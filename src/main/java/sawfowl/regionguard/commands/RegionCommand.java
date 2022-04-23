@@ -132,7 +132,7 @@ public class RegionCommand implements Command.Raw {
 			if(player.hasPermission(Permissions.HELP)) messages.add(text("&6/rg limits&f - ").clickEvent(ClickEvent.runCommand("/rg limits")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_LIMITS)));
 			if(player.hasPermission(Permissions.SET_NAME)) messages.add(text("&6/rg setname &b<ClearFlag> <Locale> [Name]&f - ").clickEvent(ClickEvent.suggestCommand("/rg setname ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SET_NAME)));
 			if(player.hasPermission(Permissions.SET_MESSAGE)) messages.add(text("&6/rg setmessage &b<CommandFlags> <Locale> [Message]&f - ").clickEvent(ClickEvent.suggestCommand("/rg setmessage ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SET_MESSAGE)));
-			if(player.hasPermission(Permissions.FLAG)) messages.add(text("&6/rg flag &b[FlagName] [Value] <Source> <Target>&f - ").clickEvent(ClickEvent.runCommand("/rg flag ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_FLAG)));
+			if(player.hasPermission(Permissions.FLAG_COMMAND)) messages.add(text("&6/rg flag &b[FlagName] [Value] <Source> <Target>&f - ").clickEvent(ClickEvent.runCommand("/rg flag ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_FLAG)));
 			messages.add(text("&6/rg leave&f - ").clickEvent(ClickEvent.suggestCommand("/rg leave")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_LEAVE)));
 			if(player.hasPermission(Permissions.TRUST)) {
 				messages.add(text("&6/rg setowner &b[Player]&f - ").clickEvent(ClickEvent.suggestCommand("/rg setowner ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETOWNER)));

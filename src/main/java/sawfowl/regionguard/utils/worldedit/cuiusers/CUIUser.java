@@ -9,6 +9,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.math.vector.Vector3i;
 
 import sawfowl.regionguard.RegionGuard;
+import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.utils.worldedit.cuievents.CUIEvent;
 
@@ -22,7 +23,9 @@ public abstract class CUIUser {
 	private UUID playerUUID;
 	private long lastTimeSendBorders;
 	private boolean cuiSupport = false;
+	private boolean isDrag = false;
 	private int failedCuiAttempts = 0;
+	private Cuboid dragCuboid;
 	public CUIUser(ServerPlayer player) {
 		playerUUID = player.uniqueId();
 	}
@@ -55,6 +58,32 @@ public abstract class CUIUser {
 	 */
 	public void setLastTimeSendBorders(long lastTimeSendBorders) {
 		this.lastTimeSendBorders = lastTimeSendBorders;
+	}
+
+	/**
+	 * Checking whether the player is using dynamic selection.
+	 */
+	public boolean isDrag() {
+		return isDrag;
+	}
+
+	/**
+	 * Setting the status of the dynamic selection.
+	 */
+	public void setDrag(boolean isDrag) {
+		this.isDrag = isDrag;
+	}
+
+	/**
+	 */
+	public Cuboid getDragCuboid() {
+		return dragCuboid;
+	}
+
+	/**
+	 */
+	public void setDragCuboid(Cuboid dragCuboid) {
+		this.dragCuboid = dragCuboid;
 	}
 
 	/**

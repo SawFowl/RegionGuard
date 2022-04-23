@@ -7,7 +7,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.blockray.RayTrace;
@@ -33,10 +32,8 @@ import sawfowl.regionguard.utils.worldedit.cuiusers.VanillaUser;
 
 public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 
-	private final RegionGuard plugin;
 	private boolean isForgePlatform;
 	public WorldEditAPI(RegionGuard plugin) {
-		this.plugin = plugin;
 		isForgePlatform = isForgePlatform();
 		if(isForgePlatform) {
 			plugin.getLogger().info("WECui support is running in Forge compatibility mode.");
@@ -45,7 +42,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 		}
 		Sponge.asyncScheduler().submit(Task.builder().interval(10, TimeUnit.SECONDS).plugin(plugin.getPluginContainer()).execute(() -> {
 			for(CUIUser user : worldEditPlayers.values()) {
-				if(user.getPlayer().isPresent() && System.currentTimeMillis() - user.getLastTimeSendBorders() > 30000) {
+				if(!user.isDrag() && user.getPlayer().isPresent() && System.currentTimeMillis() - user.getLastTimeSendBorders() > 30000) {
 					revertVisuals(user.getPlayer().get(), null);
 				}
 			}
@@ -57,7 +54,6 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public CUIUser getOrCreateUser(ServerPlayer player) {
 		if (worldEditPlayers.containsKey(player.uniqueId())) return worldEditPlayers.get(player.uniqueId());
-
 		final CUIUser user = isForgePlatform ? new ForgeUser(player) : new VanillaUser(player);
 		worldEditPlayers.put(player.uniqueId(), user);
 		return getOrCreateUser(player.uniqueId());
@@ -163,10 +159,10 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 		} else {
 			point2 = location.blockPosition();
 		}
-		user.setLastTimeSendBorders(System.currentTimeMillis());
-		Cuboid cuboid = new Cuboid(point1, point2);
+		//user.setLastTimeSendBorders(System.currentTimeMillis());
+		//Cuboid cuboid = new Cuboid(point1, point2);
 		user.dispatchCUIEvent(new MultiSelectionCuboidEvent(player.uniqueId()));
-		user.dispatchCUIEvent(new MultiSelectionPointEvent(0, point1, cuboid.getSize3D()));
+		user.dispatchCUIEvent(new MultiSelectionPointEvent(0, point1, (point2.x() - point1.x() + 1L) * (point2.y() - point1.y() + 1L) * (point2.z() - point1.z() + 1L)));
 		user.dispatchCUIEvent(new MultiSelectionPointEvent(1, point2));
 		user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.BLUE, MultiSelectionColors.YELLOW, MultiSelectionColors.GRAY, MultiSelectionColors.ORANGE));
 		user.dispatchCUIEvent(new MultiSelectionGridEvent(3));
@@ -182,25 +178,9 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 				.direction(player)
 				.select(RayTrace.nonAir())
 				.execute();
-		Region claim = null;
-
-		while (blockRay.isPresent()) {
-			RayTraceResult<LocatableBlock> blockRayHit = blockRay.get();
-			if (user.getVisualClaimId() != null) {
-				claim = plugin.getAPI().findRegion(player.world(), blockRayHit.selectedObject().blockPosition());
-			}
-			if (claim != null) {
-				for (Vector3i corner : claim.getCuboid().getAllCorners()) {
-					if (corner.equals(blockRayHit.hitPosition().toInt())) {
-						return Optional.of(blockRayHit.selectedObject().serverLocation());
-					}
-				}
-			}
-			if (blockRayHit.selectedObject().blockState().type() != BlockTypes.TALL_GRASS.get()) {
-					return Optional.of(blockRayHit.selectedObject().serverLocation());
-			}
+		if(blockRay.isPresent()) {
+			return Optional.ofNullable(blockRay.get().selectedObject().serverLocation());
 		}
-
 		return Optional.empty();
 	}
 

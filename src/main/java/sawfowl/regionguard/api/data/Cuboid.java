@@ -21,15 +21,6 @@ public class Cuboid {
 	public Cuboid(Vector3i first, Vector3i second) {
 		min = new Position(first);
 		max = new Position(second);
-		List<Vector3i> allPositions = new ArrayList<Vector3i>();
-		for(int x = min.getX(); x <= max.getX(); x++) {
-			for(int y = min.getY(); y <= max.getY(); y++) {
-				for(int z = min.getZ(); z <= max.getZ(); z++) {
-					allPositions.add(Vector3i.from(x, y, z));
-				}
-			}
-		}
-		this.allPositions.addAll(allPositions);
 	}
 
 	@Setting("Min")
@@ -39,14 +30,11 @@ public class Cuboid {
 	@Setting("SelectorType")
 	private String selectorType;
 	private AABB aabb;
-	List<Vector3i> allPositions = new ArrayList<Vector3i>();
-	List<Vector2i> allPositionsXZ = new ArrayList<Vector2i>();
 
 	/**
 	 * Getting all positions in the cuboid.
 	 */
 	public List<Vector3i> getAllPositions() {
-		if(!this.allPositions.isEmpty()) return this.allPositions;
 		List<Vector3i> allPositions = new ArrayList<Vector3i>();
 		for(int x = (int) getAABB().min().x(); x <= (int) getAABB().max().x(); x++) {
 			for(int y = (int) getAABB().min().y(); y <= (int) getAABB().max().y(); y++) {
@@ -55,7 +43,6 @@ public class Cuboid {
 				}
 			}
 		}
-		this.allPositions.addAll(allPositions);
 		return allPositions;
 	}
 
@@ -63,14 +50,12 @@ public class Cuboid {
 	 * Getting all positions in the cuboid. Excludes the Y-axis.
 	 */
 	public List<Vector2i> getPositionsXZ() {
-		if(!allPositionsXZ.isEmpty()) return allPositionsXZ;
 		List<Vector2i> allPositions = new ArrayList<Vector2i>();
 		for(int x = (int) getAABB().min().x(); x <= (int) getAABB().max().x(); x++) {
 			for(int z = (int) getAABB().min().z(); z <= (int) getAABB().max().x(); z++) {
 				allPositions.add(Vector2i.from(x, z));
 			}
 		}
-		allPositionsXZ.addAll(allPositions);
 		return allPositions;
 	}
 
@@ -93,9 +78,6 @@ public class Cuboid {
 		}
 		this.min = new Position(aabb.min());
 		this.max = new Position(aabb.max());
-		allPositions.clear();
-		allPositionsXZ.clear();
-		getAllPositions();
 		return this;
 	}
 
@@ -183,8 +165,6 @@ public class Cuboid {
 		aabb = getAABB().expand(x, y, z);
 		min = new Position(getAABB().min());
 		max = new Position(getAABB().max());
-		allPositions.clear();
-		getAllPositions();
 	}
 
 	/**
@@ -194,8 +174,6 @@ public class Cuboid {
 		aabb = getAABB().offset(x, y, z);
 		min = new Position(getAABB().min());
 		max = new Position(getAABB().max());
-		allPositions.clear();
-		getAllPositions();
 	}
 
 

@@ -656,6 +656,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 
 	private void createRegion(ServerPlayer player, Vector3i blockPosition, Region region) {
 		if(positions.get(player.uniqueId()).pos1 == null) {
+			plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(true);
 			plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setLastWandLocation(blockPosition);
 			plugin.getAPI().getWorldEditCUIAPI().sendVisualDrag(player, blockPosition);
 			positions.get(player.uniqueId()).pos1 = blockPosition;
@@ -665,6 +666,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		if(positions.get(player.uniqueId()).pos2 == null) {
 			plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
 			plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setLastWandLocation(null);
+			plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(false);
 			positions.get(player.uniqueId()).pos2 = blockPosition;
 			player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.POS, ReplaceUtil.Keys.TARGET), Arrays.asList(2, positions.get(player.uniqueId()).pos2)), LocalesPaths.REGION_CREATE_SETPOS));
 		}
@@ -759,6 +761,8 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				if(resizeEvent.getMessage().isPresent()) player.sendMessage(resizeEvent.getMessage().get());
 				positions.get(player.uniqueId()).resize = true;
 				positions.get(player.uniqueId()).tempRegion = region;
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(true);
+				plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, null);
 				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setClaimResizing(region);
 				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setLastWandLocation(positions.get(player.uniqueId()).oppositeCorner);;
 				plugin.getAPI().getWorldEditCUIAPI().sendVisualDrag(player, blockPosition);
@@ -795,6 +799,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setClaimResizing(null);;
 			plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setLastWandLocation(null);;
 			plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region, player, true, false);
+			plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(false);
 			return true;
 		}
 		return false;

@@ -1,6 +1,7 @@
 package sawfowl.regionguard.listeners;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.List;
 
 import org.spongepowered.api.ResourceKey;
@@ -16,10 +17,12 @@ import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent.Pre;
 import org.spongepowered.api.event.impl.AbstractEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Tristate;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.entity.item.ItemEntity;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -33,9 +36,11 @@ public class SpawnEntityListener {
 
 	private final RegionGuard plugin;
 	private Cause cause;
+	private final boolean isForge;
 	public SpawnEntityListener(RegionGuard plugin) {
 		this.plugin = plugin;
 		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+		isForge = isForge();
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
@@ -50,9 +55,18 @@ public class SpawnEntityListener {
 		boolean spawnItem = event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.DROPPED_ITEM.get();
 		if(optPlayer.isPresent() && (spawnExp || spawnItem)) return;
 		boolean allowSpawnExp = spawnExp && (optSource.isPresent() ? isAllowExpSpawn(region, optSource.get()) : isAllowExpSpawn(region, null));
-		boolean allowSpawnItem = spawnItem && (optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), event.entities()) : isAllowItemSpawn(region, null, event.entities()));
-		boolean allowApawnEntity = !spawnExp && !spawnItem && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
-		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowApawnEntity;
+		boolean allowSpawnItem = true;
+		if(spawnItem) {
+			if(isForge) {
+				List<ItemStack> items = event.entities().stream().map(entity -> ((ItemStack) ((Object) (((net.minecraft.entity.item.ItemEntity) entity).getItem())))).collect(Collectors.toList());
+				allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
+			} else {
+				List<ItemStack> items = event.entities().stream().map(entity -> ((ItemStack) ((Object) (((ItemEntity) entity).getItem())))).collect(Collectors.toList());
+				allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
+			}
+		}
+		boolean allowSpawnEntity = !spawnExp && !spawnItem && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
+		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowSpawnEntity;
 		class SpawnEvent extends AbstractEvent implements RegionSpawnEntityEvent {
 
 			boolean cancelled;
@@ -130,19 +144,21 @@ public class SpawnEntityListener {
 		return region.isGlobal() ? true : isAllowExpSpawn(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source);
 	}
 
-	private boolean isAllowItemSpawn(Region region, Entity source, List<Entity> entities) {
+	private boolean isAllowItemSpawn(Region region, Entity source, List<ItemStack> stacks) {
 		/*if(source != null && source instanceof ServerPlayer) {
 			ServerPlayer player = (ServerPlayer) source;
 			if(player.hasPermission(Permissions.bypassFlag(Flags.ITEM_SPAWN)) || region.isCurrentTrustType(player, TrustTypes.USER) || region.isCurrentTrustType(player, TrustTypes.MANAGER) || region.isCurrentTrustType(player, TrustTypes.OWNER)) return true;
 		}*/
 		if(source != null && source instanceof ServerPlayer) return true;
 		for(String sourceId : ListenerUtils.flagEntityArgs(source)) {
-			for(String targetid : ListenerUtils.flagEntitiesArgs(entities)) {
-				Tristate flagResult = region.getFlagResult(Flags.ITEM_SPAWN, sourceId, targetid);
+			for(String targetid : ListenerUtils.flagItemsArgs(stacks)) {
+				Tristate flagResult = region.getFlagResult(Flags.ITEM_SPAWN, 
+						sourceId, 
+						targetid);
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowItemSpawn(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, entities);
+		return region.isGlobal() ? true : isAllowItemSpawn(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, stacks);
 	}
 
 	private boolean isAllowEntitySpawn(Region region, Entity source, List<Entity> entities, String spawnType) {
@@ -165,7 +181,16 @@ public class SpawnEntityListener {
 				if(flagResult2 != Tristate.UNDEFINED) return flagResult2.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowItemSpawn(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, entities);
+		return region.isGlobal() ? true : isAllowEntitySpawn(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, entities, spawnType);
+	}
+
+	private boolean isForge() {
+		try {
+			Class.forName("net.minecraft.entity.item.ItemEntity");
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 }

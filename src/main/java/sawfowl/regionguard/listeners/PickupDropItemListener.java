@@ -204,7 +204,7 @@ public class PickupDropItemListener {
 			if(player.hasPermission(Permissions.bypassFlag(Flags.ITEM_PICKUP)) || region.isCurrentTrustType(player, TrustTypes.USER) || region.isCurrentTrustType(player, TrustTypes.MANAGER) || region.isCurrentTrustType(player, TrustTypes.OWNER)) return true;
 		}
 		for(String entityId : ListenerUtils.flagEntityArgs(source)) {
-			for(String itemid : ListenerUtils.flagItemsArgs(snapshots)) {
+			for(String itemid : ListenerUtils.flagItemsSnapshotsArgs(snapshots)) {
 				Tristate flagResult = region.getFlagResult(Flags.ITEM_PICKUP, entityId, itemid);
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
@@ -218,7 +218,7 @@ public class PickupDropItemListener {
 			if(player.hasPermission(Permissions.bypassFlag(Flags.ITEM_DROP)) || region.isCurrentTrustType(player, TrustTypes.USER) || region.isCurrentTrustType(player, TrustTypes.MANAGER) || region.isCurrentTrustType(player, TrustTypes.OWNER)) return true;
 		}
 		for(String entityId : ListenerUtils.flagEntityArgs(source)) {
-			for(String itemid : ListenerUtils.flagItemsArgs(snapshots)) {
+			for(String itemid : ListenerUtils.flagItemsSnapshotsArgs(snapshots)) {
 				Tristate flagResult = region.getFlagResult(Flags.ITEM_DROP, entityId, itemid);
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}

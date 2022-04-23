@@ -67,7 +67,7 @@ public class ListenerUtils {
 	}
 
 	public static List<String> flagEntityArgs(Entity entity) {
-		return Arrays.asList(entityId(entity), entityCategory(entity), "all");
+		return entity == null ? Arrays.asList("all") : Arrays.asList(entityId(entity), entityCategory(entity), "all");
 	}
 
 	public static List<String> flagEntitiesArgs(List<Entity> entities) {
@@ -80,10 +80,19 @@ public class ListenerUtils {
 		return list;
 	}
 
-	public static List<String> flagItemsArgs(List<ItemStackSnapshot> snapshots) {
+	public static List<String> flagItemsSnapshotsArgs(List<ItemStackSnapshot> snapshots) {
 		List<String> list = new ArrayList<String>();
 		snapshots.forEach(snapshot -> {
 			if(!list.contains(itemId(snapshot.createStack()))) list.add(itemId(snapshot.createStack()));
+		});
+		list.add("all");
+		return list;
+	}
+
+	public static List<String> flagItemsArgs(List<ItemStack> stacks) {
+		List<String> list = new ArrayList<String>();
+		stacks.forEach(snapshot -> {
+			if(!list.contains(itemId(snapshot))) list.add(itemId(snapshot));
 		});
 		list.add("all");
 		return list;

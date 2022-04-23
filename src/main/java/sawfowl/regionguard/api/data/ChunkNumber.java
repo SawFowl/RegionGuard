@@ -1,5 +1,7 @@
 package sawfowl.regionguard.api.data;
 
+import java.util.Objects;
+
 import org.spongepowered.math.vector.Vector3i;
 
 public class ChunkNumber {
@@ -28,15 +30,10 @@ public class ChunkNumber {
 	public boolean equals(Object object) {
 		return object.getClass().getName().equals(this.getClass().getName()) && ((ChunkNumber) object).x == this.x && ((ChunkNumber) object).z == this.z;
 	}
-/*
+
 	@Override
 	public int hashCode() {
-		return Integer.parseInt(String.valueOf(x + "" + z).replace("-", ""));
-	}
-*/
-	@Override
-	public int hashCode() {
-		return toString().hashCode();
+		return Objects.hash(x, z);
 	}
 
 	@Override

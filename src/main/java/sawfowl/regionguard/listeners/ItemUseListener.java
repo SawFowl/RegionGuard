@@ -40,7 +40,7 @@ public class ItemUseListener {
 		ResourceKey worldKey = entity.createSnapshot().world();
 		Region region = plugin.getAPI().findRegion(worldKey, entity.blockPosition());
 		boolean isAllow = isAllowUse(region, entity, event.itemStackInUse().createStack());
-		Optional<ServerPlayer> optPlayer = entity instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) entity) : null;
+		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		class UseEvent extends AbstractEvent implements RegionUseItemStackEvent {
 
 			boolean cancelled;

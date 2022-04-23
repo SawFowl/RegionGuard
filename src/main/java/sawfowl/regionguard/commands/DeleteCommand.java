@@ -50,8 +50,8 @@ public class DeleteCommand implements Command.Raw {
 				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_DELETED));
 			}
 		}
+		plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, region.getUniqueId());
 		})));
-		plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
 		return CommandResult.success();
 	}
 

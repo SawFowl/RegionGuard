@@ -65,9 +65,9 @@ public class Configs {
 		check(getNode("DefaultValues", "Flags", "Claim", Flags.PROJECTILE_IMPACT_BLOCK.toString()), null, false, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("DefaultValues", "Flags", "Claim", Flags.PROJECTILE_IMPACT_ENTITY.toString()), null, false, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("DefaultValues", "Flags", "Claim", Flags.PORTAL_USE.toString()), null, false, TypeTokens.BOOLEAN_TOKEN);
-		for(Flags flagName : plugin.getAPI().getFlags()) {
-			check(getNode("DefaultValues", "Flags", "World", flagName.toString()), null, true, TypeTokens.BOOLEAN_TOKEN);
-			check(getNode("DefaultValues", "Flags", "Claim", flagName.toString()), null, true, TypeTokens.BOOLEAN_TOKEN);
+		for(String flagName : plugin.getAPI().getFlags()) {
+			check(getNode("DefaultValues", "Flags", "World", flagName), null, true, TypeTokens.BOOLEAN_TOKEN);
+			check(getNode("DefaultValues", "Flags", "Claim", flagName), null, true, TypeTokens.BOOLEAN_TOKEN);
 		}
 	}
 

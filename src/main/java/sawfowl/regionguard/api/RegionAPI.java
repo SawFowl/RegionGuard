@@ -1,6 +1,7 @@
 package sawfowl.regionguard.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,7 +21,7 @@ public interface RegionAPI {
 	/**
 	 * Getting all registered flag types.
 	 */
-	List<Flags> getFlags();
+	List<String> getFlags();
 
 	/**
 	 * Update global region data.
@@ -102,7 +103,7 @@ public interface RegionAPI {
 	 * 
 	 * @return List<Region>
 	 */
-	public List<Region> getRegions();
+	public Collection<Region> getRegions();
 
 	/**
 	 * Obtaining a map of regions by worlds. <br>

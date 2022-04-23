@@ -585,7 +585,7 @@ public enum Flags {
 		}
 		@Override
 		public boolean isAllowTargetItem() {
-			return false;
+			return true;
 		}
 	},
 	ITEM_DROP {
@@ -611,7 +611,7 @@ public enum Flags {
 		}
 		@Override
 		public boolean isAllowTargetItem() {
-			return false;
+			return true;
 		}
 	},
 	ITEM_PICKUP {
@@ -637,7 +637,7 @@ public enum Flags {
 		}
 		@Override
 		public boolean isAllowTargetItem() {
-			return false;
+			return true;
 		}
 	},
 	ITEM_SPAWN {
@@ -663,7 +663,7 @@ public enum Flags {
 		}
 		@Override
 		public boolean isAllowTargetItem() {
-			return false;
+			return true;
 		}
 	},
 	EXP_SPAWN {
@@ -707,7 +707,7 @@ public enum Flags {
 		}
 		@Override
 		public boolean isAllowTargetItem() {
-			return false;
+			return true;
 		}
 	},
 	PROJECTILE_IMPACT_BLOCK {

@@ -2,6 +2,7 @@ package sawfowl.regionguard;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,12 +42,11 @@ class Api implements RegionAPI {
 	Api(RegionGuard plugin) {
 		this.plugin = plugin;
 		cuiapi = new WorldEditAPI(plugin);
-		flags = Stream.of(Flags.values()).collect(Collectors.toList());
+		flags = Stream.of(Flags.values()).map(Flags::toString).collect(Collectors.toList());
 	}
 
-	private List<Flags> flags = new ArrayList<Flags>();
+	private List<String> flags = new ArrayList<String>();
 	private Region defaultGlobal;
-	private List<Region> regions = new ArrayList<Region>();
 	private Map<UUID, Region> regionsByUUID = new HashMap<UUID, Region>();
 	private Map<UUID, Region> tempRegions = new HashMap<UUID, Region>();
 	private Map<UUID, List<Region>> playersRegions = new HashMap<UUID, List<Region>>();
@@ -69,7 +69,7 @@ class Api implements RegionAPI {
 	}
 
 	@Override
-	public List<Flags> getFlags() {
+	public List<String> getFlags() {
 		return flags;
 	}
 
@@ -152,8 +152,8 @@ class Api implements RegionAPI {
 	}
 
 	@Override
-	public List<Region> getRegions() {
-		return regions;
+	public Collection<Region> getRegions() {
+		return regionsByUUID.values();
 	}
 
 	@Override
@@ -184,7 +184,6 @@ class Api implements RegionAPI {
 			playerRegions.add(region);
 			playersRegions.put(region.getOwnerUUID(), playerRegions);
 		}
-		regions.add(region);
 		removeTempRegion(region);
 	}
 
@@ -205,7 +204,6 @@ class Api implements RegionAPI {
 		plugin.getConfigs().deleteRegion(region);
 		ResourceKey worldKey = region.getServerWorldKey();
 		for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(regionsPerWorld.get(worldKey).containsKey(chunkNumber) && regionsPerWorld.get(worldKey).get(chunkNumber).contains(region)) regionsPerWorld.get(worldKey).get(chunkNumber).remove(region);
-		if(regions.contains(region)) regions.remove(region);
 		if(playersRegions.containsKey(region.getOwnerUUID()) && playersRegions.get(region.getOwnerUUID()).contains(region)) playersRegions.get(region.getOwnerUUID()).remove(region);
 		if(regionsByUUID.containsKey(region.getUniqueId())) regionsByUUID.remove(region.getUniqueId());
 	}
@@ -286,7 +284,7 @@ class Api implements RegionAPI {
 	}
 
 	private ItemStack setNBT(ItemStack itemStack) {
-		String nbt = "{\"WandItem\":1,\"Damage\":130}";
+		String nbt = "{\"WandItem\":1}";
 		try {
 			itemStack = ItemStack.builder().fromContainer(itemStack.toContainer().set(DataQuery.of("UnsafeData"), DataFormats.JSON.get().read(nbt))).build();
 		} catch (InvalidDataException | IOException e) {
