@@ -101,15 +101,13 @@ public interface RegionAPI {
 	/**
 	 * Getting all registered regions except globals.
 	 * 
-	 * @return List<Region>
+	 * @return Collection<Region>
 	 */
 	public Collection<Region> getRegions();
 
 	/**
 	 * Obtaining a map of regions by worlds. <br>
 	 * Without global regions.
-	 * 
-	 * @return List<Region>
 	 */
 	public Map<ResourceKey, Map<ChunkNumber, ArrayList<Region>>> getRegionsPerWorld();
 
