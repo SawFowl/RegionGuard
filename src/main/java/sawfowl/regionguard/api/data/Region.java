@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,10 +22,13 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.locale.Locales;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.chunk.WorldChunk;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.StreamOptions.LoadingStyle;
@@ -32,6 +36,7 @@ import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.math.vector.Vector3i;
+import org.spongepowered.plugin.PluginContainer;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -85,7 +90,7 @@ public class Region {
 	@Setting("ExitMessages")
 	private Map<String, String> exitMessages = new HashMap<String, String>();
 	@Setting("EnhancedData")
-	private EnhancedData enhancedData = null;
+	private Map<String, AdditionalData> additionalData = null;
 	private Region parrent;
 	private boolean flat = false;
 
@@ -185,9 +190,18 @@ public class Region {
 	/**
 	 * Getting the data of the region member.
 	 * 
+	 * @param player - checked player.
+	 */
+	public Optional<MemberData> getMemberData(ServerPlayer player) {
+		return getMemberData(player.uniqueId());
+	}
+
+	/**
+	 * Getting the data of the region member.
+	 * 
 	 * @param uuid - checked player or entity.
 	 */
-	public Optional<MemberData> getMemverData(UUID uuid) {
+	public Optional<MemberData> getMemberData(UUID uuid) {
 		return members.containsKey(uuid) ? Optional.ofNullable(members.get(uuid)) : Optional.empty();
 	}
 
@@ -333,17 +347,9 @@ public class Region {
 		if(type == RegionTypes.ADMIN) {
 			members.clear();
 			members.put(new UUID(0, 0), new MemberData(TrustTypes.OWNER));
-			regionType = RegionTypes.ADMIN.toString();
 			return true;
-		}
-		if(type == RegionTypes.ARENA) {
-			regionType = RegionTypes.ARENA.toString();;
-			return true;
-		}
-		if(type == RegionTypes.CLAIM) {
-			regionType = RegionTypes.CLAIM.toString();;
-			return true;
-		}
+		} 
+		regionType = type.toString();
 		return false;
 	}
 
@@ -701,15 +707,23 @@ public class Region {
 	/**
 	 * Not tested.
 	 */
-	public Optional<EnhancedData> getEnhancedData() {
-		return Optional.ofNullable(enhancedData);
+	public Optional<AdditionalData> getAdditionalData(PluginContainer container) {
+		return additionalData.containsKey(container.metadata().id()) ? Optional.ofNullable(additionalData.get(container.metadata().id())) : Optional.empty();
 	}
 
 	/**
 	 * Not tested.
 	 */
-	public void setEnhancedData(EnhancedData enhancedData) {
-		this.enhancedData = enhancedData;
+	public void setAdditionalData(PluginContainer container, AdditionalData additionalData) {
+		removeAdditionalData(container, additionalData);
+		this.additionalData.put(regionType, additionalData);
+	}
+
+	/**
+	 * Not tested.
+	 */
+	public void removeAdditionalData(PluginContainer container, AdditionalData additionalData) {
+		if(this.additionalData.containsKey(container.metadata().id())) this.additionalData.remove(container.metadata().id());
 	}
 
 	/**
@@ -863,6 +877,51 @@ public class Region {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Territory regeneration in the region.
+	 * 
+	 * @param async - TODO
+	 */
+	public boolean regen(boolean async) {
+		if(!getServerWorld().isPresent() || !getServerWorld().get().isLoaded() || cuboid == null) return false;
+		ServerWorld world = getServerWorld().get();
+		final String id = "tempworld_" + world.key().value();
+
+		WorldGenerationConfig baseConfig = world.asTemplate().generationConfig();
+
+		WorldTemplate tempWorldProperties = world.asTemplate().asBuilder()
+			.key(ResourceKey.of("regionguard", id))
+			.loadOnStartup(true)
+			.serializationBehavior(SerializationBehavior.NONE)
+			.generationConfig(baseConfig)
+			.build();
+
+
+		try {
+			ServerWorld tempWorld = Sponge.server().worldManager().loadWorld(tempWorldProperties).get();
+			// Pre-gen all the chunks
+			// We need to also pull one more chunk in every direction
+			for (ChunkNumber chunkNumber : getChunkNumbers()) {
+				tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
+			}
+			for(ChunkNumber chunkNumber : getChunkNumbers()) if(!tempWorld.isChunkLoaded(chunkNumber.chunkPosition(), true)) tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
+			
+			for(Vector3i vector3i : getCuboid().getAllPositions()) {
+				world.setBlock(vector3i, tempWorld.block(vector3i));
+			}
+		
+		} catch (InterruptedException | ExecutionException e) {
+			throw new RuntimeException(e);
+		} finally {
+			removeWorld(tempWorldProperties);
+		}
+		return true;
+	}
+
+	private void removeWorld(WorldTemplate template) {
+		Sponge.server().worldManager().unloadWorld(template.key()).thenRun(() -> Sponge.server().worldManager().deleteWorld(template.key()));
 	}
 
 	private Component deserialize(String string) {

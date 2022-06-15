@@ -706,8 +706,12 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				}
 			}
 			for(Vector3i vector3i : positions.get(player.uniqueId()).tempRegion.getCuboid().getAllPositions()) {
-				Optional<Region> find = plugin.getAPI().getRegions().parallelStream().filter(rg -> (rg.isIntersectsWith(player.world(), vector3i))).findFirst();
-				if(find.isPresent()) {
+				//Optional<Region> find = plugin.getAPI().getRegions().parallelStream().filter(rg -> (rg.isIntersectsWith(player.world(), vector3i))).findFirst();
+				Region find = plugin.getAPI().findRegion(positions.get(player.uniqueId()).tempRegion.getServerWorldKey(), vector3i);
+				if(!find.isGlobal()) {
+					plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
+					plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, positions.get(player.uniqueId()).tempRegion.getUniqueId());
+					plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(find, player, false, false);
 					player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_CREATE_EXCEPTION_REGIONS_INTERSECT));
 					positions.get(player.uniqueId()).clear();
 					return;
@@ -753,6 +757,19 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	}
 
 	private boolean resizeRegion(ServerPlayer player, Region region, Vector3i blockPosition) {
+		if(positions.get(player.uniqueId()).tempRegion != null) {
+			for(Vector3i vector3i : positions.get(player.uniqueId()).tempRegion.getCuboid().getAllPositions()) {
+				Region find = plugin.getAPI().findRegion(positions.get(player.uniqueId()).tempRegion.getServerWorldKey(), vector3i);
+				if(!find.isGlobal() && !find.getUniqueId().equals(positions.get(player.uniqueId()).tempRegion.getUniqueId())) {
+					plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
+					plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, positions.get(player.uniqueId()).tempRegion.getUniqueId());
+					plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(find, player, false, false);
+					player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_RESIZE_EXCEPTION_REGIONS_INTERSECT));
+					positions.get(player.uniqueId()).clear();
+					return true;
+				}
+			}
+		}
 		if((region.getTrustType(player) != TrustTypes.OWNER && !region.isGlobal()) || positions.get(player.uniqueId()).pos1 != null) return false;
 		if(!region.isGlobal() && region.getCuboid().isCorner(blockPosition) && !positions.get(player.uniqueId()).resize) {
 			positions.get(player.uniqueId()).oppositeCorner = region.getCuboid().getOppositeCorner(blockPosition);

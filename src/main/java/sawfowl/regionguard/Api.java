@@ -32,6 +32,8 @@ import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.SelectorTypes;
 import sawfowl.regionguard.api.WorldEditCUIAPI;
 import sawfowl.regionguard.api.data.ChunkNumber;
+import sawfowl.regionguard.api.data.PlayerData;
+import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.utils.worldedit.WorldEditAPI;
 
@@ -39,9 +41,16 @@ class Api implements RegionAPI {
 
 	private final RegionGuard plugin;
 	private final WorldEditCUIAPI cuiapi;
-	Api(RegionGuard plugin) {
+	private final boolean isForgePlatform;
+	Api(RegionGuard plugin, boolean isForgePlatform) {
 		this.plugin = plugin;
-		cuiapi = new WorldEditAPI(plugin);
+		this.isForgePlatform = isForgePlatform;
+		if(isForgePlatform) {
+			plugin.getLogger().info("The plugin is running in Forge compatibility mode.");
+		} else {
+			plugin.getLogger().info("The plugin is running in Vanilla compatibility mode.");
+		}
+		cuiapi = new WorldEditAPI(plugin.getPluginContainer(), isForgePlatform);
 		flags = Stream.of(Flags.values()).map(Flags::toString).collect(Collectors.toList());
 	}
 
@@ -54,13 +63,14 @@ class Api implements RegionAPI {
 	private Map<ResourceKey, Map<ChunkNumber, ArrayList<Region>>> regionsPerWorld = new HashMap<ResourceKey, Map<ChunkNumber, ArrayList<Region>>>();
 	private Map<UUID, SelectorTypes> selectorsPerPlayer = new HashMap<UUID, SelectorTypes>();
 	private Map<UUID, RegionTypes> selectedRegionTypes = new HashMap<UUID, RegionTypes>();
+	private Map<UUID, PlayerData> dataPlayers = new HashMap<UUID, PlayerData>();
 	private ItemStack wandItem;
 
 	void generateGlobalRegions() {
 		Map<ResourceKey, Region> toUpdate = new HashMap<ResourceKey, Region>();
 		defaultGlobal = new Region(new UUID(0, 0), Sponge.server().worldManager().defaultWorld(), null, null, null);
 		Sponge.server().worldManager().worlds().forEach(world -> {
-			Region region = plugin.getConfigs().getWorldRegion(world);
+			Region region = plugin.getRegionsDataWork().getWorldRegion(world);
 			region.setRegionType(RegionTypes.GLOBAL);
 			toUpdate.put(world.key(), region);
 		});
@@ -104,7 +114,7 @@ class Api implements RegionAPI {
 
 	@Override
 	public SelectorTypes getSelectorType(UUID uuid) {
-		return selectorsPerPlayer.getOrDefault(selectorsPerPlayer.get(uuid), plugin.getConfigs().getDefaultSelectorType());
+		return selectorsPerPlayer.containsKey(uuid) ? selectorsPerPlayer.get(uuid) : plugin.getConfig().getDefaultSelectorType();
 	}
 
 	@Override
@@ -196,12 +206,12 @@ class Api implements RegionAPI {
 
 	@Override
 	public void saveRegion(Region region) {
-		plugin.getConfigs().saveRegion(region);
+		plugin.getRegionsDataWork().saveRegion(region);
 	}
 
 	@Override
 	public void deleteRegion(Region region) {
-		plugin.getConfigs().deleteRegion(region);
+		plugin.getRegionsDataWork().deleteRegion(region);
 		ResourceKey worldKey = region.getServerWorldKey();
 		for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(regionsPerWorld.get(worldKey).containsKey(chunkNumber) && regionsPerWorld.get(worldKey).get(chunkNumber).contains(region)) regionsPerWorld.get(worldKey).get(chunkNumber).remove(region);
 		if(playersRegions.containsKey(region.getOwnerUUID()) && playersRegions.get(region.getOwnerUUID()).contains(region)) playersRegions.get(region.getOwnerUUID()).remove(region);
@@ -249,34 +259,158 @@ class Api implements RegionAPI {
 
 	@Override
 	public int getMinimalRegionSize(SelectorTypes selectorType) {
-		return plugin.getConfigs().getMinimalRegionSize(selectorType);
+		return plugin.getConfig().getMinimalRegionSize(selectorType);
 	}
 
 	@Override
 	public long getClaimedBlocks(ServerPlayer player) {
-		int blocks = 0;
-		if(getClaimedRegions(player) > 0) for(Region region : playersRegions.get(player.uniqueId())) blocks += region.getCuboid().getSize();
+		long blocks = dataPlayers.containsKey(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getClaimed() != null && dataPlayers.get(player.uniqueId()).getClaimed().getBlocks() != null ? dataPlayers.get(player.uniqueId()).getClaimed().getBlocks() : 0;
+		if(blocks == 0 && getClaimedRegions(player) > 0) for(Region region : playersRegions.get(player.uniqueId())) blocks += region.getCuboid().getSize();
 		return blocks;
 	}
 
 	@Override
 	public long getClaimedRegions(ServerPlayer player) {
-		return playersRegions.containsKey(player.uniqueId()) ? playersRegions.get(player.uniqueId()).size() : 0;
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getClaimed().getRegions() != null ? dataPlayers.get(player.uniqueId()).getClaimed().getRegions() : playersRegions.containsKey(player.uniqueId()) ? playersRegions.get(player.uniqueId()).size() : 0;
 	}
 
 	@Override
 	public long getLimitBlocks(ServerPlayer player) {
-		return player.user().subjectData().allOptions().values().stream().findFirst().isPresent() && player.user().subjectData().allOptions().values().stream().findFirst().get().containsKey(Permissions.LIMIT_BLOCKS) && NumberUtils.isCreatable(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_BLOCKS)) ? Integer.valueOf(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_BLOCKS)) : 0;
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getBlocks() != null ? dataPlayers.get(player.uniqueId()).getLimits().getBlocks() : getOptionLongValue(player, Permissions.LIMIT_BLOCKS);
 	}
 
 	@Override
 	public long getLimitClaims(ServerPlayer player) {
-		return player.user().subjectData().allOptions().values().stream().findFirst().isPresent() && player.user().subjectData().allOptions().values().stream().findFirst().get().containsKey(Permissions.LIMIT_CLAIMS) && NumberUtils.isCreatable(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_CLAIMS)) ? Integer.valueOf(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_CLAIMS)) : 0;
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getClaims() != null ? dataPlayers.get(player.uniqueId()).getLimits().getClaims() : getOptionLongValue(player, Permissions.LIMIT_CLAIMS);
 	}
 
 	@Override
 	public long getLimitSubdivisions(ServerPlayer player) {
-		return player.user().subjectData().allOptions().values().stream().findFirst().isPresent() && player.user().subjectData().allOptions().values().stream().findFirst().get().containsKey(Permissions.LIMIT_SUBDIVISIONS) && NumberUtils.isCreatable(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_SUBDIVISIONS)) ? Integer.valueOf(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_SUBDIVISIONS)) : 0;
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() != null ? dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() : getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS);
+	}
+
+	@Override
+	public long getLimitMembers(ServerPlayer player) {
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() != null ? dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() : getOptionLongValue(player, Permissions.LIMIT_MEMBERS);
+	}
+
+	@Override
+	public long getLimitMembers(UUID player) {
+		return containsLimits(player) && dataPlayers.get(player).getLimits().getMembersPerRegion() != null ? dataPlayers.get(player).getLimits().getMembersPerRegion() : 0;
+	}
+
+	@Override
+	public long getLimitMaxBlocks(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.LIMIT_MAX_BLOCKS);
+	}
+
+	@Override
+	public long getLimitMaxClaims(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.LIMIT_MAX_CLAIMS);
+	}
+
+	@Override
+	public long getLimitMaxSubdivisions(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.LIMIT_MAX_SUBDIVISIONS);
+	}
+
+	@Override
+	public void setLimitBlocks(ServerPlayer player, long limit) {
+		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), new PlayerData());
+		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(new PlayerLimits());
+		dataPlayers.get(player.uniqueId()).getLimits().setBlocks(limit);
+		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
+	}
+
+	@Override
+	public void setLimitClaims(ServerPlayer player, long limit) {
+		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), new PlayerData());
+		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(new PlayerLimits());
+		dataPlayers.get(player.uniqueId()).getLimits().setClaims(limit);
+		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
+	}
+
+	@Override
+	public void setLimitSubdivisions(ServerPlayer player, long limit) {
+		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), new PlayerData());
+		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(new PlayerLimits());
+		dataPlayers.get(player.uniqueId()).getLimits().setSubdivisions(limit);
+		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
+	}
+
+	@Override
+	public void setLimitMembers(ServerPlayer player, long limit) {
+		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), new PlayerData());
+		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(new PlayerLimits());
+		dataPlayers.get(player.uniqueId()).getLimits().setMembersPerRegion(limit);
+		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
+	}
+
+	@Override
+	public double getBuyBlockPrice(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.BUY_BLOCK_PRICE);
+	}
+
+	@Override
+	public double getBuyClaimPrice(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.BUY_REGION_PRICE);
+	}
+
+	@Override
+	public double getBuySubdivisionPrice(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.BUY_SUBDIVISION_PRICE);
+	}
+
+	@Override
+	public double getSellBlockPrice(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.SELL_BLOCK_PRICE);
+	}
+
+	@Override
+	public double getSellClaimPrice(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.SELL_REGION_PRICE);
+	}
+
+	@Override
+	public double getSellSubdivisionPrice(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.SELL_SUBDIVISION_PRICE);
+	}
+
+	@Override
+	public String getCurrency(ServerPlayer player) {
+		return optionIsPresent(player, Permissions.TRANSACRION_CURRENCY) ? player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.TRANSACRION_CURRENCY) : null;
+	}
+
+	@Override
+	public void setPlayerData(ServerPlayer player, PlayerData playerData) {
+		setPlayerData(player.uniqueId(), playerData);
+	}
+
+	@Override
+	public void setPlayerData(UUID player, PlayerData playerData) {
+		if(dataPlayers.containsKey(player)) dataPlayers.remove(player);
+		dataPlayers.put(player, playerData);
+		plugin.getPlayersDataWork().savePlayerData(player, playerData);
+	}
+
+	@Override
+	public Optional<PlayerData> getPlayerData(ServerPlayer player) {
+		return getPlayerData(player.uniqueId());
+	}
+
+	@Override
+	public Optional<PlayerData> getPlayerData(UUID player) {
+		return dataPlayers.containsKey(player) ? Optional.ofNullable(dataPlayers.get(player)) : Optional.empty();
+	}
+
+	@Override
+	public WorldEditCUIAPI getWorldEditCUIAPI() {
+		return cuiapi;
+	}
+
+	@Override
+	public boolean isForgePlatform() {
+		return isForgePlatform;
 	}
 
 	void updateWandItem() {
@@ -284,9 +418,8 @@ class Api implements RegionAPI {
 	}
 
 	private ItemStack setNBT(ItemStack itemStack) {
-		String nbt = "{\"WandItem\":1}";
 		try {
-			itemStack = ItemStack.builder().fromContainer(itemStack.toContainer().set(DataQuery.of("UnsafeData"), DataFormats.JSON.get().read(nbt))).build();
+			itemStack = ItemStack.builder().fromContainer(itemStack.toContainer().set(DataQuery.of("UnsafeData"), DataFormats.JSON.get().read("{\"WandItem\":1}"))).build();
 		} catch (InvalidDataException | IOException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -298,13 +431,20 @@ class Api implements RegionAPI {
 			return setNBT(plugin.getRootNode().node("Items", "Wand").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack());
 		} catch (SerializationException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
-			return ItemStack.of(ItemTypes.STONE_AXE);
+			return setNBT(ItemStack.of(ItemTypes.STONE_AXE));
 		}
 	}
 
-	@Override
-	public WorldEditCUIAPI getWorldEditCUIAPI() {
-		return cuiapi;
+	private long getOptionLongValue(ServerPlayer player, String option) {
+		return optionIsPresent(player, option) && NumberUtils.isCreatable(player.option(option).get()) ? Long.valueOf(player.option(option).get()) : 0;
+	}
+
+	private boolean optionIsPresent(ServerPlayer player, String option) {
+		return player.option(option).isPresent();
+	}
+
+	private boolean containsLimits(UUID player) {
+		return dataPlayers.containsKey(player) && dataPlayers.get(player).getLimits() != null;
 	}
 
 }

@@ -32,6 +32,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
+import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -47,10 +48,16 @@ import sawfowl.localeapi.event.LocaleServiseEvent;
 import sawfowl.regionguard.api.RegionAPI;
 import sawfowl.regionguard.api.events.RegionAPIPostEvent;
 import sawfowl.regionguard.commands.RegionCommand;
-import sawfowl.regionguard.configure.Configs;
+import sawfowl.regionguard.configure.Config;
 import sawfowl.regionguard.configure.Locales;
+import sawfowl.regionguard.configure.LocalesPaths;
+import sawfowl.regionguard.configure.MySQL;
+import sawfowl.regionguard.configure.WorkConfigs;
+import sawfowl.regionguard.configure.WorkData;
+import sawfowl.regionguard.configure.WorkTables;
 import sawfowl.regionguard.listeners.BlockAndWorldChangeListener;
 import sawfowl.regionguard.listeners.ChunkListener;
+import sawfowl.regionguard.listeners.ClientConnectionListener;
 import sawfowl.regionguard.listeners.ConnectionListener;
 import sawfowl.regionguard.listeners.ImpactListener;
 import sawfowl.regionguard.listeners.DamageEntityAndCommandListener;
@@ -62,6 +69,7 @@ import sawfowl.regionguard.listeners.InteractEntityListener;
 import sawfowl.regionguard.listeners.InteractItemListener;
 import sawfowl.regionguard.listeners.ItemUseListener;
 import sawfowl.regionguard.listeners.SpawnEntityListener;
+import sawfowl.regionguard.utils.Economy;
 import sawfowl.regionguard.utils.worldedit.cuihandle.SpongeCUIChannelHandler;
 
 @Plugin("regionguard")
@@ -76,9 +84,14 @@ public class RegionGuard {
 	private Path configDir;
 	private ConfigurationLoader<CommentedConfigurationNode> configLoader;
 	private CommentedConfigurationNode rootNode;
+	private EconomyService economyService;
 	private Api api;
-	private Configs configs;
+	private Config config;
 	private RegionCommand mainCommand;
+	private MySQL mySQL;
+	private WorkData playersDataWork;
+	private WorkData regionsDataWork;
+	private Economy economy;
 
 	public static RegionGuard getInstance() {
 		return instance;
@@ -112,6 +125,46 @@ public class RegionGuard {
 		return api;
 	}
 
+	public MySQL getMySQL() {
+		return mySQL;
+	}
+
+	public WorkData getPlayersDataWork() {
+		return playersDataWork;
+	}
+
+	public WorkData getRegionsDataWork() {
+		return regionsDataWork;
+	}
+
+	public Config getConfig() {
+		return config;
+	}
+
+	public EconomyService getEconomyService() {
+		return economyService;
+	}
+
+	public Economy getEconomy() {
+		return economy;
+	}
+
+	public void loadConfigs() {
+		try {
+			rootNode = configLoader.load();
+		} catch (IOException e) {
+			logger.error(e.getLocalizedMessage());
+		}
+	}
+
+	public void saveConfig() {
+		try {
+			configLoader.save(rootNode);
+		} catch (ConfigurateException e) {
+			logger.error(e.getLocalizedMessage());
+		}
+	}
+
 	@Inject
 	public RegionGuard(PluginContainer pluginContainer, @ConfigDir(sharedRoot = false) Path configDirectory) {
 		instance = this;
@@ -119,7 +172,7 @@ public class RegionGuard {
 		this.pluginContainer = pluginContainer;
 		configDir = configDirectory;
 		configDirectory.toFile();
-		api = new Api(instance);
+		api = new Api(instance, isForgePlatform());
 	}
 
 	@Listener
@@ -127,7 +180,7 @@ public class RegionGuard {
 		localeService = event.getLocaleService();
 		configLoader = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("Config.conf")).build();
 		loadConfigs();
-		configs = new Configs(instance);
+		config = new Config(instance);
 		locales = new Locales(localeService, rootNode.node("LocaleJsonSerialize").getBoolean());
     	Sponge.game().eventManager().registerListeners(
                 pluginContainer,
@@ -150,11 +203,46 @@ public class RegionGuard {
 	@Listener
 	public void onStart(StartedEngineEvent<Server> event) {
 		if(localeService == null) return;
-		configs.createConfigsForWorlds();
-		configs.writeDefaultWandItem();
-		api.generateGlobalRegions();
+		boolean mysql = rootNode.node("MySQL", "Enable").getBoolean();
+		if(mysql) mySQL = new MySQL(instance, rootNode.node("MySQL", "Host").getString(), rootNode.node("MySQL", "Port").getString(), rootNode.node("MySQL", "DataBase").getString(), rootNode.node("MySQL", "User").getString(), rootNode.node("MySQL", "Password").getString(), rootNode.node("MySQL", "SSL").getString());
+		if(!mysql) {
+			playersDataWork = regionsDataWork = new WorkConfigs(instance);
+		} else if(mysql && rootNode.node("SplitStorage", "Enable").getBoolean()) {
+			if(rootNode.node("SplitStorage", "Players").getBoolean() && rootNode.node("SplitStorage", "Regions").getBoolean()) {
+				playersDataWork = regionsDataWork = new WorkTables(instance);
+				((WorkTables) regionsDataWork).createWorldsTables();
+				((WorkTables) playersDataWork).createTableForPlayers();
+			} else if(rootNode.node("SplitStorage", "Players").getBoolean() && !rootNode.node("SplitStorage", "Regions").getBoolean()) {
+				playersDataWork = new WorkTables(instance);
+				((WorkTables) playersDataWork).createTableForPlayers();
+				regionsDataWork = new WorkConfigs(instance);
+			} else if(!rootNode.node("SplitStorage", "Players").getBoolean() && rootNode.node("SplitStorage", "Regions").getBoolean()) {
+				regionsDataWork = new WorkTables(instance);
+				((WorkTables) regionsDataWork).createWorldsTables();
+				playersDataWork = new WorkConfigs(instance);
+			} else {
+				playersDataWork = regionsDataWork = new WorkConfigs(instance);
+			}
+		} else if(mysql) {
+			playersDataWork = regionsDataWork = new WorkTables(instance);
+			((WorkTables) regionsDataWork).createWorldsTables();
+			((WorkTables) playersDataWork).createTableForPlayers();
+		} else {
+			playersDataWork = regionsDataWork = new WorkConfigs(instance);
+		}
+		config.writeDefaultWandItem();
 		api.updateWandItem();
-		if(configs.unloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
+		if(Sponge.server().serviceProvider().economyService().isPresent()) {
+			economyService  = Sponge.server().serviceProvider().economyService().get();
+			economy = new Economy(instance);
+		} else {
+			logger.warn(locales.getText(Sponge.server().locale(), LocalesPaths.ECONOMY_NOT_FOUND));
+		}
+		regionsDataWork.createDataForWorlds();
+		playersDataWork.loadDataOfPlayers();
+		api.generateGlobalRegions();
+		if(config.unloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new BlockAndWorldChangeListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ExplosionListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new InteractEntityListener(instance));
@@ -169,7 +257,7 @@ public class RegionGuard {
 		Sponge.eventManager().registerListeners(pluginContainer, new ConnectionListener(instance));
 		Sponge.asyncScheduler().executor(pluginContainer).execute(() -> {
 			long time = System.currentTimeMillis();
-			configs.loadRegions();
+			regionsDataWork.loadRegions();
 			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
 		});
 		mainCommand.getFlagCommand().updateCompletions();
@@ -185,32 +273,24 @@ public class RegionGuard {
 		}
 		PostEvent toPost = new PostEvent();
 		Sponge.eventManager().post(toPost);
+		mainCommand.genEconomyCommands();
 	}
 
 	@Listener
 	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
-		mainCommand = new RegionCommand(instance);
+		mainCommand = new RegionCommand(instance, event);
 		event.register(pluginContainer, mainCommand, "regionguard", "region", "rg");
 	}
 
-	public void loadConfigs() {
+	private boolean isForgePlatform() {
 		try {
-			rootNode = configLoader.load();
-		} catch (IOException e) {
-			logger.error(e.getLocalizedMessage());
-		}
-	}
-
-	public void saveConfig() {
-		try {
-			configLoader.save(rootNode);
-		} catch (ConfigurateException e) {
-			logger.error(e.getLocalizedMessage());
-		}
-	}
-
-	public Configs getConfigs() {
-		return configs;
+	        Class.forName("net.minecraft.entity.player.ServerPlayerEntity");
+	        Class.forName("net.minecraft.network.play.client.CCustomPayloadPacket");
+	        Class.forName("net.minecraft.network.PacketBuffer");
+	        return true;
+	    }  catch (ClassNotFoundException e) {
+	        return false;
+	    }
 	}
 
 }

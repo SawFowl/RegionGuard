@@ -50,6 +50,7 @@ public class TrustCommand implements Command.Raw {
 		args.remove(0);
 		if(!args.isEmpty() || !Sponge.server().player(args.get(0)).isPresent()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT));
 		ServerPlayer trustedPlayer = Sponge.server().player(args.get(0)).get();
+		if(!player.hasPermission(Permissions.UNLIMIT_MEMBERS) && plugin.getAPI().getLimitMembers(region.getOwnerUUID()) <= region.getTotalMembers() - 1 && !region.getMemberData(trustedPlayer).isPresent()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_LIMIT_REACHED));
 		args.remove(0);
 		String validValues = TrustTypes.CONTAINER.toString() + ", " +
 				TrustTypes.SLEEP.toString() + ", " +
@@ -63,7 +64,7 @@ public class TrustCommand implements Command.Raw {
 		if(!region.isCurrentTrustType(player, TrustTypes.OWNER) && trustLevel == TrustTypes.MANAGER) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_PLAYER_IS_NOT_OWNER));
 		region.setTrustType(trustedPlayer, trustLevel);
 		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TRUST_TYPE, ReplaceUtil.Keys.PLAYER), Arrays.asList(trustLevel.toString(), trustedPlayer.name())), LocalesPaths.COMMAND_TRUST_SUCCESS_PLAYER));
-		trustedPlayer.sendMessage(plugin.getLocales().getTextWithReplaced(trustedPlayer.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TRUST_TYPE, ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(trustLevel.toString(), player.name(), region.getServerWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_TRUST_SUCCESS_PLAYER));
+		trustedPlayer.sendMessage(plugin.getLocales().getTextWithReplaced(trustedPlayer.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TRUST_TYPE, ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(trustLevel.toString(), player.name(), region.getServerWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_TRUST_SUCCESS_TARGET));
 		plugin.getAPI().saveRegion(region.getPrimaryParent());
 		return CommandResult.success();
 	}

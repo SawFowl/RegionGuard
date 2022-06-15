@@ -46,7 +46,7 @@ public class InteractItemListener{
 		Optional<ServerPlayer> optPlayer = entity instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) entity) : null;
 		Optional<RayTraceResult<LocatableBlock>> blockRay = Optional.empty();
 		String itemid = ListenerUtils.itemId(event.itemStack().createStack());
-		if(optPlayer.isPresent() && plugin.getConfigs().getTankItems().contains(itemid)) {
+		if(optPlayer.isPresent() && plugin.getConfig().getTankItems().contains(itemid)) {
 			blockRay = RayTrace.block()
 					.world(optPlayer.get().world())
 					.sourceEyePosition(optPlayer.get())

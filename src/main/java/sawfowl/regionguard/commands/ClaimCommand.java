@@ -52,7 +52,7 @@ public class ClaimCommand implements Command.Raw {
 					return;
 				}
 			}
-			for(Entry<Flags, Boolean> entry : plugin.getConfigs().getDefaultClaimFlags().entrySet()) {
+			for(Entry<Flags, Boolean> entry : plugin.getConfig().getDefaultClaimFlags().entrySet()) {
 				region.setFlag(entry.getKey(), entry.getValue(), null, null);
 			}
 			player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_CLAIM_SUCCESS));

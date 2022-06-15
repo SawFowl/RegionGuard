@@ -62,7 +62,7 @@ public class WandCommand implements Command.Raw {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return Component.text("/rg wand");
+		return Component.text("/wand");
 	}
 
 }

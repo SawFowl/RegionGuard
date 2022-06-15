@@ -26,6 +26,14 @@ public class ChunkNumber {
 		return Vector3i.from(x * 16, 0, z * 16);
 	}
 
+	public int getX() {
+		return x;
+	}
+
+	public int getZ() {
+		return z;
+	}
+
 	@Override
 	public boolean equals(Object object) {
 		return object.getClass().getName().equals(this.getClass().getName()) && ((ChunkNumber) object).x == this.x && ((ChunkNumber) object).z == this.z;

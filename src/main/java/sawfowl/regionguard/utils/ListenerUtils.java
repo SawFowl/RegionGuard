@@ -10,6 +10,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.entity.Bed;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
@@ -139,8 +140,9 @@ public class ListenerUtils {
 	}
 
 	public static boolean isBedBlock(BlockSnapshot block) {
-		String id = blockID(block);
-		return id.contains("minecraft:") && id.contains("minecraft:_bed");
+		//String id = blockID(block);
+		//return id.contains("minecraft:") && id.contains("_bed");
+		return block instanceof Bed;
 	}
 
 	public static boolean isPistonOperation(List<BlockTransaction> transactions) {

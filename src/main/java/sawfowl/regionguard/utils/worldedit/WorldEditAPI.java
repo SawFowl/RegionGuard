@@ -14,10 +14,10 @@ import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
+import org.spongepowered.plugin.PluginContainer;
 
 import com.google.common.collect.Maps;
 
-import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.WorldEditCUIAPI;
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
@@ -32,15 +32,10 @@ import sawfowl.regionguard.utils.worldedit.cuiusers.VanillaUser;
 
 public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 
-	private boolean isForgePlatform;
-	public WorldEditAPI(RegionGuard plugin) {
-		isForgePlatform = isForgePlatform();
-		if(isForgePlatform) {
-			plugin.getLogger().info("WECui support is running in Forge compatibility mode.");
-		} else {
-			plugin.getLogger().info("WECui support is running in Vanilla compatibility mode.");
-		}
-		Sponge.asyncScheduler().submit(Task.builder().interval(10, TimeUnit.SECONDS).plugin(plugin.getPluginContainer()).execute(() -> {
+	private final boolean isForgePlatform;
+	public WorldEditAPI(PluginContainer container, boolean isForgePlatform) {
+		this.isForgePlatform = isForgePlatform;
+		Sponge.asyncScheduler().submit(Task.builder().interval(10, TimeUnit.SECONDS).plugin(container).execute(() -> {
 			for(CUIUser user : worldEditPlayers.values()) {
 				if(!user.isDrag() && user.getPlayer().isPresent() && System.currentTimeMillis() - user.getLastTimeSendBorders() > 30000) {
 					revertVisuals(user.getPlayer().get(), null);
@@ -182,17 +177,6 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 			return Optional.ofNullable(blockRay.get().selectedObject().serverLocation());
 		}
 		return Optional.empty();
-	}
-
-	private boolean isForgePlatform() {
-		try {
-	        Class.forName("net.minecraft.entity.player.ServerPlayerEntity");
-	        Class.forName("net.minecraft.network.play.client.CCustomPayloadPacket");
-	        Class.forName("net.minecraft.network.PacketBuffer");
-	        return true;
-	    }  catch (ClassNotFoundException e) {
-	        return false;
-	    }
 	}
 
 }

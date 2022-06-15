@@ -36,9 +36,10 @@ public class Cuboid {
 	 */
 	public List<Vector3i> getAllPositions() {
 		List<Vector3i> allPositions = new ArrayList<Vector3i>();
+		boolean cuboid = selectorType.equals("Cuboid");
 		for(int x = (int) getAABB().min().x(); x <= (int) getAABB().max().x(); x++) {
-			for(int y = (int) getAABB().min().y(); y <= (int) getAABB().max().y(); y++) {
-				for(int z = (int) getAABB().min().z(); z <= (int) getAABB().max().x(); z++) {
+			for(int z = (int) getAABB().min().z(); z <= (int) getAABB().max().x(); z++) {
+				for(int y = (int) getAABB().min().y(); cuboid ? y <= (int) getAABB().max().y() : y < (int) getAABB().max().y(); y++) {
 					allPositions.add(Vector3i.from(x, y, z));
 				}
 			}

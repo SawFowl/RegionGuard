@@ -14,6 +14,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import sawfowl.regionguard.api.data.ChunkNumber;
+import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.Region;
 
 public interface RegionAPI {
@@ -258,8 +259,139 @@ public interface RegionAPI {
 	public long getLimitSubdivisions(ServerPlayer player);
 
 	/**
+	 * Getting the members limit for each region of a particular player.<br>
+	 * Each region has its own separate members limit. <br>
+	 * 
+	 * @param player - Checked player
+	 * @return - The number of members limit for each region of a particular player.
+	 */
+	public long getLimitMembers(ServerPlayer player);
+
+	/**
+	 * Getting the members limit for each region of a particular player.<br>
+	 * Each region has its own separate members limit. <br>
+	 * 
+	 * @param player - Checked player
+	 * @return - The number of members limit for each region of a particular player.
+	 */
+	public long getLimitMembers(UUID player);
+
+	/**
+	 * The maximum limit of blocks a player can claim.
+	 * 
+	 * @param player - Checked player
+	 * @return - The number of blocks available to the player for claiming.
+	 */
+	public long getLimitMaxBlocks(ServerPlayer player);
+
+	/**
+	 * The maximum limit of regions a player can claim.
+	 * 
+	 * @param player - Checked player
+	 * @return - The number of regions available to the player for claiming.
+	 */
+	public long getLimitMaxClaims(ServerPlayer player);
+
+	/**
+	 * The maximum limit of child regions a player can create. <br>
+	 * Each basic region has its own limit. <br>
+	 * 
+	 * @param player - Checked player
+	 * @returnThe number of regions available to the player for creating.
+	 */
+	public long getLimitMaxSubdivisions(ServerPlayer player);
+
+	/**
+	 * Get the value of the block price for the player. <br>
+	 * Depending on how the permissions plugin is set up, different players may have different prices.
+	 */
+	public double getBuyBlockPrice(ServerPlayer player);
+
+	/**
+	 * Get the value of the region price for the player. <br>
+	 * Depending on how the permissions plugin is set up, different players may have different prices.
+	 */
+	public double getBuyClaimPrice(ServerPlayer player);
+
+	/**
+	 * Get the value of the subdivision price for the player. <br>
+	 * Depending on how the permissions plugin is set up, different players may have different prices.
+	 */
+	public double getBuySubdivisionPrice(ServerPlayer player);
+
+
+	/**
+	 * Get the value of the block price for the player. <br>
+	 * Depending on how the permissions plugin is set up, different players may have different prices.
+	 */
+	public double getSellBlockPrice(ServerPlayer player);
+
+	/**
+	 * Get the value of the region price for the player. <br>
+	 * Depending on how the permissions plugin is set up, different players may have different prices.
+	 */
+	public double getSellClaimPrice(ServerPlayer player);
+
+	/**
+	 * Get the value of the subdivision price for the player. <br>
+	 * Depending on how the permissions plugin is set up, different players may have different prices.
+	 */
+	public double getSellSubdivisionPrice(ServerPlayer player);
+	/**
+	 * Getting the currency in which the player will perform the transaction.
+	 * Depending on how the permissions plugin is set up, different players may have different currencies.
+	 */
+	public String getCurrency(ServerPlayer player);
+
+	/**
+	 * Change the limit of blocks a player can claim.
+	 */
+	public void setLimitBlocks(ServerPlayer player, long limit);
+
+	/**
+	 * Set the number of regions a player can own.
+	 */
+	public void setLimitClaims(ServerPlayer player, long limit);
+
+	/**
+	 * Set a limit to the subdivisions a player can create.
+	 */
+	public void setLimitSubdivisions(ServerPlayer player, long limit);
+
+	/**
+	 * Set the number of players that each player region can contain.
+	 */
+	public void setLimitMembers(ServerPlayer player, long limit);
+
+	/**
+	 * Setting limits and other information on the player.
+	 */
+	public void setPlayerData(ServerPlayer player, PlayerData playerData);
+
+	/**
+	 * Setting limits and other information on the player.
+	 */
+	public void setPlayerData(UUID player, PlayerData playerData);
+
+	/**
+	 * Getting limits and other information on the player.
+	 */
+	public Optional<PlayerData> getPlayerData(ServerPlayer player);
+
+	/**
+	 * Getting limits and other information on the player.
+	 */
+	public Optional<PlayerData> getPlayerData(UUID player);
+
+	/**
 	 * Go to the API for visually highlighting regions with a mod on the WECui client.
 	 */
 	public WorldEditCUIAPI getWorldEditCUIAPI();
+
+	/**
+	 * If true, then the plugin is running in Forge compatibility mode. <br>
+	 * If false, then the plugin is running in Vanilla compatibility mode.
+	 */
+	boolean isForgePlatform();
 
 }

@@ -14,6 +14,7 @@ plugins {
 	id("java")
 	id("java-library")
 	id("maven-publish")
+	id("eclipse")
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -53,7 +54,7 @@ tasks.withType(JavaCompile) {
 
 dependencies {
 	implementation "org.spongepowered:spongeapi:8.0.0"
-	implementation 'org.spongepowered:spongevanilla:1.16.5-8.0.0-RC1031:universal'
+	implementation 'org.spongepowered:spongevanilla:1.16.5-8.0.0-RC1111:universal'
 	implementation 'com.github.SawFowl:LocaleAPI:2.1.0'
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.16'
 	implementation fileTree(dir: 'libs', include: '*.jar')

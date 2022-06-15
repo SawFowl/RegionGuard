@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
@@ -17,6 +18,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
 
@@ -30,6 +32,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.events.RegionDeleteEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
 
@@ -95,15 +98,101 @@ public class InfoCommand implements Command.Raw {
 				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(cause2 -> {
 					if(region.getParrent().isPresent()) {
 						Region parrent = region.getParrent().get();
-						parrent.removeChild(region);
-						plugin.getAPI().saveRegion(parrent.getPrimaryParent());
-						player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_CHILD_DELETED));
+						RegionDeleteEvent event = new RegionDeleteEvent() {
+							boolean canceled;
+							Component send;
+							@Override
+							public void setCancelled(boolean cancel) {
+								canceled = cancel;
+							}
+							@Override
+							public boolean isCancelled() {
+								return canceled;
+							}
+							@Override
+							public void setMessage(Component message) {
+								send = message;
+							}
+							@Override
+							public Optional<Component> getMessage() {
+								return Optional.ofNullable(send);
+							}
+							@Override
+							public Region getRegion() {
+								return region;
+							}
+							@Override
+							public ServerPlayer getPlayer() {
+								return player;
+							}
+							@Override
+							public Cause cause() {
+								return cause2.cause();
+							}
+							@Override
+							public Object getSource() {
+								return player;
+							}
+						};
+						event.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_CHILD_DELETED));
+						Sponge.eventManager().post(event);
+						if(!event.isCancelled()) {
+							parrent.removeChild(region);
+							plugin.getAPI().saveRegion(parrent.getPrimaryParent());
+							if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());
+						}
 					} else {
-						plugin.getAPI().deleteRegion(region);
-						if(region.containsChilds()) {
-							player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_DELETED_MAIN_AND_CHILDS));
-						} else {
-							player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_DELETED));
+						RegionDeleteEvent event = new RegionDeleteEvent() {
+							boolean canceled;
+							Component send;
+							@Override
+							public void setCancelled(boolean cancel) {
+								canceled = cancel;
+							}
+							@Override
+							public boolean isCancelled() {
+								return canceled;
+							}
+							@Override
+							public void setMessage(Component message) {
+								send = message;
+							}
+							@Override
+							public Optional<Component> getMessage() {
+								return Optional.ofNullable(send);
+							}
+							@Override
+							public Region getRegion() {
+								return region;
+							}
+							@Override
+							public ServerPlayer getPlayer() {
+								return player;
+							}
+							@Override
+							public Cause cause() {
+								return cause2.cause();
+							}
+							@Override
+							public Object getSource() {
+								return player;
+							}
+						};
+						event.setMessage(region.containsChilds() ? plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_DELETED_MAIN_AND_CHILDS) : plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_DELETED));
+						Sponge.eventManager().post(event);
+						if(!event.isCancelled()) {
+							if(region.getType() != RegionTypes.UNSET) {
+								region.setRegionType(RegionTypes.UNSET);
+								if(plugin.getConfig().regenAll()) region.regen(true);
+								plugin.getAPI().deleteRegion(region);
+							}
+							if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());
+						}
+						if(plugin.getConfig().regenAll()) {
+							if(region.getType() != RegionTypes.UNSET) {
+								region.setRegionType(RegionTypes.UNSET);
+								region.regen(true);
+							}
 						}
 					}
 					if(plugin.getAPI().getWorldEditCUIAPI() != null) plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
