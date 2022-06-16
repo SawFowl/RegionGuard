@@ -1,5 +1,9 @@
 # RegionGuard
+####  ***[LocaleAPI](https://ore.spongepowered.org/Semenkovsky_Ivan/LocaleAPI) plugin is required.***
 
+This job was quite a challenge for me. And it was the first time I did such a large-scale work. Therefore, I will be glad to receive suggestions on how to improve the code.
+
+### For server admins:
 #### Features:
 - The commands are partially similar to those in the WorldGuard plugin.
 - Working with flags is similar to what you may have seen in the GriefPrevention plugin.
@@ -8,7 +12,7 @@
 - Player limits are set via metadata in the permissions plugin.
 - Developers can use the plugin API to extend its functionality and use its functions in their plugins.
 - Optional Sponge economy support.
-- MySQL support
+- MySQL support.
 - Ability to regenerate territory when a region is removed.
 
 #### Commands:
@@ -111,5 +115,46 @@ lp group default meta set regionguard.limit.blocks 1000
 lp group default meta set regionguard.limit.members 5
 ```
 
-WECui forge version -> https://www.curseforge.com/minecraft/mc-mods/worldeditcui-forge-edition-3 \
+WECui forge version -> https://www.curseforge.com/minecraft/mc-mods/worldeditcui-forge-edition-3
+
+### For developers:
 javadoc -> https://sawfowl.github.io/RegionGuard/
+##### Get API:
+```JAVA
+@Plugin("pluginid")
+public class Main {
+	private Main instance;
+	private Logger logger;
+	RegionAPI regionAPI;
+
+	// Get API. This happens in event `ConstructPluginEvent`.
+	@Listener
+	public void onRegionAPIPostEvent(RegionAPIPostEvent.PostAPI event) {
+		instance = this;
+		logger = LogManager.getLogger("PluginName");
+		regionAPI = event.getAPI();
+	}
+
+	// At this stage, you can access the regions.
+	@Listener
+	public void onCompleteLoadRegionsEvent(RegionAPIPostEvent.CompleteLoadRegions event) {
+		logger.info(event.getTotalLoaded());
+		//TODO
+	}
+
+}
+```
+##### Gradle:
+```gradle
+repositories {
+	...
+	maven { 
+		name = "JitPack"
+		url 'https://jitpack.io' 
+	}
+}
+dependencies {
+	...
+	implementation 'com.github.SawFowl:RegionGuard:1.1'
+}
+```
