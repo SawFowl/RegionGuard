@@ -122,7 +122,7 @@ javadoc -> https://sawfowl.github.io/RegionGuard/
 public class Main {
 	private Main instance;
 	private Logger logger;
-	RegionAPI regionAPI;
+	private RegionAPI regionAPI;
 
 	// Get API. This happens in event `ConstructPluginEvent`.
 	@Listener
