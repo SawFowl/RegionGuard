@@ -1,7 +1,4 @@
 # RegionGuard
-####  ***[LocaleAPI](https://ore.spongepowered.org/Semenkovsky_Ivan/LocaleAPI) plugin is required.***
-
-This job was quite a challenge for me. And it was the first time I did such a large-scale work. Therefore, I will be glad to receive suggestions on how to improve the code.
 
 ### For server admins:
 #### Features:
