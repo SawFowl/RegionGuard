@@ -85,7 +85,7 @@ regionguard.staff.flag - Changing flags in any region.
 regionguard.staff.list - Getting a list of regions of any player. The ability to teleport is available by default.
 regionguard.staff.adminclaim - Creation of subdivisions in admin regions.
 ```
-#### Metaperms.
+#### Metaperms:
 ```yaml
 regionguard.limit.blocks - The limit of blocks a player can claim.
 regionguard.limit.claims - Player claims limit.
@@ -103,7 +103,7 @@ regionguard.sell.subdivisionprice - Selling price of 1 subdivision.
 regionguard.transaction.currency - Currency in which the player will be buying and selling limits.
 ```
 
-#### Example metaperms:
+#### Example set metaperms:
 ```
 lp group default meta set regionguard.limit.claims 3
 lp group default meta set regionguard.limit.subdivisions 5
