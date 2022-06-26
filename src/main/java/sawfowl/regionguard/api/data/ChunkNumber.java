@@ -36,7 +36,7 @@ public class ChunkNumber {
 
 	@Override
 	public boolean equals(Object object) {
-		return object.getClass().getName().equals(this.getClass().getName()) && ((ChunkNumber) object).x == this.x && ((ChunkNumber) object).z == this.z;
+		return object != null && object.hashCode() == this.hashCode();
 	}
 
 	@Override

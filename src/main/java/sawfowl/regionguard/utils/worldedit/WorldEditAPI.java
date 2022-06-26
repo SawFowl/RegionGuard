@@ -36,11 +36,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	public WorldEditAPI(PluginContainer container, boolean isForgePlatform) {
 		this.isForgePlatform = isForgePlatform;
 		Sponge.asyncScheduler().submit(Task.builder().interval(10, TimeUnit.SECONDS).plugin(container).execute(() -> {
-			for(CUIUser user : worldEditPlayers.values()) {
-				if(!user.isDrag() && user.getPlayer().isPresent() && System.currentTimeMillis() - user.getLastTimeSendBorders() > 30000) {
-					revertVisuals(user.getPlayer().get(), null);
-				}
-			}
+			for(CUIUser user : worldEditPlayers.values()) if(!user.isDrag() && user.getPlayer().isPresent() && System.currentTimeMillis() - user.getLastTimeSendBorders() > 30000) revertVisuals(user.getPlayer().get(), null);
 		}).build());
 	}
 
@@ -79,20 +75,14 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	public void visualizeRegion(Region region, Vector3i pos1, Vector3i pos2, ServerPlayer player, CUIUser user, boolean investigating, boolean tempRegion) {
 		if(!user.isSupportCUI()) return;
 		// revert any current visuals if investigating
-		if (investigating) {
-			revertVisuals(player, null);
-		}
+		if(investigating) revertVisuals(player, null);
 		Cuboid cuboid = new Cuboid(pos1, pos2);
 		user.dispatchCUIEvent(new MultiSelectionCuboidEvent(region.getUniqueId()));
 		user.dispatchCUIEvent(new MultiSelectionPointEvent(0, pos1, cuboid.getSize3D()));
 		if (user.getClaimResizing() != null) {
 			user.dispatchCUIEvent(new MultiSelectionPointEvent(1));
-		} else {
-			user.dispatchCUIEvent(new MultiSelectionPointEvent(1, pos2, cuboid.getSize3D()));
-		}
-		if (investigating || user.getLastWandLocation() == null) {
-			user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.RED, tempRegion ? MultiSelectionColors.PURPLE : MultiSelectionColors.getClaimColor(region), MultiSelectionColors.BLUE, MultiSelectionColors.ORANGE));
-		}
+		} else user.dispatchCUIEvent(new MultiSelectionPointEvent(1, pos2, cuboid.getSize3D()));
+		if(investigating || user.getLastWandLocation() == null) user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.RED, tempRegion ? MultiSelectionColors.PURPLE : MultiSelectionColors.getClaimColor(region), MultiSelectionColors.BLUE, MultiSelectionColors.ORANGE));
 		user.dispatchCUIEvent(new MultiSelectionGridEvent(3));
 	}
 
@@ -101,20 +91,13 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 		CUIUser user = getOrCreateUser(player);
 		if(!user.isSupportCUI()) return;
 		for (Region region : regions) {
-			/*if (region.getChilds().size() > 0) {
-				visualizeClaims(region.getChilds(), player, investigating);
-			}*/
 			long size = region.getCuboid().getSize3D();
 			user.dispatchCUIEvent(new MultiSelectionCuboidEvent(region.getUniqueId()));
 			user.dispatchCUIEvent(new MultiSelectionPointEvent(0, region.getCuboid().getMin(), size));
 			if (user.getClaimResizing() != null) {
 				user.dispatchCUIEvent(new MultiSelectionPointEvent(1));
-			} else {
-				user.dispatchCUIEvent(new MultiSelectionPointEvent(1, region.getCuboid().getMax(), size));
-			}
-			if (investigating) {
-				user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.RED, MultiSelectionColors.getClaimColor(region), MultiSelectionColors.BLUE, MultiSelectionColors.ORANGE));
-			}
+			} else user.dispatchCUIEvent(new MultiSelectionPointEvent(1, region.getCuboid().getMax(), size));
+			if(investigating) user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.RED, MultiSelectionColors.getClaimColor(region), MultiSelectionColors.BLUE, MultiSelectionColors.ORANGE));
 			user.dispatchCUIEvent(new MultiSelectionGridEvent(3));
 		}
 	}
@@ -125,9 +108,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 		if(!user.isSupportCUI()) return;
 		if (regionUniqueId != null) {
 			user.dispatchCUIEvent(new MultiSelectionClearEvent(regionUniqueId));
-		} else {
-			user.dispatchCUIEvent(new MultiSelectionClearEvent());
-		}
+		} else user.dispatchCUIEvent(new MultiSelectionClearEvent());
 	}
 
 	@Override
@@ -145,15 +126,11 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 		Vector3i point1 = null;
 		if (user.getLastWandLocation() != null) {
 			point1 = user.getLastWandLocation();
-		} else {
-			point1 = pos;
-		}
+		} else point1 = pos;
 		Vector3i point2 = null;
 		if (location == null) {
 			point2 = player.blockPosition();
-		} else {
-			point2 = location.blockPosition();
-		}
+		} else point2 = location.blockPosition();
 		//user.setLastTimeSendBorders(System.currentTimeMillis());
 		//Cuboid cuboid = new Cuboid(point1, point2);
 		user.dispatchCUIEvent(new MultiSelectionCuboidEvent(player.uniqueId()));
@@ -173,9 +150,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 				.direction(player)
 				.select(RayTrace.nonAir())
 				.execute();
-		if(blockRay.isPresent()) {
-			return Optional.ofNullable(blockRay.get().selectedObject().serverLocation());
-		}
+		if(blockRay.isPresent()) return Optional.ofNullable(blockRay.get().selectedObject().serverLocation());
 		return Optional.empty();
 	}
 

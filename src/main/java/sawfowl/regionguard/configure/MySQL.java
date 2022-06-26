@@ -82,20 +82,15 @@ public class MySQL {
 		} else {
 			c = openConnection();
 		}
-		Statement s = null;
 		try {
-			s = c.createStatement();
-		} catch (SQLException e1) {
-			plugin.getLogger().error(e1.getMessage());
-		}
-		ResultSet ret = null;
-		try {
-			ret = s.executeQuery(query);
+			Statement s = c.createStatement();
+			ResultSet ret = s.executeQuery(query);
+			closeConnection();
+			return ret;
 		} catch (SQLException e) {
 			plugin.getLogger().error(e.getMessage());
 		}
-		closeConnection();
-		return ret;
+		return null;
 	}
 
 	public void updateSQL(String update) {
@@ -105,12 +100,11 @@ public class MySQL {
 		} else {
 			c = openConnection();
 		}
-		Statement s = null;
 		try {
-			s = c.createStatement();
+			Statement s = c.createStatement();
 			s.executeUpdate(update);
-		} catch (SQLException e1) {
-			plugin.getLogger().error(e1.getMessage());
+		} catch (SQLException e) {
+			plugin.getLogger().error(e.getMessage());
 		}
 		closeConnection();
 	}

@@ -43,7 +43,7 @@ public class InteractItemListener{
 		DataContainer container = event.itemStack().toContainer();
 		if(container.get(DataQuery.of("UnsafeData")).isPresent() && container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) return;
 		ResourceKey worldKey = entity.createSnapshot().world();
-		Optional<ServerPlayer> optPlayer = entity instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) entity) : null;
+		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		Optional<RayTraceResult<LocatableBlock>> blockRay = Optional.empty();
 		String itemid = ListenerUtils.itemId(event.itemStack().createStack());
 		if(optPlayer.isPresent() && plugin.getConfig().getTankItems().contains(itemid)) {

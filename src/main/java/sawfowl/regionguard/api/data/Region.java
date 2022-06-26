@@ -25,7 +25,6 @@ import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
-import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -826,20 +825,23 @@ public class Region {
 	public Optional<Schematic> getSchematic(String schematicName, String altAuthor) {
 		Schematic schematic = null;
 		if(getServerWorld().isPresent() && getServerWorld().get().isLoaded() && !isGlobal()) {
-			ArchetypeVolume archetypeVolume = getServerWorld().get().createArchetypeVolume(cuboid.getMin(), cuboid.getMax(), cuboid.getAABB().center().toInt());
-			if(altAuthor != null) {
+			ArchetypeVolume archetypeVolume = getServerWorld().get()
+					.createArchetypeVolume(
+							cuboid.getMin(),
+							cuboid.getMax(),
+							cuboid.getAABB().center().toInt()
+							);
+			if(altAuthor != null && archetypeVolume != null) {
 				schematic = Schematic.builder()
 						.volume(archetypeVolume)
-						.blockPaletteType(PaletteTypes.BLOCK_STATE_PALETTE.get())
 						.metaValue(Schematic.METADATA_AUTHOR, altAuthor)
 						.metaValue(Schematic.METADATA_DATE, Instant.ofEpochMilli(creationTime).toString())
 						.metaValue(Schematic.METADATA_NAME, schematicName)
 						.build();
-			} else if(getOwner().isPresent()) {
+			} else {
 				schematic = Schematic.builder()
 						.volume(archetypeVolume)
-						.blockPaletteType(PaletteTypes.BLOCK_STATE_PALETTE.get())
-						.metaValue(Schematic.METADATA_AUTHOR, getOwner().get().name())
+						.metaValue(Schematic.METADATA_AUTHOR, getOwnerData().getName())
 						.metaValue(Schematic.METADATA_DATE, Instant.ofEpochMilli(creationTime).toString())
 						.metaValue(Schematic.METADATA_NAME, schematicName)
 						.build();
@@ -934,7 +936,7 @@ public class Region {
 
 	@Override
 	public boolean equals(Object object) {
-		return object instanceof Region && ((Region) object).getUniqueId().equals(regionUUID);
+		return object != null && object.hashCode() == this.hashCode();
 	}
 
 	@Override

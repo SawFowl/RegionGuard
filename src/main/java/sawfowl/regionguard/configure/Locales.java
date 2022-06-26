@@ -138,7 +138,7 @@ public class Locales {
 		save = check(locale, toText("&cAn invalid event source is specified for the flag."), null, LocalesPaths.COMMAND_FLAG_WRONG_SOURCE) || save;
 		save = check(locale, toText("&cFor the flag there is an invalid event target specified."), null, LocalesPaths.COMMAND_FLAG_WRONG_TARGET) || save;
 		save = check(locale, toText("&aThe meaning of the flag is set."), null, LocalesPaths.COMMAND_FLAG_SUCCESS) || save;
-		save = check(locale, toText("&5Event source &b%source%&5.\n&5Event target &b%target%&5"), null, LocalesPaths.COMMAND_FLAG_HOVER_VALUES) || save;
+		save = check(locale, toText("&5Event source &b%source%&5.\n&5Event target &b%target%&5."), null, LocalesPaths.COMMAND_FLAG_HOVER_VALUES) || save;
 		save = check(locale, toText("&3List of flags"), null, LocalesPaths.COMMAND_FLAG_LIST) || save;
 		save = check(locale, toText("&2Delete flag data."), null, LocalesPaths.COMMAND_FLAG_HOVER_REMOVE) || save;
 		save = check(locale, toText("&2Set the allowing value."), null, LocalesPaths.COMMAND_FLAG_HOVER_TRUE) || save;
@@ -263,6 +263,7 @@ public class Locales {
 		save = check(locale, toText("&cThe volume selected is too small. To complete the operation, select an area larger than the current one by &b%volume%&c."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_SMALL_VOLUME) || save;
 		save = check(locale, toText("&cThe new size is too large. You have selected: &b%selected%&c blocks.\nBlocks available: &b%volume%&c."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_LARGE_VOLUME) || save;
 		save = check(locale, toText("&cIt is not possible to change the size of a region, as this would cause it to intersect with another region."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_REGIONS_INTERSECT) || save;
+		save = check(locale, toText("&cIt is not possible to change the size of the region because the new position falls on a subdivision."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_CHILD_INTERSECT) || save;
 		save = check(locale, toText("&dClick again elsewhere to resize."), null, LocalesPaths.REGION_RESIZE_START) || save;
 		save = check(locale, toText("&dThe size of the region has been changed."), null, LocalesPaths.REGION_RESIZE_FINISH) || save;
 
@@ -396,7 +397,7 @@ public class Locales {
 		save = check(locale, toText("&cДля флага указан недействительный источник события."), null, LocalesPaths.COMMAND_FLAG_WRONG_SOURCE) || save;
 		save = check(locale, toText("&cДля флага указана не действительная цель события."), null, LocalesPaths.COMMAND_FLAG_WRONG_TARGET) || save;
 		save = check(locale, toText("&aЗначение флага установленно."), null, LocalesPaths.COMMAND_FLAG_SUCCESS) || save;
-		save = check(locale, toText("&5Источник события &b%source%&5.\n&5Цель события &b%target%&5"), null, LocalesPaths.COMMAND_FLAG_HOVER_VALUES) || save;
+		save = check(locale, toText("&5Источник события &b%source%&5.\n&5Цель события &b%target%&5."), null, LocalesPaths.COMMAND_FLAG_HOVER_VALUES) || save;
 		save = check(locale, toText("&3Список флагов"), null, LocalesPaths.COMMAND_FLAG_LIST) || save;
 		save = check(locale, toText("&2Удалить данные флага."), null, LocalesPaths.COMMAND_FLAG_HOVER_REMOVE) || save;
 		save = check(locale, toText("&2Установить разрешающее значение."), null, LocalesPaths.COMMAND_FLAG_HOVER_TRUE) || save;
@@ -521,6 +522,7 @@ public class Locales {
 		save = check(locale, toText("&cВыбран слишком маленький объем. Для завершения операции нужно еще &b%volume%&c."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_SMALL_VOLUME) || save;
 		save = check(locale, toText("&cНовый размер слишком велик. Вы выбрали: &b%selected%&c. блоков.\nДоступно блоков: &b%volume%&c."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_LARGE_VOLUME) || save;
 		save = check(locale, toText("&cНевозможно изменить размер региона так как это приведет к пересечению с другим регионом."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_REGIONS_INTERSECT) || save;
+		save = check(locale, toText("&cНевозможно изменить размер региона так как новая позиция попадает на дочерний регион."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_CHILD_INTERSECT) || save;
 		save = check(locale, toText("&dКликните еще раз в другом месте для изменения размера."), null, LocalesPaths.REGION_RESIZE_START) || save;
 		save = check(locale, toText("&dРазмер региона изменен."), null, LocalesPaths.REGION_RESIZE_FINISH) || save;
 

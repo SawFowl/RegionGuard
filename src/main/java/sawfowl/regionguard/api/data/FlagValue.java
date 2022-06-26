@@ -3,6 +3,8 @@ package sawfowl.regionguard.api.data;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import com.google.common.base.Objects;
+
 
 @ConfigSerializable
 public class FlagValue {
@@ -45,7 +47,8 @@ public class FlagValue {
 
 	@Override
 	public boolean equals(Object object) {
-		return object.toString().equals(this.toString());
+		// object.toString().equals(this.toString())
+		return Objects.hashCode(object) == Objects.hashCode(this);
 	}
 
 	@Override

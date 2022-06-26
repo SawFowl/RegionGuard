@@ -758,16 +758,38 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 
 	private boolean resizeRegion(ServerPlayer player, Region region, Vector3i blockPosition) {
 		if(positions.get(player.uniqueId()).tempRegion != null) {
-			for(Vector3i vector3i : positions.get(player.uniqueId()).tempRegion.getCuboid().getAllPositions()) {
-				Region find = plugin.getAPI().findRegion(positions.get(player.uniqueId()).tempRegion.getServerWorldKey(), vector3i);
-				if(!find.isGlobal() && !find.getUniqueId().equals(positions.get(player.uniqueId()).tempRegion.getUniqueId())) {
-					plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
-					plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, positions.get(player.uniqueId()).tempRegion.getUniqueId());
-					plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(find, player, false, false);
-					player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_RESIZE_EXCEPTION_REGIONS_INTERSECT));
-					positions.get(player.uniqueId()).clear();
-					return true;
-				}
+			Optional<Region> optChild = positions.get(player.uniqueId()).tempRegion.getChilds().stream().filter(rg -> (rg.getCuboid().containsIntersectsPosition(blockPosition))).findFirst();
+			if(optChild.isPresent()) {
+				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_RESIZE_EXCEPTION_CHILD_INTERSECT));
+				positions.get(player.uniqueId()).clear();
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setClaimResizing(null);
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(false);
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDragCuboid(null);
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setLastWandLocation(null);
+				plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
+				plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, null);
+				plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(optChild.get(), player, false, false);
+				return true;
+			}
+		}
+		if(positions.get(player.uniqueId()).tempRegion != null) {
+			Region find = plugin.getAPI().findRegion(positions.get(player.uniqueId()).tempRegion.getServerWorldKey(), blockPosition);
+			if(!find.isGlobal()) {
+				player.sendMessage(Component.text(!find.equals(positions.get(player.uniqueId()).tempRegion)));
+				player.sendMessage(Component.text(positions.get(player.uniqueId()).tempRegion.getUniqueId().toString()));
+				player.sendMessage(Component.text(find.getUniqueId().toString()));
+			}
+			if(!find.isGlobal() && !find.equals(positions.get(player.uniqueId()).tempRegion)) {
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setClaimResizing(null);
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(false);
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDragCuboid(null);
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setLastWandLocation(null);
+				plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
+				plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, null);
+				plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(find, player, false, false);
+				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_RESIZE_EXCEPTION_REGIONS_INTERSECT));
+				positions.get(player.uniqueId()).clear();
+				return true;
 			}
 		}
 		if((region.getTrustType(player) != TrustTypes.OWNER && !region.isGlobal()) || positions.get(player.uniqueId()).pos1 != null) return false;

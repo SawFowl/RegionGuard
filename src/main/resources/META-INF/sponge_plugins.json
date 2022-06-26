@@ -5,7 +5,7 @@
     },
     "license": "GNU",
     "global": {
-        "version": "1.1.0-API8",
+        "version": "1.1.1-API8",
         "links": {
             "homepage": "https://ore.spongepowered.org/",
             "source": "https://github.com/SawFowl/",

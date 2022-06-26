@@ -140,16 +140,13 @@ public class DamageEntityAndCommandListener {
 					if(projectileSource instanceof Entity) entity = (Entity) projectileSource;
 				}
 			}
-			boolean isPlayer = entity instanceof ServerPlayer;
 			if(entity.uniqueId().equals(event.entity().uniqueId())) return;
-			if(isPlayer && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get())) {
+			if(player != null && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get())) {
 				isAllow = false;
-				player = (ServerPlayer) entity;
 				message = plugin.getLocales().getText(player.locale(), LocalesPaths.PVP);
 			} else if(!isAllowDamage(region, event.entity(), entity)) {
-				if(isPlayer) {
+				if(player != null) {
 					message = plugin.getLocales().getText(player.locale(), LocalesPaths.ENTITY_DAMAGE);
-					player = (ServerPlayer) entity;
 				}
 				isAllow = false;
 			}

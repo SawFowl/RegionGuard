@@ -43,7 +43,7 @@ public class LimitsCommand implements Command.Raw {
 		String limitClaims = player.hasPermission(Permissions.UNLIMIT_CLAIMS) ? "∞" : toString(plugin.getAPI().getLimitClaims(player) < 0 ? 0 : plugin.getAPI().getLimitClaims(player));
 		String limitSubdivisions = player.hasPermission(Permissions.UNLIMIT_SUBDIVISIONS) ? "∞" : toString(plugin.getAPI().getLimitSubdivisions(player) < 0 ? 0 : plugin.getAPI().getLimitSubdivisions(player));
 		Locale locale = player.locale();
-		int claimedBlocks = 0;
+		long claimedBlocks = 0;
 		for(Region playerRegion : plugin.getAPI().getPlayerRegions(player)) {
 			claimedBlocks += playerRegion.getCuboid().getSize();
 		}

@@ -220,10 +220,10 @@ public class EntityMoveListener {
 					}
 				}
 				if(portal) {
-					message = player != null ? plugin.getLocales().getText(player.locale(), LocalesPaths.PORTAL_USE) : null;
+					message = plugin.getLocales().getText(player.locale(), LocalesPaths.PORTAL_USE);
 				} else {
-					if(!allowFrom) message = player != null ? (enderPeal ? plugin.getLocales().getText(player.locale(), LocalesPaths.TELEPORT_ENDERPEARL_FROM_REGION) : plugin.getLocales().getText(player.locale(), LocalesPaths.TELEPORT_FROM_REGION)) : null;
-					if(!allowTo) message = player != null ? (enderPeal ? plugin.getLocales().getText(player.locale(), LocalesPaths.TELEPORT_ENDERPEARL_TO_REGION) : plugin.getLocales().getText(player.locale(), LocalesPaths.TELEPORT_TO_REGION)) : null;
+					if(!allowFrom) message = enderPeal ? plugin.getLocales().getText(player.locale(), LocalesPaths.TELEPORT_ENDERPEARL_FROM_REGION) : plugin.getLocales().getText(player.locale(), LocalesPaths.TELEPORT_FROM_REGION);
+					if(!allowTo) message = enderPeal ? plugin.getLocales().getText(player.locale(), LocalesPaths.TELEPORT_ENDERPEARL_TO_REGION) : plugin.getLocales().getText(player.locale(), LocalesPaths.TELEPORT_TO_REGION);
 				}
 			}
 		} else if(player != null) {
@@ -392,8 +392,8 @@ public class EntityMoveListener {
 			}
 		} else {
 			if(rgEvent.getPlayer().isPresent() && !rgEvent.fromRegion().getChilds().contains(rgEvent.toRegion()) && !rgEvent.toRegion().getChilds().contains(rgEvent.fromRegion())) {
-				if(rgEvent.fromRegion().getExitMessage(player.locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.fromRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.fromRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.fromRegion().getOwnerData().asComponent(), rgEvent.fromRegion().getExitMessage(player.locale()).get()));
-				if(rgEvent.toRegion().getJoinMessage(player.locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.toRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.toRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.toRegion().getOwnerData().asComponent(), rgEvent.toRegion().getJoinMessage(player.locale()).get()));
+				if(rgEvent.fromRegion().getExitMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.fromRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.fromRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.fromRegion().getOwnerData().asComponent(), rgEvent.fromRegion().getExitMessage(player.locale()).get()));
+				if(rgEvent.toRegion().getJoinMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.toRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.toRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.toRegion().getOwnerData().asComponent(), rgEvent.toRegion().getJoinMessage(player.locale()).get()));
 			}
 		}
 		if(rgEvent.getPlayer().isPresent() && !rgEvent.isAllowFly() && rgEvent.getPlayer().get().get(Keys.CAN_FLY).isPresent() && rgEvent.getPlayer().get().get(Keys.CAN_FLY).get()) {

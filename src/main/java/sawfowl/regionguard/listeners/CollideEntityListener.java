@@ -99,6 +99,7 @@ public class CollideEntityListener {
 	}
 
 	private boolean isAllowCollideEntity(Region region, Entity source, Entity target) {
+		if(region == null) return true;
 		if(source instanceof ServerPlayer) {
 			ServerPlayer player = (ServerPlayer) source;
 			if(player.hasPermission(Permissions.bypassFlag(Flags.COLLIDE_ENTITY))) return true;

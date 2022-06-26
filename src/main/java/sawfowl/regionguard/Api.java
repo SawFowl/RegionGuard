@@ -233,7 +233,6 @@ class Api implements RegionAPI {
 		if(iterator.hasNext()) {
 			region = iterator.next();
 		}
-		//Region region = stream.filter(rg -> (rg.isIntersectsWith(worldkey, position))).findAny().orElse(getGlobalRegion(worldkey));
 		if(region.containsChilds()) {
 			Optional<Region> child = region.getAllChilds().parallelStream().filter(rg -> (rg.isIntersectsWith(worldkey, position))).findFirst();
 			if(child.isPresent()) return child.get();
