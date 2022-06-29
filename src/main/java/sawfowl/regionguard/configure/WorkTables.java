@@ -59,7 +59,8 @@ public class WorkTables extends Thread implements WorkData {
 	@Override
 	public void createDataForWorlds() {
 		Sponge.server().worldManager().worlds().forEach(world -> {
-			if(getWorldRegion(world) == null) {
+			Region global = getWorldRegion(world);
+			if(global == null) {
 				Region region = new Region(serverOwnerUUID, Sponge.server().worldManager().defaultWorld(), null, null, null);
 				region.setRegionType(RegionTypes.GLOBAL);
 				region.setName("Global#World[" + world.key() + "]", Locales.DEFAULT);
@@ -67,6 +68,9 @@ public class WorkTables extends Thread implements WorkData {
 					if(Flags.valueOfName((String) node.getKey()) != null) region.setFlag(Flags.valueOfName((String) node.getKey()), node.getValue().getBoolean());
 				}
 				saveRegion(region);
+				plugin.getAPI().updateGlobalRegionData(world, region);
+			} else {
+				plugin.getAPI().updateGlobalRegionData(world, global);
 			}
 		});
 	}

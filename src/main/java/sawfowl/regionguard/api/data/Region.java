@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.Optional;
 import java.util.UUID;
@@ -935,13 +936,17 @@ public class Region {
 	}
 
 	@Override
-	public boolean equals(Object object) {
-		return object != null && object.hashCode() == this.hashCode();
+	public boolean equals(Object obj) {
+		if(this == obj) return true;
+		if(obj == null) return false;
+		if(getClass() != obj.getClass()) return false;
+		Region other = (Region) obj;
+		return Objects.equals(regionUUID, other.regionUUID);
 	}
 
 	@Override
 	public int hashCode() {
-		return regionUUID.hashCode();
+		return Objects.hash(regionUUID);
 	}
 
 	@Override

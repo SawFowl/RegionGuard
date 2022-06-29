@@ -240,7 +240,7 @@ public class RegionGuard {
 		}
 		regionsDataWork.createDataForWorlds();
 		playersDataWork.loadDataOfPlayers();
-		api.generateGlobalRegions();
+		api.generateDefaultGlobalRegion();
 		if(config.unloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new BlockAndWorldChangeListener(instance));

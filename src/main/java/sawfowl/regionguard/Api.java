@@ -66,16 +66,9 @@ class Api implements RegionAPI {
 	private Map<UUID, PlayerData> dataPlayers = new HashMap<UUID, PlayerData>();
 	private ItemStack wandItem;
 
-	void generateGlobalRegions() {
-		Map<ResourceKey, Region> toUpdate = new HashMap<ResourceKey, Region>();
+	void generateDefaultGlobalRegion() {
 		defaultGlobal = new Region(new UUID(0, 0), Sponge.server().worldManager().defaultWorld(), null, null, null);
-		Sponge.server().worldManager().worlds().forEach(world -> {
-			Region region = plugin.getRegionsDataWork().getWorldRegion(world);
-			region.setRegionType(RegionTypes.GLOBAL);
-			toUpdate.put(world.key(), region);
-		});
-		globalRegionsPerWorlds.clear();
-		globalRegionsPerWorlds.putAll(toUpdate);
+		defaultGlobal.setRegionType(RegionTypes.GLOBAL);
 	}
 
 	@Override

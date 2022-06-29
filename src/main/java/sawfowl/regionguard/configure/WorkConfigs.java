@@ -42,6 +42,9 @@ public class WorkConfigs implements WorkData {
 					}
 					worldNode.node("RegionData").set(Region.class, region);
 					configLoader.save(worldNode);
+					plugin.getAPI().updateGlobalRegionData(world, region);
+				} else {
+					plugin.getAPI().updateGlobalRegionData(world, getWorldRegion(world));
 				}
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
@@ -64,7 +67,9 @@ public class WorkConfigs implements WorkData {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		}
-		return new Region(new UUID(0, 0), world, null, null, null);
+		Region region = new Region(new UUID(0, 0), world, null, null, null);
+		region.setRegionType(RegionTypes.GLOBAL);
+		return region;
 	}
 
 	@Override

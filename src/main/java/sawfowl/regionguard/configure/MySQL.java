@@ -2,9 +2,7 @@ package sawfowl.regionguard.configure;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 
 import sawfowl.regionguard.RegionGuard;
@@ -55,13 +53,13 @@ public class MySQL {
 	}
 
 	public Connection getOrOpenConnection() {
-		if(!checkConnection()) openConnection();
+		if(!checkConnection()) return openConnection();
 		try {
-			if(connection.isClosed()) openConnection();
+			if(connection.isClosed()) return openConnection();
 		} catch (SQLException e) {
 			plugin.getLogger().error(e.getMessage());
 		}
-		return this.connection;
+		return null;
 	}
 
 	public void closeConnection() {
@@ -73,40 +71,6 @@ public class MySQL {
 				plugin.getLogger().error(e.getMessage());
 			}
 		}
-	}
-
-	public ResultSet querySQL(String query) {
-		Connection c = null;
-		if (checkConnection()) {
-			c = getConnection();
-		} else {
-			c = openConnection();
-		}
-		try {
-			Statement s = c.createStatement();
-			ResultSet ret = s.executeQuery(query);
-			closeConnection();
-			return ret;
-		} catch (SQLException e) {
-			plugin.getLogger().error(e.getMessage());
-		}
-		return null;
-	}
-
-	public void updateSQL(String update) {
-		Connection c = null;
-		if (checkConnection()) {
-			c = getConnection();
-		} else {
-			c = openConnection();
-		}
-		try {
-			Statement s = c.createStatement();
-			s.executeUpdate(update);
-		} catch (SQLException e) {
-			plugin.getLogger().error(e.getMessage());
-		}
-		closeConnection();
 	}
 
 }
