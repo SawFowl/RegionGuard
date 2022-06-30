@@ -118,13 +118,7 @@ public class WorkTables extends Thread implements WorkData {
 
 	@Override
 	public void deleteRegion(Region region) {
-		try {
-			Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
-			statement.executeUpdate("DELETE FROM " + prefix + "world_" + region.getServerWorldKey().asString().replace(':', '_') + " WHERE " + prefix + "world_" + region.getServerWorldKey().asString().replace(':', '_') + ".uuid = '" + region.getUniqueId() + "';");
-			statement.close();
-		} catch (SQLException e) {
-			plugin.getLogger().error("Delete region data\n" + e.getLocalizedMessage());
-		}
+		executeSQL("DELETE FROM " + prefix + "world_" + region.getServerWorldKey().asString().replace(':', '_') + " WHERE " + prefix + "world_" + region.getServerWorldKey().asString().replace(':', '_') + ".uuid = '" + region.getUniqueId() + "';");
 	}
 
 	@Override
