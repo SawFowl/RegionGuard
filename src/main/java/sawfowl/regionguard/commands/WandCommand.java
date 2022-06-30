@@ -21,7 +21,6 @@ import sawfowl.regionguard.configure.LocalesPaths;
 
 public class WandCommand implements Command.Raw {
 
-
 	private final RegionGuard plugin;
 	private final List<CommandCompletion> empty = new ArrayList<>();
 	public WandCommand(RegionGuard instance) {

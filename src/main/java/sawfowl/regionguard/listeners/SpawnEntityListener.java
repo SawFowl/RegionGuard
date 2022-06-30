@@ -145,10 +145,6 @@ public class SpawnEntityListener {
 	}
 
 	private boolean isAllowItemSpawn(Region region, Entity source, List<ItemStack> stacks) {
-		/*if(source != null && source instanceof ServerPlayer) {
-			ServerPlayer player = (ServerPlayer) source;
-			if(player.hasPermission(Permissions.bypassFlag(Flags.ITEM_SPAWN)) || region.isCurrentTrustType(player, TrustTypes.USER) || region.isCurrentTrustType(player, TrustTypes.MANAGER) || region.isCurrentTrustType(player, TrustTypes.OWNER)) return true;
-		}*/
 		if(source != null && source instanceof ServerPlayer) return true;
 		for(String sourceId : ListenerUtils.flagEntityArgs(source)) {
 			for(String targetid : ListenerUtils.flagItemsArgs(stacks)) {

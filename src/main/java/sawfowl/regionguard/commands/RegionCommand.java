@@ -120,7 +120,6 @@ public class RegionCommand implements Command.Raw {
 		childExecutors.put("wand", new WandCommand(plugin));
 		childExecutors.put("wecui", new WeCUICommand(plugin));
 		childExecutors.put("list", new ListCommand(plugin));
-		
 	}
 
 	private CommandResult generateHelp(Object src) {
