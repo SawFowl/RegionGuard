@@ -183,7 +183,7 @@ public class InfoCommand implements Command.Raw {
 						if(!event.isCancelled()) {
 							if(region.getType() != RegionTypes.UNSET) {
 								region.setRegionType(RegionTypes.UNSET);
-								if(plugin.getConfig().regenAll()) region.regen(true);
+								if(plugin.getConfig().regenAll()) region.regen(plugin.getConfig().asyncRegen(), plugin.getConfig().delayRegen());
 								plugin.getAPI().deleteRegion(region);
 							}
 							if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());
@@ -191,7 +191,7 @@ public class InfoCommand implements Command.Raw {
 						if(plugin.getConfig().regenAll()) {
 							if(region.getType() != RegionTypes.UNSET) {
 								region.setRegionType(RegionTypes.UNSET);
-								region.regen(true);
+								region.regen(plugin.getConfig().asyncRegen(), plugin.getConfig().delayRegen());
 							}
 						}
 					}

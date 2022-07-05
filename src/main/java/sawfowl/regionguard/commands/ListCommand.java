@@ -19,6 +19,10 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
@@ -32,6 +36,7 @@ import net.kyori.adventure.text.Component;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.events.RegionCommandTeleportEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
 
@@ -39,8 +44,10 @@ public class ListCommand implements Command.Raw {
 
 	private final RegionGuard plugin;
 	private List<CommandCompletion> empty = new ArrayList<>();
+	private Cause cause;
 	public ListCommand(RegionGuard plugin) {
 		this.plugin = plugin;
+		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
 	}
 
 	@Override
@@ -55,16 +62,15 @@ public class ListCommand implements Command.Raw {
 		if(regions.size() == 0) throw new CommandException(Component.text(otherPlayer ? "У игрока нет регионов" : "У вас нет регионов"));
 		List<Component> list = new ArrayList<>();
 		for(Region region : regions) {
-			Component tp = player.hasPermission(Permissions.TELEPORT) || player.hasPermission(Permissions.STAFF_LIST) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
-				ServerWorld world = region.getServerWorld().isPresent() ? region.getServerWorld().get() : player.world();
+			Component tp = region.getServerWorld().isPresent() && (player.hasPermission(Permissions.TELEPORT) || player.hasPermission(Permissions.STAFF_LIST)) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
+				ServerWorld world = region.getServerWorld().get();
 				Vector3i vector3i = world.highestPositionAt(region.getCuboid().getCenter().toInt());
 				boolean safePos = player.gameMode().get() == GameModes.CREATIVE.get() || player.gameMode().get() == GameModes.SPECTATOR.get() || (world.block(vector3i.add(0, 1, 0)).type() == BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.LAVA.get());
 				if(safePos) {
-					player.transferToWorld(world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
+					teleport(player, region, world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
 				} else {
-					Vector3d finalize = Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z());
 					player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_LIST_EXCEPTION_NOTSAFE).clickEvent(SpongeComponents.executeCallback(callback2 -> {
-						player.transferToWorld(world, finalize);
+						teleport(player, region, world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
 					})));
 				}
 			})) : Component.empty();
@@ -113,6 +119,78 @@ public class ListCommand implements Command.Raw {
 		.padding(plugin.getLocales().getText(locale, LocalesPaths.PADDING))
 		.linesPerPage(lines)
 		.sendTo(audience);
+	}
+
+	private void teleport(ServerPlayer player, Region region, ServerWorld world, Vector3d location) {
+		class RegionTPEvent extends AbstractEvent implements RegionCommandTeleportEvent {
+			boolean cancelled = false;
+			Component message;
+			Vector3d destination;
+			@Override
+			public Cause cause() {
+				return cause;
+			}
+
+			@Override
+			public ServerPlayer getPlayer() {
+				return player;
+			}
+
+			@Override
+			public Region getRegion() {
+				return region;
+			}
+
+			@Override
+			public void setMessage(Component message) {
+				this.message = message;
+			}
+
+			@Override
+			public Optional<Component> getMessage() {
+				return Optional.ofNullable(message);
+			}
+
+			@Override
+			public boolean isCancelled() {
+				return cancelled;
+			}
+
+			@Override
+			public void setCancelled(boolean cancel) {
+				cancelled = cancel;
+			}
+
+			@Override
+			public Region from() {
+				return plugin.getAPI().findRegion(world, player.blockPosition());
+			}
+
+			@Override
+			public Vector3d getOriginalLocation() {
+				return player.position();
+			}
+
+			@Override
+			public Vector3d getOriginalDestinationLocation() {
+				return location;
+			}
+
+			@Override
+			public Vector3d getDestinationLocation() {
+				return destination;
+			}
+
+			@Override
+			public void setDestination(Vector3d location) {
+				destination = location;
+			}
+		}
+		RegionCommandTeleportEvent rgEvent = new RegionTPEvent();
+		rgEvent.setDestination(location);
+		Sponge.eventManager().post(rgEvent);
+		if(!rgEvent.isCancelled()) player.transferToWorld(world, rgEvent.getDestinationLocation());
+		if(rgEvent.getMessage().isPresent()) player.sendMessage(rgEvent.getMessage().get());
 	}
 
 }

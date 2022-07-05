@@ -14,6 +14,8 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent.Reposition;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.item.ItemTypes;
@@ -28,6 +30,7 @@ import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.events.RegionChangeEntityWorldEvent;
 import sawfowl.regionguard.api.events.RegionMoveEntityEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
@@ -400,6 +403,133 @@ public class EntityMoveListener {
 			rgEvent.getPlayer().get().offer(Keys.CAN_FLY, false);
 			rgEvent.getPlayer().get().offer(Keys.IS_FLYING, false);
 			if(rgEvent.getStopFlyingMessage().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getStopFlyingMessage().get());
+		}
+	}
+
+	@Listener(order = Order.FIRST, beforeModifications = true)
+	public void onWorldChange(ChangeEntityWorldEvent.Reposition event) {
+		Entity entity = event.entity();
+		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
+		Optional<ServerPlayer> optSourcePlayer = entity instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) entity) : Optional.empty();
+		Region from = plugin.getAPI().findRegion(event.originalWorld(), event.originalPosition().toInt());
+		Region to = plugin.getAPI().findRegion(event.destinationWorld(), event.destinationPosition().toInt());
+		boolean isAllowFrom = optPlayer.isPresent() && !optPlayer.get().uniqueId().equals(entity.uniqueId()) ? isAllowTeleportFrom(optPlayer.get(), from) : isAllowTeleportFrom(entity, from);
+		boolean isAllowTo = optPlayer.isPresent() && !optPlayer.get().uniqueId().equals(entity.uniqueId()) ? isAllowTeleportTo(optPlayer.get(), from) : isAllowTeleportTo(entity, to);
+		boolean isAllowFly = optPlayer.isPresent() && !optPlayer.get().uniqueId().equals(entity.uniqueId()) ? isAllowPlayerFly(optPlayer.get(), from) : (optSourcePlayer.isPresent() ? isAllowPlayerFly(optSourcePlayer.get(), to) : true);
+		if(optPlayer.isPresent() && optSourcePlayer.isPresent() && !optPlayer.get().uniqueId().equals(optSourcePlayer.get().uniqueId())) {
+			if(!isAllowFrom) {
+				optPlayer.get().sendMessage(plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.TELEPORT_OTHER_FROM_REGION));
+				event.setCancelled(true);
+				return;
+			}
+			if(!isAllowTo) {
+				optPlayer.get().sendMessage(plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.TELEPORT_OTHER_TO_REGION));
+				event.setCancelled(true);
+				return;
+			}
+		}
+		class RegionEvent extends AbstractEvent implements RegionChangeEntityWorldEvent {
+			Component message;
+			Component stopFly;
+			boolean canceled;
+			boolean allowFly;
+			@Override
+			public void setMessage(Component message) {
+				this.message = message;
+			}
+
+			@Override
+			public Optional<Component> getMessage() {
+				return Optional.ofNullable(message);
+			}
+
+			@Override
+			public Cause cause() {
+				return cause;
+			}
+
+			@Override
+			public Reposition spongeEvent() {
+				return event;
+			}
+
+			@Override
+			public boolean isAllowFrom() {
+				return isAllowFrom;
+			}
+
+			@Override
+			public boolean isAllowTo() {
+				return isAllowTo;
+			}
+
+			@Override
+			public Region fromRegion() {
+				return from;
+			}
+
+			@Override
+			public Region toRegion() {
+				return to;
+			}
+
+			@Override
+			public Optional<ServerPlayer> getPlayer() {
+				return optPlayer;
+			}
+
+			@Override
+			public boolean isAllowFly() {
+				return allowFly;
+			}
+
+			@Override
+			public void setAllowFly(boolean allow) {
+				allowFly = allow;
+			}
+
+			@Override
+			public Optional<Component> getStopFlyingMessage() {
+				return Optional.ofNullable(stopFly);
+			}
+
+			@Override
+			public void setStopFlyingMessage(Component component) {
+				stopFly = component;
+			}
+
+			@Override
+			public boolean isCancelled() {
+				return canceled;
+			}
+
+			@Override
+			public void setCancelled(boolean cancel) {
+				canceled = cancel;
+			}
+			
+		}
+		RegionChangeEntityWorldEvent rgEvent = new RegionEvent();
+		rgEvent.setCancelled(!isAllowFrom || !isAllowTo);
+		rgEvent.setAllowFly(isAllowFly);
+		if(optPlayer.isPresent() && !isAllowFly) rgEvent.setStopFlyingMessage(plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.DISABLE_FLY_ON_JOIN));
+		if(rgEvent.isCancelled() && optPlayer.isPresent()) rgEvent.setMessage(!isAllowFrom ? plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.TELEPORT_FROM_REGION) : plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.TELEPORT_TO_REGION));
+		ListenerUtils.postEvent(rgEvent);
+		if(!rgEvent.isAllowFly() && rgEvent.getPlayer().isPresent()) {
+			rgEvent.getPlayer().get().offer(Keys.CAN_FLY, false);
+			rgEvent.getPlayer().get().offer(Keys.IS_FLYING, false);
+			if(rgEvent.getStopFlyingMessage().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getStopFlyingMessage().get());
+		}
+		if(rgEvent.isCancelled()) {
+			event.setCancelled(true);
+			if(rgEvent.getPlayer().isPresent() && rgEvent.getMessage().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
+		} else {
+			if(rgEvent.getPlayer().isPresent()) {
+				Optional<Component> exit = from.getExitMessage(rgEvent.getPlayer().get().locale());
+				Optional<Component> join = from.getJoinMessage(rgEvent.getPlayer().get().locale());
+				if(exit.isPresent()) rgEvent.getPlayer().get().sendMessage(exit.get());
+				if(join.isPresent()) rgEvent.getPlayer().get().sendMessage(join.get());
+			}
 		}
 	}
 

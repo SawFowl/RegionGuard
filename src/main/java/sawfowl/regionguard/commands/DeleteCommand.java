@@ -135,7 +135,7 @@ public class DeleteCommand implements Command.Raw {
 				if(!event.isCancelled()) {
 					if(region.getType() != RegionTypes.UNSET) {
 						region.setRegionType(RegionTypes.UNSET);
-						if(regen) region.regen(true);
+						if(regen) region.regen(plugin.getConfig().asyncRegen(), plugin.getConfig().delayRegen());
 						plugin.getAPI().deleteRegion(region);
 					}
 					if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());

@@ -9,9 +9,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.spongepowered.api.ResourceKey;
@@ -21,6 +21,7 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -42,6 +43,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import sawfowl.regionguard.api.TrustTypes;
+import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.SelectorTypes;
@@ -323,7 +325,7 @@ public class Region {
 	 * Getting the region cuboid.
 	 */
 	public Cuboid getCuboid() {
-		if(!flat && cuboid.getSelectorType() == SelectorTypes.FLAT && getServerWorld().isPresent() && (getServerWorld().get().min().y() != cuboid.getAABB().min().y() || getServerWorld().get().max().y() != cuboid.getAABB().max().y())) {
+		if(cuboid != null && !flat && cuboid.getSelectorType() == SelectorTypes.FLAT && getServerWorld().isPresent() && (getServerWorld().get().min().y() != cuboid.getAABB().min().y() || getServerWorld().get().max().y() != cuboid.getAABB().max().y())) {
 			cuboid.setPositions(cuboid.getMin(), cuboid.getMax(), cuboid.getSelectorType(), getServerWorld().get());
 			flat = true;
 		}
@@ -883,11 +885,24 @@ public class Region {
 	}
 
 	/**
+	 * Territory regeneration in the region. <br>
+	 * Deprecated. See {@link #regen(boolean, int)}
+	 * 
+	 * @param async - regen in async mode
+	 */
+	@Deprecated
+	public boolean regen(boolean async) {
+		return regen(async, 10);
+	}
+
+
+	/**
 	 * Territory regeneration in the region.
 	 * 
-	 * @param async - TODO
+	 * @param async - regen in async mode
+	 * @param delay - delay before regeneration
 	 */
-	public boolean regen(boolean async) {
+	public boolean regen(boolean async, int delay) {
 		if(!getServerWorld().isPresent() || !getServerWorld().get().isLoaded() || cuboid == null) return false;
 		ServerWorld world = getServerWorld().get();
 		final String id = "tempworld_" + world.key().value();
@@ -900,31 +915,50 @@ public class Region {
 			.serializationBehavior(SerializationBehavior.NONE)
 			.generationConfig(baseConfig)
 			.build();
+		return async ? regenAsync(tempWorldProperties, delay) : regen(tempWorldProperties);
+	}
 
-
-		try {
-			ServerWorld tempWorld = Sponge.server().worldManager().loadWorld(tempWorldProperties).get();
-			// Pre-gen all the chunks
-			// We need to also pull one more chunk in every direction
-			for (ChunkNumber chunkNumber : getChunkNumbers()) {
-				tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
-			}
+	private boolean regen(WorldTemplate template) {
+		return Sponge.server().worldManager().loadWorld(template).thenRun(() -> {
+			ServerWorld tempWorld = Sponge.server().worldManager().world(template.key()).get();
 			for(ChunkNumber chunkNumber : getChunkNumbers()) if(!tempWorld.isChunkLoaded(chunkNumber.chunkPosition(), true)) tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
-			
+			ServerWorld world = getServerWorld().get();
 			for(Vector3i vector3i : getCuboid().getAllPositions()) {
 				world.setBlock(vector3i, tempWorld.block(vector3i));
 			}
-		
-		} catch (InterruptedException | ExecutionException e) {
-			throw new RuntimeException(e);
-		} finally {
-			removeWorld(tempWorldProperties);
-		}
-		return true;
+		}).thenRun(() -> {
+			removeWorld(template.key());
+		}).isDone();
 	}
 
-	private void removeWorld(WorldTemplate template) {
-		Sponge.server().worldManager().unloadWorld(template.key()).thenRun(() -> Sponge.server().worldManager().deleteWorld(template.key()));
+	private boolean regenAsync(WorldTemplate template, int delay) {
+		return Sponge.server().worldManager().loadWorld(template).thenRunAsync(() -> {
+			ServerWorld tempWorld = Sponge.server().worldManager().world(template.key()).get();
+			for(ChunkNumber chunkNumber : getChunkNumbers()) if(!tempWorld.isChunkLoaded(chunkNumber.chunkPosition(), true)) tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
+			ServerWorld world = getServerWorld().get();
+			Map<Vector3i, BlockState> blocks = new HashMap<Vector3i, BlockState>();
+			for(Vector3i vector3i : getCuboid().getAllPositions()) if(tempWorld.block(vector3i).type() != world.block(vector3i).type()) blocks.put(vector3i, tempWorld.block(vector3i));
+			if(!blocks.isEmpty()) {
+				if(delay <= 0) {
+					blocks.forEach((vector, block) -> {
+						Sponge.server().scheduler().submit(Task.builder().plugin(RegionGuard.getInstance().getPluginContainer()).delay(delay, TimeUnit.SECONDS).execute(() -> {
+							world.setBlock(vector, block);
+						}).build());
+					});
+					blocks.clear();
+				} else blocks.forEach((vector, block) -> {
+					Sponge.server().scheduler().submit(Task.builder().plugin(RegionGuard.getInstance().getPluginContainer()).delay(delay, TimeUnit.SECONDS).execute(() -> {
+						world.setBlock(vector, block);
+					}).build());
+				});
+			}
+		}).thenRun(() -> {
+			removeWorld(template.key());
+		}).isDone();
+	}
+
+	private void removeWorld(ResourceKey world) {
+		Sponge.server().worldManager().unloadWorld(world).thenRun(() -> Sponge.server().worldManager().deleteWorld(world));
 	}
 
 	private Component deserialize(String string) {
