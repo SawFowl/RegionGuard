@@ -70,6 +70,8 @@ import sawfowl.regionguard.listeners.InteractItemListener;
 import sawfowl.regionguard.listeners.ItemUseListener;
 import sawfowl.regionguard.listeners.SpawnEntityListener;
 import sawfowl.regionguard.utils.Economy;
+import sawfowl.regionguard.utils.RegenUtil;
+import sawfowl.regionguard.utils.worldedit.WorldEditAPI;
 import sawfowl.regionguard.utils.worldedit.cuihandle.SpongeCUIChannelHandler;
 
 @Plugin("regionguard")
@@ -84,6 +86,10 @@ public class RegionGuard {
 	private Path configDir;
 	private ConfigurationLoader<CommentedConfigurationNode> configLoader;
 	private CommentedConfigurationNode rootNode;
+	private ConfigurationLoader<CommentedConfigurationNode> flagsConfigLoader;
+	private CommentedConfigurationNode flagsNode;
+	private ConfigurationLoader<CommentedConfigurationNode> cuiConfigLoader;
+	private CommentedConfigurationNode cuiNode;
 	private EconomyService economyService;
 	private Api api;
 	private Config config;
@@ -91,6 +97,7 @@ public class RegionGuard {
 	private MySQL mySQL;
 	private WorkData playersDataWork;
 	private WorkData regionsDataWork;
+	private RegenUtil regenUtil;
 	private Economy economy;
 
 	public static RegionGuard getInstance() {
@@ -107,6 +114,14 @@ public class RegionGuard {
 
 	public CommentedConfigurationNode getRootNode() {
 		return rootNode;
+	}
+
+	public CommentedConfigurationNode getFlagsNode() {
+		return flagsNode;
+	}
+
+	public CommentedConfigurationNode getCuiNode() {
+		return cuiNode;
 	}
 
 	public ConfigurationOptions getConfigurationOptions() {
@@ -137,6 +152,10 @@ public class RegionGuard {
 		return regionsDataWork;
 	}
 
+	public RegenUtil getRegenUtil() {
+		return regenUtil;
+	}
+
 	public Config getConfig() {
 		return config;
 	}
@@ -152,6 +171,8 @@ public class RegionGuard {
 	public void loadConfigs() {
 		try {
 			rootNode = configLoader.load();
+			flagsNode = flagsConfigLoader.load();
+			cuiNode = cuiConfigLoader.load();
 		} catch (IOException e) {
 			logger.error(e.getLocalizedMessage());
 		}
@@ -160,6 +181,8 @@ public class RegionGuard {
 	public void saveConfig() {
 		try {
 			configLoader.save(rootNode);
+			flagsConfigLoader.save(flagsNode);
+			cuiConfigLoader.save(cuiNode);
 		} catch (ConfigurateException e) {
 			logger.error(e.getLocalizedMessage());
 		}
@@ -173,15 +196,19 @@ public class RegionGuard {
 		configDir = configDirectory;
 		configDirectory.toFile();
 		api = new Api(instance, isForgePlatform());
+		regenUtil = new RegenUtil(instance);
 	}
 
 	@Listener
 	public void onConstruct(LocaleServiseEvent.Construct event) {
 		localeService = event.getLocaleService();
 		configLoader = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("Config.conf")).build();
+		flagsConfigLoader = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("DefaultFlags.conf")).build();
+		cuiConfigLoader = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("CuiSettings.conf")).build();
 		loadConfigs();
 		config = new Config(instance);
 		locales = new Locales(localeService, rootNode.node("LocaleJsonSerialize").getBoolean());
+		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
     	Sponge.game().eventManager().registerListeners(
                 pluginContainer,
                 new SpongeCUIChannelHandler.RegistrationHandler(instance)

@@ -1,7 +1,9 @@
 package sawfowl.regionguard.utils.worldedit;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -14,13 +16,13 @@ import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
-import org.spongepowered.plugin.PluginContainer;
-
 import com.google.common.collect.Maps;
 
+import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.WorldEditCUIAPI;
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.configure.CuiConfigPaths;
 import sawfowl.regionguard.utils.worldedit.cuievents.MultiSelectionClearEvent;
 import sawfowl.regionguard.utils.worldedit.cuievents.MultiSelectionColorEvent;
 import sawfowl.regionguard.utils.worldedit.cuievents.MultiSelectionCuboidEvent;
@@ -33,14 +35,33 @@ import sawfowl.regionguard.utils.worldedit.cuiusers.VanillaUser;
 public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 
 	private final boolean isForgePlatform;
-	public WorldEditAPI(PluginContainer container, boolean isForgePlatform) {
+	private final RegionGuard plugin;
+	private Map<UUID, CUIUser> worldEditPlayers = Maps.newHashMap();
+	private Map<String, String[]> cuiColors = new HashMap<String, String[]>();
+	private Map<String, Integer> cuiSpaces = new HashMap<String, Integer>();
+	public WorldEditAPI(RegionGuard plugin, boolean isForgePlatform) {
 		this.isForgePlatform = isForgePlatform;
-		Sponge.asyncScheduler().submit(Task.builder().interval(10, TimeUnit.SECONDS).plugin(container).execute(() -> {
+		this.plugin = plugin;
+		Sponge.asyncScheduler().submit(Task.builder().interval(10, TimeUnit.SECONDS).plugin(plugin.getPluginContainer()).execute(() -> {
 			for(CUIUser user : worldEditPlayers.values()) if(!user.isDrag() && user.getPlayer().isPresent() && System.currentTimeMillis() - user.getLastTimeSendBorders() > 30000) revertVisuals(user.getPlayer().get(), null);
 		}).build());
 	}
 
-	private Map<UUID, CUIUser> worldEditPlayers = Maps.newHashMap();
+	public void updateCuiDataMaps() {
+		Map<String, Map<String, String>> colors = plugin.getConfig().getCuiColors();
+		if(colors.isEmpty()) cuiColors.put(CuiConfigPaths.DEFAULT, new String[]{MultiSelectionColors.RED, MultiSelectionColors.RED, MultiSelectionColors.RED, MultiSelectionColors.RED});
+		for(Entry<String, Map<String, String>> entry : colors.entrySet()) {
+			Map<String, String> value = entry.getValue();
+			cuiColors.put(entry.getKey(), new String[]{
+					value.containsKey(CuiConfigPaths.EDGE) ? value.get(CuiConfigPaths.EDGE) : MultiSelectionColors.RED,
+					value.containsKey(CuiConfigPaths.GRID) ? value.get(CuiConfigPaths.GRID) : MultiSelectionColors.RED,
+					value.containsKey(CuiConfigPaths.FIRST_POSITION) ? value.get(CuiConfigPaths.FIRST_POSITION) : MultiSelectionColors.RED,
+					value.containsKey(CuiConfigPaths.SECOND_POSITION) ? value.get(CuiConfigPaths.SECOND_POSITION) : MultiSelectionColors.RED,
+					});
+		}
+		cuiSpaces = plugin.getConfig().getCuiSpaces();
+		if(cuiSpaces.isEmpty()) cuiSpaces.put(CuiConfigPaths.DEFAULT, 5);
+	}
 
 	@Override
 	public CUIUser getOrCreateUser(ServerPlayer player) {
@@ -82,8 +103,8 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 		if (user.getClaimResizing() != null) {
 			user.dispatchCUIEvent(new MultiSelectionPointEvent(1));
 		} else user.dispatchCUIEvent(new MultiSelectionPointEvent(1, pos2, cuboid.getSize3D()));
-		if(investigating || user.getLastWandLocation() == null) user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.RED, tempRegion ? MultiSelectionColors.PURPLE : MultiSelectionColors.getClaimColor(region), MultiSelectionColors.BLUE, MultiSelectionColors.ORANGE));
-		user.dispatchCUIEvent(new MultiSelectionGridEvent(3));
+		if(investigating || user.getLastWandLocation() == null) user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.getColors(cuiColors, tempRegion ? CuiConfigPaths.TEMP : region.getType().toString())));
+		user.dispatchCUIEvent(new MultiSelectionGridEvent(getSpaces(region.getType().toString())));
 	}
 
 	@Override
@@ -97,8 +118,8 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 			if (user.getClaimResizing() != null) {
 				user.dispatchCUIEvent(new MultiSelectionPointEvent(1));
 			} else user.dispatchCUIEvent(new MultiSelectionPointEvent(1, region.getCuboid().getMax(), size));
-			if(investigating) user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.RED, MultiSelectionColors.getClaimColor(region), MultiSelectionColors.BLUE, MultiSelectionColors.ORANGE));
-			user.dispatchCUIEvent(new MultiSelectionGridEvent(3));
+			if(investigating) user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.getColors(cuiColors, region.getType().toString())));
+			user.dispatchCUIEvent(new MultiSelectionGridEvent(getSpaces(region.getType().toString())));
 		}
 	}
 
@@ -136,8 +157,8 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 		user.dispatchCUIEvent(new MultiSelectionCuboidEvent(player.uniqueId()));
 		user.dispatchCUIEvent(new MultiSelectionPointEvent(0, point1, (point2.x() - point1.x() + 1L) * (point2.y() - point1.y() + 1L) * (point2.z() - point1.z() + 1L)));
 		user.dispatchCUIEvent(new MultiSelectionPointEvent(1, point2));
-		user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.BLUE, MultiSelectionColors.YELLOW, MultiSelectionColors.GRAY, MultiSelectionColors.ORANGE));
-		user.dispatchCUIEvent(new MultiSelectionGridEvent(3));
+		user.dispatchCUIEvent(new MultiSelectionColorEvent(MultiSelectionColors.getColors(cuiColors, CuiConfigPaths.DRAG)));
+		user.dispatchCUIEvent(new MultiSelectionGridEvent(getSpaces(CuiConfigPaths.DRAG)));
 	}
 
 	@Override
@@ -152,6 +173,11 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 				.execute();
 		if(blockRay.isPresent()) return Optional.ofNullable(blockRay.get().selectedObject().serverLocation());
 		return Optional.empty();
+	}
+
+	private int getSpaces(String type) {
+		if(cuiSpaces.containsKey(type)) return cuiSpaces.get(type);
+		return 5;
 	}
 
 }

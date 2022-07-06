@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.spongepowered.api.ResourceKey;
@@ -21,15 +20,11 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.locale.Locales;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.chunk.WorldChunk;
-import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.StreamOptions.LoadingStyle;
@@ -346,13 +341,13 @@ public class Region {
 	 * @param type - assignable type
 	 */
 	public boolean setRegionType(RegionTypes type) {
+		if(type == RegionTypes.UNSET) return false;
 		if(type == RegionTypes.ADMIN) {
 			members.clear();
 			members.put(new UUID(0, 0), new MemberData(TrustTypes.OWNER));
-			return true;
 		} 
 		regionType = type.toString();
-		return false;
+		return true;
 	}
 
 	/**
@@ -601,6 +596,19 @@ public class Region {
 		removeFlag(flagName, flagValue);
 		if(!flagValues.containsKey(flagName)) flagValues.put(flagName, new ArrayList<>());
 		flagValues.get(flagName).add(flagValue);
+		return this;
+	}
+
+	/**
+	 * Set the values of a set of flags.
+	 * 
+	 * @param flags - Map with flags and their values.
+	 */
+	public Region setFlags(Map<String, List<FlagValue>> flags) {
+		flags.keySet().forEach(name -> {
+			if(flagValues.containsKey(name)) flagValues.remove(name);
+		});
+		flagValues.putAll(flags);
 		return this;
 	}
 
@@ -904,61 +912,7 @@ public class Region {
 	 */
 	public boolean regen(boolean async, int delay) {
 		if(!getServerWorld().isPresent() || !getServerWorld().get().isLoaded() || cuboid == null) return false;
-		ServerWorld world = getServerWorld().get();
-		final String id = "tempworld_" + world.key().value();
-
-		WorldGenerationConfig baseConfig = world.asTemplate().generationConfig();
-
-		WorldTemplate tempWorldProperties = world.asTemplate().asBuilder()
-			.key(ResourceKey.of("regionguard", id))
-			.loadOnStartup(true)
-			.serializationBehavior(SerializationBehavior.NONE)
-			.generationConfig(baseConfig)
-			.build();
-		return async ? regenAsync(tempWorldProperties, delay) : regen(tempWorldProperties);
-	}
-
-	private boolean regen(WorldTemplate template) {
-		return Sponge.server().worldManager().loadWorld(template).thenRun(() -> {
-			ServerWorld tempWorld = Sponge.server().worldManager().world(template.key()).get();
-			for(ChunkNumber chunkNumber : getChunkNumbers()) if(!tempWorld.isChunkLoaded(chunkNumber.chunkPosition(), true)) tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
-			ServerWorld world = getServerWorld().get();
-			for(Vector3i vector3i : getCuboid().getAllPositions()) {
-				world.setBlock(vector3i, tempWorld.block(vector3i));
-			}
-		}).thenRun(() -> {
-			removeWorld(template.key());
-		}).isDone();
-	}
-
-	private boolean regenAsync(WorldTemplate template, int delay) {
-		return Sponge.server().worldManager().loadWorld(template).thenRunAsync(() -> {
-			ServerWorld tempWorld = Sponge.server().worldManager().world(template.key()).get();
-			for(ChunkNumber chunkNumber : getChunkNumbers()) if(!tempWorld.isChunkLoaded(chunkNumber.chunkPosition(), true)) tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
-			ServerWorld world = getServerWorld().get();
-			Map<Vector3i, BlockState> blocks = new HashMap<Vector3i, BlockState>();
-			for(Vector3i vector3i : getCuboid().getAllPositions()) if(tempWorld.block(vector3i).type() != world.block(vector3i).type()) blocks.put(vector3i, tempWorld.block(vector3i));
-			if(!blocks.isEmpty()) {
-				if(delay <= 0) {
-					blocks.forEach((vector, block) -> {
-						Sponge.server().scheduler().submit(Task.builder().plugin(RegionGuard.getInstance().getPluginContainer()).delay(delay, TimeUnit.SECONDS).execute(() -> {
-							world.setBlock(vector, block);
-						}).build());
-					});
-					blocks.clear();
-				} else blocks.forEach((vector, block) -> {
-					Sponge.server().scheduler().submit(Task.builder().plugin(RegionGuard.getInstance().getPluginContainer()).delay(delay, TimeUnit.SECONDS).execute(() -> {
-						world.setBlock(vector, block);
-					}).build());
-				});
-			}
-		}).thenRun(() -> {
-			removeWorld(template.key());
-		}).isDone();
-	}
-
-	private void removeWorld(ResourceKey world) {
-		Sponge.server().worldManager().unloadWorld(world).thenRun(() -> Sponge.server().worldManager().deleteWorld(world));
+		return async ? RegionGuard.getInstance().getRegenUtil().regenAsync(this, delay) : RegionGuard.getInstance().getRegenUtil().regenSync(this);
 	}
 
 	private Component deserialize(String string) {

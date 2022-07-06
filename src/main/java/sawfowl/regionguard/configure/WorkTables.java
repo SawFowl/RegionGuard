@@ -8,20 +8,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
-import java.util.Map.Entry;
-
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
 import sawfowl.regionguard.RegionGuard;
-import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.Region;
@@ -64,9 +60,7 @@ public class WorkTables extends Thread implements WorkData {
 				Region region = new Region(serverOwnerUUID, Sponge.server().worldManager().defaultWorld(), null, null, null);
 				region.setRegionType(RegionTypes.GLOBAL);
 				region.setName("Global#World[" + world.key() + "]", Locales.DEFAULT);
-				for(Entry<Object, CommentedConfigurationNode> node : plugin.getRootNode().node("DefaultValues", "Flags", "World").childrenMap().entrySet()) {
-					if(Flags.valueOfName((String) node.getKey()) != null) region.setFlag(Flags.valueOfName((String) node.getKey()), node.getValue().getBoolean());
-				}
+				region.setFlags(plugin.getConfig().getDefaultGlobalFlags());
 				saveRegion(region);
 				plugin.getAPI().updateGlobalRegionData(world, region);
 			} else {

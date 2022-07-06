@@ -2,8 +2,6 @@ package sawfowl.regionguard.configure;
 
 import java.io.File;
 import java.util.UUID;
-import java.util.Map.Entry;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.locale.Locales;
@@ -14,7 +12,6 @@ import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 import sawfowl.regionguard.RegionGuard;
-import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.Region;
@@ -37,9 +34,7 @@ public class WorkConfigs implements WorkData {
 					Region region = new Region(new UUID(0, 0), Sponge.server().worldManager().defaultWorld(), null, null, null);
 					region.setRegionType(RegionTypes.GLOBAL);
 					region.setName("Global#World[" + world.key() + "]", Locales.DEFAULT);
-					for(Entry<Object, CommentedConfigurationNode> node : plugin.getRootNode().node("DefaultValues", "Flags", "World").childrenMap().entrySet()) {
-						if(Flags.valueOfName((String) node.getKey()) != null) region.setFlag(Flags.valueOfName((String) node.getKey()), node.getValue().getBoolean());
-					}
+					region.setFlags(plugin.getConfig().getDefaultGlobalFlags());
 					worldNode.node("RegionData").set(Region.class, region);
 					configLoader.save(worldNode);
 					plugin.getAPI().updateGlobalRegionData(world, region);

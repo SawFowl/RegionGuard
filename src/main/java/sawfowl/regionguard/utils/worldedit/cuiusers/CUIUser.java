@@ -159,6 +159,7 @@ public abstract class CUIUser {
 	 */
 	public void handleCUIInitializationMessage(String text) {
 		if (this.failedCuiAttempts > 3) {
+			failedCuiAttempts = 0; // Test
 			return;
 		}
 		String[] split = text.split("\\|", 2);

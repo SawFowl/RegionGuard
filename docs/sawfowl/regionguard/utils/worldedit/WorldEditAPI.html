@@ -133,7 +133,7 @@ implements <a href="../../api/WorldEditCUIAPI.html" title="interface in sawfowl.
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(org.spongepowered.plugin.PluginContainer,boolean)" class="member-name-link">WorldEditAPI</a><wbr>(org.spongepowered.plugin.PluginContainer&nbsp;container,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(sawfowl.regionguard.RegionGuard,boolean)" class="member-name-link">WorldEditAPI</a><wbr>(<a href="../../RegionGuard.html" title="class in sawfowl.regionguard">RegionGuard</a>&nbsp;plugin,
  boolean&nbsp;isForgePlatform)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
@@ -190,29 +190,32 @@ implements <a href="../../api/WorldEditCUIAPI.html" title="interface in sawfowl.
 <div class="block">Stop the dynamic area selection.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualizeRegion(sawfowl.regionguard.api.data.Region,org.spongepowered.api.entity.living.player.server.ServerPlayer,boolean,boolean)" class="member-name-link">visualizeRegion</a><wbr>(<a href="../../api/data/Region.html" title="class in sawfowl.regionguard.api.data">Region</a>&nbsp;region,
- org.spongepowered.api.entity.living.player.server.ServerPlayer&nbsp;player,
- boolean&nbsp;investigating,
- boolean&nbsp;tempRegion)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Display the region boundaries.</div>
-</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateCuiDataMaps()" class="member-name-link">updateCuiDataMaps</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualizeRegion(sawfowl.regionguard.api.data.Region,org.spongepowered.math.vector.Vector3i,org.spongepowered.math.vector.Vector3i,org.spongepowered.api.entity.living.player.server.ServerPlayer,sawfowl.regionguard.utils.worldedit.cuiusers.CUIUser,boolean,boolean)" class="member-name-link">visualizeRegion</a><wbr>(<a href="../../api/data/Region.html" title="class in sawfowl.regionguard.api.data">Region</a>&nbsp;region,
- org.spongepowered.math.vector.Vector3i&nbsp;pos1,
- org.spongepowered.math.vector.Vector3i&nbsp;pos2,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualizeRegion(sawfowl.regionguard.api.data.Region,org.spongepowered.api.entity.living.player.server.ServerPlayer,boolean,boolean)" class="member-name-link">visualizeRegion</a><wbr>(<a href="../../api/data/Region.html" title="class in sawfowl.regionguard.api.data">Region</a>&nbsp;region,
  org.spongepowered.api.entity.living.player.server.ServerPlayer&nbsp;player,
- <a href="cuiusers/CUIUser.html" title="class in sawfowl.regionguard.utils.worldedit.cuiusers">CUIUser</a>&nbsp;user,
  boolean&nbsp;investigating,
  boolean&nbsp;tempRegion)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Display the region boundaries.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualizeRegions(java.util.List,org.spongepowered.api.entity.living.player.server.ServerPlayer,boolean)" class="member-name-link">visualizeRegions</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/data/Region.html" title="class in sawfowl.regionguard.api.data">Region</a>&gt;&nbsp;regions,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualizeRegion(sawfowl.regionguard.api.data.Region,org.spongepowered.math.vector.Vector3i,org.spongepowered.math.vector.Vector3i,org.spongepowered.api.entity.living.player.server.ServerPlayer,sawfowl.regionguard.utils.worldedit.cuiusers.CUIUser,boolean,boolean)" class="member-name-link">visualizeRegion</a><wbr>(<a href="../../api/data/Region.html" title="class in sawfowl.regionguard.api.data">Region</a>&nbsp;region,
+ org.spongepowered.math.vector.Vector3i&nbsp;pos1,
+ org.spongepowered.math.vector.Vector3i&nbsp;pos2,
+ org.spongepowered.api.entity.living.player.server.ServerPlayer&nbsp;player,
+ <a href="cuiusers/CUIUser.html" title="class in sawfowl.regionguard.utils.worldedit.cuiusers">CUIUser</a>&nbsp;user,
+ boolean&nbsp;investigating,
+ boolean&nbsp;tempRegion)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Display the region boundaries.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualizeRegions(java.util.List,org.spongepowered.api.entity.living.player.server.ServerPlayer,boolean)" class="member-name-link">visualizeRegions</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/data/Region.html" title="class in sawfowl.regionguard.api.data">Region</a>&gt;&nbsp;regions,
  org.spongepowered.api.entity.living.player.server.ServerPlayer&nbsp;player,
  boolean&nbsp;investigating)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Display borders to multiple regions at the same time.</div>
 </div>
 </div>
@@ -236,9 +239,9 @@ implements <a href="../../api/WorldEditCUIAPI.html" title="interface in sawfowl.
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(org.spongepowered.plugin.PluginContainer,boolean)">
+<section class="detail" id="&lt;init&gt;(sawfowl.regionguard.RegionGuard,boolean)">
 <h3>WorldEditAPI</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">WorldEditAPI</span><wbr><span class="parameters">(org.spongepowered.plugin.PluginContainer&nbsp;container,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">WorldEditAPI</span><wbr><span class="parameters">(<a href="../../RegionGuard.html" title="class in sawfowl.regionguard">RegionGuard</a>&nbsp;plugin,
  boolean&nbsp;isForgePlatform)</span></div>
 </section>
 </li>
@@ -250,6 +253,12 @@ implements <a href="../../api/WorldEditCUIAPI.html" title="interface in sawfowl.
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="updateCuiDataMaps()">
+<h3>updateCuiDataMaps</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updateCuiDataMaps</span>()</div>
+</section>
+</li>
 <li>
 <section class="detail" id="getOrCreateUser(org.spongepowered.api.entity.living.player.server.ServerPlayer)">
 <h3>getOrCreateUser</h3>

@@ -3,7 +3,6 @@ package sawfowl.regionguard.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.spongepowered.api.Sponge;
@@ -22,7 +21,6 @@ import org.spongepowered.math.vector.Vector3i;
 import net.kyori.adventure.text.Component;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
-import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
@@ -52,9 +50,7 @@ public class ClaimCommand implements Command.Raw {
 					return;
 				}
 			}
-			for(Entry<Flags, Boolean> entry : plugin.getConfig().getDefaultClaimFlags().entrySet()) {
-				region.setFlag(entry.getKey(), entry.getValue(), null, null);
-			}
+			region.setFlags(plugin.getConfig().getDefaultClaimFlags());
 			player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_CLAIM_SUCCESS));
 			plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region, player, false, false);
 			plugin.getAPI().registerRegion(region);

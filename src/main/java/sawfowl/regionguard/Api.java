@@ -50,7 +50,7 @@ class Api implements RegionAPI {
 		} else {
 			plugin.getLogger().info("The plugin is running in Vanilla compatibility mode.");
 		}
-		cuiapi = new WorldEditAPI(plugin.getPluginContainer(), isForgePlatform);
+		cuiapi = new WorldEditAPI(plugin, isForgePlatform);
 		flags = Stream.of(Flags.values()).map(Flags::toString).collect(Collectors.toList());
 	}
 
