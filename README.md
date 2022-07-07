@@ -36,6 +36,9 @@
 /rg sellblocks <Volume> - Selling the limit of blocks for game currency.
 /rg sellclaims <Volume> - Selling the limit of claims for game currency.
 /rg sellsubdivisions <Volume> - Selling the limit of subdivisions for game currency.
+/rg setlimitblocks <Player> <Volume> - Selling the limit of blocks for game currency.
+/rg setlimitclaims <Player> <Volume> - Selling the limit of claims for game currency.
+/rg setlimitsubdivisions <Player> <Volume> - Selling the limit of subdivisions for game currency.
 ```
 
 #### Region member types:
@@ -84,6 +87,9 @@ regionguard.staff.setname - Set a name for any region.
 regionguard.staff.setregiontype - Change the type of region and select the type of regions to be created.
 regionguard.staff.flag - Changing flags in any region.
 regionguard.staff.list - Getting a list of regions of any player. The ability to teleport is available by default.
+regionguard.staff.setlimit.blocks - Change the blocks limit of the player.
+regionguard.staff.setlimit.claims - Change the claims limit of the player.
+regionguard.staff.setlimit.subdivisions - Change the subdivisions limit of the player.
 regionguard.staff.adminclaim - Creation of subdivisions in admin regions.
 ```
 #### Metaperms:
