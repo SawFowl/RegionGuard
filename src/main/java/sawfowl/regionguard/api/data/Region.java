@@ -908,10 +908,9 @@ public class Region {
 	 * Territory regeneration in the region.
 	 * 
 	 * @param async - regen in async mode
-	 * @param delay - delay before regeneration
+	 * @param delay - delay before regeneration in async mode
 	 */
 	public boolean regen(boolean async, int delay) {
-		if(!getServerWorld().isPresent() || !getServerWorld().get().isLoaded() || cuboid == null) return false;
 		return async ? RegionGuard.getInstance().getRegenUtil().regenAsync(this, delay) : RegionGuard.getInstance().getRegenUtil().regenSync(this);
 	}
 

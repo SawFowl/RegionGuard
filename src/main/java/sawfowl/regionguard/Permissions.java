@@ -44,6 +44,9 @@ public class Permissions {
 	public static final String STAFF_SET_REGION_TYPE = "regionguard.staff.setregiontype";
 	public static final String STAFF_FLAG = "regionguard.staff.flag";
 	public static final String STAFF_LIST = "regionguard.staff.list";
+	public static final String STAFF_SETLIMIT_BLOCKS = "regionguard.staff.setlimit.blocks"; // Дополнить в документации
+	public static final String STAFF_SETLIMIT_CLAIMS = "regionguard.staff.setlimit.claims"; // Дополнить в документации
+	public static final String STAFF_SETLIMIT_SUBDIVISIONS = "regionguard.staff.setlimit.subdivisions"; // Дополнить в документации
 	public static final String STAFF_ADMINCLAIM = "regionguard.staff.adminclaim";
 	public static final String BUY_BLOCK_PRICE = "regionguard.buy.blockprice";
 	public static final String BUY_REGION_PRICE = "regionguard.buy.regionprice";

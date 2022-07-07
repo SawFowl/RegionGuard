@@ -120,6 +120,9 @@ public class RegionCommand implements Command.Raw {
 		childExecutors.put("wand", new WandCommand(plugin));
 		childExecutors.put("wecui", new WeCUICommand(plugin));
 		childExecutors.put("list", new ListCommand(plugin));
+		childExecutors.put("setlimitblocks", new SetBlocksLimitCommand(plugin));
+		childExecutors.put("setlimitclaims", new SetClaimsLimitCommand(plugin));
+		childExecutors.put("setlimitsubdivisions", new SetSubdivisionsLimitCommand(plugin));
 	}
 
 	private CommandResult generateHelp(Object src) {
@@ -152,6 +155,9 @@ public class RegionCommand implements Command.Raw {
 				if(player.hasPermission(Permissions.SELL_CLAIMS) && plugin.getAPI().getBuyClaimPrice(player) > 0) messages.add(text("&6/rg sellclaims &b<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellclaims 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLCLAIMS)));
 				if(player.hasPermission(Permissions.SELL_SUBDIVISIONS) && plugin.getAPI().getBuySubdivisionPrice(player) > 0) messages.add(text("&6/rg sellsubdivisions &b<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellsubdivisions 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLSUBDIVISIONS)));
 			}
+			if(player.hasPermission(Permissions.STAFF_SETLIMIT_BLOCKS)) messages.add(text("&6/rg setlimitblocks &b<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimitblocks ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMITBLOCKS)));
+			if(player.hasPermission(Permissions.STAFF_SETLIMIT_CLAIMS)) messages.add(text("&6/rg setlimitclaims &b<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimitclaims ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMITCLAIMS)));
+			if(player.hasPermission(Permissions.STAFF_SETLIMIT_SUBDIVISIONS)) messages.add(text("&6/rg setlimitsubdivisions &b<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimitsubdivisions ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS)));
 			sendCommandsList(player, player.locale(), messages, 7);
 		} else {
 			Locale locale = src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT;
@@ -180,6 +186,9 @@ public class RegionCommand implements Command.Raw {
 				messages.add(text("&6/rg sellclaims &b<Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLCLAIMS)));
 				messages.add(text("&6/rg sellsubdivisions &b<Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLSUBDIVISIONS)));
 			}
+			messages.add(text("&6/rg setlimitblocks &b<Player> <Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMITBLOCKS)));
+			messages.add(text("&6/rg setlimitclaims &b<Player> <Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMITCLAIMS)));
+			messages.add(text("&6/rg setlimitsubdivisions &b<Player> <Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS)));
 			sendCommandsList((Audience) src, locale, messages, 30);
 		}
 		return CommandResult.success();
@@ -203,14 +212,13 @@ public class RegionCommand implements Command.Raw {
 	}
 
 	public void genEconomyCommands() {
-		if(plugin.getEconomyService() != null) {
-			childExecutors.put("buyblocks", new BuyBlocksCommand(plugin));
-			childExecutors.put("buyclaims", new BuyClaimsCommand(plugin));
-			childExecutors.put("buysubdivisions", new BuySubdivisionsCommand(plugin));
-			childExecutors.put("sellblocks", new SellBlocksCommand(plugin));
-			childExecutors.put("sellclaims", new SellClaimsCommand(plugin));
-			childExecutors.put("sellsubdivisions", new SellSubdivisionsCommand(plugin));
-		}
+		if(plugin.getEconomyService() == null) return;
+		childExecutors.put("buyblocks", new BuyBlocksCommand(plugin));
+		childExecutors.put("buyclaims", new BuyClaimsCommand(plugin));
+		childExecutors.put("buysubdivisions", new BuySubdivisionsCommand(plugin));
+		childExecutors.put("sellblocks", new SellBlocksCommand(plugin));
+		childExecutors.put("sellclaims", new SellClaimsCommand(plugin));
+		childExecutors.put("sellsubdivisions", new SellSubdivisionsCommand(plugin));
 		childs.addAll(childExecutors.keySet().stream().map(CommandCompletion::of).collect(Collectors.toList()));
 	}
 

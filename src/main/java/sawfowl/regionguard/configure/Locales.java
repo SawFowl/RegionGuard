@@ -85,6 +85,9 @@ public class Locales {
 		save = check(locale, toText("&6Selling the limit of blocks for game currency."), null, LocalesPaths.COMMANDS_SELLBLOCKS) || save;
 		save = check(locale, toText("&6Selling the limit of claims for game currency."), null, LocalesPaths.COMMANDS_SELLCLAIMS) || save;
 		save = check(locale, toText("&6Selling the limit of subdivisions for game currency."), null, LocalesPaths.COMMANDS_SELLSUBDIVISIONS) || save;
+		save = check(locale, toText("&6Change the blocks limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITBLOCKS) || save;
+		save = check(locale, toText("&6Change the claims limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITCLAIMS) || save;
+		save = check(locale, toText("&6Change the subdivisions limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS) || save;
 
 		save = check(locale, toText("&cRegion world not found: &b%world%"), null, LocalesPaths.COMMAND_CLAIM_WORLD_NOT_FOUND) || save;
 		save = check(locale, toText("&cNo region available to create a claim."), null, LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND) || save;
@@ -95,6 +98,7 @@ public class Locales {
 		save = check(locale, toText("&aThe child region has been removed."), null, LocalesPaths.COMMAND_DELETE_CHILD_DELETED) || save;
 		save = check(locale, toText("&aRegion has been removed."), null, LocalesPaths.COMMAND_DELETE_DELETED) || save;
 		save = check(locale, toText("&aRegion removed. The child regions it contained were also deleted."), null, LocalesPaths.COMMAND_DELETE_DELETED_MAIN_AND_CHILDS) || save;
+		save = check(locale, toText("&eATTENTION!!! The area in the region will be restored to its original state!"), null, LocalesPaths.COMMAND_DELETE_REGEN) || save;
 
 		save = check(locale, toText(" &bRegion Info "), null, LocalesPaths.COMMAND_INFO_HEADER) || save;
 		save = check(locale, toText("&7[&4Delete&7]"), null, LocalesPaths.COMMAND_INFO_DELETE) || save;
@@ -241,6 +245,27 @@ public class Locales {
 		save = check(locale, toText("&cSomething went wrong while executing the transaction. The details may be in the server console."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION) || save;
 		save = check(locale, toText("&aYou have reduced your subdivisions limit by &b%size%&a. Your current subdivisions limit: &b%volume%&a."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_SUCCESS) || save;
 
+		save = check(locale, toText("&cYou need to specify a player online."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_PLAYER_NOT_PRESENT) || save;
+		save = check(locale, toText("&cYou need to specify a new limit."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_VOLUME_NOT_PRESENT) || save;
+		save = check(locale, toText("&cYou need to specify a number."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cYou entered a number less than zero."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_LESS_THEN_ZERO) || save;
+		save = check(locale, toText("&aYou have changed the blocks limit of the player &b%player%&a. His limit is now &b%size%&a blocks."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_SUCCESS_SOURCE) || save;
+		save = check(locale, toText("&aAdministration representative &b%player%&a has changed your blocks limit. It is now &b%size%&a blocks."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_SUCCESS_TARGET) || save;
+
+		save = check(locale, toText("&cYou need to specify a player online."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_EXCEPTION_PLAYER_NOT_PRESENT) || save;
+		save = check(locale, toText("&cYou need to specify a new limit."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_EXCEPTION_VOLUME_NOT_PRESENT) || save;
+		save = check(locale, toText("&cYou need to specify a number."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cYou entered a number less than zero."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_EXCEPTION_LESS_THEN_ZERO) || save;
+		save = check(locale, toText("&aYou have changed the claims limit of the player &b%player%&a. His limit is now &b%size%&a claims."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_SUCCESS_SOURCE) || save;
+		save = check(locale, toText("&aAdministration representative &b%player%&a has changed your claims limit. It is now &b%size%&a claims."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_SUCCESS_TARGET) || save;
+
+		save = check(locale, toText("&cYou need to specify a player online."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_PLAYER_NOT_PRESENT) || save;
+		save = check(locale, toText("&cYou need to specify a new limit."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_VOLUME_NOT_PRESENT) || save;
+		save = check(locale, toText("&cYou need to specify a number."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cYou entered a number less than zero."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_LESS_THEN_ZERO) || save;
+		save = check(locale, toText("&aYou have changed the subdivisions limit of the player &b%player%&a. His limit is now &b%size%&a subdivisions."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_SOURCE) || save;
+		save = check(locale, toText("&aAdministration representative &b%player%&a has changed your subdivisions limit. It is now &b%size%&a subdivisions."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_TARGET) || save;
+
 
 
 		save = check(locale, toText("&cYou do not have the permission to create child regions in an administrative region."), null, LocalesPaths.REGION_CREATE_EXCEPTION_ADMIN_CLAIM) || save;
@@ -263,7 +288,7 @@ public class Locales {
 		save = check(locale, toText("&cThe volume selected is too small. To complete the operation, select an area larger than the current one by &b%volume%&c."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_SMALL_VOLUME) || save;
 		save = check(locale, toText("&cThe new size is too large. You have selected: &b%selected%&c blocks.\nBlocks available: &b%volume%&c."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_LARGE_VOLUME) || save;
 		save = check(locale, toText("&cIt is not possible to change the size of a region, as this would cause it to intersect with another region."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_REGIONS_INTERSECT) || save;
-		save = check(locale, toText("&cIt is not possible to change the size of the region because the new position falls on a subdivision."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_CHILD_INTERSECT) || save;
+		save = check(locale, toText("&cIt is not possible to change the size of a region as this would cause the child region to be outside his boundaries."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_CHILD_OUT) || save;
 		save = check(locale, toText("&dClick again elsewhere to resize."), null, LocalesPaths.REGION_RESIZE_START) || save;
 		save = check(locale, toText("&dThe size of the region has been changed."), null, LocalesPaths.REGION_RESIZE_FINISH) || save;
 
@@ -339,11 +364,14 @@ public class Locales {
 		save = check(locale, toText("&6Переключить статус отправки пакетов WECui."), null, LocalesPaths.COMMANDS_WECUI) || save;
 		save = check(locale, toText("&6Показать список регионов."), null, LocalesPaths.COMMANDS_LIST) || save;
 		save = check(locale, toText("&6Повышение лимита блоков за игровую валюту."), null, LocalesPaths.COMMANDS_BUYBLOCKS) || save;
-		save = check(locale, toText("&6Повышение лимита регионов за игровую валюту."), null, LocalesPaths.COMMANDS_BUYCLAIMS) || save;
+		save = check(locale, toText("&6Повышение лимита приватов за игровую валюту."), null, LocalesPaths.COMMANDS_BUYCLAIMS) || save;
 		save = check(locale, toText("&6Повышение лимита дочерних регионов за игровую валюту."), null, LocalesPaths.COMMANDS_BUYSUBDIVISIONS) || save;
 		save = check(locale, toText("&6Продажа лимита блоков за игровую валюту."), null, LocalesPaths.COMMANDS_SELLBLOCKS) || save;
-		save = check(locale, toText("&6Продажа лимита регионов за игровую валюту."), null, LocalesPaths.COMMANDS_SELLCLAIMS) || save;
+		save = check(locale, toText("&6Продажа лимита приватов за игровую валюту."), null, LocalesPaths.COMMANDS_SELLCLAIMS) || save;
 		save = check(locale, toText("&6Продажа лимита дочерних регионов за игровую валюту."), null, LocalesPaths.COMMANDS_SELLSUBDIVISIONS) || save;
+		save = check(locale, toText("&6Изменение лимита блоков у игрока."), null, LocalesPaths.COMMANDS_SETLIMITBLOCKS) || save;
+		save = check(locale, toText("&6Изменение лимита приватов у игрока."), null, LocalesPaths.COMMANDS_SETLIMITCLAIMS) || save;
+		save = check(locale, toText("&6Изменение лимита дочерних регионов у игрока."), null, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS) || save;
 
 		save = check(locale, toText("&cНе найден мир региона: &b%world%"), null, LocalesPaths.COMMAND_CLAIM_WORLD_NOT_FOUND) || save;
 		save = check(locale, toText("&cНет доступного региона для создания привата."), null, LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND) || save;
@@ -354,6 +382,7 @@ public class Locales {
 		save = check(locale, toText("&aДочерний регион удален."), null, LocalesPaths.COMMAND_DELETE_CHILD_DELETED) || save;
 		save = check(locale, toText("&aРегион удален."), null, LocalesPaths.COMMAND_DELETE_DELETED) || save;
 		save = check(locale, toText("&aРегион удален. Содержавшиеся в нем дочерние регионы так же были удалены."), null, LocalesPaths.COMMAND_DELETE_DELETED_MAIN_AND_CHILDS) || save;
+		save = check(locale, toText("&eВНИМАНИЕ!!! Область занимаемая регионом будет восстановлена до изначального состояния!"), null, LocalesPaths.COMMAND_DELETE_REGEN) || save;
 
 		save = check(locale, toText(" &bИнформация о регионе "), null, LocalesPaths.COMMAND_INFO_HEADER) || save;
 		save = check(locale, toText("&7[&4Удалить&7]"), null, LocalesPaths.COMMAND_INFO_DELETE) || save;
@@ -500,6 +529,27 @@ public class Locales {
 		save = check(locale, toText("&cПри выполнении транзакции что-то пошло не так. Подробности могут быть в консоли сервера."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION) || save;
 		save = check(locale, toText("&aВы уменьшили свой лимит дочерних регионов на &b%size%&a. Ваш текущий лимит дочерних регионов: &b%volume%&a."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_SUCCESS) || save;
 
+		save = check(locale, toText("&cНужно указать игрока онлайн."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_PLAYER_NOT_PRESENT) || save;
+		save = check(locale, toText("&cНужно указать новый лимит."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_VOLUME_NOT_PRESENT) || save;
+		save = check(locale, toText("&cНужно ввести число."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cВы ввели число меньше нуля."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_LESS_THEN_ZERO) || save;
+		save = check(locale, toText("&aВы изменили лимит блоков игрока &b%player%&a. Теперь его лимит составляет &b%size%&a блоков."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_SUCCESS_SOURCE) || save;
+		save = check(locale, toText("&aПредставитель администрации &b%player%&a изменил ваш лимит блоков. Теперь он составляет &b%size%&a блоков."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_SUCCESS_TARGET) || save;
+
+		save = check(locale, toText("&cНужно указать игрока онлайн."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_EXCEPTION_PLAYER_NOT_PRESENT) || save;
+		save = check(locale, toText("&cНужно указать новый лимит."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_EXCEPTION_VOLUME_NOT_PRESENT) || save;
+		save = check(locale, toText("&cНужно ввести число."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cВы ввели число меньше нуля."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_EXCEPTION_LESS_THEN_ZERO) || save;
+		save = check(locale, toText("&aВы изменили лимит приватов игрока &b%player%&a. Теперь его лимит составляет &b%size%&a приватов."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_SUCCESS_SOURCE) || save;
+		save = check(locale, toText("&aПредставитель администрации &b%player%&a изменил ваш лимит приватов. Теперь он составляет &b%size%&a приватов."), null, LocalesPaths.COMMAND_SETLIMITCLAIMS_SUCCESS_TARGET) || save;
+
+		save = check(locale, toText("&cНужно указать игрока онлайн."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_PLAYER_NOT_PRESENT) || save;
+		save = check(locale, toText("&cНужно указать новый лимит."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_VOLUME_NOT_PRESENT) || save;
+		save = check(locale, toText("&cНужно ввести число."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cВы ввели число меньше нуля."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_LESS_THEN_ZERO) || save;
+		save = check(locale, toText("&aВы изменили лимит дочерних регионов игрока &b%player%&a. Теперь его лимит составляет &b%size%&a дочерних регионов."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_SOURCE) || save;
+		save = check(locale, toText("&aПредставитель администрации &b%player%&a изменил ваш лимит дочерних регионов. Теперь он составляет &b%size%&a дочерних регионов."), null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_TARGET) || save;
+
 
 
 		save = check(locale, toText("&cУ вас нет права создавать дочерние регионы в административном регионе."), null, LocalesPaths.REGION_CREATE_EXCEPTION_ADMIN_CLAIM) || save;
@@ -522,7 +572,7 @@ public class Locales {
 		save = check(locale, toText("&cВыбран слишком маленький объем. Для завершения операции нужно еще &b%volume%&c."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_SMALL_VOLUME) || save;
 		save = check(locale, toText("&cНовый размер слишком велик. Вы выбрали: &b%selected%&c. блоков.\nДоступно блоков: &b%volume%&c."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_LARGE_VOLUME) || save;
 		save = check(locale, toText("&cНевозможно изменить размер региона так как это приведет к пересечению с другим регионом."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_REGIONS_INTERSECT) || save;
-		save = check(locale, toText("&cНевозможно изменить размер региона так как новая позиция попадает на дочерний регион."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_CHILD_INTERSECT) || save;
+		save = check(locale, toText("&cНевозможно изменить размер региона так как это приведет к выходу дочернего региона за его границы."), null, LocalesPaths.REGION_RESIZE_EXCEPTION_CHILD_OUT) || save;
 		save = check(locale, toText("&dКликните еще раз в другом месте для изменения размера."), null, LocalesPaths.REGION_RESIZE_START) || save;
 		save = check(locale, toText("&dРазмер региона изменен."), null, LocalesPaths.REGION_RESIZE_FINISH) || save;
 

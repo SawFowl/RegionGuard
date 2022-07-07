@@ -2,7 +2,6 @@ package sawfowl.regionguard.utils.worldedit;
 
 import java.util.Map;
 
-import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.CuiConfigPaths;
 
 public class MultiSelectionColors {
@@ -16,13 +15,6 @@ public class MultiSelectionColors {
 	public static final String BURLYWOOD = "#deB887";
 	public static final String PURPLE = "#A020F0";
 	private static final String[] IF_UNSET = {RED, RED, RED, RED};
-
-	public static String getClaimColor(Region region) {
-		if(region.isSubdivision()) return GRAY;
-		if(region.isAdmin()) return RED;
-		if(region.isArena()) return GREEN;
-		return YELLOW;
-	}
 
 	public static String[] getColors(Map<String, String[]> cuiColors, String type) {
 		if(cuiColors.isEmpty()) return IF_UNSET;

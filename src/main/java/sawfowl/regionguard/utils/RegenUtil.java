@@ -23,14 +23,14 @@ import sawfowl.regionguard.api.data.Region;
 public class RegenUtil {
 
 	private final RegionGuard plugin;
-	private Map<ResourceKey, List<Region>> blockedWorlds = new HashMap<ResourceKey, List<Region>>();
+	private Map<ResourceKey, List<Region>> lockedWorlds = new HashMap<ResourceKey, List<Region>>();
 	public RegenUtil(RegionGuard plugin) {
 		this.plugin = plugin;
 	}
 
 	public boolean regenSync(Region region) {
-		WorldTemplate template = getWorldTemplate(region);
-		writeMap(region, template);
+		if(region == null || !region.getServerWorld().isPresent() || !region.getServerWorld().get().isLoaded() || region.getCuboid() == null) return false;
+		WorldTemplate template = createWorldTemplate(region);
 		return Sponge.server().worldManager().loadWorld(template).thenRun(() -> {
 			ServerWorld tempWorld = Sponge.server().worldManager().world(template.key()).get();
 			for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(!tempWorld.isChunkLoaded(chunkNumber.chunkPosition(), true)) tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
@@ -39,13 +39,13 @@ public class RegenUtil {
 				world.setBlock(vector3i, tempWorld.block(vector3i));
 			}
 		}).thenRun(() -> {
-			removeWorldAndBlock(region, template.key());
+			removeWorld(region, template.key());
 		}).isDone();
 	}
 
 	public boolean regenAsync(Region region, int delay) {
-		WorldTemplate template = getWorldTemplate(region);
-		writeMap(region, template);
+		if(region == null || !region.getServerWorld().isPresent() || !region.getServerWorld().get().isLoaded() || region.getCuboid() == null) return false;
+		WorldTemplate template = createWorldTemplate(region);
 		Sponge.server().worldManager().loadWorld(template).thenRunAsync(() -> {
 			ServerWorld tempWorld = Sponge.server().worldManager().world(template.key()).get();
 			for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(!tempWorld.isChunkLoaded(chunkNumber.chunkPosition(), true)) tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
@@ -67,39 +67,34 @@ public class RegenUtil {
 				});
 			}
 		}).thenRun(() -> {
-			removeWorldAndBlock(region, template.key());
+			removeWorld(region, template.key());
 		});
 		return true;
 	}
 
-	private void removeWorldAndBlock(Region region, ResourceKey world) {
-		if(blockedWorlds.containsKey(world)) blockedWorlds.get(world).remove(region);
-		if(!blockedWorlds.containsKey(world) || blockedWorlds.get(world).size() == 0) Sponge.server().worldManager().unloadWorld(world).thenRun(() -> Sponge.server().worldManager().deleteWorld(world));
+	private void lockWorld(Region region, ResourceKey world) {
+		if(!lockedWorlds.containsKey(world)) lockedWorlds.put(world, new ArrayList<Region>());
+		lockedWorlds.get(world).add(region);
 	}
 
-	private void writeMap(Region region, WorldTemplate template) {
-		if(blockedWorlds.isEmpty() || !blockedWorlds.containsKey(template.key())) {
-			List<Region> regions = new ArrayList<Region>();
-			regions.add(region);
-			blockedWorlds.put(template.key(), regions);
-		} else {
-			blockedWorlds.get(template.key()).add(region);
-		}
-	}
-
-	private WorldTemplate getWorldTemplate(Region region) {
+	private WorldTemplate createWorldTemplate(Region region) {
 		ServerWorld world = region.getServerWorld().get();
-		final String id = "tempworld_" + world.key().value();
-
 		WorldGenerationConfig baseConfig = world.asTemplate().generationConfig();
-
 		WorldTemplate tempWorldProperties = world.asTemplate().asBuilder()
-			.key(ResourceKey.of("regionguard", id))
+			.key(ResourceKey.of("regionguard", "tempworld_" + world.key().value()))
 			.loadOnStartup(true)
 			.serializationBehavior(SerializationBehavior.NONE)
 			.generationConfig(baseConfig)
 			.build();
+		lockWorld(region, tempWorldProperties.key());
 		return tempWorldProperties;
+	}
+
+	private void removeWorld(Region region, ResourceKey world) {
+		if(lockedWorlds.containsKey(world)) {
+			lockedWorlds.get(world).remove(region);
+			if(lockedWorlds.get(world).isEmpty()) Sponge.server().worldManager().unloadWorld(world).thenRun(() -> Sponge.server().worldManager().deleteWorld(world));
+		}
 	}
 
 }

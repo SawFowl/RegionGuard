@@ -70,6 +70,9 @@ public class Cuboid {
 	 */
 	public Cuboid setPositions(Vector3i position1, Vector3i position2 , SelectorTypes selectorType, ServerWorld serverWorld) {
 		this.selectorType = selectorType.toString();
+		if(position1.x() == position2.x()) position1 = Vector3i.from(position1.x() + 1, position1.y(), position1.z());
+		if(position1.y() == position2.y() && !selectorType.equals(SelectorTypes.FLAT)) position1 = Vector3i.from(position1.x(), position1.y() + 1, position1.z());
+		if(position1.z() == position2.z()) position1 = Vector3i.from(position1.x(), position1.y(), position1.z() + 1);
 		if(selectorType.equals(SelectorTypes.FLAT)) {
 			this.aabb = AABB.of(position1.x(), serverWorld.min().y(), position1.z(), position2.x(), serverWorld.height(), position2.z());
 		} else if(selectorType.equals(SelectorTypes.CUBOID)) {

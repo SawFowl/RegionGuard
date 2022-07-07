@@ -94,6 +94,8 @@ public class InfoCommand implements Command.Raw {
 			Component arena = Component.empty();
 			Component admin = Component.empty();
 			Component flags = null;
+			boolean regen = plugin.getConfig().regenAll() && !region.getParrent().isPresent();
+			if(regen) player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_REGEN));
 			Component delete = plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_INFO_DELETE).clickEvent(SpongeComponents.executeCallback(cause -> {
 				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(cause2 -> {
 					if(region.getParrent().isPresent()) {
@@ -183,16 +185,10 @@ public class InfoCommand implements Command.Raw {
 						if(!event.isCancelled()) {
 							if(region.getType() != RegionTypes.UNSET) {
 								region.setRegionType(RegionTypes.UNSET);
-								if(plugin.getConfig().regenAll()) region.regen(plugin.getConfig().asyncRegen(), plugin.getConfig().delayRegen());
+								if(regen) region.regen(plugin.getConfig().asyncRegen(), plugin.getConfig().delayRegen());
 								plugin.getAPI().deleteRegion(region);
 							}
 							if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());
-						}
-						if(plugin.getConfig().regenAll()) {
-							if(region.getType() != RegionTypes.UNSET) {
-								region.setRegionType(RegionTypes.UNSET);
-								region.regen(plugin.getConfig().asyncRegen(), plugin.getConfig().delayRegen());
-							}
 						}
 					}
 					if(plugin.getAPI().getWorldEditCUIAPI() != null) plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);

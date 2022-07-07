@@ -706,7 +706,6 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				}
 			}
 			for(Vector3i vector3i : positions.get(player.uniqueId()).tempRegion.getCuboid().getAllPositions()) {
-				//Optional<Region> find = plugin.getAPI().getRegions().parallelStream().filter(rg -> (rg.isIntersectsWith(player.world(), vector3i))).findFirst();
 				Region find = plugin.getAPI().findRegion(positions.get(player.uniqueId()).tempRegion.getServerWorldKey(), vector3i);
 				if(!find.isGlobal()) {
 					plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
@@ -757,28 +756,35 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	}
 
 	private boolean resizeRegion(ServerPlayer player, Region region, Vector3i blockPosition) {
-		if(positions.get(player.uniqueId()).tempRegion != null) {
-			Optional<Region> optChild = positions.get(player.uniqueId()).tempRegion.getChilds().stream().filter(rg -> (rg.getCuboid().containsIntersectsPosition(blockPosition))).findFirst();
-			if(optChild.isPresent()) {
-				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_RESIZE_EXCEPTION_CHILD_INTERSECT));
-				positions.get(player.uniqueId()).clear();
-				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setClaimResizing(null);
-				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(false);
-				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDragCuboid(null);
-				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setLastWandLocation(null);
-				plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
-				plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, null);
-				plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(optChild.get(), player, false, false);
-				return true;
+		if(positions.get(player.uniqueId()).tempRegion != null && positions.get(player.uniqueId()).oppositeCorner != null) {
+			boolean out =  positions.get(player.uniqueId()).tempRegion.getParrent().isPresent() && !positions.get(player.uniqueId()).tempRegion.getParrent().get().getCuboid().containsIntersectsPosition(blockPosition);
+			if(out || !positions.get(player.uniqueId()).tempRegion.getChilds().isEmpty()) {
+				Optional<Region> optChild = Optional.empty();
+				if(!out) {
+					Cuboid cuboid = new Cuboid(positions.get(player.uniqueId()).oppositeCorner, blockPosition);
+					optChild = positions.get(player.uniqueId()).tempRegion.getChilds().stream().filter(rg -> (!cuboid.containsIntersectsPosition(rg.getCuboid().getMin()) || !cuboid.containsIntersectsPosition(rg.getCuboid().getMax()))).findFirst();
+				}
+				if(optChild.isPresent() || out) {
+					player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_RESIZE_EXCEPTION_CHILD_OUT));
+					positions.get(player.uniqueId()).clear();
+					plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setClaimResizing(null);
+					plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(false);
+					plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDragCuboid(null);
+					plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setLastWandLocation(null);
+					plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
+					plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, null);
+					if(optChild.isPresent()) {
+						plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(optChild.get(), player, false, false);
+					} else if(region.getParrent().isPresent()) {
+						plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region.getParrent().get(), player, false, false);
+					}
+					return true;
+				}
+			
 			}
 		}
 		if(positions.get(player.uniqueId()).tempRegion != null) {
 			Region find = plugin.getAPI().findRegion(positions.get(player.uniqueId()).tempRegion.getServerWorldKey(), blockPosition);
-			if(!find.isGlobal()) {
-				player.sendMessage(Component.text(!find.equals(positions.get(player.uniqueId()).tempRegion)));
-				player.sendMessage(Component.text(positions.get(player.uniqueId()).tempRegion.getUniqueId().toString()));
-				player.sendMessage(Component.text(find.getUniqueId().toString()));
-			}
 			if(!find.isGlobal() && !find.equals(positions.get(player.uniqueId()).tempRegion)) {
 				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setClaimResizing(null);
 				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(false);
@@ -869,6 +875,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		RegionCreateEvent createSubdivisionEvent = new RegionCreate(cause, player, subdivision);
 		if(parrent.getCuboid().getAABB().intersects(subdivision.getCuboid().getAABB())) {
 			createSubdivisionEvent.setMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.VOLUME), Arrays.asList(subdivision.getCuboid().getSize())), LocalesPaths.REGION_CREATE_SUBDIVISION));
+			subdivision.setParrent(parrent);
 			ListenerUtils.postEvent(createSubdivisionEvent);
 			positions.remove(player.uniqueId());
 		} else {
