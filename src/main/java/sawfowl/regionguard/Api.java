@@ -263,7 +263,7 @@ class Api implements RegionAPI {
 
 	@Override
 	public long getClaimedRegions(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getClaimed().getRegions() != null ? dataPlayers.get(player.uniqueId()).getClaimed().getRegions() : playersRegions.containsKey(player.uniqueId()) ? playersRegions.get(player.uniqueId()).size() : 0;
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getClaimed() != null && dataPlayers.get(player.uniqueId()).getClaimed().getRegions() != null ? dataPlayers.get(player.uniqueId()).getClaimed().getRegions() : playersRegions.containsKey(player.uniqueId()) ? playersRegions.get(player.uniqueId()).size() : 0;
 	}
 
 	@Override

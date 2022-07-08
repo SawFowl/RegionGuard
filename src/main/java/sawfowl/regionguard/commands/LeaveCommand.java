@@ -24,6 +24,7 @@ import sawfowl.regionguard.configure.LocalesPaths;
 public class LeaveCommand implements Command.Raw {
 
 	private final RegionGuard plugin;
+	private List<CommandCompletion> empty = new ArrayList<>();
 	public LeaveCommand(RegionGuard plugin) {
 		this.plugin = plugin;
 	}
@@ -49,7 +50,7 @@ public class LeaveCommand implements Command.Raw {
 
 	@Override
 	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments) throws CommandException {
-		return new ArrayList<>();
+		return empty;
 	}
 
 	@Override
