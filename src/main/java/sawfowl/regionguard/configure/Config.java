@@ -44,7 +44,7 @@ public class Config {
 		check(getNode("MinimalRegionSize", "3D"), null, 800, TypeTokens.INTEGER_TOKEN);
 		
 		check(getNode("RegenerateChunks"), "If true, the chunks will be restored to their original appearance when the region is deleted.", null, null);
-		check(getNode("RegenerateChunks", "Async"), "Using asynchronous mode. May not work stably.", false, TypeTokens.BOOLEAN_TOKEN);
+		check(getNode("RegenerateChunks", "Async"), "Using asynchronous mode. May not work stably.", true, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("RegenerateChunks", "Delay"), "It is used for CPU load balancing during asynchronous regeneration of regions. If you have a powerful CPU, you can set it to 0 to instantly regenerate blocks after loading chunks into copies of the world.", 3, TypeTokens.INTEGER_TOKEN);
 		check(getNode("RegenerateChunks", "AllPlayers"), "This option applies to any variant of deleting a region.", false, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("RegenerateChunks", "Staff"), "This parameter applies only to the `/rg delete` command, and you must specify the flag in the command for regenerating the area.", true, TypeTokens.BOOLEAN_TOKEN);
