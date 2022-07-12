@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -31,7 +28,7 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionDeleteEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 
-public class DeleteCommand implements Command.Raw {
+public class DeleteCommand implements PluginRawCommand {
 
 	private final RegionGuard plugin;
 	List<CommandCompletion> empty = new ArrayList<CommandCompletion>();
@@ -41,14 +38,13 @@ public class DeleteCommand implements Command.Raw {
 	}
 
 	@Override
-	public CommandResult process(CommandCause cause, Mutable arguments) throws CommandException {
+	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
 		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
 		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
 		if(!region.getOwnerUUID().equals(player.uniqueId()) && !player.hasPermission(Permissions.STAFF_DELETE)) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_OWNER));
-		List<String> args = Stream.of(arguments.input().split(" ")).map(String::toString).filter(string -> (!string.equals(""))).collect(Collectors.toList());
 		boolean regen = !region.getParrent().isPresent() && (player.hasPermission(Permissions.STAFF_DELETE) ? (args.contains("-regen") || args.contains("-r")) && plugin.getConfig().regenStaff() : plugin.getConfig().regenAll());
 		if(regen) player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_REGEN));
 		player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(messageCause -> {
@@ -163,12 +159,10 @@ public class DeleteCommand implements Command.Raw {
 	}
 
 	@Override
-	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments) throws CommandException {
+	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		if(!cause.hasPermission(Permissions.STAFF_DELETE)) return empty;
 		String plainArgs = arguments.input();
 		if(!plainArgs.contains("delete ")) return empty;
-		List<String> args = Stream.of(plainArgs.split(" ")).map(String::toString).filter(string -> (!string.equals(""))).collect(Collectors.toList());
-		args.remove(0);
 		if(args.size() == 0 && plugin.getConfig().regenStaff() && cause.hasPermission(Permissions.STAFF_DELETE)) return regen;
 		return empty;
 	}
@@ -176,21 +170,6 @@ public class DeleteCommand implements Command.Raw {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.DELETE);
-	}
-
-	@Override
-	public Optional<Component> shortDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Delete region."));
-	}
-
-	@Override
-	public Optional<Component> extendedDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Delete region."));
-	}
-
-	@Override
-	public Component usage(CommandCause cause) {
-		return Component.text("/rg delete");
 	}
 
 }

@@ -2,9 +2,7 @@ package sawfowl.regionguard.commands;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -14,13 +12,12 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
 
-import net.kyori.adventure.text.Component;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.worldedit.cuiusers.CUIUser;
 
-public class WeCUICommand implements Command.Raw {
+public class WeCUICommand implements PluginRawCommand {
 
 	private final RegionGuard plugin;
 	private List<CommandCompletion> empty = new ArrayList<>();
@@ -29,7 +26,7 @@ public class WeCUICommand implements Command.Raw {
 	}
 
 	@Override
-	public CommandResult process(CommandCause cause, Mutable arguments) throws CommandException {
+	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
@@ -47,28 +44,13 @@ public class WeCUICommand implements Command.Raw {
 	}
 
 	@Override
-	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments) throws CommandException {
+	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		return empty;
 	}
 
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.CUI_COMMAND);
-	}
-
-	@Override
-	public Optional<Component> shortDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Switching WECui status."));
-	}
-
-	@Override
-	public Optional<Component> extendedDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Switching WECui status."));
-	}
-
-	@Override
-	public Component usage(CommandCause cause) {
-		return Component.text("/rg wecui");
 	}
 
 }

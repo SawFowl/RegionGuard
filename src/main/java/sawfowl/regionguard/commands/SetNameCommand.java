@@ -6,11 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -28,7 +25,7 @@ import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.LocalesPaths;
 
-public class SetNameCommand implements Command.Raw {
+public class SetNameCommand implements PluginRawCommand {
 
 	private final RegionGuard plugin;
 	private final Map<String, Locale> locales = new HashMap<String, Locale>();
@@ -51,7 +48,7 @@ public class SetNameCommand implements Command.Raw {
 	}
 
 	@Override
-	public CommandResult process(CommandCause cause, Mutable arguments) throws CommandException {
+	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
@@ -61,9 +58,6 @@ public class SetNameCommand implements Command.Raw {
 			if(!region.isTrusted(player)) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_NAME_NOT_TRUSTED));
 			if(region.isCurrentTrustType(player, TrustTypes.OWNER) || region.isCurrentTrustType(player, TrustTypes.MANAGER)) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_NAME_LOW_TRUST));
 		}
-		String plainArgs = arguments.input();
-		List<String> args = Stream.of(plainArgs.split(" ")).filter(string -> (!string.equals(""))).collect(Collectors.toList());
-		args.remove(0);
 		boolean clearFlag = args.size() > 0 && (args.get(0).equals("-c") || args.get(0).equals("-clear"));
 		Locale locale = args.size() > 0 && locales.keySet().contains(args.get(0)) ? locales.get(args.get(0)) : player.locale();
 		if(locales.keySet().contains(args.get(0))) args.remove(0);
@@ -92,16 +86,15 @@ public class SetNameCommand implements Command.Raw {
 	}
 
 	@Override
-	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments) throws CommandException {
+	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		String plainArgs = arguments.input();
 		if(!plainArgs.contains("setname ") && !plainArgs.contains("name ")) return empty;
-		List<String> args = Stream.of(plainArgs.split(" ")).filter(string -> (!string.equals(""))).collect(Collectors.toList());
-		args.remove(0);
+		if(plainArgs.contains("setname")) plainArgs = plainArgs.replaceFirst("setname", "");
+		if(plainArgs.contains("name")) plainArgs = plainArgs.replaceFirst("name", "");
 		if(!args.isEmpty() && args.size() < 3) {
 			if(args.size() == 1 && !flags.contains(args.get(args.size() - 1))) return completionFlags.stream().filter(flag -> (flag.completion().startsWith(args.get(args.size() - 1)))).collect(Collectors.toList());
 			if(args.size() == 2 && flags.contains(args.get(args.size() - 2)) && !locales.containsKey(args.get(args.size() - 1))) return completionLocales.stream().filter(locale -> (locale.completion().startsWith(args.get(args.size() - 1)))).collect(Collectors.toList());
 			if(locales.containsKey(args.get(args.size() - 1)) || !plainArgs.contains(args.get(args.size() - 1) + " ")) return empty;
-			plainArgs = arguments.input().replace("setname", "").replace("name", "");
 			if(plainArgs.contains("-c ") && args.size() == 1) return completionLocales;
 			List<String> optArgs = allArgs.stream().filter(string -> (!string.equals(args.get(args.size() - 1)) && string.startsWith(args.get(args.size() - 1)))).collect(Collectors.toList());
 			return optArgs.stream().map(CommandCompletion::of).collect(Collectors.toList());
@@ -115,21 +108,6 @@ public class SetNameCommand implements Command.Raw {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.SET_NAME);
-	}
-
-	@Override
-	public Optional<Component> shortDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Set region name."));
-	}
-
-	@Override
-	public Optional<Component> extendedDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Set region name."));
-	}
-
-	@Override
-	public Component usage(CommandCause cause) {
-		return Component.text("/rg setname");
 	}
 
 	private String removeDecor(String string) {

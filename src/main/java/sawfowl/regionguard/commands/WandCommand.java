@@ -19,7 +19,7 @@ import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.configure.LocalesPaths;
 
-public class WandCommand implements Command.Raw {
+public class WandCommand implements Command.Raw, PluginRawCommand {
 
 	private final RegionGuard plugin;
 	private final List<CommandCompletion> empty = new ArrayList<>();
@@ -47,6 +47,16 @@ public class WandCommand implements Command.Raw {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.WAND);
+	}
+
+	@Override
+	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
+		return process(cause, arguments);
+	}
+
+	@Override
+	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
+		return complete(cause, arguments);
 	}
 
 	@Override

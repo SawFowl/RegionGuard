@@ -3,13 +3,10 @@ package sawfowl.regionguard.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -19,13 +16,12 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
 
-import net.kyori.adventure.text.Component;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
 
-public class SetSubdivisionsLimitCommand implements Command.Raw {
+public class SetSubdivisionsLimitCommand implements PluginRawCommand {
 
 	private final RegionGuard plugin;
 	private List<CommandCompletion> empty = new ArrayList<>();
@@ -34,12 +30,10 @@ public class SetSubdivisionsLimitCommand implements Command.Raw {
 	}
 
 	@Override
-	public CommandResult process(CommandCause cause, Mutable arguments) throws CommandException {
+	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
-		List<String> args = Stream.of(arguments.input().split(" ")).filter(string -> (!string.equals(""))).collect(Collectors.toList());
-		args.remove(0);
 		if(args.size() == 0 || !Sponge.server().player(args.get(0)).isPresent()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_PLAYER_NOT_PRESENT));
 		if(args.size() == 1) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_VOLUME_NOT_PRESENT));
 		if(!NumberUtils.isParsable(args.get(1))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_WRONG_ARGUMENT));
@@ -53,9 +47,7 @@ public class SetSubdivisionsLimitCommand implements Command.Raw {
 	}
 
 	@Override
-	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments) throws CommandException {
-		List<String> args = Stream.of(arguments.input().split(" ")).filter(string -> (!string.equals(""))).collect(Collectors.toList());
-		args.remove(0);
+	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		if(args.isEmpty()) return Sponge.server().onlinePlayers().stream().map(player -> (CommandCompletion.of(player.name()))).collect(Collectors.toList());
 		return empty;
 	}
@@ -63,21 +55,6 @@ public class SetSubdivisionsLimitCommand implements Command.Raw {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.STAFF_SETLIMIT_SUBDIVISIONS);
-	}
-
-	@Override
-	public Optional<Component> shortDescription(CommandCause cause) {
-		return Optional.of(Component.text("Changing the player subdivisions limit."));
-	}
-
-	@Override
-	public Optional<Component> extendedDescription(CommandCause cause) {
-		return Optional.of(Component.text("Changing the player subdivisions limit."));
-	}
-
-	@Override
-	public Component usage(CommandCause cause) {
-		return Component.text("/rg setlimitsubdivisions");
 	}
 
 }

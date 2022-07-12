@@ -3,14 +3,11 @@ package sawfowl.regionguard.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -35,7 +32,7 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
 
-public class FlagCommand implements Command.Raw {
+public class FlagCommand implements PluginRawCommand {
 
 	private final RegionGuard plugin;
 	public FlagCommand(RegionGuard plugin) {
@@ -58,13 +55,11 @@ public class FlagCommand implements Command.Raw {
 	List<CommandCompletion> items = new ArrayList<CommandCompletion>();
 
 	@Override
-	public CommandResult process(CommandCause cause, Mutable arguments) throws CommandException {
+	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		String plainArgs = arguments.input();
 		while(plainArgs.contains("  ")) plainArgs.replace("  ", " ");
-		List<String> args = Stream.of(plainArgs.split(" ")).filter(string -> (!string.equals(""))).collect(Collectors.toList());
-		args.remove(0);
 		ServerPlayer player = (ServerPlayer) src;
 		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
 		if(args.isEmpty()) {
@@ -96,11 +91,9 @@ public class FlagCommand implements Command.Raw {
 	}
 
 	@Override
-	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments) throws CommandException {
+	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		String plainArgs = arguments.input();
 		if(!plainArgs.contains("flag ")) return empty;
-		List<String> args = Stream.of(plainArgs.split(" ")).map(String::toString).filter(string -> (!string.equals(""))).collect(Collectors.toList());
-		args.remove(0);
 		if(args.size() > 4) return empty;
 		List<CommandCompletion> allow = flags.stream().filter(flag -> (cause.hasPermission(Permissions.setFlag(flag.completion())))).collect(Collectors.toList());
 		List<String> allowNames = allow.stream().map(CommandCompletion::completion).collect(Collectors.toList());
@@ -136,21 +129,6 @@ public class FlagCommand implements Command.Raw {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.FLAG_COMMAND);
-	}
-
-	@Override
-	public Optional<Component> shortDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Set region flags"));
-	}
-
-	@Override
-	public Optional<Component> extendedDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Set region flags"));
-	}
-
-	@Override
-	public Component usage(CommandCause cause) {
-		return Component.text("/rg flag [FlagName] [FlagValue] <Source> <Target>");
 	}
 
 	private void setFlag(Region region, Flags flag, boolean value, String source, String target) {

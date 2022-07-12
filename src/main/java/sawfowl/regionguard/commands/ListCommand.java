@@ -10,12 +10,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -50,7 +48,7 @@ import sawfowl.regionguard.api.events.RegionDeleteEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
 
-public class ListCommand implements Command.Raw {
+public class ListCommand implements PluginRawCommand {
 
 	private final RegionGuard plugin;
 	private List<CommandCompletion> empty = new ArrayList<>();
@@ -63,12 +61,10 @@ public class ListCommand implements Command.Raw {
 	}
 
 	@Override
-	public CommandResult process(CommandCause cause, Mutable arguments) throws CommandException {
+	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
-		List<String> args = Stream.of(arguments.input().split(" ")).filter(string -> (!string.equals(""))).collect(Collectors.toList());
-		args.remove(0);
 		boolean otherPlayer = !args.isEmpty() && !args.get(0).equals(player.name()) && player.hasPermission(Permissions.STAFF_LIST) && Sponge.server().player(args.get(0)).isPresent();
 		List<Region> regions = otherPlayer ? plugin.getAPI().getPlayerRegions(Sponge.server().player(args.get(0)).get()) : plugin.getAPI().getPlayerRegions(player);
 		if(regions.size() == 0) throw new CommandException(Component.text(otherPlayer ? "У игрока нет регионов" : "У вас нет регионов"));
@@ -99,10 +95,8 @@ public class ListCommand implements Command.Raw {
 	}
 
 	@Override
-	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments) throws CommandException {
+	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		if(cause.hasPermission(Permissions.STAFF_LIST)) {
-			List<String> args = Stream.of(arguments.input().split(" ")).filter(string -> (!string.equals(""))).collect(Collectors.toList());
-			args.remove(0);
 			if(args.isEmpty()) return Sponge.server().onlinePlayers().stream().map(player -> (CommandCompletion.of(player.name()))).collect(Collectors.toList());
 		}
 		return empty;
@@ -111,21 +105,6 @@ public class ListCommand implements Command.Raw {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.LIST) || cause.hasPermission(Permissions.STAFF_LIST);
-	}
-
-	@Override
-	public Optional<Component> shortDescription(CommandCause cause) {
-		return Optional.of(Component.text("Getting a list of player's regions."));
-	}
-
-	@Override
-	public Optional<Component> extendedDescription(CommandCause cause) {
-		return Optional.of(Component.text("Getting a list of player's regions."));
-	}
-
-	@Override
-	public Component usage(CommandCause cause) {
-		return Component.text("/rg list");
 	}
 
 	private void sendRegionsList(Audience audience, Locale locale, List<Component> messages, int lines, String name) {

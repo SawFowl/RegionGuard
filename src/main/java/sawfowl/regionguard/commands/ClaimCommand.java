@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -18,7 +17,6 @@ import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
-import net.kyori.adventure.text.Component;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
@@ -28,7 +26,7 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
 
-public class ClaimCommand implements Command.Raw {
+public class ClaimCommand implements PluginRawCommand {
 
 	private final RegionGuard plugin;
 	private List<CommandCompletion> empty = new ArrayList<>();
@@ -37,7 +35,7 @@ public class ClaimCommand implements Command.Raw {
 	}
 
 	@Override
-	public CommandResult process(CommandCause cause, Mutable arguments) throws CommandException {
+	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
@@ -76,28 +74,13 @@ public class ClaimCommand implements Command.Raw {
 	}
 
 	@Override
-	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments) throws CommandException {
+	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
 		return empty;
 	}
 
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.CLAIM);
-	}
-
-	@Override
-	public Optional<Component> shortDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Claim region."));
-	}
-
-	@Override
-	public Optional<Component> extendedDescription(CommandCause cause) {
-		return Optional.ofNullable(Component.text("Claim region."));
-	}
-
-	@Override
-	public Component usage(CommandCause cause) {
-		return Component.text("/rg claim");
 	}
 
 }

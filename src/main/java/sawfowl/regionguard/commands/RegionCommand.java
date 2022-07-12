@@ -32,33 +32,36 @@ import sawfowl.regionguard.configure.LocalesPaths;
 public class RegionCommand implements Command.Raw {
 
 	private final RegionGuard plugin;
+	private final List<String> childArgsEmpty = new ArrayList<String>();
+	private final List<CommandCompletion> empty = new ArrayList<>();
 	private List<CommandCompletion> childs = new ArrayList<CommandCompletion>();
-	private List<CommandCompletion> empty = new ArrayList<>();
-	private Map<String, Command.Raw> childExecutors = new HashMap<String, Command.Raw>();
+	private Map<String, PluginRawCommand> childExecutors = new HashMap<String, PluginRawCommand>();
 	public RegionCommand(RegionGuard plugin, RegisterCommandEvent<Command.Raw> event) {
 		this.plugin = plugin;
 		generateChild();
-		event.register(plugin.getPluginContainer(), childExecutors.get("wand"), "wand");
+		event.register(plugin.getPluginContainer(), (Command.Raw) childExecutors.get("wand"), "wand");
 	}
 
 	@Override
 	public CommandResult process(CommandCause cause, Mutable arguments) throws CommandException {
 		List<String> args = Stream.of(arguments.input().split(" ")).map(String::toString).filter(string -> (!string.equals(""))).collect(Collectors.toList());
 		if(args.isEmpty()) {
-			return generateHelp(cause.root());
+			return generateHelp(cause, cause.root());
 		} else {
-			if(childExecutors.containsKey(args.get(0)) && childExecutors.get(args.get(0)).canExecute(cause)) return childExecutors.get(args.get(0)).process(cause, arguments);
+			List<String> nextCommand = args.subList(1, args.size());
+			if(childExecutors.containsKey(args.get(0)) && childExecutors.get(args.get(0)).canExecute(cause)) return childExecutors.get(args.get(0)).process(cause, arguments, nextCommand);
 		}
-		return generateHelp(cause.root());
+		return generateHelp(cause, cause.root());
 	}
 
 	@Override
 	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments) throws CommandException {
-		List<String> args = Stream.of(arguments.input().split(" ")).map(String::toString).filter(string -> (!string.equals(""))).collect(Collectors.toList());
+		List<String> args = Stream.of(arguments.input().split(" ")).filter(string -> (!string.equals(""))).collect(Collectors.toList());
 		List<CommandCompletion> send = childs.stream().filter(command -> (childExecutors.containsKey(command.completion()) && childExecutors.get(command.completion()).canExecute(cause))).collect(Collectors.toList());
 		if(!send.isEmpty() && args.size() > 0) {
+			List<String> nextCommand = args.size() == 1 ? childArgsEmpty : args.subList(1, args.size());
 			if(childExecutors.containsKey(args.get(0)) && childExecutors.get(args.get(0)).canExecute(cause)) {
-				return childExecutors.get(args.get(0)).complete(cause, arguments);
+				return childExecutors.get(args.get(0)).complete(cause, arguments, nextCommand);
 			} else {
 				if(args.size() == 1) {
 					return send.stream().filter(c -> (c.completion().startsWith(args.get(0)))).collect(Collectors.toList());
@@ -120,12 +123,10 @@ public class RegionCommand implements Command.Raw {
 		childExecutors.put("wand", new WandCommand(plugin));
 		childExecutors.put("wecui", new WeCUICommand(plugin));
 		childExecutors.put("list", new ListCommand(plugin));
-		childExecutors.put("setlimitblocks", new SetBlocksLimitCommand(plugin));
-		childExecutors.put("setlimitclaims", new SetClaimsLimitCommand(plugin));
-		childExecutors.put("setlimitsubdivisions", new SetSubdivisionsLimitCommand(plugin));
+		childExecutors.put("setlimit", new SetLimitsCommand(plugin));
 	}
 
-	private CommandResult generateHelp(Object src) {
+	private CommandResult generateHelp(CommandCause cause, Object src) {
 		List<Component> messages = new ArrayList<Component>();
 		if(src instanceof ServerPlayer) {
 			ServerPlayer player = (ServerPlayer) src;
@@ -148,17 +149,15 @@ public class RegionCommand implements Command.Raw {
 			if(player.hasPermission(Permissions.CUI_COMMAND)) messages.add(text("&6/rg wecui&f - ").clickEvent(ClickEvent.runCommand("/rg wecui")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_WECUI)));
 			if(player.hasPermission(Permissions.LIST) || player.hasPermission(Permissions.STAFF_LIST)) messages.add(text("&6/rg list&f - ").clickEvent(ClickEvent.runCommand("/rg list")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_LIST)));
 			if(plugin.getEconomyService() != null) {
-				if(player.hasPermission(Permissions.BUY_BLOCKS) && plugin.getAPI().getBuyBlockPrice(player) > 0) messages.add(text("&6/rg buyblocks &b<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg buyblocks 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYBLOCKS)));
-				if(player.hasPermission(Permissions.BUY_CLAIMS) && plugin.getAPI().getBuyClaimPrice(player) > 0) messages.add(text("&6/rg buyclaims &b<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg buyclaims 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYCLAIMS)));
-				if(player.hasPermission(Permissions.BUY_SUBDIVISIONS) && plugin.getAPI().getBuySubdivisionPrice(player) > 0) messages.add(text("&6/rg buysubdivisions &b<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg buysubdivisions 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYSUBDIVISIONS)));
-				if(player.hasPermission(Permissions.SELL_BLOCKS) && plugin.getAPI().getBuyBlockPrice(player) > 0) messages.add(text("&6/rg sellblocks &b<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellblocks 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLBLOCKS)));
-				if(player.hasPermission(Permissions.SELL_CLAIMS) && plugin.getAPI().getBuyClaimPrice(player) > 0) messages.add(text("&6/rg sellclaims &b<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellclaims 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLCLAIMS)));
-				if(player.hasPermission(Permissions.SELL_SUBDIVISIONS) && plugin.getAPI().getBuySubdivisionPrice(player) > 0) messages.add(text("&6/rg sellsubdivisions &b<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellsubdivisions 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLSUBDIVISIONS)));
+				if(player.hasPermission(Permissions.BUY_BLOCKS) && plugin.getAPI().getBuyBlockPrice(player) > 0) messages.add(text("&6/rg buyblocks &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg buyblocks 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYBLOCKS)));
+				if(player.hasPermission(Permissions.BUY_CLAIMS) && plugin.getAPI().getBuyClaimPrice(player) > 0) messages.add(text("&6/rg buyclaims &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg buyclaims 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYCLAIMS)));
+				if(player.hasPermission(Permissions.BUY_SUBDIVISIONS) && plugin.getAPI().getBuySubdivisionPrice(player) > 0) messages.add(text("&6/rg buysubdivisions &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg buysubdivisions 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYSUBDIVISIONS)));
+				if(player.hasPermission(Permissions.SELL_BLOCKS) && plugin.getAPI().getBuyBlockPrice(player) > 0) messages.add(text("&6/rg sellblocks &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellblocks 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLBLOCKS)));
+				if(player.hasPermission(Permissions.SELL_CLAIMS) && plugin.getAPI().getBuyClaimPrice(player) > 0) messages.add(text("&6/rg sellclaims &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellclaims 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLCLAIMS)));
+				if(player.hasPermission(Permissions.SELL_SUBDIVISIONS) && plugin.getAPI().getBuySubdivisionPrice(player) > 0) messages.add(text("&6/rg sellsubdivisions &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellsubdivisions 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLSUBDIVISIONS)));
 			}
-			if(player.hasPermission(Permissions.STAFF_SETLIMIT_BLOCKS)) messages.add(text("&6/rg setlimitblocks &b<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimitblocks ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMITBLOCKS)));
-			if(player.hasPermission(Permissions.STAFF_SETLIMIT_CLAIMS)) messages.add(text("&6/rg setlimitclaims &b<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimitclaims ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMITCLAIMS)));
-			if(player.hasPermission(Permissions.STAFF_SETLIMIT_SUBDIVISIONS)) messages.add(text("&6/rg setlimitsubdivisions &b<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimitsubdivisions ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS)));
-			sendCommandsList(player, player.locale(), messages, 7);
+			if(childExecutors.get("setlimit").canExecute(cause)) messages.add(text("&6/rg setlimit &b[Args...]&f - ").clickEvent(ClickEvent.runCommand("/rg setlimit")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMITS)));
+			sendCommandsList(player, player.locale(), messages, 10);
 		} else {
 			Locale locale = src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT;
 			messages.add(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_USED_BY_NON_PLAYER));
@@ -179,17 +178,15 @@ public class RegionCommand implements Command.Raw {
 			messages.add(text("&6/rg wecui&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_WECUI)));
 			messages.add(text("&6/rg list&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_LIST)));
 			if(plugin.getEconomyService() != null) {
-				messages.add(text("&6/rg buyblocks &b<Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYBLOCKS)));
-				messages.add(text("&6/rg buyclaims &b<Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYCLAIMS)));
-				messages.add(text("&6/rg buysubdivisions &b<Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYSUBDIVISIONS)));
-				messages.add(text("&6/rg sellblocks &b<Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLBLOCKS)));
-				messages.add(text("&6/rg sellclaims &b<Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLCLAIMS)));
-				messages.add(text("&6/rg sellsubdivisions &b<Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLSUBDIVISIONS)));
+				messages.add(text("&6/rg buyblocks &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYBLOCKS)));
+				messages.add(text("&6/rg buyclaims &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYCLAIMS)));
+				messages.add(text("&6/rg buysubdivisions &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYSUBDIVISIONS)));
+				messages.add(text("&6/rg sellblocks &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLBLOCKS)));
+				messages.add(text("&6/rg sellclaims &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLCLAIMS)));
+				messages.add(text("&6/rg sellsubdivisions &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLSUBDIVISIONS)));
 			}
-			messages.add(text("&6/rg setlimitblocks &b<Player> <Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMITBLOCKS)));
-			messages.add(text("&6/rg setlimitclaims &b<Player> <Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMITCLAIMS)));
-			messages.add(text("&6/rg setlimitsubdivisions &b<Player> <Volume>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS)));
-			sendCommandsList((Audience) src, locale, messages, 30);
+			messages.add(text("&6/rg setlimit &b[Args...]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMITS)));
+			sendCommandsList((Audience) src, locale, messages, 35);
 		}
 		return CommandResult.success();
 	}
