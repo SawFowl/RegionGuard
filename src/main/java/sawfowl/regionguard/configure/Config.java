@@ -141,7 +141,7 @@ public class Config {
 	}
 
 	public boolean regenStaff() {
-		return getNode("RegenerateChunks", "AllPlayers").getBoolean();
+		return getNode("RegenerateChunks", "Staff").getBoolean();
 	}
 
 	public boolean regenAll() {
