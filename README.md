@@ -16,29 +16,30 @@
 ```yaml
 /rg wand - Get an item to create regions.
 /rg claim - Claim the allocated region.
-/rg delete - Delete the region in the current position.
+/rg delete - Delete the region.
 /rg info - Information about the region.
 /rg limits - Information about your limits.
-/rg setname <ClearFlag> <Locale> [Name] - Set the name of the region.
+/rg setname <ClearFlag> <OptionalLocale> [Name] - Set the name of the region.
 /rg setmessage <CommandFlags> <Locale> [Message] - Set/remove the join/exit message in the region.
 /rg flag [FlagName] [Value] <Source> <Target> - Set the flag parameters.
 /rg leave - Leave from region.
 /rg setowner [Player] - Set the owner of the region.
 /rg trust [Player] [TrustType] - Add a player to the region and specify his rights in the region.
 /rg untrust [Player] - Remove a player from the region.
-/rg setselector - Select the type of area selection.
-/rg setcreatingtype - Select the type of region to be created.
-/rg wecui - Switch the sending status of WECui packets. 
+/rg setselector [Type] - Select the type of area selection.
+/rg setcreatingtype [Type] - Select the type of region to be created.
+/rg wecui - Switch the sending status of WECui packets.
 /rg list - Show list of regions.
-/rg buyblocks <Volume> - Payment in game currency to increase the limit of blocks.
-/rg buyclaims <Volume> - Payment in game currency to increase the limit of claims.
-/rg buysubdivisions <Volume> - Payment in game currency to increase the limit of subdivisions.
-/rg sellblocks <Volume> - Selling the limit of blocks for game currency.
-/rg sellclaims <Volume> - Selling the limit of claims for game currency.
-/rg sellsubdivisions <Volume> - Selling the limit of subdivisions for game currency.
-/rg setlimitblocks <Player> <Volume> - Selling the limit of blocks for game currency.
-/rg setlimitclaims <Player> <Volume> - Selling the limit of claims for game currency.
-/rg setlimitsubdivisions <Player> <Volume> - Selling the limit of subdivisions for game currency.
+/rg buyblocks [Volume] - Payment in game currency to increase the limit of blocks.
+/rg buyclaims [Volume] - Payment in game currency to increase the limit of claims.
+/rg buysubdivisions [Volume] - Payment in game currency to increase the limit of subdivisions.
+/rg sellblocks [Volume] - Selling the limit of blocks for game currency.
+/rg sellclaims [Volume] - Selling the limit of claims for game currency.
+/rg sellsubdivisions [Volume] - Selling the limit of subdivisions for game currency.
+/rg setlimit blocks [Player] [Size] - Selling the limit of blocks for game currency.
+/rg setlimit claims [Player] [Size] - Selling the limit of claims for game currency.
+/rg setlimit subdivisions [Player] [Size] - Selling the limit of subdivisions for game currency.
+/rg setlimit members [Player] [Size] - Changing the limit of members in the player's regions.
 ```
 
 #### Region member types:
@@ -90,6 +91,8 @@ regionguard.staff.list - Getting a list of regions of any player. The ability to
 regionguard.staff.setlimit.blocks - Change the blocks limit of the player.
 regionguard.staff.setlimit.claims - Change the claims limit of the player.
 regionguard.staff.setlimit.subdivisions - Change the subdivisions limit of the player.
+regionguard.staff.setlimit.subdivisions - Change the subdivisions limit of the player.
+regionguard.staff.setlimit.members - Changing the limit of members in the player's regions.
 regionguard.staff.adminclaim - Creation of subdivisions in admin regions.
 ```
 #### Metaperms:
@@ -158,6 +161,6 @@ repositories {
 }
 dependencies {
 	...
-	implementation 'com.github.SawFowl:RegionGuard:1.1'
+	implementation 'com.github.SawFowl:RegionGuard:1.2'
 }
 ```
