@@ -79,13 +79,17 @@ public class Locales {
 		save = check(locale, toText("&6Select the type of region to be created."), null, LocalesPaths.COMMANDS_SET_CREATING_TYPE) || save;
 		save = check(locale, toText("&6Switch the sending status of WECui packets."), null, LocalesPaths.COMMANDS_WECUI) || save;
 		save = check(locale, toText("&6Show list of regions."), null, LocalesPaths.COMMANDS_LIST) || save;
+		save = check(locale, toText("&6Payment in game currency to increase the limits."), null, LocalesPaths.COMMANDS_BUYLIMIT) || save;
 		save = check(locale, toText("&6Payment in game currency to increase the limit of blocks."), null, LocalesPaths.COMMANDS_BUYBLOCKS) || save;
 		save = check(locale, toText("&6Payment in game currency to increase the limit of claims."), null, LocalesPaths.COMMANDS_BUYCLAIMS) || save;
 		save = check(locale, toText("&6Payment in game currency to increase the limit of subdivisions."), null, LocalesPaths.COMMANDS_BUYSUBDIVISIONS) || save;
+		save = check(locale, toText("&6Payment in game currency to increase the limit of region members."), null, LocalesPaths.COMMANDS_BUYMEMBERS) || save;
+		save = check(locale, toText("&6Selling the limits for game currency."), null, LocalesPaths.COMMANDS_SELLLIMIT) || save;
 		save = check(locale, toText("&6Selling the limit of blocks for game currency."), null, LocalesPaths.COMMANDS_SELLBLOCKS) || save;
 		save = check(locale, toText("&6Selling the limit of claims for game currency."), null, LocalesPaths.COMMANDS_SELLCLAIMS) || save;
 		save = check(locale, toText("&6Selling the limit of subdivisions for game currency."), null, LocalesPaths.COMMANDS_SELLSUBDIVISIONS) || save;
-		save = check(locale, toText("&6Changing player limits."), null, LocalesPaths.COMMANDS_SETLIMITS) || save;
+		save = check(locale, toText("&6Selling the limit of region members for game currency."), null, LocalesPaths.COMMANDS_SELLMEMBERS) || save;
+		save = check(locale, toText("&6Changing player limits."), null, LocalesPaths.COMMANDS_SETLIMIT) || save;
 		save = check(locale, toText("&6Change the blocks limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITBLOCKS) || save;
 		save = check(locale, toText("&6Change the claims limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITCLAIMS) || save;
 		save = check(locale, toText("&6Change the subdivisions limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS) || save;
@@ -226,6 +230,14 @@ public class Locales {
 		save = check(locale, toText("&cSomething went wrong while executing the transaction. The details may be in the server console."), null, LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION) || save;
 		save = check(locale, toText("&aYou have increased your subdivisions limit by &b%size%&a. Your current subdivisions limit: &b%volume%&a."), null, LocalesPaths.COMMAND_BUYSUBDIVISIONS_SUCCESS) || save;
 
+		save = check(locale, toText("&cYou need to specify the volume of the purchase."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_NOT_PRESENT) || save;
+		save = check(locale, toText("&cYou need to specify a number."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cYou need to specify a number greater than 0."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_ENTERED_ZERO) || save;
+		save = check(locale, toText("&cThe maximum purchase volume you can specify: &b%max%&c."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_TO_MUCH_VOLUME) || save;
+		save = check(locale, toText("&cYou don't have enough money to buy."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_NOT_ENOUGH_MONEY) || save;
+		save = check(locale, toText("&cSomething went wrong while executing the transaction. The details may be in the server console."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_ECONOMY_EXCEPTION) || save;
+		save = check(locale, toText("&aYou have increased your region members limit by &b%size%&a. Your current members limit: &b%volume%&a."), null, LocalesPaths.COMMAND_BUYMEMBERS_SUCCESS) || save;
+
 		save = check(locale, toText("&cYou need to specify the sales volume."), null, LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_NOT_PRESENT) || save;
 		save = check(locale, toText("&cYou need to specify a number."), null, LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_WRONG_ARGUMENT) || save;
 		save = check(locale, toText("&cYou need to specify a number greater than 0."), null, LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_ENTERED_ZERO) || save;
@@ -246,6 +258,13 @@ public class Locales {
 		save = check(locale, toText("&cThe maximum sales volume you can specify: &b%max%&c."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_TO_MUCH_VOLUME) || save;
 		save = check(locale, toText("&cSomething went wrong while executing the transaction. The details may be in the server console."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION) || save;
 		save = check(locale, toText("&aYou have reduced your subdivisions limit by &b%size%&a. Your current subdivisions limit: &b%volume%&a."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_SUCCESS) || save;
+
+		save = check(locale, toText("&cYou need to specify the sales volume."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_NOT_PRESENT) || save;
+		save = check(locale, toText("&cYou need to specify a number."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cYou need to specify a number greater than 0."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_ENTERED_ZERO) || save;
+		save = check(locale, toText("&cThe maximum sales volume you can specify: &b%max%&c."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_TO_MUCH_VOLUME) || save;
+		save = check(locale, toText("&cSomething went wrong while executing the transaction. The details may be in the server console."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_ECONOMY_EXCEPTION) || save;
+		save = check(locale, toText("&aYou have reduced your region members limit by &b%size%&a. Your current members limit: &b%volume%&a."), null, LocalesPaths.COMMAND_SELLMEMBERS_SUCCESS) || save;
 
 		save = check(locale, toText("&cYou need to specify a player online."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_PLAYER_NOT_PRESENT) || save;
 		save = check(locale, toText("&cYou need to specify a new limit."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_VOLUME_NOT_PRESENT) || save;
@@ -372,13 +391,17 @@ public class Locales {
 		save = check(locale, toText("&6Выбрать тип создаваемого региона."), null, LocalesPaths.COMMANDS_SET_CREATING_TYPE) || save;
 		save = check(locale, toText("&6Переключить статус отправки пакетов WECui."), null, LocalesPaths.COMMANDS_WECUI) || save;
 		save = check(locale, toText("&6Показать список регионов."), null, LocalesPaths.COMMANDS_LIST) || save;
+		save = check(locale, toText("&6Повышение лимитов за игровую валюту."), null, LocalesPaths.COMMANDS_BUYLIMIT) || save;
 		save = check(locale, toText("&6Повышение лимита блоков за игровую валюту."), null, LocalesPaths.COMMANDS_BUYBLOCKS) || save;
 		save = check(locale, toText("&6Повышение лимита приватов за игровую валюту."), null, LocalesPaths.COMMANDS_BUYCLAIMS) || save;
 		save = check(locale, toText("&6Повышение лимита дочерних регионов за игровую валюту."), null, LocalesPaths.COMMANDS_BUYSUBDIVISIONS) || save;
+		save = check(locale, toText("&6Повышение лимита участников регионов за игровую валюту."), null, LocalesPaths.COMMANDS_BUYMEMBERS) || save;
+		save = check(locale, toText("&6Продажа лимитов за игровую валюту."), null, LocalesPaths.COMMANDS_SELLLIMIT) || save;
 		save = check(locale, toText("&6Продажа лимита блоков за игровую валюту."), null, LocalesPaths.COMMANDS_SELLBLOCKS) || save;
 		save = check(locale, toText("&6Продажа лимита приватов за игровую валюту."), null, LocalesPaths.COMMANDS_SELLCLAIMS) || save;
 		save = check(locale, toText("&6Продажа лимита дочерних регионов за игровую валюту."), null, LocalesPaths.COMMANDS_SELLSUBDIVISIONS) || save;
-		save = check(locale, toText("&6Изменение лимитов у игрока."), null, LocalesPaths.COMMANDS_SETLIMITS) || save;
+		save = check(locale, toText("&6Продажа лимита участников регионов за игровую валюту."), null, LocalesPaths.COMMANDS_SELLMEMBERS) || save;
+		save = check(locale, toText("&6Изменение лимитов у игрока."), null, LocalesPaths.COMMANDS_SETLIMIT) || save;
 		save = check(locale, toText("&6Изменение лимита блоков у игрока."), null, LocalesPaths.COMMANDS_SETLIMITBLOCKS) || save;
 		save = check(locale, toText("&6Изменение лимита приватов у игрока."), null, LocalesPaths.COMMANDS_SETLIMITCLAIMS) || save;
 		save = check(locale, toText("&6Изменение лимита дочерних регионов у игрока."), null, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS) || save;
@@ -519,6 +542,14 @@ public class Locales {
 		save = check(locale, toText("&cПри выполнении транзакции что-то пошло не так. Подробности могут быть в консоли сервера."), null, LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION) || save;
 		save = check(locale, toText("&aВы повысили свой лимит дочерних регионов на &b%size%&a. Ваш текущий лимит дочерних регионов: &b%volume%&a."), null, LocalesPaths.COMMAND_BUYSUBDIVISIONS_SUCCESS) || save;
 
+		save = check(locale, toText("&cНужно указать объем покупки."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_NOT_PRESENT) || save;
+		save = check(locale, toText("&cНужно указать число."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cНужно указать число больше 0."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_ENTERED_ZERO) || save;
+		save = check(locale, toText("&cМаксимальный объем покупки который вы можете указать: &b%max%&c."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_TO_MUCH_VOLUME) || save;
+		save = check(locale, toText("&cУ вас недостаточно денег для покупки."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_NOT_ENOUGH_MONEY) || save;
+		save = check(locale, toText("&cПри выполнении транзакции что-то пошло не так. Подробности могут быть в консоли сервера."), null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_ECONOMY_EXCEPTION) || save;
+		save = check(locale, toText("&aВы повысили свой лимит участников региона на &b%size%&a. Ваш текущий лимит участников: &b%volume%&a."), null, LocalesPaths.COMMAND_BUYMEMBERS_SUCCESS) || save;
+
 		save = check(locale, toText("&cНужно указать объем продажи."), null, LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_NOT_PRESENT) || save;
 		save = check(locale, toText("&cНужно указать число."), null, LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_WRONG_ARGUMENT) || save;
 		save = check(locale, toText("&cНужно указать число больше 0."), null, LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_ENTERED_ZERO) || save;
@@ -539,6 +570,13 @@ public class Locales {
 		save = check(locale, toText("&cМаксимальный объем продажи который вы можете указать: &b%max%&c."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_TO_MUCH_VOLUME) || save;
 		save = check(locale, toText("&cПри выполнении транзакции что-то пошло не так. Подробности могут быть в консоли сервера."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION) || save;
 		save = check(locale, toText("&aВы уменьшили свой лимит дочерних регионов на &b%size%&a. Ваш текущий лимит дочерних регионов: &b%volume%&a."), null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_SUCCESS) || save;
+
+		save = check(locale, toText("&cНужно указать объем продажи."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_NOT_PRESENT) || save;
+		save = check(locale, toText("&cНужно указать число."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_WRONG_ARGUMENT) || save;
+		save = check(locale, toText("&cНужно указать число больше 0."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_ENTERED_ZERO) || save;
+		save = check(locale, toText("&cМаксимальный объем продажи который вы можете указать: &b%max%&c."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_TO_MUCH_VOLUME) || save;
+		save = check(locale, toText("&cПри выполнении транзакции что-то пошло не так. Подробности могут быть в консоли сервера."), null, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_ECONOMY_EXCEPTION) || save;
+		save = check(locale, toText("&aВы уменьшили свой участников региона на &b%size%&a. Ваш текущий лимит участников: &b%volume%&a."), null, LocalesPaths.COMMAND_SELLMEMBERS_SUCCESS) || save;
 
 		save = check(locale, toText("&cНужно указать игрока онлайн."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_PLAYER_NOT_PRESENT) || save;
 		save = check(locale, toText("&cНужно указать новый лимит."), null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_VOLUME_NOT_PRESENT) || save;

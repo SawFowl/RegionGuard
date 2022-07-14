@@ -54,12 +54,12 @@ public class SellClaimsCommand implements PluginRawCommand {
 		return cause.hasPermission(Permissions.SELL_CLAIMS);
 	}
 
-	private boolean optionIsPresent(ServerPlayer player) {
-		return player.user().subjectData().allOptions().values().stream().findFirst().isPresent() && player.user().subjectData().allOptions().values().stream().findFirst().get().containsKey(Permissions.LIMIT_CLAIMS);
+	private long getDefaultSize(ServerPlayer player) {
+		return optionIsPresent(player) && NumberUtils.isCreatable(player.option(Permissions.LIMIT_CLAIMS).get()) ? Long.valueOf(player.option(Permissions.LIMIT_CLAIMS).get()) : 0;
 	}
 
-	private long getDefaultSize(ServerPlayer player) {
-		return optionIsPresent(player) && NumberUtils.isCreatable(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_CLAIMS)) ? Long.valueOf(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_CLAIMS)) : 0;
+	private boolean optionIsPresent(ServerPlayer player) {
+		return player.option(Permissions.LIMIT_CLAIMS).isPresent();
 	}
 
 }

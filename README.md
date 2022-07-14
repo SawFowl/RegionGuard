@@ -69,9 +69,11 @@ regionguard.user.wecui - Displaying region boundaries with WECui mod, as well as
 regionguard.user.buy.blocks - Payment in game currency to increase the limit of blocks.
 regionguard.user.buy.claims - Payment in game currency to increase the limit of claims.
 regionguard.user.buy.subdivisions - Payment in game currency to increase the limit of subdivisions.
+regionguard.user.buy.members - Payment in game currency to increase the limit of region members.
 regionguard.user.sell.blocks - Selling the limit of blocks for game currency.
 regionguard.user.sell.claims - Selling the limit of claims for game currency.
 regionguard.user.sell.subdivisions - Selling the limit of subdivisions for game currency.
+regionguard.user.sell.members - Selling the limit of region members for game currency.
 regionguard.user.list - Show list of regions.
 regionguard.user.teleport - Teleportation to the region.
 regionguard.flags - Access flags by their lowercase name.
@@ -92,7 +94,7 @@ regionguard.staff.setlimit.blocks - Change the blocks limit of the player.
 regionguard.staff.setlimit.claims - Change the claims limit of the player.
 regionguard.staff.setlimit.subdivisions - Change the subdivisions limit of the player.
 regionguard.staff.setlimit.subdivisions - Change the subdivisions limit of the player.
-regionguard.staff.setlimit.members - Changing the limit of members in the player's regions.
+regionguard.staff.setlimit.members - Changing the limit of members in the player regions.
 regionguard.staff.adminclaim - Creation of subdivisions in admin regions.
 ```
 #### Metaperms:
@@ -104,12 +106,15 @@ regionguard.limit.members - Members limit for each player region.
 regionguard.limit.max.blocks - The maximum number of blocks a player can claim when using the economy.
 regionguard.limit.max.claims - The maximum number of regions a player can claim when using the economy.
 regionguard.limit.max.subdivisions - The maximum number of subdivisions a player can claim when using the economy.
+regionguard.limit.max.members - The maximum number of region members a player can add using the economy.
 regionguard.buy.blockprice - Purchase price of 1 block.
 regionguard.buy.regionprice - Purchase price of 1 region.
 regionguard.buy.subdivisionprice - Purchase price of 1 subdivision.
+regionguard.buy.memberprice - The price for increasing the limit of participants by 1.
 regionguard.sell.blockprice - Selling price of 1 block.
 regionguard.sell.regionprice - Selling price of 1 region.
 regionguard.sell.subdivisionprice - Selling price of 1 subdivision.
+regionguard.sell.memberprice - The price of reducing the limit of participants by 1.
 regionguard.transaction.currency - Currency in which the player will be buying and selling limits.
 ```
 

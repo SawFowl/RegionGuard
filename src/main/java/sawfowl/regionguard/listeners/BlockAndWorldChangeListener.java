@@ -689,12 +689,8 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		} else return;
 		if(region.isGlobal()) {
 			if(!player.hasPermission(Permissions.UNLIMIT_CLAIMS) && plugin.getAPI().getLimitClaims(player) - plugin.getAPI().getClaimedRegions(player) <= 0) {
-				long limit = plugin.getAPI().getLimitClaims(player) - plugin.getAPI().getClaimedRegions(player);
-				limit = limit >= 0 ? limit : 0;
-				if(limit <= 0) {
-					player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE), Arrays.asList((limit + "/" + plugin.getAPI().getLimitClaims(player)))), LocalesPaths.REGION_CREATE_EXCEPTION_LARGE_VOLUME_REGIONS));
-					return;
-				}
+				player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE), Arrays.asList((plugin.getAPI().getLimitClaims(player) + "/" + plugin.getAPI().getLimitClaims(player)))), LocalesPaths.REGION_CREATE_EXCEPTION_LARGE_VOLUME_REGIONS));
+				return;
 			}
 			if(!player.hasPermission(Permissions.UNLIMIT_BLOCKS)) {
 				long limit = plugin.getAPI().getLimitBlocks(player) - plugin.getAPI().getClaimedBlocks(player);

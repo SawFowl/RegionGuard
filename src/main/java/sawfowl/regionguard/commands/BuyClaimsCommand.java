@@ -40,7 +40,11 @@ public class BuyClaimsCommand implements PluginRawCommand {
 		if(!NumberUtils.isParsable(args.get(0))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_WRONG_ARGUMENT));
 		long toBuy = Long.valueOf(args.get(0));
 		if(toBuy <= 0) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_ENTERED_ZERO));
-		if(plugin.getAPI().getLimitMaxClaims(player) < toBuy + plugin.getAPI().getClaimedRegions(player)) throw new CommandException(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(plugin.getAPI().getLimitMaxClaims(player) - plugin.getAPI().getClaimedRegions(player))), LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_TO_MUCH_VOLUME));
+		if(plugin.getAPI().getLimitMaxClaims(player) < toBuy + plugin.getAPI().getLimitClaims(player)) {
+			long max = plugin.getAPI().getLimitMaxClaims(player) - plugin.getAPI().getLimitClaims(player);
+			if(max < 0) max = 0;
+			throw new CommandException(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(max)), LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_TO_MUCH_VOLUME));
+		}
 		double needMoney = plugin.getAPI().getBuyClaimPrice(player) * toBuy;
 		Currency currency = plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(player));
 		if(!plugin.getEconomy().checkPlayerBalance(player.uniqueId(), currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_NOT_ENOUGH_MONEY));

@@ -148,18 +148,15 @@ public class RegionCommand implements Command.Raw {
 			if(player.hasPermission(Permissions.STAFF_SET_REGION_TYPE)) messages.add(text("&6/rg setcreatingtype &b[Type]&f - ").clickEvent(ClickEvent.suggestCommand("/rg setcreatingtype ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SET_CREATING_TYPE)));
 			if(player.hasPermission(Permissions.CUI_COMMAND)) messages.add(text("&6/rg wecui&f - ").clickEvent(ClickEvent.runCommand("/rg wecui")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_WECUI)));
 			if(player.hasPermission(Permissions.LIST) || player.hasPermission(Permissions.STAFF_LIST)) messages.add(text("&6/rg list&f - ").clickEvent(ClickEvent.runCommand("/rg list")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_LIST)));
-			if(plugin.getEconomyService() != null) {
-				if(player.hasPermission(Permissions.BUY_BLOCKS) && plugin.getAPI().getBuyBlockPrice(player) > 0) messages.add(text("&6/rg buyblocks &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg buyblocks 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYBLOCKS)));
-				if(player.hasPermission(Permissions.BUY_CLAIMS) && plugin.getAPI().getBuyClaimPrice(player) > 0) messages.add(text("&6/rg buyclaims &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg buyclaims 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYCLAIMS)));
-				if(player.hasPermission(Permissions.BUY_SUBDIVISIONS) && plugin.getAPI().getBuySubdivisionPrice(player) > 0) messages.add(text("&6/rg buysubdivisions &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg buysubdivisions 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYSUBDIVISIONS)));
-				if(player.hasPermission(Permissions.SELL_BLOCKS) && plugin.getAPI().getBuyBlockPrice(player) > 0) messages.add(text("&6/rg sellblocks &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellblocks 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLBLOCKS)));
-				if(player.hasPermission(Permissions.SELL_CLAIMS) && plugin.getAPI().getBuyClaimPrice(player) > 0) messages.add(text("&6/rg sellclaims &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellclaims 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLCLAIMS)));
-				if(player.hasPermission(Permissions.SELL_SUBDIVISIONS) && plugin.getAPI().getBuySubdivisionPrice(player) > 0) messages.add(text("&6/rg sellsubdivisions &b[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg sellsubdivisions 1")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLSUBDIVISIONS)));
+			if(childExecutors.containsKey("buylimit") && childExecutors.containsKey("selllimit")) {
+				if(childExecutors.get("buylimit").canExecute(cause) && plugin.getAPI().getBuyBlockPrice(player) > 0) messages.add(text("&6/rg buylimit &b[Limit] [Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg buylimit ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_BUYLIMIT)));
+				if(childExecutors.get("selllimit").canExecute(cause) && plugin.getAPI().getBuyClaimPrice(player) > 0) messages.add(text("&6/rg selllimit &b[Limit] [Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg selllimit ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLLIMIT)));
 			}
-			if(childExecutors.get("setlimit").canExecute(cause)) messages.add(text("&6/rg setlimit &b[Args...]&f - ").clickEvent(ClickEvent.runCommand("/rg setlimit")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMITS)));
+			if(childExecutors.get("setlimit").canExecute(cause)) messages.add(text("&6/rg setlimit &b[Args...]&f - ").clickEvent(ClickEvent.runCommand("/rg setlimit")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMIT)));
 			sendCommandsList(player, player.locale(), messages, 10);
 		} else {
 			Locale locale = src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT;
+			messages.add(text("&6/rg setlimit &b[Args...]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMIT)));
 			messages.add(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_USED_BY_NON_PLAYER));
 			messages.add(text("&6/rg wand&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_WAND)));
 			messages.add(text("&6/rg claim&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_CLAIM)));
@@ -177,15 +174,10 @@ public class RegionCommand implements Command.Raw {
 			messages.add(text("&6/rg setcreatingtype &b[Type]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SET_CREATING_TYPE)));
 			messages.add(text("&6/rg wecui&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_WECUI)));
 			messages.add(text("&6/rg list&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_LIST)));
-			if(plugin.getEconomyService() != null) {
-				messages.add(text("&6/rg buyblocks &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYBLOCKS)));
-				messages.add(text("&6/rg buyclaims &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYCLAIMS)));
-				messages.add(text("&6/rg buysubdivisions &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYSUBDIVISIONS)));
-				messages.add(text("&6/rg sellblocks &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLBLOCKS)));
-				messages.add(text("&6/rg sellclaims &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLCLAIMS)));
-				messages.add(text("&6/rg sellsubdivisions &b[Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLSUBDIVISIONS)));
+			if(childExecutors.containsKey("buylimit") && childExecutors.containsKey("selllimit")) {
+				messages.add(text("&6/rg buylimit &b[Limit] [Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYLIMIT)));
+				messages.add(text("&6/rg selllimit &b[Limit] [Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLLIMIT)));
 			}
-			messages.add(text("&6/rg setlimit &b[Args...]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMITS)));
 			sendCommandsList((Audience) src, locale, messages, 35);
 		}
 		return CommandResult.success();
@@ -210,12 +202,8 @@ public class RegionCommand implements Command.Raw {
 
 	public void genEconomyCommands() {
 		if(plugin.getEconomyService() == null) return;
-		childExecutors.put("buyblocks", new BuyBlocksCommand(plugin));
-		childExecutors.put("buyclaims", new BuyClaimsCommand(plugin));
-		childExecutors.put("buysubdivisions", new BuySubdivisionsCommand(plugin));
-		childExecutors.put("sellblocks", new SellBlocksCommand(plugin));
-		childExecutors.put("sellclaims", new SellClaimsCommand(plugin));
-		childExecutors.put("sellsubdivisions", new SellSubdivisionsCommand(plugin));
+		childExecutors.put("buylimit", new BuyLimitsCommand(plugin));
+		childExecutors.put("selllimit", new SellLimitsCommand(plugin));
 		childs.addAll(childExecutors.keySet().stream().map(CommandCompletion::of).collect(Collectors.toList()));
 	}
 

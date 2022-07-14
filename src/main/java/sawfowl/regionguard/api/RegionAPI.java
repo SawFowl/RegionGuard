@@ -297,9 +297,18 @@ public interface RegionAPI {
 	 * Each basic region has its own limit. <br>
 	 * 
 	 * @param player - Checked player
-	 * @returnThe number of regions available to the player for creating.
+	 * @return - The number of subdivisions available to the player for creating.
 	 */
 	public long getLimitMaxSubdivisions(ServerPlayer player);
+
+	/**
+	 * The maximum limit of members of the player region.. <br>
+	 * Each basic region has its own limit. <br>
+	 * 
+	 * @param player - Checked player
+	 * @return - The maximum number of region members a player can add.
+	 */
+	public long getLimitMaxMembers(ServerPlayer player);
 
 	/**
 	 * Get the value of the block price for the player. <br>
@@ -319,6 +328,12 @@ public interface RegionAPI {
 	 */
 	public double getBuySubdivisionPrice(ServerPlayer player);
 
+	/**
+	 * Getting the value of the price of the region's participant limit increase. <br>
+	 * Depending on how the permissions plugin is set up, different players may have different prices.
+	 */
+	public double getBuyMembersPrice(ServerPlayer player);
+
 
 	/**
 	 * Get the value of the block price for the player. <br>
@@ -337,6 +352,12 @@ public interface RegionAPI {
 	 * Depending on how the permissions plugin is set up, different players may have different prices.
 	 */
 	public double getSellSubdivisionPrice(ServerPlayer player);
+
+	/**
+	 * Getting the value of the price of the region members limit decrease. <br>
+	 * Depending on how the permissions plugin is set up, different players may have different prices.
+	 */
+	public double getSellMembersPrice(ServerPlayer player);
 	/**
 	 * Getting the currency in which the player will perform the transaction.
 	 * Depending on how the permissions plugin is set up, different players may have different currencies.

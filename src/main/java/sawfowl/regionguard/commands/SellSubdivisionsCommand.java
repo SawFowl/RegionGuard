@@ -54,12 +54,12 @@ public class SellSubdivisionsCommand implements PluginRawCommand {
 		return cause.hasPermission(Permissions.SELL_BLOCKS);
 	}
 
-	private boolean optionIsPresent(ServerPlayer player) {
-		return player.user().subjectData().allOptions().values().stream().findFirst().isPresent() && player.user().subjectData().allOptions().values().stream().findFirst().get().containsKey(Permissions.LIMIT_SUBDIVISIONS);
+	private long getDefaultSize(ServerPlayer player) {
+		return optionIsPresent(player) && NumberUtils.isCreatable(player.option(Permissions.LIMIT_SUBDIVISIONS).get()) ? Long.valueOf(player.option(Permissions.LIMIT_SUBDIVISIONS).get()) : 0;
 	}
 
-	private long getDefaultSize(ServerPlayer player) {
-		return optionIsPresent(player) && NumberUtils.isCreatable(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_SUBDIVISIONS)) ? Long.valueOf(player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.LIMIT_SUBDIVISIONS)) : 0;
+	private boolean optionIsPresent(ServerPlayer player) {
+		return player.option(Permissions.LIMIT_SUBDIVISIONS).isPresent();
 	}
 
 }

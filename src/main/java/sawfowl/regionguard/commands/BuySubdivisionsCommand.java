@@ -40,15 +40,19 @@ public class BuySubdivisionsCommand implements PluginRawCommand {
 		if(!NumberUtils.isParsable(args.get(0))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_WRONG_ARGUMENT));
 		long toBuy = Long.valueOf(args.get(0));
 		if(toBuy <= 0) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_ENTERED_ZERO));
-		if(plugin.getAPI().getLimitMaxSubdivisions(player) < toBuy + plugin.getAPI().getLimitSubdivisions(player)) throw new CommandException(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(plugin.getAPI().getLimitMaxSubdivisions(player) - plugin.getAPI().getLimitSubdivisions(player))), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_TO_MUCH_VOLUME));
+		if(plugin.getAPI().getLimitMaxSubdivisions(player) < toBuy + plugin.getAPI().getLimitSubdivisions(player)) {
+			long max = plugin.getAPI().getLimitMaxSubdivisions(player) - plugin.getAPI().getLimitSubdivisions(player);
+			if(max < 0) max = 0;
+			throw new CommandException(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(max)), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_TO_MUCH_VOLUME));
+		}
 		double needMoney = plugin.getAPI().getBuySubdivisionPrice(player) * toBuy;
 		Currency currency = plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(player));
 		if(!plugin.getEconomy().checkPlayerBalance(player.uniqueId(), currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_NOT_ENOUGH_MONEY));
-		if(plugin.getEconomy().removeFromPlayerBalance(player, currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION));
+		if(!plugin.getEconomy().removeFromPlayerBalance(player, currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION));
 		if(!plugin.getAPI().getPlayerData(player).isPresent()) plugin.getAPI().setPlayerData(player, new PlayerData());
 		if(plugin.getAPI().getPlayerData(player).get().getLimits() == null) plugin.getAPI().getPlayerData(player).get().setLimits(new PlayerLimits());
 		plugin.getAPI().setLimitSubdivisions(player, plugin.getAPI().getLimitSubdivisions(player) + toBuy);
-		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.VOLUME), Arrays.asList(toBuy, plugin.getAPI().getLimitClaims(player))), LocalesPaths.COMMAND_BUYSUBDIVISIONS_SUCCESS));
+		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.VOLUME), Arrays.asList(toBuy, plugin.getAPI().getLimitSubdivisions(player))), LocalesPaths.COMMAND_BUYSUBDIVISIONS_SUCCESS));
 		return CommandResult.success();
 	}
 

@@ -307,6 +307,11 @@ class Api implements RegionAPI {
 	}
 
 	@Override
+	public long getLimitMaxMembers(ServerPlayer player) {
+		return getOptionLongValue(player, Permissions.LIMIT_MAX_MEMBERS);
+	}
+
+	@Override
 	public void setLimitBlocks(ServerPlayer player, long limit) {
 		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), new PlayerData());
 		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(new PlayerLimits());
@@ -340,32 +345,42 @@ class Api implements RegionAPI {
 
 	@Override
 	public double getBuyBlockPrice(ServerPlayer player) {
-		return getOptionLongValue(player, Permissions.BUY_BLOCK_PRICE);
+		return getOptionDoubleValue(player, Permissions.BUY_BLOCK_PRICE);
 	}
 
 	@Override
 	public double getBuyClaimPrice(ServerPlayer player) {
-		return getOptionLongValue(player, Permissions.BUY_REGION_PRICE);
+		return getOptionDoubleValue(player, Permissions.BUY_REGION_PRICE);
 	}
 
 	@Override
 	public double getBuySubdivisionPrice(ServerPlayer player) {
-		return getOptionLongValue(player, Permissions.BUY_SUBDIVISION_PRICE);
+		return getOptionDoubleValue(player, Permissions.BUY_SUBDIVISION_PRICE);
+	}
+
+	@Override
+	public double getBuyMembersPrice(ServerPlayer player) {
+		return getOptionDoubleValue(player, Permissions.BUY_MEMBERS_PRICE);
 	}
 
 	@Override
 	public double getSellBlockPrice(ServerPlayer player) {
-		return getOptionLongValue(player, Permissions.SELL_BLOCK_PRICE);
+		return getOptionDoubleValue(player, Permissions.SELL_BLOCK_PRICE);
 	}
 
 	@Override
 	public double getSellClaimPrice(ServerPlayer player) {
-		return getOptionLongValue(player, Permissions.SELL_REGION_PRICE);
+		return getOptionDoubleValue(player, Permissions.SELL_REGION_PRICE);
 	}
 
 	@Override
 	public double getSellSubdivisionPrice(ServerPlayer player) {
-		return getOptionLongValue(player, Permissions.SELL_SUBDIVISION_PRICE);
+		return getOptionDoubleValue(player, Permissions.SELL_SUBDIVISION_PRICE);
+	}
+
+	@Override
+	public double getSellMembersPrice(ServerPlayer player) {
+		return getOptionDoubleValue(player, Permissions.SELL_MEMBERS_PRICE);
 	}
 
 	@Override
@@ -428,7 +443,11 @@ class Api implements RegionAPI {
 	}
 
 	private long getOptionLongValue(ServerPlayer player, String option) {
-		return optionIsPresent(player, option) && NumberUtils.isCreatable(player.option(option).get()) ? Long.valueOf(player.option(option).get()) : 0;
+		return optionIsPresent(player, option) && NumberUtils.isCreatable(player.option(option).get()) ? NumberUtils.createLong(player.option(option).get()) : 0;
+	}
+
+	private double getOptionDoubleValue(ServerPlayer player, String option) {
+		return optionIsPresent(player, option) && NumberUtils.isCreatable(player.option(option).get()) ? NumberUtils.createDouble(player.option(option).get()) : 0;
 	}
 
 	private boolean optionIsPresent(ServerPlayer player, String option) {
