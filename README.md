@@ -30,16 +30,18 @@
 /rg setcreatingtype [Type] - Select the type of region to be created.
 /rg wecui - Switch the sending status of WECui packets.
 /rg list - Show list of regions.
-/rg buyblocks [Volume] - Payment in game currency to increase the limit of blocks.
-/rg buyclaims [Volume] - Payment in game currency to increase the limit of claims.
-/rg buysubdivisions [Volume] - Payment in game currency to increase the limit of subdivisions.
-/rg sellblocks [Volume] - Selling the limit of blocks for game currency.
-/rg sellclaims [Volume] - Selling the limit of claims for game currency.
-/rg sellsubdivisions [Volume] - Selling the limit of subdivisions for game currency.
-/rg setlimit blocks [Player] [Size] - Selling the limit of blocks for game currency.
-/rg setlimit claims [Player] [Size] - Selling the limit of claims for game currency.
-/rg setlimit subdivisions [Player] [Size] - Selling the limit of subdivisions for game currency.
-/rg setlimit members [Player] [Size] - Changing the limit of members in the player's regions.
+/rg buylimit blocks [Volume] - Payment in game currency to increase the limit of blocks.
+/rg buylimit claims [Volume] - Payment in game currency to increase the limit of claims.
+/rg buylimit subdivisions [Volume] - Payment in game currency to increase the limit of subdivisions.
+/rg buylimit members [Volume] - Payment in game currency to increase the limit of region members.
+/rg selllimit blocks [Volume] - Selling the limit of blocks for game currency.
+/rg selllimit claims [Volume] - Selling the limit of claims for game currency.
+/rg selllimit subdivisions [Volume] - Selling the limit of subdivisions for game currency.
+/rg selllimit members [Volume] - Selling the limit of region members for game currency.
+/rg setlimit blocks [Player] [Size] - Change the blocks limit of the player.
+/rg setlimit claims [Player] [Size] - Change the claims limit of the player.
+/rg setlimit subdivisions [Player] [Size] - Change the subdivisions limit of the player.
+/rg setlimit members [Player] [Size] - Changing the limit of members in the player regions.
 ```
 
 #### Region member types:

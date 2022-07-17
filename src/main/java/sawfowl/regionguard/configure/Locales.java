@@ -93,7 +93,7 @@ public class Locales {
 		save = check(locale, toText("&6Change the blocks limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITBLOCKS) || save;
 		save = check(locale, toText("&6Change the claims limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITCLAIMS) || save;
 		save = check(locale, toText("&6Change the subdivisions limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS) || save;
-		save = check(locale, toText("&6Changing the limit of members in the player's regions."), null, LocalesPaths.COMMANDS_SETLIMITMEMBERS) || save;
+		save = check(locale, toText("&6Changing the limit of members in the player regions."), null, LocalesPaths.COMMANDS_SETLIMITMEMBERS) || save;
 
 		save = check(locale, toText("&cRegion world not found: &b%world%"), null, LocalesPaths.COMMAND_CLAIM_WORLD_NOT_FOUND) || save;
 		save = check(locale, toText("&cNo region available to create a claim."), null, LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND) || save;
