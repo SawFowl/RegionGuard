@@ -1,13 +1,13 @@
 buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.blamejared.com' }
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.+', changing: true
-    }
+	repositories {
+		maven { url = 'https://maven.minecraftforge.net' }
+		maven { url = 'https://maven.blamejared.com' }
+		jcenter()
+		mavenCentral()
+	}
+	dependencies {
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.+', changing: true
+	}
 }
 
 plugins {
@@ -15,6 +15,7 @@ plugins {
 	id("java-library")
 	id("maven-publish")
 	id("eclipse")
+	id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -28,7 +29,7 @@ java {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.16.5'
+	mappings channel: 'official', version: '1.16.5'
 }
 
 repositories {
@@ -56,18 +57,40 @@ dependencies {
 	implementation "org.spongepowered:spongeapi:8.0.0"
 	implementation 'org.spongepowered:spongevanilla:1.16.5-8.0.0-RC1111:universal'
 	implementation 'com.github.SawFowl:LocaleAPI:2.1.0'
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.16'
+	minecraft 'net.minecraftforge:forge:1.16.5-36.1.16'
 	implementation fileTree(dir: 'libs', include: '*.jar')
+	implementation 'mysql:mysql-connector-java:8.0.29'
+	shadow 'mysql:mysql-connector-java:8.0.29'
 }
 
 configurations {
-    doc {
-        transitive false
-    }
+	doc {
+		transitive false
+	}
 }
 
+tasks.jar.configure {
+	classifier = 'WithoutDriver'
+}
+
+tasks.shadowJar.configure {
+	classifier = null
+}
+
+shadowJar {
+	dependencies {
+		exclude(dependency('org.spongepowered:spongeapi:8.0.0'))
+		exclude(dependency('org.spongepowered:spongevanilla:1.16.5-8.0.0-RC1111:universal'))
+		exclude(dependency('com.github.SawFowl:LocaleAPI:2.1.0'))
+		exclude('server-1.16.5.jar')
+		include(dependency('mysql:mysql-connector-java:8.0.29'))
+	}
+}
+
+build.dependsOn(shadowJar);
+
 javadoc {
-    source configurations.doc.collect { zipTree(it) }
-    include '**/*.java'
-    options.addStringOption('Xdoclint:none', '-quiet')
+	source configurations.doc.collect { zipTree(it) }
+	include '**/*.java'
+	options.addStringOption('Xdoclint:none', '-quiet')
 }

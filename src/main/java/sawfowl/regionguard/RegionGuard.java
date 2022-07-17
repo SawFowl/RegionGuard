@@ -19,6 +19,7 @@ package sawfowl.regionguard;
 
 import java.io.IOException;
 import java.nio.file.Path;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
@@ -178,7 +179,7 @@ public class RegionGuard {
 		}
 	}
 
-	public void saveConfig() {
+	public void saveConfigs() {
 		try {
 			configLoader.save(rootNode);
 			flagsConfigLoader.save(flagsNode);

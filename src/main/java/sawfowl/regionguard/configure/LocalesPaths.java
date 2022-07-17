@@ -74,6 +74,8 @@ public class LocalesPaths {
 
 	private static final String PATH_COMMAND_SETLIMITMEMBERS = "SetLimitMembers";
 
+	private static final String PATH_COMMAND_UPDATEDEFAULTFLAGS = "UpdateDefaultFlags";
+
 	private static final String PATH_EXCEPTIONS = "Exceptions";
 
 	private static final String PATH_REGION = "Region";
@@ -133,6 +135,7 @@ public class LocalesPaths {
 	public static final Object[] COMMANDS_SETLIMITCLAIMS = {PATH_COMMANDS, PATH_COMMAND_MAIN, PATH_COMMAND_SETLIMITCLAIMS};
 	public static final Object[] COMMANDS_SETLIMITSUBDIVISIONS = {PATH_COMMANDS, PATH_COMMAND_MAIN, PATH_COMMAND_SETLIMITSUBDIVISIONS};
 	public static final Object[] COMMANDS_SETLIMITMEMBERS = {PATH_COMMANDS, PATH_COMMAND_MAIN, PATH_COMMAND_SETLIMITMEMBERS};
+	public static final Object[] COMMANDS_UPDATE_DEFAULT_FLAGS = {PATH_COMMANDS, PATH_COMMAND_MAIN, PATH_COMMAND_UPDATEDEFAULTFLAGS};
 
 	public static final Object[] COMMAND_CLAIM_WORLD_NOT_FOUND = {PATH_COMMANDS, PATH_COMMAND_CLAIM,  PATH_EXCEPTIONS, "WorldNotFound"};
 	public static final Object[] COMMAND_CLAIM_REGION_NOT_FOUND = {PATH_COMMANDS, PATH_COMMAND_CLAIM, PATH_EXCEPTIONS, "RegionNotFound"};
@@ -144,6 +147,9 @@ public class LocalesPaths {
 	public static final Object[] COMMAND_DELETE_DELETED = {PATH_COMMANDS, PATH_COMMAND_DELETE, "Deleted"};
 	public static final Object[] COMMAND_DELETE_DELETED_MAIN_AND_CHILDS = {PATH_COMMANDS, PATH_COMMAND_DELETE, "DeletedMainAndChilds"};
 	public static final Object[] COMMAND_DELETE_REGEN = {PATH_COMMANDS, PATH_COMMAND_DELETE, "Regen"};
+
+	public static final Object[] COMMAND_UPDATEDEFAULTFLAGS_EXCEPTION = {PATH_COMMANDS, PATH_COMMAND_UPDATEDEFAULTFLAGS, PATH_EXCEPTIONS, "Exception"};
+	public static final Object[] COMMAND_UPDATEDEFAULTFLAGS_SUCCESS = {PATH_COMMANDS, PATH_COMMAND_DELETE, "Success"};
 
 
 	public static final Object[] COMMAND_INFO_HEADER = {PATH_COMMANDS, PATH_COMMAND_INFO, "Header"};

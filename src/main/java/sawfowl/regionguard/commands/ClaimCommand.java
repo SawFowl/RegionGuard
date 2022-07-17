@@ -52,7 +52,9 @@ public class ClaimCommand implements PluginRawCommand {
 					return;
 				}
 			}
-			region.setFlags(plugin.getConfig().getDefaultClaimFlags());
+			if(region.isBasicClaim()) region.setFlags(plugin.getConfig().getDefaultClaimFlags());
+			if(region.isArena()) region.setFlags(plugin.getConfig().getDefaultArenaFlags());
+			if(region.isAdmin()) region.setFlags(plugin.getConfig().getDefaultAdminFlags());
 			player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_CLAIM_SUCCESS));
 			plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region, player, false, false);
 			plugin.getAPI().registerRegion(region);

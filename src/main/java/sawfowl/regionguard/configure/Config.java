@@ -16,6 +16,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.SelectorTypes;
 import sawfowl.regionguard.api.data.FlagValue;
+import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.utils.worldedit.MultiSelectionColors;
 
 public class Config {
@@ -69,6 +70,8 @@ public class Config {
 		check(getNode("MySQL", "SSL"), null, "false", TypeTokens.STRING_TOKEN);
 		
 		check(getFlagsNode("ClaimFlags"), "Default flags for basic claim", claimDefaultFlags(), MAP_FLAGS_TOKEN);
+		check(getFlagsNode("ArenaFlags"), "Default flags for arena claim", claimDefaultFlags(), MAP_FLAGS_TOKEN);
+		check(getFlagsNode("AdminFlags"), "Default flags for admin claim", claimDefaultFlags(), MAP_FLAGS_TOKEN);
 		check(getFlagsNode("GlobalFlags"), "Default flags for worlds", globalDefaultFlags(), MAP_FLAGS_TOKEN);
 		
 		check(getCuiNode("Colors"), "Area selection colors. The colors used are in HEX format.", defaultCuiColors(), MAP_CUI_COLORS_TOKEN);
@@ -80,7 +83,7 @@ public class Config {
 
 	public void writeDefaultWandItem() {
 		check(getNode("Items", "Wand"), "An item to highlight the position.", new SerializedItemStack(ItemStack.of(ItemTypes.STONE_AXE)), TypeTokens.SERIALIZED_STACK_TOKEN);
-		if(save) plugin.saveConfig();
+		if(save) plugin.saveConfigs();
 	}
 
 	public List<String> getTankItems() {
@@ -95,6 +98,24 @@ public class Config {
 	public Map<String, List<FlagValue>> getDefaultClaimFlags() {
 		try {
 			return getFlagsNode("ClaimFlags").get(MAP_FLAGS_TOKEN);
+		} catch (SerializationException e) {
+			plugin.getLogger().error(e.getLocalizedMessage());
+			return claimDefaultFlags();
+		}
+	}
+
+	public Map<String, List<FlagValue>> getDefaultArenaFlags() {
+		try {
+			return getFlagsNode("ArenaFlags").get(MAP_FLAGS_TOKEN);
+		} catch (SerializationException e) {
+			plugin.getLogger().error(e.getLocalizedMessage());
+			return claimDefaultFlags();
+		}
+	}
+
+	public Map<String, List<FlagValue>> getDefaultAdminFlags() {
+		try {
+			return getFlagsNode("AdminFlags").get(MAP_FLAGS_TOKEN);
 		} catch (SerializationException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 			return claimDefaultFlags();
@@ -154,6 +175,16 @@ public class Config {
 
 	public int delayRegen() {
 		return getNode("RegenerateChunks", "Delay").getInt(15);
+	}
+
+	public void setDefaultFlags(Region region) throws SerializationException {
+		if(region == null) return;
+		Region primary = region.getPrimaryParent();
+		if(primary.isGlobal()) getFlagsNode("GlobalFlags").set(MAP_FLAGS_TOKEN, region.getFlags());
+		if(primary.isBasicClaim()) getFlagsNode("ClaimFlags").set(MAP_FLAGS_TOKEN, region.getFlags());
+		if(primary.isArena()) getFlagsNode("ArenaFlags").set(MAP_FLAGS_TOKEN, region.getFlags());
+		if(primary.isAdmin()) getFlagsNode("AdminFlags").set(MAP_FLAGS_TOKEN, region.getFlags());
+		plugin.saveConfigs();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

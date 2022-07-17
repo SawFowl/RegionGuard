@@ -94,6 +94,7 @@ public class Locales {
 		save = check(locale, toText("&6Change the claims limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITCLAIMS) || save;
 		save = check(locale, toText("&6Change the subdivisions limit of the player."), null, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS) || save;
 		save = check(locale, toText("&6Changing the limit of members in the player regions."), null, LocalesPaths.COMMANDS_SETLIMITMEMBERS) || save;
+		save = check(locale, toText("&6Setting default flags based on those available in the region at the player location."), null, LocalesPaths.COMMANDS_UPDATE_DEFAULT_FLAGS) || save;
 
 		save = check(locale, toText("&cRegion world not found: &b%world%"), null, LocalesPaths.COMMAND_CLAIM_WORLD_NOT_FOUND) || save;
 		save = check(locale, toText("&cNo region available to create a claim."), null, LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND) || save;
@@ -294,6 +295,9 @@ public class Locales {
 		save = check(locale, toText("&aYou have set a members limit for each region of player &b%player%&a. His limit is now &b%size%&a members."), null, LocalesPaths.COMMAND_SETLIMITMEMBERS_SUCCESS_SOURCE) || save;
 		save = check(locale, toText("&aAdministration representative &b%player%&a has changed the members limit for your regions. It is now &b%size%&a members."), null, LocalesPaths.COMMAND_SETLIMITMEMBERS_SUCCESS_TARGET) || save;
 
+		save = check(locale, toText("&cSomething has gone wrong. The details may be in the console."), null, LocalesPaths.COMMAND_UPDATEDEFAULTFLAGS_EXCEPTION) || save;
+		save = check(locale, toText("&aYou have changed the default flags for regions with type &b%type%&a."), null, LocalesPaths.COMMAND_UPDATEDEFAULTFLAGS_SUCCESS) || save;
+
 
 
 		save = check(locale, toText("&cYou do not have the permission to create child regions in an administrative region."), null, LocalesPaths.REGION_CREATE_EXCEPTION_ADMIN_CLAIM) || save;
@@ -406,6 +410,7 @@ public class Locales {
 		save = check(locale, toText("&6Изменение лимита приватов у игрока."), null, LocalesPaths.COMMANDS_SETLIMITCLAIMS) || save;
 		save = check(locale, toText("&6Изменение лимита дочерних регионов у игрока."), null, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS) || save;
 		save = check(locale, toText("&6Изменение лимита участников в регионах игрока."), null, LocalesPaths.COMMANDS_SETLIMITMEMBERS) || save;
+		save = check(locale, toText("&6Установка флагов по умолчанию на основе флагов, имеющихся в регионе в месте нахождения игрока."), null, LocalesPaths.COMMANDS_UPDATE_DEFAULT_FLAGS) || save;
 
 		save = check(locale, toText("&cНе найден мир региона: &b%world%"), null, LocalesPaths.COMMAND_CLAIM_WORLD_NOT_FOUND) || save;
 		save = check(locale, toText("&cНет доступного региона для создания привата."), null, LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND) || save;
@@ -468,7 +473,7 @@ public class Locales {
 		save = check(locale, toText("&2Клик для указания аргументов."), null, LocalesPaths.COMMAND_FLAG_HOVER_SUGGEST_ARGS) || save;
 
 		save = check(locale, toText("&eВы уверены, что хотите покинуть этот регион? Кликните на это сообщение для подтверждения."), null, LocalesPaths.COMMAND_LEAVE_CONFIRMATION_REQUEST) || save;
-		save = check(locale, toText("&cВы владелец региона и не можете его покинуть. Смените владельца или либо удалите регион."), null, LocalesPaths.COMMAND_LEAVE_PLAYER_IS_OWNER) || save;
+		save = check(locale, toText("&cВы владелец региона и не можете его покинуть. Смените владельца либо удалите регион."), null, LocalesPaths.COMMAND_LEAVE_PLAYER_IS_OWNER) || save;
 		save = check(locale, toText("&cВы не являетесь участником этого региона."), null, LocalesPaths.COMMAND_LEAVE_PLAYER_NOT_TRUSTED) || save;
 		save = check(locale, toText("&aВы покинули регион в вашем текущем местоположении."), null, LocalesPaths.COMMAND_LEAVE_SUCCESS) || save;
 
@@ -605,6 +610,9 @@ public class Locales {
 		save = check(locale, toText("&cВы ввели число меньше нуля."), null, LocalesPaths.COMMAND_SETLIMITMEMBERS_EXCEPTION_LESS_THEN_ZERO) || save;
 		save = check(locale, toText("&aВы установили лимит участников для каждого региона игрока &b%player%&a. Теперь его лимит составляет &b%size%&a участников."), null, LocalesPaths.COMMAND_SETLIMITMEMBERS_SUCCESS_SOURCE) || save;
 		save = check(locale, toText("&aПредставитель администрации &b%player%&a изменил ваш лимит участников региона. Теперь он составляет &b%size%&a участников."), null, LocalesPaths.COMMAND_SETLIMITMEMBERS_SUCCESS_TARGET) || save;
+
+		save = check(locale, toText("&cЧто-то пошло не так. Подробности могут быть в консоли."), null, LocalesPaths.COMMAND_UPDATEDEFAULTFLAGS_EXCEPTION) || save;
+		save = check(locale, toText("&aВы изменили флаги по умолчанию для регионов с типом &b%type%&a."), null, LocalesPaths.COMMAND_UPDATEDEFAULTFLAGS_SUCCESS) || save;
 
 
 

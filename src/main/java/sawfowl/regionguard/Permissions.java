@@ -57,6 +57,7 @@ public class Permissions {
 	public static final String STAFF_SETLIMIT_SUBDIVISIONS = "regionguard.staff.setlimit.subdivisions";
 	public static final String STAFF_SETLIMIT_MEMBERS = "regionguard.staff.setlimit.members";
 	public static final String STAFF_ADMINCLAIM = "regionguard.staff.adminclaim";
+	public static final String STAFF_UPDATE_DEFAULT_FLAGS = "regionguard.staff.updatedefaultflags";
 
 
 

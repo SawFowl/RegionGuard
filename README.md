@@ -9,7 +9,7 @@
 - Player limits are set via metadata in the permissions plugin.
 - Developers can use the plugin API to extend its functionality and use its functions in their plugins.
 - Optional Sponge economy support.
-- MySQL support.
+- MySQL support. The MySQL driver is provided with the plugin since version 1.3.
 - Ability to regenerate territory when a region is removed.
 
 #### Commands:
@@ -42,6 +42,7 @@
 /rg setlimit claims [Player] [Size] - Change the claims limit of the player.
 /rg setlimit subdivisions [Player] [Size] - Change the subdivisions limit of the player.
 /rg setlimit members [Player] [Size] - Changing the limit of members in the player regions.
+/rg updatedefaultflags - Setting default flags based on those available in the region at the player location.
 ```
 
 #### Region member types:
@@ -98,6 +99,7 @@ regionguard.staff.setlimit.subdivisions - Change the subdivisions limit of the p
 regionguard.staff.setlimit.subdivisions - Change the subdivisions limit of the player.
 regionguard.staff.setlimit.members - Changing the limit of members in the player regions.
 regionguard.staff.adminclaim - Creation of subdivisions in admin regions.
+regionguard.staff.updatedefaultflags - Setting default flags based on those available in the region at the player location.
 ```
 #### Metaperms:
 ```yaml
@@ -168,6 +170,6 @@ repositories {
 }
 dependencies {
 	...
-	implementation 'com.github.SawFowl:RegionGuard:1.2.1'
+	implementation 'com.github.SawFowl:RegionGuard:1.3.0'
 }
 ```

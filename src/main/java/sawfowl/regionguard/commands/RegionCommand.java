@@ -124,6 +124,10 @@ public class RegionCommand implements Command.Raw {
 		childExecutors.put("wecui", new WeCUICommand(plugin));
 		childExecutors.put("list", new ListCommand(plugin));
 		childExecutors.put("setlimit", new SetLimitsCommand(plugin));
+		UpdateDefaultFlagsCommand updateDefaultFlagsCommand = new UpdateDefaultFlagsCommand(plugin);
+		childExecutors.put("updatedefaultflags", updateDefaultFlagsCommand);
+		childExecutors.put("udf", updateDefaultFlagsCommand);
+		childs.addAll(childExecutors.keySet().stream().map(CommandCompletion::of).collect(Collectors.toList()));
 	}
 
 	private CommandResult generateHelp(CommandCause cause, Object src) {
@@ -153,6 +157,7 @@ public class RegionCommand implements Command.Raw {
 				if(childExecutors.get("selllimit").canExecute(cause) && plugin.getAPI().getBuyClaimPrice(player) > 0) messages.add(text("&6/rg selllimit &b[Limit] [Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg selllimit ")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SELLLIMIT)));
 			}
 			if(childExecutors.get("setlimit").canExecute(cause)) messages.add(text("&6/rg setlimit &b[Args...]&f - ").clickEvent(ClickEvent.runCommand("/rg setlimit")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_SETLIMIT)));
+			if(player.hasPermission(Permissions.STAFF_UPDATE_DEFAULT_FLAGS)) messages.add(text("&6/rg updatedefaultflags&f - ").clickEvent(ClickEvent.runCommand("/rg updatedefaultflags")).append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_UPDATE_DEFAULT_FLAGS)));
 			sendCommandsList(player, player.locale(), messages, 10);
 		} else {
 			Locale locale = src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT;
@@ -178,6 +183,7 @@ public class RegionCommand implements Command.Raw {
 				messages.add(text("&6/rg buylimit &b[Limit] [Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYLIMIT)));
 				messages.add(text("&6/rg selllimit &b[Limit] [Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLLIMIT)));
 			}
+			messages.add(text("&6/rg updatedefaultflags&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_UPDATE_DEFAULT_FLAGS)));
 			sendCommandsList((Audience) src, locale, messages, 35);
 		}
 		return CommandResult.success();
@@ -204,7 +210,8 @@ public class RegionCommand implements Command.Raw {
 		if(plugin.getEconomyService() == null) return;
 		childExecutors.put("buylimit", new BuyLimitsCommand(plugin));
 		childExecutors.put("selllimit", new SellLimitsCommand(plugin));
-		childs.addAll(childExecutors.keySet().stream().map(CommandCompletion::of).collect(Collectors.toList()));
+		childs.add(CommandCompletion.of("buylimit"));
+		childs.add(CommandCompletion.of("selllimit"));
 	}
 
 }
