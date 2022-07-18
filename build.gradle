@@ -69,14 +69,6 @@ configurations {
 	}
 }
 
-tasks.jar.configure {
-	classifier = 'WithoutDriver'
-}
-
-tasks.shadowJar.configure {
-	classifier = null
-}
-
 shadowJar {
 	dependencies {
 		exclude(dependency('org.spongepowered:spongeapi:8.0.0'))
