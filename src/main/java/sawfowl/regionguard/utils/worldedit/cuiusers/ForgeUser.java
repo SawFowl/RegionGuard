@@ -25,15 +25,15 @@ public class ForgeUser extends CUIUser {
 
 	@Override
 	public void dispatchCUIEvent(CUIEvent event) {
-	if(!getPlayer().isPresent()) return;
-        String[] params = event.getParameters();
-        String send = event.getTypeId();
-        if(params.length > 0) send = send + "|" + StringUtil.joinString(params, "|");
-        ResourceLocation loc = new ResourceLocation(CUI_PLUGIN_CHANNEL);
-	ServerPlayerEntity player = (ServerPlayerEntity) getPlayer().get();
-        PacketBuffer buffer = new PacketBuffer(Unpooled.copiedBuffer(send.getBytes(UTF_8_CHARSET)));
-        SCustomPayloadPlayPacket packet = new SCustomPayloadPlayPacket(loc, buffer);
-        PacketDistributor.PLAYER.with(new Supplier<ServerPlayerEntity>() {
+		if(!getPlayer().isPresent()) return;
+		String[] params = event.getParameters();
+		String send = event.getTypeId();
+		if(params.length > 0) send = send + "|" + StringUtil.joinString(params, "|");
+		ResourceLocation loc = new ResourceLocation(CUI_PLUGIN_CHANNEL);
+		ServerPlayerEntity player = (ServerPlayerEntity) getPlayer().get();
+		PacketBuffer buffer = new PacketBuffer(Unpooled.copiedBuffer(send.getBytes(UTF_8_CHARSET)));
+		SCustomPayloadPlayPacket packet = new SCustomPayloadPlayPacket(loc, buffer);
+		PacketDistributor.PLAYER.with(new Supplier<ServerPlayerEntity>() {
 			@Override
 			public ServerPlayerEntity get() {
 				return player;
