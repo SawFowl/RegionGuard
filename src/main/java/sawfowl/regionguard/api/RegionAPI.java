@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -14,15 +15,31 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import sawfowl.regionguard.api.data.ChunkNumber;
+import sawfowl.regionguard.api.data.FlagSettings;
+import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.Region;
 
 public interface RegionAPI {
 
 	/**
-	 * Getting all registered flag types.
+	 * Getting all registered flags.<br>
+	 * See {@link #getRegisteredFlags()}
 	 */
-	List<String> getFlags();
+	@Deprecated
+	public default List<String> getFlags() {
+		return getRegisteredFlags().keySet().stream().collect(Collectors.toList());
+	}
+
+	/**
+	 * Getting all registered flags.
+	 */
+	public Map<String, FlagSettings> getRegisteredFlags();
+
+	/**
+	 * Flag registration. Values cannot be null.
+	 */
+	public void registerFlag(String flagName, FlagSettings settings);
 
 	/**
 	 * Update global region data.
@@ -218,6 +235,11 @@ public interface RegionAPI {
 	public int getMinimalRegionSize(SelectorTypes selectorType);
 
 	/**
+	 * Get the default flags for a certain type of region.
+	 */
+	public Map<String, List<FlagValue>> getDefaultFlags(RegionTypes regionType);
+
+	/**
 	 * Get the number of blocks that belong to the player.
 	 * 
 	 * @param player - Checked player
@@ -393,6 +415,16 @@ public interface RegionAPI {
 	 * Setting limits and other information on the player.
 	 */
 	public void setPlayerData(UUID player, PlayerData playerData);
+
+	/**
+	 * Update cached data on regions and blocks claimed by the player.
+	 */
+	void updatePlayerData(ServerPlayer player);
+
+	/**
+	 * Update cached data on regions and blocks claimed by the player.
+	 */
+	void updatePlayerData(UUID player);
 
 	/**
 	 * Getting limits and other information on the player.

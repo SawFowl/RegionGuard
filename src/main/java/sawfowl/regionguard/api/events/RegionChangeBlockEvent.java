@@ -24,28 +24,28 @@ public interface RegionChangeBlockEvent extends Event {
 		interface Surface extends Explode {
 
 			/**
-	         * Gets a list of the {@link Transaction}s for this event. If a
-	         * transaction is requested to be marked as "invalid",
-	         * {@link Transaction#setValid(boolean)} can be used.
-	         *
-	         * @return The unmodifiable list of transactions
-	         */
+			 * Gets a list of the {@link Transaction}s for this event. If a
+			 * transaction is requested to be marked as "invalid",
+			 * {@link Transaction#setValid(boolean)} can be used.
+			 *
+			 * @return The unmodifiable list of transactions
+			 */
 			public List<BlockTransaction> getTransactions();
 
 			/**
-	         * Get default {@link Transaction} for this event. If a
-	         * transaction is requested to be marked as "invalid",
-	         * {@link Transaction#setValid(boolean)} can be used.
-	         *
-	         * @return transaction
-	         */
+			 * Get default {@link Transaction} for this event. If a
+			 * transaction is requested to be marked as "invalid",
+			 * {@link Transaction#setValid(boolean)} can be used.
+			 *
+			 * @return transaction
+			 */
 			public BlockTransaction getDefaultTransaction();
 
 			/**
-		     * Gets the default replacement snapshot.
-		     *
-		     * @return The default replacement
-		     */
+			 * Gets the default replacement snapshot.
+			 *
+			 * @return The default replacement
+			 */
 			public BlockSnapshot afterTransaction();
 
 			/**
@@ -57,22 +57,22 @@ public interface RegionChangeBlockEvent extends Event {
 		}
 
 		/**
-	     * Gets the {@link Explosion}.
-	     *
-	     * @return The explosion
-	     */
+		 * Gets the {@link Explosion}.
+		 *
+		 * @return The explosion
+		 */
 		public Explosion getExplosion();
 
 		/**
-	     * Set the {@link Explosion}.
+		 * Set the {@link Explosion}.
 		 */
 		public void setExplosion(Explosion explosion);
 
 		/**
-	     * Gets the {@link Explosive}.
-	     *
-	     * @return The explosive
-	     */
+		 * Gets the {@link Explosive}.
+		 *
+		 * @return The explosive
+		 */
 		public Optional<Explosive> getExplosive();
 
 		/**
@@ -94,28 +94,28 @@ public interface RegionChangeBlockEvent extends Event {
 		 */
 		public int getFlowLevel();
 		/**
-         * Gets a list of the {@link Transaction}s for this event. If a
-         * transaction is requested to be marked as "invalid",
-         * {@link Transaction#setValid(boolean)} can be used.
-         *
-         * @return The unmodifiable list of transactions
-         */
+		 * Gets a list of the {@link Transaction}s for this event. If a
+		 * transaction is requested to be marked as "invalid",
+		 * {@link Transaction#setValid(boolean)} can be used.
+		 *
+		 * @return The unmodifiable list of transactions
+		 */
 		public List<BlockTransaction> getTransactions();
 
 		/**
-         * Get default {@link Transaction} for this event. If a
-         * transaction is requested to be marked as "invalid",
-         * {@link Transaction#setValid(boolean)} can be used.
-         *
-         * @return transaction
-         */
+		 * Get default {@link Transaction} for this event. If a
+		 * transaction is requested to be marked as "invalid",
+		 * {@link Transaction#setValid(boolean)} can be used.
+		 *
+		 * @return transaction
+		 */
 		public BlockTransaction getDefaultTransaction();
 
 		/**
-	     * Gets the default replacement snapshot.
-	     *
-	     * @return The default replacement
-	     */
+		 * Gets the default replacement snapshot.
+		 *
+		 * @return The default replacement
+		 */
 		public BlockSnapshot afterTransaction();
 
 		/**
@@ -146,28 +146,28 @@ public interface RegionChangeBlockEvent extends Event {
 		 */
 		public boolean isAllowBreak();
 		/**
-         * Gets a list of the {@link Transaction}s for this event. If a
-         * transaction is requested to be marked as "invalid",
-         * {@link Transaction#setValid(boolean)} can be used.
-         *
-         * @return The unmodifiable list of transactions
-         */
+		 * Gets a list of the {@link Transaction}s for this event. If a
+		 * transaction is requested to be marked as "invalid",
+		 * {@link Transaction#setValid(boolean)} can be used.
+		 *
+		 * @return The unmodifiable list of transactions
+		 */
 		public List<BlockTransaction> getTransactions();
 
 		/**
-         * Get default {@link Transaction} for this event. If a
-         * transaction is requested to be marked as "invalid",
-         * {@link Transaction#setValid(boolean)} can be used.
-         *
-         * @return transaction
-         */
+		 * Get default {@link Transaction} for this event. If a
+		 * transaction is requested to be marked as "invalid",
+		 * {@link Transaction#setValid(boolean)} can be used.
+		 *
+		 * @return transaction
+		 */
 		public BlockTransaction getDefaultTransaction();
 
 		/**
-	     * Gets the default replacement snapshot.
-	     *
-	     * @return The default replacement
-	     */
+		 * Gets the default replacement snapshot.
+		 *
+		 * @return The default replacement
+		 */
 		public BlockSnapshot afterTransaction();
 
 		/**
@@ -194,36 +194,37 @@ public interface RegionChangeBlockEvent extends Event {
 		public Optional<ServerPlayer> getPlayer();
 
 		/**
-		 * Get protect result.
+		 * Getting protect result.
 		 */
 		public boolean isAllowPlace();
+
 		/**
-         * Gets a list of the {@link Transaction}s for this event. If a
-         * transaction is requested to be marked as "invalid",
-         * {@link Transaction#setValid(boolean)} can be used.
-         *
-         * @return The unmodifiable list of transactions
-         */
+		 * Getting a list of the {@link Transaction}s for this event. If a
+		 * transaction is requested to be marked as "invalid",
+		 * {@link Transaction#setValid(boolean)} can be used.
+		 *
+		 * @return The unmodifiable list of transactions
+		 */
 		public List<BlockTransaction> getTransactions();
 
 		/**
-         * Get default {@link Transaction} for this event. If a
-         * transaction is requested to be marked as "invalid",
-         * {@link Transaction#setValid(boolean)} can be used.
-         *
-         * @return transaction
-         */
+		 * Getting default {@link Transaction} for this event. If a
+		 * transaction is requested to be marked as "invalid",
+		 * {@link Transaction#setValid(boolean)} can be used.
+		 *
+		 * @return transaction
+		 */
 		public BlockTransaction getDefaultTransaction();
 
 		/**
-	     * Gets the default replacement snapshot.
-	     *
-	     * @return The default replacement
-	     */
+		 * Getting the default replacement snapshot.
+		 *
+		 * @return The default replacement
+		 */
 		public BlockSnapshot afterTransaction();
 
 		/**
-		 * Gets the original snapshot.
+		 * Getting the original snapshot.
 		 * 
 		 * @return The original snapshot
 		 */
@@ -252,8 +253,8 @@ public interface RegionChangeBlockEvent extends Event {
 	public ServerWorld getWorld();
 
 	/**
-     * Get the {@link Region} where the event occurred.
-     */
+	 * Get the {@link Region} where the event occurred.
+	 */
 	public Region getRegion();
 
 }

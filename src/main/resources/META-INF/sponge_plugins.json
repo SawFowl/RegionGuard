@@ -23,6 +23,12 @@
                 "version": "8.0.0"
             },
             {
+                "id": "mysqldriver",
+                "version": "1.0.0",
+                "load-order": "after",
+                "optional": true
+            },
+            {
                 "id": "localeapi",
                 "version": "2.1.0",
                 "load-order": "after",

@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.entity.Bed;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
@@ -28,6 +29,9 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.data.MemoryDataView;
 import org.spongepowered.math.vector.Vector3i;
+
+import net.minecraft.block.BedBlock;
+import sawfowl.regionguard.RegionGuard;
 
 public class ListenerUtils {
 
@@ -111,6 +115,13 @@ public class ListenerUtils {
 		return flagBlockArgs(snapshot.state());
 	}
 
+	public static List<String> flagBlocksArgs(List<BlockSnapshot> snapshots) {
+		if(snapshots.isEmpty()) return Arrays.asList("all");
+		List<String> args = snapshots.stream().map(b -> (blockID(b))).collect(Collectors.toList());
+		args.add("all");
+		return args;
+	}
+
 	public static List<String> flagBlockArgs(BlockState snapshot) {
 		return Arrays.asList(blockID(snapshot), "all");
 	}
@@ -140,13 +151,11 @@ public class ListenerUtils {
 	}
 
 	public static boolean isBedBlock(BlockSnapshot block) {
-		//String id = blockID(block);
-		//return id.contains("minecraft:") && id.contains("_bed");
-		return block instanceof Bed;
+		return RegionGuard.getInstance().getAPI().isForgePlatform() ? block.state().type() instanceof BedBlock : block.state().type() instanceof net.minecraft.world.level.block.BedBlock;
 	}
 
-	public static boolean isPistonOperation(List<BlockTransaction> transactions) {
-		return transactions.stream().filter(transaction -> (blockID(transaction.defaultReplacement()).contains("piston"))).findFirst().isPresent();
+	public static boolean isPiston(BlockSnapshot blockSnapshot) {
+		return blockSnapshot.state().type().equals(BlockTypes.PISTON.get()) || blockSnapshot.state().type().equals(BlockTypes.STICKY_PISTON.get());
 	}
 
 	public static boolean isDestructBlock(List<BlockTransaction> transactions) {

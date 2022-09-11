@@ -4,6 +4,8 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryTypes;
 
+import sawfowl.regionguard.api.data.FlagSettings;
+
 public enum Flags {
 
 	INTERACT_BLOCK_PRIMARY {
@@ -12,24 +14,41 @@ public enum Flags {
 			return "Interact-Block-Primary";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredBlockType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	INTERACT_BLOCK_SECONDARY {
@@ -38,24 +57,41 @@ public enum Flags {
 			return "Interact-Block-Secondary";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredBlockType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	BLOCK_BREAK {
@@ -64,24 +100,42 @@ public enum Flags {
 			return "Block-Break";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredBlockType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			// TODO Автоматически созданная заглушка метода
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	BLOCK_PLACE {
@@ -90,24 +144,41 @@ public enum Flags {
 			return "Block-Place";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredBlockType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	BLOCK_DECAY {
@@ -116,24 +187,41 @@ public enum Flags {
 			return "Block-Decay";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredBlockType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	BLOCK_GROWTH {
@@ -142,20 +230,41 @@ public enum Flags {
 			return "Block-Growth";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredBlockType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	PISTON {
@@ -163,11 +272,86 @@ public enum Flags {
 		public String toString() {
 			return "Piston";
 		}
+		@Override
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
+		}
 	},
 	PISTON_GRIEF {
 		@Override
 		public String toString() {
 			return "Piston-Grief";
+		}
+		@Override
+		public FlagSettings getFlagSettings() {
+			// TODO Автоматически созданная заглушка метода
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	LIQUID_FLOW {
@@ -176,20 +360,41 @@ public enum Flags {
 			return "Liquid-Flow";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredBlockType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return false;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	EXPLOSION {
@@ -198,16 +403,41 @@ public enum Flags {
 			return "Explosion";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	EXPLOSION_SURFACE {
@@ -216,30 +446,93 @@ public enum Flags {
 			return "Explosion-Surface";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredBlockType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	FIRE_SPREAD {
 		@Override
 		public String toString() {
 			return "Fire-Spread";
+		}
+
+		@Override
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowSource(String source) {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowArgs() {
+					return false;
+				}
+			};
 		}
 	},
 	ENTER_CLAIM {
@@ -248,16 +541,41 @@ public enum Flags {
 			return "Enter-Claim";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	EXIT_CLAIM {
@@ -266,16 +584,41 @@ public enum Flags {
 			return "Exit-Claim";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	ALLOW_FLY {
@@ -284,16 +627,41 @@ public enum Flags {
 			return "Allow-Fly";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	PVP {
@@ -301,17 +669,156 @@ public enum Flags {
 		public String toString() {
 			return "PvP";
 		}
+
+		@Override
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+
+				@Override
+				public boolean isAllowArgs() {
+					return false;
+				}
+
+				@Override
+				public boolean isAllowSource(String source) {
+					return false;
+				}
+
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+				
+			};
+		}
 	},
 	KEEP_INVENTORY {
 		@Override
 		public String toString() {
 			return "Keep-Inventory";
 		}
+
+		@Override
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowSource(String source) {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowArgs() {
+					return false;
+				}
+			};
+		}
 	},
 	KEEP_EXP {
 		@Override
 		public String toString() {
 			return "Keep-Exp";
+		}
+
+		@Override
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowSource(String source) {
+					return false;
+				}
+				
+				@Override
+				public boolean isAllowArgs() {
+					return false;
+				}
+			};
 		}
 	},
 	COMMAND_EXECUTE {
@@ -320,20 +827,45 @@ public enum Flags {
 			return "Command-Execute";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			String[] targets = target.split(";");
-			for(String command : targets) {
-				if(Sponge.server().commandManager().knownAliases().contains(command)) return true;
-			}
-			return Sponge.server().commandManager().knownAliases().contains(target) || target.equals("all");
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					String[] targets = target.split(";");
+					for(String command : targets) {
+						if(Sponge.server().commandManager().knownAliases().contains(command)) return true;
+					}
+					return Sponge.server().commandManager().knownAliases().contains(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	COMMAND_EXECUTE_PVP {
@@ -342,16 +874,41 @@ public enum Flags {
 			return "Command-Execute-PvP";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return Sponge.server().commandManager().knownAliases().contains(target) || target.equals("all");
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return Sponge.server().commandManager().knownAliases().contains(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	INTERACT_ENTITY_PRIMARY {
@@ -360,24 +917,41 @@ public enum Flags {
 			return "Interact-Entity-Primary";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetEntity() {
-			return false;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	INTERACT_ENTITY_SECONDARY {
@@ -386,24 +960,41 @@ public enum Flags {
 			return "Interact-Entity-Secondary";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetEntity() {
-			return false;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	COLLIDE_ENTITY {
@@ -412,24 +1003,41 @@ public enum Flags {
 			return "Collide-Entity";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetEntity() {
-			return false;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	ENTITY_DAMAGE {
@@ -438,28 +1046,41 @@ public enum Flags {
 			return "Entity-Damage";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || registeredDamageType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSourceDamageType() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetEntity() {
-			return false;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || registeredDamageType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	ETITY_RIDING {
@@ -468,24 +1089,41 @@ public enum Flags {
 			return "Entity-Riding";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetEntity() {
-			return false;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	ENTITY_SPAWN {
@@ -494,24 +1132,41 @@ public enum Flags {
 			return "Entity-Spawn";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetEntity() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	ENTITY_TELEPORT_FROM {
@@ -520,28 +1175,41 @@ public enum Flags {
 			return "Entity-Teleport-From";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTargetEntity() {
-			return false;
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetItem() {
-			return false;
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return false;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+			};
 		}
 	},
 	ENTITY_TELEPORT_TO {
@@ -550,16 +1218,41 @@ public enum Flags {
 			return "Entity-Teleport-To";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	INTERACT_ITEM {
@@ -568,24 +1261,41 @@ public enum Flags {
 			return "Interact-Item";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredItemType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetItem() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredItemType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	ITEM_DROP {
@@ -594,24 +1304,41 @@ public enum Flags {
 			return "Item-Drop";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredItemType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetItem() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredItemType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	ITEM_PICKUP {
@@ -620,24 +1347,41 @@ public enum Flags {
 			return "Item-Pickup";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredItemType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetItem() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+			@Override
+			public boolean isAllowArgs() {
+				return true;
+			}
+			@Override
+			public boolean isAllowSource(String source) {
+				return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+			}
+			@Override
+			public boolean isAllowTarget(String target) {
+				return registeredItemType(target) || target.equals("all");
+			}
+			@Override
+			public boolean isAllowSourceEntity() {
+				return true;
+			}
+			@Override
+			public boolean isAllowTargetItem() {
+				return true;
+			}
+			@Override
+			public boolean isAllowSourceDamageType() {
+				return false;
+			}
+			@Override
+			public boolean isAllowTargetEntity() {
+				return false;
+			}
+			@Override
+			public boolean isAllowTargetBlock() {
+				return false;
+			}
+			};
 		}
 	},
 	ITEM_SPAWN {
@@ -646,24 +1390,41 @@ public enum Flags {
 			return "Item-Spawn";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredItemType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetItem() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredItemType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	EXP_SPAWN {
@@ -672,16 +1433,41 @@ public enum Flags {
 			return "Exp-Spawn";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	ITEM_USE {
@@ -690,24 +1476,41 @@ public enum Flags {
 			return "Item-Use";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredItemType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetItem() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredItemType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	PROJECTILE_IMPACT_BLOCK {
@@ -716,24 +1519,41 @@ public enum Flags {
 			return "Projectile-Impact-Block";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredBlockType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetBlock() {
-			return false;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredBlockType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+			};
 		}
 	},
 	PROJECTILE_IMPACT_ENTITY {
@@ -742,24 +1562,41 @@ public enum Flags {
 			return "Projectile-Impact-Entity";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowTarget(String target) {
-			return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
-		}
-		@Override
-		public boolean isAllowTargetEntity() {
-			return false;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return registeredEntityCategory(target) || registeredEntityType(target) || target.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	},
 	PORTAL_USE {
@@ -768,56 +1605,51 @@ public enum Flags {
 			return "Portal-Use";
 		}
 		@Override
-		public boolean isAllowArgs() {
-			return true;
-		}
-		@Override
-		public boolean isAllowSource(String source) {
-			return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
-		}
-		@Override
-		public boolean isAllowSourceEntity() {
-			return true;
+		public FlagSettings getFlagSettings() {
+			return new FlagSettings() {
+				@Override
+				public boolean isAllowArgs() {
+					return true;
+				}
+				@Override
+				public boolean isAllowSource(String source) {
+					return registeredEntityCategory(source) || registeredEntityType(source) || source.equals("all");
+				}
+				@Override
+				public boolean isAllowSourceEntity() {
+					return true;
+				}
+				@Override
+				public boolean isAllowTarget(String target) {
+					return false;
+				}
+				@Override
+				public boolean isAllowSourceDamageType() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetEntity() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetItem() {
+					return false;
+				}
+				@Override
+				public boolean isAllowTargetBlock() {
+					return false;
+				}
+			};
 		}
 	};
+
+	public abstract FlagSettings getFlagSettings();
 
 	public static Flags valueOfName(String string) {
 		for(Flags type : Flags.values()) {
 			if(type.toString().equalsIgnoreCase(string)) return type;
 		}
 		return null;
-	}
-
-	public boolean isAllowArgs() {
-		return false;
-	}
-
-	public boolean isAllowSource(String source) {
-		return false;
-	}
-
-	public boolean isAllowTarget(String target) {
-		return false;
-	}
-
-	public boolean isAllowSourceEntity() {
-		return false;
-	}
-
-	public boolean isAllowSourceDamageType() {
-		return false;
-	}
-
-	public boolean isAllowTargetEntity() {
-		return false;
-	}
-
-	public boolean isAllowTargetItem() {
-		return false;
-	}
-
-	public boolean isAllowTargetBlock() {
-		return false;
 	}
 
 	public static boolean registeredItemType(String string) {

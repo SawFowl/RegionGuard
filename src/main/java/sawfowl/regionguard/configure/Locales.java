@@ -345,6 +345,8 @@ public class Locales {
 		save = check(locale, toText("&cYou cannot deal damage to this entity in the current region."), null, LocalesPaths.ENTITY_DAMAGE) || save;
 		save = check(locale, toText("&aThe region has saved your experience and it will be restored after the respawn."), null, LocalesPaths.KEEP_EXP) || save;
 		save = check(locale, toText("&aThe region has saved your inventory and it will be restored after the respawn."), null, LocalesPaths.KEEP_INVENTORY) || save;
+		save = check(locale, toText("&cThe region has blocked the use of the piston."), null, LocalesPaths.DENY_PISTON) || save;
+		save = check(locale, toText("&aThe region has blocked the use of the piston from outside."), null, LocalesPaths.DENY_PISTON_GRIEF) || save;
 
 		save = check(locale, toText("&cThe block is in a region in which you have no rights to shoot blocks."), null, LocalesPaths.IMPACT_BLOCK) || save;
 		save = check(locale, toText("&cThe target is in a region in which you have no rights to shoot entities."), null, LocalesPaths.IMPACT_ENTITY) || save;
@@ -661,6 +663,8 @@ public class Locales {
 		save = check(locale, toText("&cВы не можете нанести урон этой сущности в текущем регионе."), null, LocalesPaths.ENTITY_DAMAGE) || save;
 		save = check(locale, toText("&aРегион сохранил ваш опыт и он и будет восстановлен после респавна."), null, LocalesPaths.KEEP_EXP) || save;
 		save = check(locale, toText("&aРегион сохранил ваш инвентарь и он и будет восстановлен после респавна."), null, LocalesPaths.KEEP_INVENTORY) || save;
+		save = check(locale, toText("&cРегион запретил использование поршня."), null, LocalesPaths.DENY_PISTON) || save;
+		save = check(locale, toText("&aРегион запретил использование поршня из вне."), null, LocalesPaths.DENY_PISTON_GRIEF) || save;
 
 		save = check(locale, toText("&cБлок находится в регионе в котором у вас нет прав на стрельбу по блокам."), null, LocalesPaths.IMPACT_BLOCK) || save;
 		save = check(locale, toText("&cЦель находится в регионе в котором у вас нет прав на стрельбу по сущностям."), null, LocalesPaths.IMPACT_ENTITY) || save;

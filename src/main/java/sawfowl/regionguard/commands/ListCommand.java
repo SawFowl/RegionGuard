@@ -117,6 +117,7 @@ public class ListCommand implements PluginRawCommand {
 	}
 
 	private void teleport(ServerPlayer player, Region region, ServerWorld world, Vector3d location) {
+		Vector3d playerPos = player.position();
 		class RegionTPEvent extends AbstractEvent implements RegionCommandTeleportEvent {
 			boolean cancelled = false;
 			Component message;
@@ -134,6 +135,11 @@ public class ListCommand implements PluginRawCommand {
 			@Override
 			public Region getRegion() {
 				return region;
+			}
+
+			@Override
+			public Region getOriginalDestinationRegion() {
+				return plugin.getAPI().findRegion(world, location.toInt());
 			}
 
 			@Override
@@ -163,7 +169,7 @@ public class ListCommand implements PluginRawCommand {
 
 			@Override
 			public Vector3d getOriginalLocation() {
-				return player.position();
+				return playerPos;
 			}
 
 			@Override
@@ -178,7 +184,7 @@ public class ListCommand implements PluginRawCommand {
 
 			@Override
 			public void setDestination(Vector3d location) {
-				destination = location;
+				if(location != null) destination = location;
 			}
 		}
 		RegionCommandTeleportEvent rgEvent = new RegionTPEvent();

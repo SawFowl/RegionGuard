@@ -8,8 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.math.NumberUtils;
@@ -32,6 +33,8 @@ import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.SelectorTypes;
 import sawfowl.regionguard.api.WorldEditCUIAPI;
 import sawfowl.regionguard.api.data.ChunkNumber;
+import sawfowl.regionguard.api.data.FlagSettings;
+import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
@@ -51,10 +54,12 @@ class Api implements RegionAPI {
 			plugin.getLogger().info("The plugin is running in Vanilla compatibility mode.");
 		}
 		cuiapi = new WorldEditAPI(plugin, isForgePlatform);
-		flags = Stream.of(Flags.values()).map(Flags::toString).collect(Collectors.toList());
+		for(Flags flag : Flags.values()) {
+			registeredFlags.put(flag.toString(), flag.getFlagSettings());
+		}
 	}
 
-	private List<String> flags = new ArrayList<String>();
+	private SortedMap<String, FlagSettings> registeredFlags = new TreeMap<String, FlagSettings>();
 	private Region defaultGlobal;
 	private Map<UUID, Region> regionsByUUID = new HashMap<UUID, Region>();
 	private Map<UUID, Region> tempRegions = new HashMap<UUID, Region>();
@@ -72,8 +77,18 @@ class Api implements RegionAPI {
 	}
 
 	@Override
-	public List<String> getFlags() {
-		return flags;
+	public SortedMap<String, FlagSettings> getRegisteredFlags() {
+		SortedMap<String, FlagSettings> copy = new TreeMap<String, FlagSettings>();
+		copy.putAll(registeredFlags);
+		return copy;
+	}
+
+	@Override
+	public void registerFlag(String flagName, FlagSettings settings) {
+		if(flagName == null) throw new NullPointerException("The name of the flag is not specified!");
+		if(settings == null) throw new NullPointerException("The flag settings are not specified!");
+		if(registeredFlags.containsKey(flagName)) throw new RuntimeException("The flag is already registered!");
+		registeredFlags.put(flagName, settings);
 	}
 
 	@Override
@@ -182,10 +197,12 @@ class Api implements RegionAPI {
 		}
 		if(playersRegions.containsKey(region.getOwnerUUID())) {
 			playersRegions.get(region.getOwnerUUID()).add(region);
+			updatePlayerData(region.getOwnerUUID());
 		} else {
 			List<Region> playerRegions = new ArrayList<Region>();
 			playerRegions.add(region);
 			playersRegions.put(region.getOwnerUUID(), playerRegions);
+			updatePlayerData(region.getOwnerUUID());
 		}
 		removeTempRegion(region);
 	}
@@ -207,7 +224,10 @@ class Api implements RegionAPI {
 		plugin.getRegionsDataWork().deleteRegion(region);
 		ResourceKey worldKey = region.getServerWorldKey();
 		for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(regionsPerWorld.get(worldKey).containsKey(chunkNumber) && regionsPerWorld.get(worldKey).get(chunkNumber).contains(region)) regionsPerWorld.get(worldKey).get(chunkNumber).remove(region);
-		if(playersRegions.containsKey(region.getOwnerUUID()) && playersRegions.get(region.getOwnerUUID()).contains(region)) playersRegions.get(region.getOwnerUUID()).remove(region);
+		if(playersRegions.containsKey(region.getOwnerUUID()) && playersRegions.get(region.getOwnerUUID()).contains(region)) {
+			playersRegions.get(region.getOwnerUUID()).remove(region);
+			updatePlayerData(region.getOwnerUUID());
+		}
 		if(regionsByUUID.containsKey(region.getUniqueId())) regionsByUUID.remove(region.getUniqueId());
 	}
 
@@ -252,6 +272,14 @@ class Api implements RegionAPI {
 	@Override
 	public int getMinimalRegionSize(SelectorTypes selectorType) {
 		return plugin.getConfig().getMinimalRegionSize(selectorType);
+	}
+
+	@Override
+	public Map<String, List<FlagValue>> getDefaultFlags(RegionTypes regionType) {
+		if(regionType == RegionTypes.ADMIN) return plugin.getConfig().getDefaultAdminFlags();
+		if(regionType == RegionTypes.ARENA) return plugin.getConfig().getDefaultArenaFlags();
+		if(regionType == RegionTypes.GLOBAL) return plugin.getConfig().getDefaultGlobalFlags();
+		return plugin.getConfig().getDefaultClaimFlags();
 	}
 
 	@Override
@@ -398,6 +426,20 @@ class Api implements RegionAPI {
 		if(dataPlayers.containsKey(player)) dataPlayers.remove(player);
 		dataPlayers.put(player, playerData);
 		plugin.getPlayersDataWork().savePlayerData(player, playerData);
+	}
+
+	@Override
+	public void updatePlayerData(ServerPlayer player) {
+		updatePlayerData(player.uniqueId());
+	}
+
+	@Override
+	public void updatePlayerData(UUID player) {
+		if(containsLimits(player)) dataPlayers.get(player).getClaimed().setRegions(playersRegions.containsKey(player) ? (long) playersRegions.get(player).size() : 0);
+		long blocks = 0;
+		if(playersRegions.containsKey(player) && !playersRegions.get(player).isEmpty()) for(Region region1 : playersRegions.get(player)) blocks += region1.getCuboid().getSize();
+		if(playersRegions.containsKey(player) && containsLimits(player)) dataPlayers.get(player).getClaimed().setBlocks(blocks);
+		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player));
 	}
 
 	@Override

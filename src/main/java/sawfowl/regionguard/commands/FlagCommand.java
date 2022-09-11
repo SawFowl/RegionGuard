@@ -26,7 +26,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
-import sawfowl.regionguard.api.Flags;
+import sawfowl.regionguard.api.data.FlagSettings;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.LocalesPaths;
@@ -65,22 +65,23 @@ public class FlagCommand implements PluginRawCommand {
 		if(args.isEmpty()) {
 			return sendFlagList(player, getFlagList(player, region));
 		} else {
-			Flags flag = Flags.valueOfName(args.get(0));
+			String flag = args.get(0);
 			String value = null;
 			String source = null;
 			String target = null;
-			if(flag == null || !player.hasPermission(Permissions.setFlag(flag))) return sendFlagList(player, getFlagList(player, region));
+			if(!plugin.getAPI().getRegisteredFlags().containsKey(flag) || !player.hasPermission(Permissions.setFlag(flag))) return sendFlagList(player, getFlagList(player, region));
+			FlagSettings settings = plugin.getAPI().getRegisteredFlags().get(flag);
 			for(int cursor = 0; cursor <= args.size() - 1; cursor++) {
 				if(cursor == 1) {
 					value = args.get(1);
 					if(!value.equals("true") && !value.equals("false")) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_FLAG_VALUE_NOT_PRESENT));
 				} else if(cursor == 2) {
-					if(flag.isAllowArgs()) {
-						source = flag.isAllowSource(args.get(2)) ? args.get(2) : null;
+					if(settings.isAllowArgs()) {
+						source = settings.isAllowSource(args.get(2)) ? args.get(2) : null;
 					}
 				} else if(cursor == 3) {
-					if(flag.isAllowArgs()) {
-						target = flag.isAllowTarget(args.get(3)) ? args.get(3) : null;
+					if(settings.isAllowArgs()) {
+						target = settings.isAllowTarget(args.get(3)) ? args.get(3) : null;
 					}
 				}
 			}
@@ -102,25 +103,26 @@ public class FlagCommand implements PluginRawCommand {
 		if(args.size() == 1 && !plainArgs.contains(args.get(args.size() - 1) + " ")) return empty;
 		if(args.size() == 1) return bools;
 		if(args.size() == 2 && !boolsOfString.contains(args.get(args.size() - 1))) return boolsOfString.stream().filter(bool -> (bool.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
-		Flags flag = Flags.valueOfName(args.get(0));
-		if(flag == null) return empty;
+		String flag = args.get(0);
+		if(!plugin.getAPI().getRegisteredFlags().containsKey(flag)) return empty;
+		FlagSettings settings = plugin.getAPI().getRegisteredFlags().get(flag);
 		if(args.size() == 2 && !plainArgs.contains(args.get(args.size() - 1) + " ")) return empty;
-		if(args.size() > 1 && flag.isAllowArgs()) {
-			if(args.size() == 2 && flag.isAllowSourceDamageType()) return damageTypesAndEntities;
-			if(args.size() == 2 && flag.isAllowSourceEntity()) return entities;
+		if(args.size() > 1 && settings.isAllowArgs()) {
+			if(args.size() == 2 && settings.isAllowSourceDamageType()) return damageTypesAndEntities;
+			if(args.size() == 2 && settings.isAllowSourceEntity()) return entities;
 			if(args.size() == 3) {
-				if(!flag.isAllowSourceEntity() && !flag.isAllowSourceDamageType()) return onlyAll;
-				if(flag.isAllowSourceDamageType() && !damageTypeAndEntityStrings.contains(args.get(args.size() - 1))) return damageTypeAndEntityStrings.stream().filter(source -> (source.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
-				if(flag.isAllowSourceEntity() && !entityStrings.contains(args.get(args.size() - 1))) return entityStrings.stream().filter(entity -> (entity.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
-				if(flag.isAllowTargetEntity()) return entities;
-				if(flag.isAllowTargetBlock()) return blocks;
-				if(flag.isAllowTargetItem()) return items;
+				if(!settings.isAllowSourceEntity() && !settings.isAllowSourceDamageType()) return onlyAll;
+				if(settings.isAllowSourceDamageType() && !damageTypeAndEntityStrings.contains(args.get(args.size() - 1))) return damageTypeAndEntityStrings.stream().filter(source -> (source.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
+				if(settings.isAllowSourceEntity() && !entityStrings.contains(args.get(args.size() - 1))) return entityStrings.stream().filter(entity -> (entity.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
+				if(settings.isAllowTargetEntity()) return entities;
+				if(settings.isAllowTargetBlock()) return blocks;
+				if(settings.isAllowTargetItem()) return items;
 			}
 			if(args.size() == 3 && !plainArgs.contains(args.get(args.size() - 1) + " ")) return empty;
 			if(args.size() == 4) {
-				if(flag.isAllowTargetEntity() && !entityStrings.contains(args.get(args.size() - 1))) return entityStrings.stream().filter(entity -> (entity.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
-				if(flag.isAllowTargetBlock() && !blockStrings.contains(args.get(args.size() - 1))) return blockStrings.stream().filter(block -> (block.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
-				if(flag.isAllowTargetItem() && !itemStrings.contains(args.get(args.size() - 1))) return itemStrings.stream().filter(item -> (item.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
+				if(settings.isAllowTargetEntity() && !entityStrings.contains(args.get(args.size() - 1))) return entityStrings.stream().filter(entity -> (entity.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
+				if(settings.isAllowTargetBlock() && !blockStrings.contains(args.get(args.size() - 1))) return blockStrings.stream().filter(block -> (block.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
+				if(settings.isAllowTargetItem() && !itemStrings.contains(args.get(args.size() - 1))) return itemStrings.stream().filter(item -> (item.startsWith(args.get(args.size() - 1)))).map(CommandCompletion::of).collect(Collectors.toList());
 			}
 		}
 		return empty;
@@ -131,7 +133,7 @@ public class FlagCommand implements PluginRawCommand {
 		return cause.hasPermission(Permissions.FLAG_COMMAND);
 	}
 
-	private void setFlag(Region region, Flags flag, boolean value, String source, String target) {
+	private void setFlag(Region region, String flag, boolean value, String source, String target) {
 		region.setFlag(flag, value, source, target);
 		plugin.getAPI().saveRegion(region.getPrimaryParent());
 	}
@@ -150,7 +152,7 @@ public class FlagCommand implements PluginRawCommand {
 		ArrayList<Component> messages = new ArrayList<Component>();
 		int flagNumber = 0;
 		List<Integer> addedCustom = new ArrayList<Integer>();
-		for(String flagName : plugin.getAPI().getFlags()) {
+		for(String flagName : plugin.getAPI().getRegisteredFlags().keySet()) {
 			List<Component> customFlagsList = getCustomFlagsList(player, region, flagName);
 			if(!addedCustom.contains(flagNumber)) {
 				addedCustom.add(flagNumber);
@@ -308,7 +310,7 @@ public class FlagCommand implements PluginRawCommand {
 	}
 
 	public void updateCompletions() {
-		flags = plugin.getAPI().getFlags().stream().map(CommandCompletion::of).collect(Collectors.toList());
+		flags = plugin.getAPI().getRegisteredFlags().keySet().stream().map(CommandCompletion::of).collect(Collectors.toList());
 
 		entityStrings = Sponge.game().registry(RegistryTypes.ENTITY_CATEGORY).streamEntries().map(RegistryEntry::key).map(ResourceKey::toString).collect(Collectors.toList());
 		entityStrings.addAll(Sponge.game().registry(RegistryTypes.ENTITY_TYPE).streamEntries().map(RegistryEntry::key).map(ResourceKey::toString).collect(Collectors.toList()));

@@ -232,7 +232,7 @@ public class Config {
 		claimFlags.put(Flags.PROJECTILE_IMPACT_BLOCK.toString(), Arrays.asList(new FlagValue(false, null, null)));
 		claimFlags.put(Flags.PROJECTILE_IMPACT_ENTITY.toString(), Arrays.asList(new FlagValue(false, null, null)));
 		claimFlags.put(Flags.PORTAL_USE.toString(), Arrays.asList(new FlagValue(false, null, null)));
-		for(String flagName : plugin.getAPI().getFlags()) {
+		for(String flagName : plugin.getAPI().getRegisteredFlags().keySet()) {
 			if(!claimFlags.containsKey(flagName)) claimFlags.put(flagName, Arrays.asList(new FlagValue(true, null, null)));
 		}
 		return claimFlags;
@@ -240,7 +240,7 @@ public class Config {
 
 	private Map<String, List<FlagValue>> globalDefaultFlags() {
 		Map<String, List<FlagValue>> worldFlags = new HashMap<String, List<FlagValue>>();
-		for(String flagName : plugin.getAPI().getFlags()) {
+		for(String flagName : plugin.getAPI().getRegisteredFlags().keySet()) {
 			worldFlags.put(flagName, Arrays.asList(new FlagValue(true, null, null)));
 		}
 		return worldFlags;

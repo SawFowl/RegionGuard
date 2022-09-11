@@ -18,9 +18,12 @@ public class ClientConnectionListener {
 
 	@Listener
 	public void onJoin(ServerSideConnectionEvent.Join event) {
-		if(plugin.getAPI().getPlayerData(event.player().uniqueId()).isPresent()) return;
 		ServerPlayer player = event.player();
+		plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
+		plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, null);
+		if(plugin.getAPI().getPlayerData(event.player().uniqueId()).isPresent()) return;
 		plugin.getAPI().setPlayerData(player.uniqueId(), new PlayerData(new PlayerLimits(plugin.getAPI().getLimitBlocks(player), plugin.getAPI().getLimitClaims(player), plugin.getAPI().getLimitSubdivisions(player), plugin.getAPI().getLimitMembers(player)), new ClaimedByPlayer(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player))));
+		plugin.getAPI().updatePlayerData(player);
 	}
 
 }

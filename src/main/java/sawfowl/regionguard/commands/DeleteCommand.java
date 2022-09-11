@@ -21,9 +21,6 @@ import net.kyori.adventure.text.Component;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionTypes;
-import sawfowl.regionguard.api.data.ClaimedByPlayer;
-import sawfowl.regionguard.api.data.PlayerData;
-import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionDeleteEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
@@ -137,18 +134,6 @@ public class DeleteCommand implements PluginRawCommand {
 						region.setRegionType(RegionTypes.UNSET);
 						if(regen) region.regen(plugin.getConfig().asyncRegen(), plugin.getConfig().delayRegen());
 						plugin.getAPI().deleteRegion(region);
-						Optional<PlayerData> optPlayerData = plugin.getAPI().getPlayerData(player);
-						if(optPlayerData.isPresent()) {
-							optPlayerData.get().getClaimed().setRegions(plugin.getAPI().getClaimedRegions(player) - 1);
-							optPlayerData.get().getClaimed().setBlocks(plugin.getAPI().getClaimedBlocks(player) - region.getCuboid().getSize());
-							plugin.getPlayersDataWork().savePlayerData(player, optPlayerData.get());
-						} else {
-							PlayerData playerData = new PlayerData(
-								new PlayerLimits(plugin.getAPI().getLimitBlocks(player), plugin.getAPI().getLimitClaims(player), plugin.getAPI().getLimitSubdivisions(player), plugin.getAPI().getLimitMembers(player)), 
-								new ClaimedByPlayer(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player))
-							);
-							plugin.getPlayersDataWork().savePlayerData(player, playerData);
-						}
 					}
 					if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());
 				}

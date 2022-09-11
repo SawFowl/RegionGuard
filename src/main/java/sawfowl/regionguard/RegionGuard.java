@@ -59,7 +59,6 @@ import sawfowl.regionguard.configure.WorkTables;
 import sawfowl.regionguard.listeners.BlockAndWorldChangeListener;
 import sawfowl.regionguard.listeners.ChunkListener;
 import sawfowl.regionguard.listeners.ClientConnectionListener;
-import sawfowl.regionguard.listeners.ConnectionListener;
 import sawfowl.regionguard.listeners.ImpactListener;
 import sawfowl.regionguard.listeners.DamageEntityAndCommandListener;
 import sawfowl.regionguard.listeners.DeathListener;
@@ -282,7 +281,6 @@ public class RegionGuard {
 		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ConnectionListener(instance));
 		Sponge.asyncScheduler().executor(pluginContainer).execute(() -> {
 			long time = System.currentTimeMillis();
 			regionsDataWork.loadRegions();

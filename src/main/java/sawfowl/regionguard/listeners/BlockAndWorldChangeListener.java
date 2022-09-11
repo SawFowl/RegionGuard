@@ -6,15 +6,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operations;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -23,17 +26,22 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.ChangeBlockEvent.Pre;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.util.AABB;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.common.world.server.SpongeLocatableBlock;
 import org.spongepowered.math.vector.Vector3i;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -43,6 +51,7 @@ import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionCreateEvent;
 import sawfowl.regionguard.api.events.RegionInteractBlockEvent;
+import sawfowl.regionguard.api.events.RegionPistonEvent;
 import sawfowl.regionguard.api.events.RegionChangeBlockEvent;
 import sawfowl.regionguard.api.events.RegionResizeEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
@@ -222,6 +231,18 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
+	public void onPreChange(ChangeBlockEvent.Pre event) {
+		if(event.locations().size() == 1) return;
+		if(event.source() instanceof SpongeLocatableBlock && ListenerUtils.isPiston(((SpongeLocatableBlock) event.source()).location().createSnapshot())) {
+			onPistonMove(event, ((SpongeLocatableBlock) event.source()).location().createSnapshot());
+		} else {
+			event.locations().stream().filter(l -> (ListenerUtils.isPiston(l.createSnapshot()))).findFirst().ifPresent(location -> {
+				onPistonMove(event, location.createSnapshot());
+			});
+		}
+	}
+
+	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onBlockChange(ChangeBlockEvent.All event) {
 		boolean isPlayer = event.source() instanceof ServerPlayer;
 		ServerPlayer player = isPlayer ? (ServerPlayer) event.source() : null;
@@ -231,22 +252,6 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				event.setCancelled(true);
 				return;
 			}
-		}
-		if(event.transactions().size() >= 2 && ListenerUtils.isPistonOperation(event.transactions())) {
-			Region first = plugin.getAPI().findRegion(event.world(), event.transactions().get(0).original().position());
-			for(BlockTransaction blockTransaction : event.transactions()) {
-				Region second = plugin.getAPI().findRegion(event.world(), blockTransaction.original().position());
-				if(!first.equals(second)) {
-					if(!isAllowPistonGrief(first) || !isAllowPistonGrief(second)) {
-						event.setCancelled(true);
-						return;
-					}
-				}
-			}
-		}
-		if(ListenerUtils.isPistonOperation(event.transactions()) && !isAllowPistonMove(plugin.getAPI().findRegion(event.world(), event.transactions().get(0).original().position()))) {
-			event.setCancelled(true);
-			return;
 		}
 		if(ListenerUtils.isDecay(event.transactions())) {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.DECAY.get());
@@ -536,7 +541,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
 			Entity entity = event.source() instanceof Entity ? (Entity) event.source() : null;
 			boolean allow = isAllowBreak(region, blockTransaction, entity, true);
-			class PlaceEvent extends AbstractEvent implements RegionChangeBlockEvent.Place {
+			class BreakEvent extends AbstractEvent implements RegionChangeBlockEvent.Break {
 
 				Component component;
 				boolean cancelled;
@@ -596,11 +601,6 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				}
 
 				@Override
-				public boolean isAllowPlace() {
-					return allow;
-				}
-
-				@Override
 				public Entity getEntity() {
 					return entity;
 				}
@@ -619,9 +619,14 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				public Optional<Component> getMessage() {
 					return Optional.ofNullable(component);
 				}
+
+				@Override
+				public boolean isAllowBreak() {
+					return allow;
+				}
 				
 			}
-			RegionChangeBlockEvent.Place rgEvent = new PlaceEvent();
+			RegionChangeBlockEvent.Break rgEvent = new BreakEvent();
 			rgEvent.setCancelled(!allow);
 			if(isPlayer) rgEvent.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.CANCEL_BREAK));
 			ListenerUtils.postEvent(rgEvent);
@@ -640,6 +645,173 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	@Listener
 	public void worldChange(ChangeEntityWorldEvent.Pre event, @Root ServerPlayer player) {
 		if(positions.containsKey(player.uniqueId())) positions.get(player.uniqueId()).clear();
+	}
+
+	private void onPistonMove(ChangeBlockEvent.Pre event, BlockSnapshot snapshot) {
+		Direction direction = getDirect(snapshot);
+		if(direction == null) return;
+		Region region = plugin.getAPI().findRegion(event.world(), snapshot.position());
+		Region second = secondRegion(event.locations(), region);
+		Optional<Entity> optEntity = event.context().get(EventContextKeys.NOTIFIER).isPresent() ? event.world().entity(event.context().get(EventContextKeys.NOTIFIER).get()) : (event.context().get(EventContextKeys.CREATOR).isPresent() ? event.world().entity(event.context().get(EventContextKeys.CREATOR).get()) : Optional.empty());
+		List<String> sources = optEntity.isPresent() ? ListenerUtils.flagEntityArgs(optEntity.get()) : Arrays.asList("all");
+		List<String> targets = ListenerUtils.flagBlocksArgs(event.locations().stream().filter(l -> (!l.blockPosition().equals(snapshot.position()))).map(l -> (l.createSnapshot())).collect(Collectors.toList()));
+		if(region.equals(second)) {
+			boolean isAllow = isAllowPistonMove(region, sources, targets);
+			class MoveEvent extends AbstractEvent implements RegionPistonEvent.OneRegion {
+
+				Component text;
+				boolean cancelled;
+				@Override
+				public Pre getSpongeEvent() {
+					return event;
+				}
+
+				@Override
+				public Region getRegion() {
+					return region;
+				}
+
+				@Override
+				public List<ServerLocation> getPistonMovedBlocks() {
+					return event.locations().stream().filter(l -> (!l.blockPosition().equals(snapshot.position()))).collect(Collectors.toList());
+				}
+
+				@Override
+				public Cause cause() {
+					return cause;
+				}
+
+				@Override
+				public boolean isAllowMove() {
+					return isAllow;
+				}
+
+				@Override
+				public boolean isCancelled() {
+					return cancelled;
+				}
+
+				@Override
+				public void setCancelled(boolean cancel) {
+					cancelled = cancel;
+				}
+
+				@Override
+				public Direction getDirection() {
+					return direction;
+				}
+
+				@Override
+				public Optional<ServerPlayer> getPlayer() {
+					return optEntity.isPresent() && optEntity.get() instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) optEntity.get()) : Optional.empty();
+				}
+
+				@Override
+				public Optional<Entity> getEntity() {
+					return optEntity;
+				}
+
+				@Override
+				public void setMessage(Component message) {
+					text = message;
+				}
+
+				@Override
+				public Optional<Component> getMessage() {
+					return Optional.ofNullable(text);
+				}
+				
+			}
+			RegionPistonEvent.OneRegion rgEvent = new MoveEvent();
+			rgEvent.setCancelled(!isAllow);
+			if(!isAllow && rgEvent.getPlayer().isPresent()) rgEvent.setMessage(plugin.getLocales().getText(rgEvent.getPlayer().get().locale(), LocalesPaths.DENY_PISTON));
+			ListenerUtils.postEvent(rgEvent);
+			if(rgEvent.isCancelled()) {
+				event.setCancelled(true);
+			}
+			if(rgEvent.getMessage().isPresent() && rgEvent.getPlayer().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
+		} else if(!second.isGlobal()) {
+			boolean isAllow = isAllowPistonGrief(second, sources, targets) && isAllowPistonMove(second, sources, targets);
+			class GriefEvent extends AbstractEvent implements RegionPistonEvent.Grief {
+
+				Component text;
+				boolean cancelled;
+				@Override
+				public Pre getSpongeEvent() {
+					return event;
+				}
+
+				@Override
+				public Region getRegion() {
+					return region;
+				}
+
+				@Override
+				public Region getGriefedRegion() {
+					return second;
+				}
+
+				@Override
+				public List<ServerLocation> getPistonMovedBlocks() {
+					return event.locations().stream().filter(l -> (!l.blockPosition().equals(snapshot.position()))).collect(Collectors.toList());
+				}
+
+				@Override
+				public Cause cause() {
+					return cause;
+				}
+
+				@Override
+				public boolean isAllowGrief() {
+					return isAllow;
+				}
+
+				@Override
+				public boolean isCancelled() {
+					return cancelled;
+				}
+
+				@Override
+				public void setCancelled(boolean cancel) {
+					cancelled = cancel;
+				}
+
+				@Override
+				public Direction getDirection() {
+					return direction;
+				}
+
+				@Override
+				public Optional<ServerPlayer> getPlayer() {
+					return optEntity.isPresent() && optEntity.get() instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) optEntity.get()) : Optional.empty();
+				}
+
+				@Override
+				public Optional<Entity> getEntity() {
+					return optEntity;
+				}
+
+				@Override
+				public void setMessage(Component message) {
+					text = message;
+				}
+
+				@Override
+				public Optional<Component> getMessage() {
+					return Optional.ofNullable(text);
+				}
+				
+			}
+			RegionPistonEvent.Grief rgEvent = new GriefEvent();
+			rgEvent.setCancelled(!isAllow);
+			if(!isAllow && rgEvent.getPlayer().isPresent()) rgEvent.setMessage(plugin.getLocales().getText(rgEvent.getPlayer().get().locale(), LocalesPaths.DENY_PISTON_GRIEF));
+			ListenerUtils.postEvent(rgEvent);
+			if(rgEvent.isCancelled()) {
+				event.setCancelled(true);
+			}
+			if(rgEvent.getMessage().isPresent() && rgEvent.getPlayer().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
+		}
+	
 	}
 
 	private boolean resizeOrCreateRegion(ServerPlayer player, Vector3i blockPosition, Region region) {
@@ -689,7 +861,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		} else return;
 		if(region.isGlobal()) {
 			if(!player.hasPermission(Permissions.UNLIMIT_CLAIMS) && plugin.getAPI().getLimitClaims(player) - plugin.getAPI().getClaimedRegions(player) <= 0) {
-				player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE), Arrays.asList((plugin.getAPI().getLimitClaims(player) + "/" + plugin.getAPI().getLimitClaims(player)))), LocalesPaths.REGION_CREATE_EXCEPTION_LARGE_VOLUME_REGIONS));
+				player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE), Arrays.asList((plugin.getAPI().getClaimedRegions(player) + "/" + plugin.getAPI().getLimitClaims(player)))), LocalesPaths.REGION_CREATE_EXCEPTION_LARGE_VOLUME_REGIONS));
 				return;
 			}
 			if(!player.hasPermission(Permissions.UNLIMIT_BLOCKS)) {
@@ -927,7 +1099,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	}
 
 	private boolean isAllowPlace(Region region, BlockTransaction transaction, Entity entity, boolean first) {
-		if(ListenerUtils.nonReplacement(transaction)) return true;
+		if(ListenerUtils.nonReplacement(transaction) || entity instanceof FallingBlock) return true;
 		if(first && (entity != null && (region.getTrustType(entity.uniqueId()) == TrustTypes.OWNER || region.getTrustType(entity.uniqueId()) == TrustTypes.BUILDER || region.getTrustType(entity.uniqueId()) == TrustTypes.MANAGER || region.getTrustType(entity.uniqueId()) == TrustTypes.USER))) return true;
 		if(entity != null && (entity instanceof ServerPlayer) && ((ServerPlayer) entity).hasPermission(Permissions.bypassFlag(Flags.BLOCK_PLACE))) return true;
 		for(String entityId : ListenerUtils.flagEntityArgs(entity)) {
@@ -940,7 +1112,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	}
 
 	private boolean isAllowBreak(Region region, BlockTransaction transaction, Entity entity, boolean first) {
-		if(ListenerUtils.nonReplacement(transaction)) return true;
+		if(ListenerUtils.nonReplacement(transaction) || entity instanceof FallingBlock) return true;
 		if(first && (entity != null && (region.getTrustType(entity.uniqueId()) == TrustTypes.OWNER || region.getTrustType(entity.uniqueId()) == TrustTypes.BUILDER || region.getTrustType(entity.uniqueId()) == TrustTypes.MANAGER || region.getTrustType(entity.uniqueId()) == TrustTypes.USER))) return true;
 		if(entity != null && (entity instanceof ServerPlayer) && ((ServerPlayer) entity).hasPermission(Permissions.bypassFlag(Flags.BLOCK_BREAK))) return true;
 		for(String entityId : ListenerUtils.flagEntityArgs(entity)) {
@@ -1002,14 +1174,24 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion, transaction);
 	}
 
-	private boolean isAllowPistonMove(Region region) {
-		Tristate flagResult = region.getFlagResult(Flags.PISTON, null, null);
-		return region.isGlobal() ? (flagResult == Tristate.UNDEFINED ? true : flagResult.asBoolean()) : isAllowPistonMove(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+	private boolean isAllowPistonMove(Region region, List<String> sources, List<String> targets) {
+		for(String source : sources) {
+			for(String target : targets) {
+				Tristate flagResult = region.getFlagResult(Flags.PISTON, source, target);
+				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+			}
+		}
+		return true;
 	}
 
-	private boolean isAllowPistonGrief(Region region) {
-		Tristate flagResult = region.getFlagResult(Flags.PISTON_GRIEF, null, null);
-		return region.isGlobal() ? (flagResult == Tristate.UNDEFINED ? true : flagResult.asBoolean()) : isAllowPistonGrief(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+	private boolean isAllowPistonGrief(Region region, List<String> sources, List<String> targets) {
+		for(String source : sources) {
+			for(String target : targets) {
+				Tristate flagResult = region.getFlagResult(Flags.PISTON_GRIEF, source, target);
+				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+			}
+		}
+		return true;
 	}
 
 	class PlayerPositions {
@@ -1029,6 +1211,18 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			resize = false;
 		}
 
+	}
+
+	private Region secondRegion(List<ServerLocation> locations, Region region) {
+		for(ServerLocation location : locations) {
+			Region find = plugin.getAPI().findRegion(location.world(), location.blockPosition());
+			if(!find.equals(region)) return find;
+		}
+		return region;
+	}
+
+	private Direction getDirect(BlockSnapshot snapshot) {
+		return snapshot != null && snapshot.get(Keys.DIRECTION).isPresent() ? snapshot.get(Keys.DIRECTION).get() : null;
 	}
 
 }

@@ -1,5 +1,9 @@
 package sawfowl.regionguard.api.data;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,14 +33,23 @@ import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.StreamOptions.LoadingStyle;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
+import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
+import org.spongepowered.configurate.yaml.NodeStyle;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -87,13 +100,13 @@ public class Region {
 	@Setting("ExitMessages")
 	private Map<String, String> exitMessages = new HashMap<String, String>();
 	@Setting("EnhancedData")
-	private Map<String, AdditionalData> additionalData = null;
+	private Map<String, Map<String, String>> enhancedData = null;
 	private Region parrent;
 	private boolean flat = false;
 
 	/**
 	 * Getting the region name.
-	 * 
+	 *
 	 * @param locale - language to be checked
 	 */
 	public Optional<String> getName(Locale locale) {
@@ -102,7 +115,7 @@ public class Region {
 
 	/**
 	 * Getting the region name as kyori component.
-	 * 
+	 *
 	 * @param locale - language to be checked
 	 */
 	public Component asComponent(Locale locale) {
@@ -131,12 +144,12 @@ public class Region {
 	 */
 	public UUID getOwnerUUID() {
 		Optional<Entry<UUID, MemberData>> optOwnerData = members.entrySet().stream().filter(entry -> entry.getValue().getTrustType() == TrustTypes.OWNER).findFirst();
-		UUID uuid = optOwnerData.isPresent() ? optOwnerData.get().getKey() : new UUID(0, 0);
+		UUID uuid = optOwnerData.isPresent() ? optOwnerData.get().getKey() : parrent != null ? parrent.getOwnerUUID() : new UUID(0, 0);
 		return uuid;
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public String getOwnerName() {
 		return getOwnerData().getName();
@@ -144,7 +157,7 @@ public class Region {
 
 	/**
 	 * Make the player the new owner of the region.
-	 * 
+	 *
 	 * @param owner - new owner
 	 */
 	public Region setOwner(ServerPlayer owner) {
@@ -155,7 +168,7 @@ public class Region {
 
 	/**
 	 * Adding a player to a region.
-	 * 
+	 *
 	 * @param player - addable player
 	 * @param type - assignable trust type
 	 */
@@ -166,7 +179,7 @@ public class Region {
 
 	/**
 	 * Adding a entity to a region.
-	 * 
+	 *
 	 * @param uuid - addable entity
 	 * @param type - assignable trust type
 	 */
@@ -180,13 +193,13 @@ public class Region {
 	 * Getting the data of the region owner
 	 */
 	public MemberData getOwnerData() {
-		if(members.size() > 20) members.values().parallelStream().filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst().get();
-		return members.values().stream().filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst().get();
+		Optional<MemberData> data = members.size() > 20 ? members.values().parallelStream().filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst() : members.values().stream().filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst();
+		return data.isPresent() ? data.get() : parrent != null ? parrent.getOwnerData() : setTrustType(new UUID(0, 0), TrustTypes.OWNER).getOwnerData();
 	}
 
 	/**
 	 * Getting the data of the region member.
-	 * 
+	 *
 	 * @param player - checked player.
 	 */
 	public Optional<MemberData> getMemberData(ServerPlayer player) {
@@ -195,11 +208,11 @@ public class Region {
 
 	/**
 	 * Getting the data of the region member.
-	 * 
+	 *
 	 * @param uuid - checked player or entity.
 	 */
 	public Optional<MemberData> getMemberData(UUID uuid) {
-		return members.containsKey(uuid) ? Optional.ofNullable(members.get(uuid)) : Optional.empty();
+		return members.containsKey(uuid) ? Optional.ofNullable(members.get(uuid)) : (parrent != null ? parrent.getMemberData(uuid) : Optional.empty());
 	}
 
 	/**
@@ -211,7 +224,7 @@ public class Region {
 
 	/**
 	 * Checking the type of trust in the region.
-	 * 
+	 *
 	 * @param player - checked player
 	 * @param level - checked trust type
 	 * @return true - if the player has the trust type specified in the check <br>
@@ -223,7 +236,7 @@ public class Region {
 
 	/**
 	 * Checking the type of trust in the region.
-	 * 
+	 *
 	 * @param uuid - player uuid
 	 * @param level - checked trust type
 	 * @return true - if the player or entity has the trust type specified in the check <br>
@@ -235,7 +248,7 @@ public class Region {
 
 	/**
 	 * Getting a player's type of trust.
-	 * 
+	 *
 	 * @param player - checked player
 	 * @return the type without trust(TrustTypes.WITHOUT_TRUST) if the player is not a member of the region
 	 */
@@ -246,19 +259,19 @@ public class Region {
 
 	/**
 	 * Gaining the trust of a player or entity
-	 * 
+	 *
 	 * @param uuid - checked entity
 	 * @return the type without trust(TrustTypes.WITHOUT_TRUST) if the entity is not a member of the region
 	 */
 	public TrustTypes getTrustType(UUID uuid) {
-		return members.containsKey(uuid) ? members.get(uuid).getTrustType() : TrustTypes.WITHOUT_TRUST;
+		return members.containsKey(uuid) ? members.get(uuid).getTrustType() : (parrent != null ? parrent.getTrustType(uuid) : TrustTypes.WITHOUT_TRUST);
 	}
 
 	/**
 	 * Removing a player from a region.
 	 */
 	public void untrust(ServerPlayer player) {
-		untrust(player.uniqueId());;
+		untrust(player.uniqueId());
 	}
 
 
@@ -267,11 +280,12 @@ public class Region {
 	 */
 	public void untrust(UUID uuid) {
 		if(members.containsKey(uuid)) members.remove(uuid);
+		if(parrent != null) parrent.untrust(uuid);
 	}
 
 	/**
 	 * Checking whether a player is a member of a region.
-	 * 
+	 *
 	 * @param player - checked player
 	 */
 	public boolean isTrusted(ServerPlayer player) {
@@ -280,11 +294,11 @@ public class Region {
 
 	/**
 	 * Checking whether a entity is a member of a region.
-	 * 
+	 *
 	 * @param uuid - checked entity
 	 */
 	public boolean isTrusted(UUID uuid) {
-		return members.containsKey(uuid) && getTrustType(uuid) != TrustTypes.WITHOUT_TRUST;
+		return members.containsKey(uuid) ? getTrustType(uuid) != TrustTypes.WITHOUT_TRUST : (parrent != null ? parrent.isTrusted(uuid) : false);
 	}
 
 	/**
@@ -337,7 +351,7 @@ public class Region {
 	/**
 	 * Changing the type of region. <br>
 	 * Depending on the specified type, some parameters may change.
-	 * 
+	 *
 	 * @param type - assignable type
 	 */
 	public boolean setRegionType(RegionTypes type) {
@@ -345,7 +359,7 @@ public class Region {
 		if(type == RegionTypes.ADMIN) {
 			members.clear();
 			members.put(new UUID(0, 0), new MemberData(TrustTypes.OWNER));
-		} 
+		}
 		regionType = type.toString();
 		return true;
 	}
@@ -354,7 +368,7 @@ public class Region {
 	 * Check if the region is global.
 	 */
 	public boolean isGlobal() {
-		return regionType.equals(RegionTypes.GLOBAL.toString());
+		return regionType == null || regionType.equals(RegionTypes.GLOBAL.toString());
 	}
 
 	/**
@@ -387,7 +401,7 @@ public class Region {
 
 	/**
 	 * Setting new boundaries for the region.
-	 * 
+	 *
 	 * @param first - first position
 	 * @param second - second position
 	 * @param selectorType - type of area selection
@@ -413,7 +427,7 @@ public class Region {
 
 	/**
 	 * Getting the primary parent region.
-	 * 
+	 *
 	 * @return the primary parent region if it exists, or the current region if the region has no parent
 	 */
 	public Region getPrimaryParent() {
@@ -601,7 +615,7 @@ public class Region {
 
 	/**
 	 * Set the values of a set of flags.
-	 * 
+	 *
 	 * @param flags - Map with flags and their values.
 	 */
 	public Region setFlags(Map<String, List<FlagValue>> flags) {
@@ -671,7 +685,7 @@ public class Region {
 	 * Getting region join message.<br>
 	 * If the specified localization is not found, the default localization will be checked.<br>
 	 * If no default localization is found, the first value found will be returned or an empty optional value if the list is empty.
-	 * 
+	 *
 	 * @param locale - checking locale
 	 */
 	public Optional<Component> getJoinMessage(Locale locale) {
@@ -680,7 +694,7 @@ public class Region {
 
 	/**
 	 * Setting region join message.<br>
-	 * 
+	 *
 	 * @param message - setting message
 	 * @param locale - setting locale
 	 */
@@ -695,7 +709,7 @@ public class Region {
 	 * Getting region exit message.<br>
 	 * If the specified localization is not found, the default localization will be checked.<br>
 	 * If no default localization is found, the first value found will be returned or an empty optional value if the list is empty.
-	 * 
+	 *
 	 * @param locale - checking locale
 	 */
 	public Optional<Component> getExitMessage(Locale locale) {
@@ -704,7 +718,7 @@ public class Region {
 
 	/**
 	 * Setting region exit message.<br>
-	 * 
+	 *
 	 * @param message - setting message
 	 * @param locale - setting locale
 	 */
@@ -715,30 +729,59 @@ public class Region {
 	}
 
 	/**
-	 * Not tested.
+	 * Getting additional data that is created by other plugins.<br>
+	 * After getting the data, they must be converted to the desired type.<br>
+	 * Exemple: YourDataClass yourDataClass = (YourDataClass) additionalData;
 	 */
-	public Optional<AdditionalData> getAdditionalData(PluginContainer container) {
-		return additionalData.containsKey(container.metadata().id()) ? Optional.ofNullable(additionalData.get(container.metadata().id())) : Optional.empty();
+	public Optional<AdditionalData> getAdditionalData(PluginContainer container, String dataName, Class<AdditionalData> clazz) {
+		if(!enhancedData.containsKey(container.metadata().id()) || !enhancedData.get(container.metadata().id()).containsKey(dataName)) return Optional.empty();
+		String string = enhancedData.get(container.metadata().id()).get(dataName);
+		StringReader source = new StringReader(string);
+		YamlConfigurationLoader loader = YamlConfigurationLoader.builder().nodeStyle(NodeStyle.FLOW).source(() -> new BufferedReader(source)).build();
+		try {
+			ConfigurationNode node = loader.load();
+			return Optional.ofNullable(node.get(clazz));
+		} catch (ConfigurateException e) {
+			e.printStackTrace();
+			return Optional.empty();
+		}
 	}
 
 	/**
-	 * Not tested.
+	 * Write additional data created by another plugin.
 	 */
-	public void setAdditionalData(PluginContainer container, AdditionalData additionalData) {
-		removeAdditionalData(container, additionalData);
-		this.additionalData.put(regionType, additionalData);
+	public void setAdditionalData(PluginContainer container, String dataName, AdditionalData additionalData) {
+		if(enhancedData == null) enhancedData = new HashMap<String, Map<String, String>>();
+		removeAdditionalData(container, dataName, additionalData);
+		if(!enhancedData.containsKey(container.metadata().id())) enhancedData.put(container.metadata().id(), new HashMap<String, String>());
+		StringWriter sink = new StringWriter();
+		ConfigurationOptions options = ConfigurationOptions.defaults().serializers(
+				TypeSerializerCollection.defaults().childBuilder().registerAnnotatedObjects(
+						ObjectMapper.factoryBuilder().addNodeResolver(NodeResolver.onlyWithSetting()).build()).build());
+		YamlConfigurationLoader loader = YamlConfigurationLoader.builder().nodeStyle(NodeStyle.FLOW).defaultOptions(options).sink(() -> new BufferedWriter(sink)).build();
+		ConfigurationNode node = loader.createNode();
+		try {
+			node.set(AdditionalData.class, additionalData);
+			if(!node.node("__class__").virtual()) node.removeChild("__class__");
+			loader.save(node);
+		} catch (ConfigurateException e) {
+			e.printStackTrace();
+		}
+		String toWrite = sink.toString();
+		if(toWrite.endsWith("\n")) toWrite = toWrite.substring(0, toWrite.length()-1);
+		enhancedData.get(container.metadata().id()).put(dataName, toWrite);
 	}
 
 	/**
-	 * Not tested.
+	 * Deleting additional data created by another plugin.
 	 */
-	public void removeAdditionalData(PluginContainer container, AdditionalData additionalData) {
-		if(this.additionalData.containsKey(container.metadata().id())) this.additionalData.remove(container.metadata().id());
+	public void removeAdditionalData(PluginContainer container, String dataName, AdditionalData additionalData) {
+		if(enhancedData.containsKey(container.metadata().id()) && enhancedData.get(container.metadata().id()).containsKey(dataName)) enhancedData.get(container.metadata().id()).remove(dataName);
 	}
 
 	/**
 	 * Checking whether the position belongs to the region.
-	 * 
+	 *
 	 * @param serverWorld - checkable World
 	 * @param vector3i - checkable position
 	 */
@@ -748,7 +791,7 @@ public class Region {
 
 	/**
 	 * Checking whether the position belongs to the region.
-	 * 
+	 *
 	 * @param worldkey - checkable World
 	 * @param vector3i - checkable position
 	 */
@@ -864,7 +907,7 @@ public class Region {
 	/**
 	 * Insert Schematic into the region.<br><br>
 	 * This operation can work overload the server.
-	 * 
+	 *
 	 * @param schematic
 	 * @param heigt - the height at which the insertion will be made
 	 */
@@ -880,7 +923,7 @@ public class Region {
 	/**
 	 * Insert Schematic into the region.<br><br>
 	 * This operation can work overload the server.
-	 * 
+	 *
 	 * @param schematic
 	 * @param vector3i - central position
 	 */
@@ -895,7 +938,7 @@ public class Region {
 	/**
 	 * Territory regeneration in the region. <br>
 	 * Deprecated. See {@link #regen(boolean, int)}
-	 * 
+	 *
 	 * @param async - regen in async mode
 	 */
 	@Deprecated
@@ -906,7 +949,7 @@ public class Region {
 
 	/**
 	 * Territory regeneration in the region.
-	 * 
+	 *
 	 * @param async - regen in async mode
 	 * @param delay - delay before regeneration in async mode
 	 */
@@ -929,6 +972,10 @@ public class Region {
 		if(getClass() != obj.getClass()) return false;
 		Region other = (Region) obj;
 		return Objects.equals(regionUUID, other.regionUUID);
+	}
+
+	public boolean equalsOwners(Region region) {
+		return Objects.equals(getOwnerUUID(), region.getOwnerUUID());
 	}
 
 	@Override

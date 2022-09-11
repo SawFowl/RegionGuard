@@ -393,6 +393,9 @@ public class LocalesPaths {
 	public static final Object[] KEEP_EXP = {PATH_EVENTS, PATH_FLAG_RESULT_TRUE, "KeepExp"};
 	public static final Object[] KEEP_INVENTORY = {PATH_EVENTS, PATH_FLAG_RESULT_TRUE, "KeepInventory"};
 
+	public static final Object[] DENY_PISTON = {PATH_EVENTS, PATH_FLAG_RESULT_FALSE, "PistonUse"};
+	public static final Object[] DENY_PISTON_GRIEF = {PATH_EVENTS, PATH_FLAG_RESULT_FALSE, "PistonGrief"};
+
 	public static final Object[] IMPACT_BLOCK = {PATH_EVENTS, PATH_FLAG_RESULT_FALSE, "ImpactBlock"};
 	public static final Object[] IMPACT_ENTITY = {PATH_EVENTS, PATH_FLAG_RESULT_FALSE, "ImpactEntity"};
 
