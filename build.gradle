@@ -13,11 +13,12 @@ plugins {
 	id("java-library")
 	id("maven-publish")
 	id("eclipse")
+	id("org.spongepowered.gradle.plugin") version "2.0.2"
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 
-group = "sawfowl.regionapi"
+group = "sawfowl.regionguard"
 version = "${major}.${minor}.${patch}-${api}-${suffix}"
 
 java {
@@ -52,9 +53,48 @@ tasks.withType(JavaCompile) {
 dependencies {
 	implementation "org.spongepowered:spongeapi:8.0.0"
 	implementation 'org.spongepowered:spongevanilla:1.16.5-8.0.0-RC1111:universal'
-	implementation 'com.github.SawFowl:LocaleAPI:2.1.0'
+	implementation 'com.github.SawFowl:LocaleAPI:2.2.0'
 	minecraft 'net.minecraftforge:forge:1.16.5-36.1.16'
 	implementation fileTree(dir: 'libs', include: '*.jar')
+}
+
+
+sponge {
+	apiVersion("8.0.0")
+	loader {
+		name("java_plain")
+		version("1.0")
+	}
+	license("GPL-3.0")
+	plugin("regionguard") {
+		displayName(project.name.capitalize())
+		version("${major}.${minor}.${patch}")
+		entrypoint("${project.group}.${rootProject.name}")
+		description("Create regions and protect them from various actions of other players.")
+		contributor("SawFowl") {
+			description("Lead Developer")
+		}
+		dependency("spongeapi") {
+			optional(false)
+			loadOrder("after")
+			version("8.0.0")
+		}
+		dependency("localeapi") {
+			optional(false)
+			loadOrder("after")
+			version("2.2.0")
+		}
+		dependency("mysqldriver") {
+			optional(true)
+			loadOrder("after")
+			version("1.0.0")
+		}
+		dependency("worldedit") {
+			optional(true)
+			loadOrder("after")
+			version("7.2.0")
+		}
+	}
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

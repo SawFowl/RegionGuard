@@ -34,7 +34,7 @@ public class WorkConfigs implements WorkData {
 					Region region = new Region(new UUID(0, 0), Sponge.server().worldManager().defaultWorld(), null, null, null);
 					region.setRegionType(RegionTypes.GLOBAL);
 					region.setName("Global#World[" + world.key() + "]", Locales.DEFAULT);
-					region.setFlags(plugin.getConfig().getDefaultGlobalFlags());
+					region.setFlags(plugin.getDefaultFlagsConfig().getGlobalFlags());
 					worldNode.node("RegionData").set(Region.class, region);
 					configLoader.save(worldNode);
 					plugin.getAPI().updateGlobalRegionData(world, region);

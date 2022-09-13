@@ -205,7 +205,7 @@ public class ListCommand implements PluginRawCommand {
 			Component arena = Component.empty();
 			Component admin = Component.empty();
 			Component flags = null;
-			boolean regen = plugin.getConfig().regenAll() && !region.getParrent().isPresent();
+			boolean regen = plugin.getConfig().getRegenerateTerritory().isAllPlayers() && !region.getParrent().isPresent();
 			if(regen) player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_REGEN));
 			Component delete = plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_INFO_DELETE).clickEvent(SpongeComponents.executeCallback(cause -> {
 				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(cause2 -> {
@@ -296,7 +296,7 @@ public class ListCommand implements PluginRawCommand {
 						if(!event.isCancelled()) {
 							if(region.getType() != RegionTypes.UNSET) {
 								region.setRegionType(RegionTypes.UNSET);
-								if(regen) region.regen(plugin.getConfig().asyncRegen(), plugin.getConfig().delayRegen());
+								if(regen) region.regen(plugin.getConfig().getRegenerateTerritory().isAsync(), plugin.getConfig().getRegenerateTerritory().getDelay());
 								plugin.getAPI().deleteRegion(region);
 							}
 							if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());

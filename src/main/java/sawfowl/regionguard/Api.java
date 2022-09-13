@@ -1,6 +1,5 @@
 package sawfowl.regionguard;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,17 +15,12 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3i;
 
-import sawfowl.localeapi.serializetools.TypeTokens;
+import sawfowl.localeapi.serializetools.SerializedItemStack;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.RegionAPI;
 import sawfowl.regionguard.api.RegionTypes;
@@ -122,7 +116,7 @@ class Api implements RegionAPI {
 
 	@Override
 	public SelectorTypes getSelectorType(UUID uuid) {
-		return selectorsPerPlayer.containsKey(uuid) ? selectorsPerPlayer.get(uuid) : plugin.getConfig().getDefaultSelectorType();
+		return selectorsPerPlayer.containsKey(uuid) ? selectorsPerPlayer.get(uuid) : plugin.getConfig().getDefaultSelector();
 	}
 
 	@Override
@@ -271,15 +265,15 @@ class Api implements RegionAPI {
 
 	@Override
 	public int getMinimalRegionSize(SelectorTypes selectorType) {
-		return plugin.getConfig().getMinimalRegionSize(selectorType);
+		return plugin.getConfig().getMinimalRegionSize().getMinimalRegionSize(selectorType);
 	}
 
 	@Override
 	public Map<String, List<FlagValue>> getDefaultFlags(RegionTypes regionType) {
-		if(regionType == RegionTypes.ADMIN) return plugin.getConfig().getDefaultAdminFlags();
-		if(regionType == RegionTypes.ARENA) return plugin.getConfig().getDefaultArenaFlags();
-		if(regionType == RegionTypes.GLOBAL) return plugin.getConfig().getDefaultGlobalFlags();
-		return plugin.getConfig().getDefaultClaimFlags();
+		if(regionType == RegionTypes.ADMIN) return plugin.getDefaultFlagsConfig().getAdminFlags();
+		if(regionType == RegionTypes.ARENA) return plugin.getDefaultFlagsConfig().getArenaFlags();
+		if(regionType == RegionTypes.GLOBAL) return plugin.getDefaultFlagsConfig().getGlobalFlags();
+		return plugin.getDefaultFlagsConfig().getClaimFlags();
 	}
 
 	@Override
@@ -467,21 +461,13 @@ class Api implements RegionAPI {
 	}
 
 	private ItemStack setNBT(ItemStack itemStack) {
-		try {
-			itemStack = ItemStack.builder().fromContainer(itemStack.toContainer().set(DataQuery.of("UnsafeData"), DataFormats.JSON.get().read("{\"WandItem\":1}"))).build();
-		} catch (InvalidDataException | IOException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-		}
-		return itemStack.copy();
+		SerializedItemStack serializedItemStack = new SerializedItemStack(itemStack);
+		serializedItemStack.getOrCreateTag().putInteger("WandItem", 1);
+		return serializedItemStack.getItemStack();
 	}
 
 	private ItemStack getWandItemFromConfig() {
-		try {
-			return setNBT(plugin.getRootNode().node("Items", "Wand").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack());
-		} catch (SerializationException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-			return setNBT(ItemStack.of(ItemTypes.STONE_AXE));
-		}
+		return setNBT(plugin.getConfig().getWanditem().getWandItem());
 	}
 
 	private long getOptionLongValue(ServerPlayer player, String option) {

@@ -12,7 +12,6 @@ import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -34,13 +33,8 @@ public class UpdateDefaultFlagsCommand implements PluginRawCommand {
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
 		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
-		try {
-			plugin.getConfig().setDefaultFlags(region);
-			player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TYPE), Arrays.asList(region.getPrimaryParent().getType().toString())), LocalesPaths.COMMAND_UPDATEDEFAULTFLAGS_SUCCESS));
-		} catch (SerializationException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-			player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_UPDATEDEFAULTFLAGS_EXCEPTION));
-		}
+		plugin.getDefaultFlagsConfig().setDefaultFlags(region);
+		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TYPE), Arrays.asList(region.getPrimaryParent().getType().toString())), LocalesPaths.COMMAND_UPDATEDEFAULTFLAGS_SUCCESS));
 		return CommandResult.success();
 	}
 

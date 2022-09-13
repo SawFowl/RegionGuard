@@ -42,7 +42,7 @@ public class DeleteCommand implements PluginRawCommand {
 		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
 		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
 		if(!region.getOwnerUUID().equals(player.uniqueId()) && !player.hasPermission(Permissions.STAFF_DELETE)) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_OWNER));
-		boolean regen = !region.getParrent().isPresent() && (player.hasPermission(Permissions.STAFF_DELETE) ? (args.contains("-regen") || args.contains("-r")) && plugin.getConfig().regenStaff() : plugin.getConfig().regenAll());
+		boolean regen = !region.getParrent().isPresent() && (player.hasPermission(Permissions.STAFF_DELETE) ? (args.contains("-regen") || args.contains("-r")) && plugin.getConfig().getRegenerateTerritory().isStaff() : plugin.getConfig().getRegenerateTerritory().isAllPlayers());
 		if(regen) player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_REGEN));
 		player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(messageCause -> {
 			if(region.getParrent().isPresent()) {
@@ -132,7 +132,7 @@ public class DeleteCommand implements PluginRawCommand {
 				if(!event.isCancelled()) {
 					if(region.getType() != RegionTypes.UNSET) {
 						region.setRegionType(RegionTypes.UNSET);
-						if(regen) region.regen(plugin.getConfig().asyncRegen(), plugin.getConfig().delayRegen());
+						if(regen) region.regen(plugin.getConfig().getRegenerateTerritory().isAsync(), plugin.getConfig().getRegenerateTerritory().getDelay());
 						plugin.getAPI().deleteRegion(region);
 					}
 					if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());
@@ -148,7 +148,7 @@ public class DeleteCommand implements PluginRawCommand {
 		if(!cause.hasPermission(Permissions.STAFF_DELETE)) return empty;
 		String plainArgs = arguments.input();
 		if(!plainArgs.contains("delete ")) return empty;
-		if(args.size() == 0 && plugin.getConfig().regenStaff() && cause.hasPermission(Permissions.STAFF_DELETE)) return regen;
+		if(args.size() == 0 && plugin.getConfig().getRegenerateTerritory().isStaff() && cause.hasPermission(Permissions.STAFF_DELETE)) return regen;
 		return empty;
 	}
 

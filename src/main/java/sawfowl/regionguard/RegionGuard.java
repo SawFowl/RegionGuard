@@ -17,11 +17,11 @@
  */
 package sawfowl.regionguard;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
@@ -38,7 +38,8 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.reference.ConfigurationReference;
+import org.spongepowered.configurate.reference.ValueReference;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
@@ -49,9 +50,11 @@ import sawfowl.localeapi.event.LocaleServiseEvent;
 import sawfowl.regionguard.api.RegionAPI;
 import sawfowl.regionguard.api.events.RegionAPIPostEvent;
 import sawfowl.regionguard.commands.RegionCommand;
-import sawfowl.regionguard.configure.Config;
+import sawfowl.regionguard.configure.CuiConfig;
+import sawfowl.regionguard.configure.DefaultFlags;
 import sawfowl.regionguard.configure.Locales;
 import sawfowl.regionguard.configure.LocalesPaths;
+import sawfowl.regionguard.configure.MainConfig;
 import sawfowl.regionguard.configure.MySQL;
 import sawfowl.regionguard.configure.WorkConfigs;
 import sawfowl.regionguard.configure.WorkData;
@@ -84,15 +87,14 @@ public class RegionGuard {
 	private Locales locales;
 	private PluginContainer pluginContainer;
 	private Path configDir;
-	private ConfigurationLoader<CommentedConfigurationNode> configLoader;
-	private CommentedConfigurationNode rootNode;
-	private ConfigurationLoader<CommentedConfigurationNode> flagsConfigLoader;
-	private CommentedConfigurationNode flagsNode;
-	private ConfigurationLoader<CommentedConfigurationNode> cuiConfigLoader;
-	private CommentedConfigurationNode cuiNode;
+	private ConfigurationReference<CommentedConfigurationNode> configurationReference;
+    private ValueReference<MainConfig, CommentedConfigurationNode> mainConfig;
+	private ConfigurationReference<CommentedConfigurationNode> flagsConfigurationReference;
+    private ValueReference<DefaultFlags, CommentedConfigurationNode> flagsConfig;
+	private ConfigurationReference<CommentedConfigurationNode> cuiConfigurationReference;
+    private ValueReference<CuiConfig, CommentedConfigurationNode> cuiConfig;
 	private EconomyService economyService;
 	private Api api;
-	private Config config;
 	private RegionCommand mainCommand;
 	private MySQL mySQL;
 	private WorkData playersDataWork;
@@ -110,18 +112,6 @@ public class RegionGuard {
 
 	public Path getConfigDir() {
 		return configDir;
-	}
-
-	public CommentedConfigurationNode getRootNode() {
-		return rootNode;
-	}
-
-	public CommentedConfigurationNode getFlagsNode() {
-		return flagsNode;
-	}
-
-	public CommentedConfigurationNode getCuiNode() {
-		return cuiNode;
 	}
 
 	public ConfigurationOptions getConfigurationOptions() {
@@ -156,8 +146,16 @@ public class RegionGuard {
 		return regenUtil;
 	}
 
-	public Config getConfig() {
-		return config;
+	public MainConfig getConfig() {
+		return mainConfig.get();
+	}
+
+	public DefaultFlags getDefaultFlagsConfig() {
+		return flagsConfig.get();
+	}
+
+	public CuiConfig getCuiConfig() {
+		return cuiConfig.get();
 	}
 
 	public EconomyService getEconomyService() {
@@ -166,26 +164,6 @@ public class RegionGuard {
 
 	public Economy getEconomy() {
 		return economy;
-	}
-
-	public void loadConfigs() {
-		try {
-			rootNode = configLoader.load();
-			flagsNode = flagsConfigLoader.load();
-			cuiNode = cuiConfigLoader.load();
-		} catch (IOException e) {
-			logger.error(e.getLocalizedMessage());
-		}
-	}
-
-	public void saveConfigs() {
-		try {
-			configLoader.save(rootNode);
-			flagsConfigLoader.save(flagsNode);
-			cuiConfigLoader.save(cuiNode);
-		} catch (ConfigurateException e) {
-			logger.error(e.getLocalizedMessage());
-		}
 	}
 
 	@Inject
@@ -202,12 +180,25 @@ public class RegionGuard {
 	@Listener
 	public void onConstruct(LocaleServiseEvent.Construct event) {
 		localeService = event.getLocaleService();
-		configLoader = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("Config.conf")).build();
-		flagsConfigLoader = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("DefaultFlags.conf")).build();
-		cuiConfigLoader = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("CuiSettings.conf")).build();
-		loadConfigs();
-		config = new Config(instance);
-		locales = new Locales(localeService, rootNode.node("LocaleJsonSerialize").getBoolean());
+		if(!getConfigDir().resolve("Worlds").toFile().exists()) {
+			getConfigDir().resolve("Worlds").toFile().mkdir();
+		}
+		try {
+			configurationReference = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("Config.conf")).build().loadToReference();
+			this.mainConfig = configurationReference.referenceTo(MainConfig.class);
+			configurationReference.save();
+			
+			flagsConfigurationReference = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
+			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
+			flagsConfigurationReference.save();
+			
+			cuiConfigurationReference = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
+			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
+			cuiConfigurationReference.save();
+		} catch (ConfigurateException e) {
+			logger.warn(e.getLocalizedMessage());
+		}
+		locales = new Locales(localeService, getConfig().isLocaleJsonSerialize());
 		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
     	Sponge.game().eventManager().registerListeners(
                 pluginContainer,
@@ -230,20 +221,20 @@ public class RegionGuard {
 	@Listener
 	public void onStart(StartedEngineEvent<Server> event) {
 		if(localeService == null) return;
-		boolean mysql = rootNode.node("MySQL", "Enable").getBoolean();
-		if(mysql) mySQL = new MySQL(instance, rootNode.node("MySQL", "Host").getString(), rootNode.node("MySQL", "Port").getString(), rootNode.node("MySQL", "DataBase").getString(), rootNode.node("MySQL", "User").getString(), rootNode.node("MySQL", "Password").getString(), rootNode.node("MySQL", "SSL").getString());
+		boolean mysql = getConfig().getMySQLConfig().isEnable();
+		if(mysql) mySQL = new MySQL(instance, getConfig().getMySQLConfig().getHost(), getConfig().getMySQLConfig().getPort(), getConfig().getMySQLConfig().getDatabase(), getConfig().getMySQLConfig().getUser(), getConfig().getMySQLConfig().getPassword(), getConfig().getMySQLConfig().getSSL());
 		if(!mysql) {
 			playersDataWork = regionsDataWork = new WorkConfigs(instance);
-		} else if(mysql && rootNode.node("SplitStorage", "Enable").getBoolean()) {
-			if(rootNode.node("SplitStorage", "Players").getBoolean() && rootNode.node("SplitStorage", "Regions").getBoolean()) {
+		} else if(mysql && getConfig().getSplitStorage().isEnable()) {
+			if(getConfig().getSplitStorage().isPlayers() && getConfig().getSplitStorage().isRegions()) {
 				playersDataWork = regionsDataWork = new WorkTables(instance);
 				((WorkTables) regionsDataWork).createWorldsTables();
 				((WorkTables) playersDataWork).createTableForPlayers();
-			} else if(rootNode.node("SplitStorage", "Players").getBoolean() && !rootNode.node("SplitStorage", "Regions").getBoolean()) {
+			} else if(getConfig().getSplitStorage().isPlayers() && !getConfig().getSplitStorage().isRegions()) {
 				playersDataWork = new WorkTables(instance);
 				((WorkTables) playersDataWork).createTableForPlayers();
 				regionsDataWork = new WorkConfigs(instance);
-			} else if(!rootNode.node("SplitStorage", "Players").getBoolean() && rootNode.node("SplitStorage", "Regions").getBoolean()) {
+			} else if(!getConfig().getSplitStorage().isPlayers() && getConfig().getSplitStorage().isRegions()) {
 				regionsDataWork = new WorkTables(instance);
 				((WorkTables) regionsDataWork).createWorldsTables();
 				playersDataWork = new WorkConfigs(instance);
@@ -257,7 +248,6 @@ public class RegionGuard {
 		} else {
 			playersDataWork = regionsDataWork = new WorkConfigs(instance);
 		}
-		config.writeDefaultWandItem();
 		api.updateWandItem();
 		if(Sponge.server().serviceProvider().economyService().isPresent()) {
 			economyService  = Sponge.server().serviceProvider().economyService().get();
@@ -268,7 +258,7 @@ public class RegionGuard {
 		regionsDataWork.createDataForWorlds();
 		playersDataWork.loadDataOfPlayers();
 		api.generateDefaultGlobalRegion();
-		if(config.unloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
+		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new BlockAndWorldChangeListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ExplosionListener(instance));

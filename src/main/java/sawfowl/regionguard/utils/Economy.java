@@ -51,7 +51,7 @@ public class Economy {
                 TransactionResult result = uOpt.get().deposit(currency, money);
                 if (result.result() == ResultType.SUCCESS) {
                 	return true;
-                } else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
+                } else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
                 	plugin.getLogger().error(plugin.getLocales().getText(player.locale(), LocalesPaths.ECONOMY_ERROR_GIVE_MONEY)
                 				.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build()));
                 } else {
@@ -70,7 +70,7 @@ public class Economy {
                 TransactionResult result = uOpt.get().withdraw(currency, money);
                 if (result.result() == ResultType.SUCCESS) {
                 	return true;
-                } else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
+                } else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
                 	plugin.getLogger().error(plugin.getLocales().getText(player.locale(), LocalesPaths.ECONOMY_ERROR_TAKE_MONEY)
             				.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build()));
                 } else {

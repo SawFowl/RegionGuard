@@ -1,7 +1,9 @@
 package sawfowl.regionguard.listeners;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -651,11 +653,11 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		Direction direction = getDirect(snapshot);
 		if(direction == null) return;
 		Region region = plugin.getAPI().findRegion(event.world(), snapshot.position());
-		Region second = secondRegion(event.locations(), region);
 		Optional<Entity> optEntity = event.context().get(EventContextKeys.NOTIFIER).isPresent() ? event.world().entity(event.context().get(EventContextKeys.NOTIFIER).get()) : (event.context().get(EventContextKeys.CREATOR).isPresent() ? event.world().entity(event.context().get(EventContextKeys.CREATOR).get()) : Optional.empty());
 		List<String> sources = optEntity.isPresent() ? ListenerUtils.flagEntityArgs(optEntity.get()) : Arrays.asList("all");
 		List<String> targets = ListenerUtils.flagBlocksArgs(event.locations().stream().filter(l -> (!l.blockPosition().equals(snapshot.position()))).map(l -> (l.createSnapshot())).collect(Collectors.toList()));
-		if(region.equals(second)) {
+		HashSet<Region> affectedRegions = getOtherRegions(event.world(), event.locations().stream().map(ServerLocation::blockPosition).collect(Collectors.toList()), direction, region, sources, targets);
+		if(affectedRegions.isEmpty()) {
 			boolean isAllow = isAllowPistonMove(region, sources, targets);
 			class MoveEvent extends AbstractEvent implements RegionPistonEvent.OneRegion {
 
@@ -730,8 +732,8 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				event.setCancelled(true);
 			}
 			if(rgEvent.getMessage().isPresent() && rgEvent.getPlayer().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
-		} else if(!second.isGlobal()) {
-			boolean isAllow = isAllowPistonGrief(second, sources, targets) && isAllowPistonMove(second, sources, targets);
+		} else {
+			boolean isAllow = isAllowPistonGrief(region, affectedRegions, sources, targets) && isAllowPistonMove(affectedRegions, sources, targets);
 			class GriefEvent extends AbstractEvent implements RegionPistonEvent.Grief {
 
 				Component text;
@@ -747,8 +749,8 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				}
 
 				@Override
-				public Region getGriefedRegion() {
-					return second;
+				public List<Region> getAffectedRegions() {
+					return new ArrayList<Region>(affectedRegions);
 				}
 
 				@Override
@@ -1184,11 +1186,25 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		return true;
 	}
 
-	private boolean isAllowPistonGrief(Region region, List<String> sources, List<String> targets) {
-		for(String source : sources) {
-			for(String target : targets) {
-				Tristate flagResult = region.getFlagResult(Flags.PISTON_GRIEF, source, target);
-				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+	private boolean isAllowPistonMove(HashSet<Region> regions, List<String> sources, List<String> targets) {
+		for(Region region : regions) {
+			for(String source : sources) {
+				for(String target : targets) {
+					Tristate flagResult = region.getFlagResult(Flags.PISTON, source, target);
+					if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean isAllowPistonGrief(Region region, HashSet<Region> regions, List<String> sources, List<String> targets) {
+		for(Region other : regions) {
+			if(!other.equals(region)) for(String source : sources) {
+				for(String target : targets) {
+					Tristate flagResult = other.getFlagResult(Flags.PISTON_GRIEF, source, target);
+					if(flagResult != Tristate.UNDEFINED && !flagResult.asBoolean()) return false;
+				}
 			}
 		}
 		return true;
@@ -1213,12 +1229,18 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 
 	}
 
-	private Region secondRegion(List<ServerLocation> locations, Region region) {
-		for(ServerLocation location : locations) {
-			Region find = plugin.getAPI().findRegion(location.world(), location.blockPosition());
-			if(!find.equals(region)) return find;
+	private HashSet<Region> getOtherRegions(ServerWorld world, List<Vector3i> locations, Direction direction, Region region, List<String> sources, List<String> targets) {
+		HashSet<Region> regions = new HashSet<Region>();
+		for(Vector3i location : locations) {
+			Region find1 = plugin.getAPI().findRegion(world, location);
+			if(!find1.equals(region)) regions.add(find1);
+			Vector3i vector2 = location.add(direction.asBlockOffset());
+			if(!locations.contains(vector2)) {
+				Region find2 = plugin.getAPI().findRegion(world, vector2);
+				if(!find2.equals(region)) regions.add(find2);
+			}
 		}
-		return region;
+		return regions;
 	}
 
 	private Direction getDirect(BlockSnapshot snapshot) {

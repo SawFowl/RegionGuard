@@ -1,12 +1,16 @@
 package sawfowl.regionguard.utils.worldedit.cuihandle;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.lifecycle.RegisterChannelEvent;
 import org.spongepowered.api.network.ServerPlayerConnection;
+import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.network.channel.raw.play.RawPlayDataHandler;
@@ -28,9 +32,10 @@ public class SpongeCUIChannelHandler implements RawPlayDataHandler<ServerPlayerC
     		plugin = regionGuard;
     	}
     	
-        @Listener
+        @Listener(order = Order.LAST)
         public void onChannelRegistration(RegisterChannelEvent event) {
-            RawDataChannel channel = event.register(CUI_PLUGIN_CHANNEL, RawDataChannel.class);
+        	Optional<Channel> cuiChanel = Sponge.channelManager().get(CUI_PLUGIN_CHANNEL);
+            RawDataChannel channel = cuiChanel.isPresent() && cuiChanel.get() instanceof RawDataChannel ? (RawDataChannel) cuiChanel.get() : event.register(CUI_PLUGIN_CHANNEL, RawDataChannel.class);
             channel.play().addHandler(ServerPlayerConnection.class, new SpongeCUIChannelHandler());
             CHANNEL.newValue(channel);
         }

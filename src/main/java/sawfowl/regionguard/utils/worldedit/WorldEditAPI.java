@@ -48,7 +48,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	}
 
 	public void updateCuiDataMaps() {
-		Map<String, Map<String, String>> colors = plugin.getConfig().getCuiColors();
+		Map<String, Map<String, String>> colors = plugin.getCuiConfig().getColors();
 		if(colors.isEmpty()) cuiColors.put(CuiConfigPaths.DEFAULT, new String[]{MultiSelectionColors.RED, MultiSelectionColors.RED, MultiSelectionColors.RED, MultiSelectionColors.RED});
 		for(Entry<String, Map<String, String>> entry : colors.entrySet()) {
 			Map<String, String> value = entry.getValue();
@@ -59,7 +59,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 					value.containsKey(CuiConfigPaths.SECOND_POSITION) ? value.get(CuiConfigPaths.SECOND_POSITION) : MultiSelectionColors.RED,
 					});
 		}
-		cuiSpaces = plugin.getConfig().getCuiSpaces();
+		cuiSpaces = plugin.getCuiConfig().getSpaces();
 		if(cuiSpaces.isEmpty()) cuiSpaces.put(CuiConfigPaths.DEFAULT, 5);
 	}
 

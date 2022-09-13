@@ -27,9 +27,20 @@ public interface RegionPistonEvent {
 	public interface Grief extends RegionPistonEvent, RegionMessageEvent, Event, Cancellable {
 
 		/**
-		 * Getting the region to which the block is attempted to move or vice versa.
+		 * Getting the region to which the block is attempted to move or vice versa.<br>
+		 * Deprecated. See {@link #getAffectedRegions()}
 		 */
-		public Region getGriefedRegion();
+		@Deprecated
+		public default Region getGriefedRegion() {
+			return getAffectedRegions().get(0);
+		}
+
+		/**
+		 * Getting all regions with which the piston interacts.<br>
+		 * The collection does not contain the region in which the piston is located.<br>
+		 * Because of an incomprehensible error with the list of locations when searching for a region is taken not only the original position, but also the next following it.
+		 */
+		List<Region> getAffectedRegions();
 
 		/**
 		 * Get protect result.

@@ -734,7 +734,7 @@ public class Region {
 	 * Exemple: YourDataClass yourDataClass = (YourDataClass) additionalData;
 	 */
 	public Optional<AdditionalData> getAdditionalData(PluginContainer container, String dataName, Class<AdditionalData> clazz) {
-		if(!enhancedData.containsKey(container.metadata().id()) || !enhancedData.get(container.metadata().id()).containsKey(dataName)) return Optional.empty();
+		if(enhancedData == null || !enhancedData.containsKey(container.metadata().id()) || !enhancedData.get(container.metadata().id()).containsKey(dataName)) return Optional.empty();
 		String string = enhancedData.get(container.metadata().id()).get(dataName);
 		StringReader source = new StringReader(string);
 		YamlConfigurationLoader loader = YamlConfigurationLoader.builder().nodeStyle(NodeStyle.FLOW).source(() -> new BufferedReader(source)).build();

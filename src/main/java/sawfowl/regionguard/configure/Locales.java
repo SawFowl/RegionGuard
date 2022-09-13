@@ -365,6 +365,9 @@ public class Locales {
 		save = check(locale, toText("&cYou cannot use this item in the current region."), null, LocalesPaths.ITEM_USE) || save;
 
 		save = check(locale, toText("&cYou cannot use the portal in your current region."), null, LocalesPaths.PORTAL_USE) || save;
+
+		save = check(locale, toText("Failed to add game currency to player %player%."), null, LocalesPaths.ECONOMY_ERROR_GIVE_MONEY) || save;
+		save = check(locale, toText("Failed to take game currency from player %player%."), null, LocalesPaths.ECONOMY_ERROR_TAKE_MONEY) || save;
 		
 		if(save) save(locale);
 	}
@@ -683,6 +686,9 @@ public class Locales {
 		save = check(locale, toText("&cВы не можете использовать этот предмет в текущем регионе."), null, LocalesPaths.ITEM_USE) || save;
 
 		save = check(locale, toText("&cВы не можете использовать портал в текущем регионе."), null, LocalesPaths.PORTAL_USE) || save;
+
+		save = check(locale, toText("&cНе удалось начислить игровую валюту игроку %player%."), null, LocalesPaths.ECONOMY_ERROR_GIVE_MONEY) || save;
+		save = check(locale, toText("&cНе удалось списать игровую валюту у игрока %player%."), null, LocalesPaths.ECONOMY_ERROR_TAKE_MONEY) || save;
 		
 		if(save) save(locale);
 	}

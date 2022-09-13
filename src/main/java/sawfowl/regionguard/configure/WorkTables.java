@@ -33,7 +33,7 @@ public class WorkTables extends Thread implements WorkData {
 	public WorkTables(RegionGuard plugin) {
 		this.plugin = plugin;
 		this.mySQL = plugin.getMySQL();
-		prefix = plugin.getRootNode().node("MySQL", "Prefix").getString();
+		prefix = plugin.getConfig().getMySQLConfig().getPrefix();
 		try {
 			statement = mySQL.getOrOpenConnection().createStatement();
 		} catch (SQLException e) {
@@ -60,7 +60,7 @@ public class WorkTables extends Thread implements WorkData {
 				Region region = new Region(serverOwnerUUID, Sponge.server().worldManager().defaultWorld(), null, null, null);
 				region.setRegionType(RegionTypes.GLOBAL);
 				region.setName("Global#World[" + world.key() + "]", Locales.DEFAULT);
-				region.setFlags(plugin.getConfig().getDefaultGlobalFlags());
+				region.setFlags(plugin.getDefaultFlagsConfig().getGlobalFlags());
 				saveRegion(region);
 				plugin.getAPI().updateGlobalRegionData(world, region);
 			} else {
