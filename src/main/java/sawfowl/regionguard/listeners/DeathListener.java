@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -29,9 +30,9 @@ public class DeathListener {
 		//cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
 	}
 
-	@Listener
+	@Listener(order = Order.LAST)
 	public void onDeath(DestructEntityEvent.Death event) {
-		if(!(event.entity() instanceof ServerPlayer)) return;
+		if(event.keepInventory() || !(event.entity() instanceof ServerPlayer)) return;
 		ServerPlayer player = (ServerPlayer) event.entity();
 		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
 		boolean keepInventory = isKeepInventory(region);
