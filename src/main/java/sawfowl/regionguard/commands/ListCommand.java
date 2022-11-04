@@ -359,12 +359,6 @@ public class ListCommand implements PluginRawCommand {
 		return removeDecor(component).length();
 	}
 
-	private String removeDecor(Component component) {
-		Component toClear = Component.empty().append(component);
-		toClear.decorations().clear();
-		return LegacyComponentSerializer.legacyAmpersand().serialize(toClear);
-	}
-
 	private Component addDecor(String string, Map<TextDecoration, State> decor) {
 		Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(string);
 		component.decorations().putAll(decor);

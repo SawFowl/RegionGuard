@@ -17,8 +17,6 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.TrustTypes;
@@ -108,12 +106,6 @@ public class SetNameCommand implements PluginRawCommand {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.SET_NAME);
-	}
-
-	private String removeDecor(String string) {
-		Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(string);
-		component.decorations().clear();
-		return LegacyComponentSerializer.legacyAmpersand().serialize(component);
 	}
 
 }

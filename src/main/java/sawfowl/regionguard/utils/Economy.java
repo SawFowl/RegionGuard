@@ -84,7 +84,7 @@ public class Economy {
 
 	public Currency checkCurrency(String check) {
 		if(check == null) return plugin.getEconomyService().defaultCurrency();
-		Optional<Currency> optCurrency = getCurrencies().stream().filter(currency -> (toPlain(currency.displayName()).equalsIgnoreCase(check) || toPlain(currency.symbol()).equalsIgnoreCase(check))).findFirst();
+		Optional<Currency> optCurrency = getCurrencies().stream().filter(currency -> (clearDecorations(currency.displayName()).equalsIgnoreCase(check) || clearDecorations(currency.symbol()).equalsIgnoreCase(check))).findFirst();
 		return optCurrency.isPresent() ? optCurrency.get() : plugin.getEconomyService().defaultCurrency();
 	}
 
@@ -96,9 +96,14 @@ public class Economy {
 		return !currencies.isEmpty() ? currencies : Arrays.asList(plugin.getEconomyService().defaultCurrency());
 	}
 
-	private String toPlain(Component component) {
-		component.decorations().clear();
-		return LegacyComponentSerializer.legacyAmpersand().serialize(component);
+	private String clearDecorations(Component component) {
+		String toReturn = LegacyComponentSerializer.legacyAmpersand().serialize(component);
+		while(toReturn.indexOf('&') != -1 && !toReturn.endsWith("&") && isStyleChar(toReturn.charAt(toReturn.indexOf("&") + 1))) toReturn = toReturn.replaceAll("&" + toReturn.charAt(toReturn.indexOf("&") + 1), "");
+		return toReturn;
+	}
+
+	private boolean isStyleChar(char ch) {
+		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }
