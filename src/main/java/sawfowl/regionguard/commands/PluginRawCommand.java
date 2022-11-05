@@ -9,7 +9,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import sawfowl.localeapi.api.TextUtils;
 
 public interface PluginRawCommand {
 
@@ -20,16 +20,11 @@ public interface PluginRawCommand {
 	public boolean canExecute(CommandCause cause);
 
 	default String removeDecor(String string) {
-		while(string.indexOf('&') != -1 && !string.endsWith("&") && isStyleChar(string.charAt(string.indexOf("&") + 1))) string = string.replaceAll("&" + string.charAt(string.indexOf("&") + 1), "");
-		return string;
+		return TextUtils.clearDecorations(string);
 	}
 
 	default String removeDecor(Component component) {
-		return removeDecor(LegacyComponentSerializer.legacyAmpersand().serialize(component));
-	}
-
-	default boolean isStyleChar(char ch) {
-		return "0123456789abcdefklmnor".indexOf(ch) != -1;
+		return TextUtils.clearDecorations(component);
 	}
 
 }

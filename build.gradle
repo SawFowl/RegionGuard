@@ -53,7 +53,7 @@ tasks.withType(JavaCompile) {
 dependencies {
 	implementation "org.spongepowered:spongeapi:8.0.0"
 	implementation 'org.spongepowered:spongevanilla:1.16.5-8.0.0-RC1111:universal'
-	implementation 'com.github.SawFowl:LocaleAPI:2.2.0'
+	implementation 'com.github.SawFowl:LocaleAPI:2.3.0'
 	minecraft 'net.minecraftforge:forge:1.16.5-36.1.16'
 	implementation fileTree(dir: 'libs', include: '*.jar')
 }
@@ -82,7 +82,7 @@ sponge {
 		dependency("localeapi") {
 			optional(false)
 			loadOrder("after")
-			version("2.2.0")
+			version("2.3.0")
 		}
 		dependency("mysqldriver") {
 			optional(true)

@@ -16,9 +16,8 @@ import org.spongepowered.api.service.economy.account.UniqueAccount;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.configure.LocalesPaths;
 
@@ -84,7 +83,7 @@ public class Economy {
 
 	public Currency checkCurrency(String check) {
 		if(check == null) return plugin.getEconomyService().defaultCurrency();
-		Optional<Currency> optCurrency = getCurrencies().stream().filter(currency -> (clearDecorations(currency.displayName()).equalsIgnoreCase(check) || clearDecorations(currency.symbol()).equalsIgnoreCase(check))).findFirst();
+		Optional<Currency> optCurrency = getCurrencies().stream().filter(currency -> (TextUtils.clearDecorations(currency.displayName()).equalsIgnoreCase(check) || TextUtils.clearDecorations(currency.symbol()).equalsIgnoreCase(check))).findFirst();
 		return optCurrency.isPresent() ? optCurrency.get() : plugin.getEconomyService().defaultCurrency();
 	}
 
@@ -94,16 +93,6 @@ public class Economy {
 			if(registry.stream().count() > 0) currencies.addAll(registry.stream().collect(Collectors.toList()));
 		});
 		return !currencies.isEmpty() ? currencies : Arrays.asList(plugin.getEconomyService().defaultCurrency());
-	}
-
-	private String clearDecorations(Component component) {
-		String toReturn = LegacyComponentSerializer.legacyAmpersand().serialize(component);
-		while(toReturn.indexOf('&') != -1 && !toReturn.endsWith("&") && isStyleChar(toReturn.charAt(toReturn.indexOf("&") + 1))) toReturn = toReturn.replaceAll("&" + toReturn.charAt(toReturn.indexOf("&") + 1), "");
-		return toReturn;
-	}
-
-	private boolean isStyleChar(char ch) {
-		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }
