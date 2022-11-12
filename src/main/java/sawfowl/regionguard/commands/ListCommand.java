@@ -7,7 +7,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,9 +34,6 @@ import org.spongepowered.math.vector.Vector3i;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.format.TextDecoration.State;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionTypes;
@@ -198,7 +194,8 @@ public class ListCommand implements PluginRawCommand {
 		if(region == null || calendar == null) return;
 		List<Component> messages = new ArrayList<Component>();
 		Component padding = plugin.getLocales().getText(player.locale(), LocalesPaths.PADDING);
-		Component headerPart = addDecor(String.join("", Collections.nCopies(13, removeDecor(padding))), getDecor(padding));
+		Component headerPart = Component.empty();
+		for(Component component : Collections.nCopies(12, padding)) headerPart = headerPart.append(component);
 		messages.add(headerPart.append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_INFO_HEADER).append(headerPart)));
 		if(!region.isGlobal() && (player.hasPermission(Permissions.STAFF_DELETE) || region.isCurrentTrustType(player, TrustTypes.OWNER))) {
 			Component claim = Component.empty();
@@ -344,8 +341,9 @@ public class ListCommand implements PluginRawCommand {
 			messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.POS), Arrays.asList(region.getCuboid().getMax())), LocalesPaths.COMMAND_INFO_MAX_POS));
 			messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TYPE), Arrays.asList(region.getCuboid().getSelectorType())), LocalesPaths.COMMAND_INFO_SELECTION_TYPE));
 		}
-		String footer = String.join("", Collections.nCopies(headerWithoutDecorLength(messages.get(0)) - 8, removeDecor(padding)));
-		messages.add(addDecor(footer, getDecor(padding)));
+		Component footer = Component.empty();
+		for(Component component : Collections.nCopies(headerWithoutDecorLength(messages.get(0)) - 2, padding)) footer = footer.append(component);
+		messages.add(footer);
 		sendMessage(player, messages);
 	}
 
@@ -357,16 +355,6 @@ public class ListCommand implements PluginRawCommand {
 
 	private int headerWithoutDecorLength(Component component) {
 		return removeDecor(component).length();
-	}
-
-	private Component addDecor(String string, Map<TextDecoration, State> decor) {
-		Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(string);
-		component.decorations().putAll(decor);
-		return component;
-	}
-
-	private Map<TextDecoration, State> getDecor(Component component) {
-		return component.decorations();
 	}
 
 }
