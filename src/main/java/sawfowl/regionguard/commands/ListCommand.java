@@ -357,4 +357,9 @@ public class ListCommand implements PluginRawCommand {
 		return removeDecor(component).length();
 	}
 
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg list"));
+	}
+
 }

@@ -34,6 +34,7 @@ public class SetOwnerCommand implements PluginRawCommand {
 
 	@Override
 	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
+		if(args.isEmpty()) usage();
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
@@ -86,6 +87,11 @@ public class SetOwnerCommand implements PluginRawCommand {
 		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(newOwner.name(), region.getServerWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_SETOWNER_SUCCESS_PLAYER));
 		newOwner.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(player.name(), region.getServerWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_SETOWNER_SUCCESS_TARGET));
 		plugin.getAPI().saveRegion(region.getPrimaryParent());
+	}
+
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg setowner [Player]"));
 	}
 
 }

@@ -30,6 +30,7 @@ public class SetSelectorTypeCommand implements PluginRawCommand {
 
 	@Override
 	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
+		if(args.isEmpty()) usage();
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
@@ -59,6 +60,11 @@ public class SetSelectorTypeCommand implements PluginRawCommand {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.CHANGE_SELECTOR);
+	}
+
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg setselector [Type]"));
 	}
 
 }

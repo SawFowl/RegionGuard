@@ -85,6 +85,7 @@ public class SetNameCommand implements PluginRawCommand {
 
 	@Override
 	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
+		if(args.isEmpty()) usage();
 		String plainArgs = arguments.input();
 		if(!plainArgs.contains("setname ") && !plainArgs.contains("name ")) return empty;
 		if(plainArgs.contains("setname")) plainArgs = plainArgs.replaceFirst("setname", "");
@@ -106,6 +107,11 @@ public class SetNameCommand implements PluginRawCommand {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.SET_NAME);
+	}
+
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg setmessage <CommandFlags> <Locale> [Message]"));
 	}
 
 }

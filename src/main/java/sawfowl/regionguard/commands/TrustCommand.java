@@ -26,14 +26,21 @@ import sawfowl.regionguard.utils.ReplaceUtil;
 public class TrustCommand implements PluginRawCommand {
 
 	private final RegionGuard plugin;
-	List<CommandCompletion> validTypes = Stream.of(TrustTypes.values()).filter(type -> (type != TrustTypes.WITHOUT_TRUST)).map(TrustTypes::toString).map(CommandCompletion::of).collect(Collectors.toList());
+	private List<CommandCompletion> validTypes = Stream.of(TrustTypes.values()).filter(type -> (type != TrustTypes.WITHOUT_TRUST)).map(TrustTypes::toString).map(CommandCompletion::of).collect(Collectors.toList());
 	private final List<CommandCompletion> empty = new ArrayList<>();
+	private final String validValues = TrustTypes.CONTAINER.toString() + ", " +
+			TrustTypes.SLEEP.toString() + ", " +
+			TrustTypes.HUNTER.toString() + ", " +
+			TrustTypes.BUILDER.toString() + ", " +
+			TrustTypes.USER.toString() + ", " +
+			TrustTypes.MANAGER.toString() + ".";
 	public TrustCommand(RegionGuard plugin) {
 		this.plugin = plugin;
 	}
 
 	@Override
 	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
+		if(args.isEmpty()) usage();
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
@@ -47,12 +54,6 @@ public class TrustCommand implements PluginRawCommand {
 		ServerPlayer trustedPlayer = Sponge.server().player(args.get(0)).get();
 		if(!player.hasPermission(Permissions.UNLIMIT_MEMBERS) && plugin.getAPI().getLimitMembers(region.getOwnerUUID()) <= region.getTotalMembers() - 1 && !region.getMemberData(trustedPlayer).isPresent()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_LIMIT_REACHED));
 		args.remove(0);
-		String validValues = TrustTypes.CONTAINER.toString() + ", " +
-				TrustTypes.SLEEP.toString() + ", " +
-				TrustTypes.HUNTER.toString() + ", " +
-				TrustTypes.BUILDER.toString() + ", " +
-				TrustTypes.USER.toString() + ", " +
-				TrustTypes.MANAGER.toString() + ".";
 		if(args.isEmpty() || TrustTypes.checkType(args.get(0)) == TrustTypes.WITHOUT_TRUST) throw new CommandException(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TRUST_TYPES), Arrays.asList(validValues)), LocalesPaths.COMMAND_TRUST_EXCEPTION_TRUST_TYPE_NOT_PRESENT));
 		TrustTypes trustLevel = TrustTypes.checkType(args.get(0));
 		if((player.uniqueId().equals(trustedPlayer.uniqueId()) && !player.hasPermission(Permissions.STAFF_TRUST)) || (player.uniqueId().equals(trustedPlayer.uniqueId()) && region.isCurrentTrustType(player, TrustTypes.OWNER))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_TARGET_SELF));
@@ -79,6 +80,11 @@ public class TrustCommand implements PluginRawCommand {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.TRUST);
+	}
+
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg trust [Player] [TrustType]"));
 	}
 
 }

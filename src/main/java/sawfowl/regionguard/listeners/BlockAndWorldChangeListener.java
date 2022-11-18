@@ -888,7 +888,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			}
 			RegionCreateEvent createRegionEvent = createRegion(player, positions.get(player.uniqueId()).tempRegion);
 			if(!createRegionEvent.isCancelled()) {
-				plugin.getAPI().addTempRegion(createRegionEvent.getRegion());
+				plugin.getAPI().addTempRegion(player.uniqueId(), createRegionEvent.getRegion());
 				plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(createRegionEvent.getRegion(), player, true, true);
 				if(createRegionEvent.getMessage().isPresent()) player.sendMessage(createRegionEvent.getMessage().get());
 			} else {

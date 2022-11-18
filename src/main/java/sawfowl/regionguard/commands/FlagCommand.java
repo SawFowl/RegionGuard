@@ -332,4 +332,9 @@ public class FlagCommand implements PluginRawCommand {
 		
 	}
 
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg flag"));
+	}
+
 }

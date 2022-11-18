@@ -55,4 +55,9 @@ public class LeaveCommand implements PluginRawCommand {
 		return true;
 	}
 
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg leave"));
+	}
+
 }

@@ -74,4 +74,9 @@ public class WandCommand implements Command.Raw, PluginRawCommand {
 		return Component.text("/wand");
 	}
 
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg trust [Player] [TrustType]"));
+	}
+
 }

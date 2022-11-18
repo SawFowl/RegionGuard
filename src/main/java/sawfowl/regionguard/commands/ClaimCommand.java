@@ -70,4 +70,9 @@ public class ClaimCommand implements PluginRawCommand {
 		return cause.hasPermission(Permissions.CLAIM);
 	}
 
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg claim"));
+	}
+
 }

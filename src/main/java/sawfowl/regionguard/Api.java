@@ -100,6 +100,12 @@ class Api implements RegionAPI {
 	}
 
 	@Override
+	public void addTempRegion(UUID user, Region region) {
+		removeTempRegion(user);
+		tempRegions.put(user, region);
+	}
+
+	@Override
 	public void removeTempRegion(Region region) {
 		if(tempRegions.containsKey(region.getOwnerUUID())) tempRegions.remove(region.getOwnerUUID());
 	}
@@ -189,14 +195,16 @@ class Api implements RegionAPI {
 		if(!regionsByUUID.containsKey(region.getUniqueId())) {
 			regionsByUUID.put(region.getUniqueId(), region);
 		}
-		if(playersRegions.containsKey(region.getOwnerUUID())) {
-			playersRegions.get(region.getOwnerUUID()).add(region);
-			updatePlayerData(region.getOwnerUUID());
-		} else {
-			List<Region> playerRegions = new ArrayList<Region>();
-			playerRegions.add(region);
-			playersRegions.put(region.getOwnerUUID(), playerRegions);
-			updatePlayerData(region.getOwnerUUID());
+		if(!region.isAdmin()) {
+			if(playersRegions.containsKey(region.getOwnerUUID())) {
+				playersRegions.get(region.getOwnerUUID()).add(region);
+				updatePlayerData(region.getOwnerUUID());
+			} else {
+				List<Region> playerRegions = new ArrayList<Region>();
+				playerRegions.add(region);
+				playersRegions.put(region.getOwnerUUID(), playerRegions);
+				updatePlayerData(region.getOwnerUUID());
+			}
 		}
 		removeTempRegion(region);
 	}

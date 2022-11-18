@@ -48,4 +48,9 @@ public class UpdateDefaultFlagsCommand implements PluginRawCommand {
 		return cause.hasPermission(Permissions.STAFF_UPDATE_DEFAULT_FLAGS);
 	}
 
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg updatedefaultflags"));
+	}
+
 }

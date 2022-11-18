@@ -64,4 +64,9 @@ public class SetCreatingTypeCommand implements PluginRawCommand {
 		return cause.hasPermission(Permissions.STAFF_SET_REGION_TYPE);
 	}
 
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg setcreatingtype [Type]"));
+	}
+
 }

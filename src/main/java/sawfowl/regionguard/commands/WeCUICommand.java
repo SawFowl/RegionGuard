@@ -53,4 +53,9 @@ public class WeCUICommand implements PluginRawCommand {
 		return cause.hasPermission(Permissions.CUI_COMMAND);
 	}
 
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg wecui"));
+	}
+
 }

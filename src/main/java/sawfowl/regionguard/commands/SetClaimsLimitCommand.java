@@ -33,6 +33,7 @@ public class SetClaimsLimitCommand implements PluginRawCommand {
 
 	@Override
 	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
+		if(args.isEmpty()) usage();
 		Object src = cause.root();
 		Locale sourceLocale = src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT;
 		String sourceName = src instanceof ServerPlayer ? ((ServerPlayer) src).name() : "ServerConsole";
@@ -57,6 +58,11 @@ public class SetClaimsLimitCommand implements PluginRawCommand {
 	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.STAFF_SETLIMIT_CLAIMS);
+	}
+
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg setlimit claims [Player] [Volume]"));
 	}
 
 }

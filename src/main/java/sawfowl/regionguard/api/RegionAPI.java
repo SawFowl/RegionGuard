@@ -54,7 +54,15 @@ public interface RegionAPI {
 	 * 
 	 * @param region
 	 */
+	@Deprecated
 	public void addTempRegion(Region region);
+
+	/**
+	 * Adding a temporary region
+	 * 
+	 * @param region
+	 */
+	public void addTempRegion(UUID user, Region region);
 
 	/**
 	 * Removing a temporary region

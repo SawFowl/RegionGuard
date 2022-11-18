@@ -85,4 +85,9 @@ public class LimitsCommand implements PluginRawCommand {
 		return object.toString();
 	}
 
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg limits"));
+	}
+
 }

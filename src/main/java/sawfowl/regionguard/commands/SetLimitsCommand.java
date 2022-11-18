@@ -20,7 +20,6 @@ import org.spongepowered.api.util.locale.Locales;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.configure.LocalesPaths;
@@ -110,8 +109,9 @@ public class SetLimitsCommand implements PluginRawCommand {
 		.sendTo(audience);
 	}
 
-	private Component text(String string) {
-		return LegacyComponentSerializer.legacyAmpersand().deserialize(string);
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg setlimit [Limit] [Player] [Volume]"));
 	}
 
 }

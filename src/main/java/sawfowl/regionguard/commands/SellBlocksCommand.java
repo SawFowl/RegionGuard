@@ -30,6 +30,7 @@ public class SellBlocksCommand implements PluginRawCommand {
 
 	@Override
 	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
+		if(args.isEmpty()) usage();
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
@@ -60,6 +61,11 @@ public class SellBlocksCommand implements PluginRawCommand {
 
 	private boolean optionIsPresent(ServerPlayer player) {
 		return player.option(Permissions.LIMIT_BLOCKS).isPresent();
+	}
+
+	@Override
+	public CommandException usage() throws CommandException {
+		throw new CommandException(text("Usage: /rg sellimit blocks [Volume]"));
 	}
 
 }
