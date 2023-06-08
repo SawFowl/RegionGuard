@@ -12,7 +12,6 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Tristate;
@@ -21,6 +20,7 @@ import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -58,7 +58,7 @@ public class InteractItemListener{
 		boolean liquidInteract = isLiquidInteract(blockRay);
 		Region region = plugin.getAPI().findRegion(worldKey, liquidInteract ? blockRay.get().hitPosition().toInt() : entity.blockPosition());
 		boolean isAllow = !liquidInteract ? isAllowInteractItem(region, entity,  event.itemStack().createStack()) : isAllowInteractItem(region, entity, event.itemStack().createStack()) && isAllowInteractBlockSecondary(region, entity, blockRay.get().selectedObject().blockState(), true) && isAllowBreak(region, entity, blockRay.get().selectedObject().blockState(), true) ;
-		class InteractEvent extends AbstractEvent implements RegionInteractItemEvent {
+		class InteractEvent implements RegionInteractItemEvent {
 
 			boolean cancelled;
 			Component message;

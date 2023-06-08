@@ -13,13 +13,13 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.Tristate;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -51,7 +51,7 @@ public class PickupDropItemListener {
 		}
 		boolean allowPickup = isAllowItemPickup(region, entity, items);
 		Optional<ServerPlayer> optPlayer = entity instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) entity) : Optional.empty();
-		class DropEvent extends AbstractEvent implements RegionChangeInventoryEvent.Pickup {
+		class DropEvent implements RegionChangeInventoryEvent.Pickup {
 
 			boolean cancelled;
 			Component message;
@@ -131,7 +131,7 @@ public class PickupDropItemListener {
 		}
 		boolean allowDrop = isAllowItemDrop(region, entity, items);
 		Optional<ServerPlayer> optPlayer = entity instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) entity) : Optional.empty();
-		class DropEvent extends AbstractEvent implements RegionChangeInventoryEvent.Drop {
+		class DropEvent implements RegionChangeInventoryEvent.Drop {
 
 			boolean cancelled;
 			Component message;

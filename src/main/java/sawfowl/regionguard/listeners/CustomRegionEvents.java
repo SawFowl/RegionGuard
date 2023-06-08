@@ -8,6 +8,7 @@ import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.math.vector.Vector3i;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionCreateEvent;
 import sawfowl.regionguard.api.events.RegionResizeEvent;

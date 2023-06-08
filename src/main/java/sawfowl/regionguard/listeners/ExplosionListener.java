@@ -8,7 +8,6 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -34,7 +33,7 @@ public class ExplosionListener {
 		Explosion explosion = event.explosion();
 		Region region = plugin.getAPI().findRegion(event.world(), explosion.blockPosition());
 		boolean allow = isAllowExplosion(region, explosion);
-		class RegionExplosionEvent extends AbstractEvent implements RegionChangeBlockEvent.Explode {
+		class RegionExplosionEvent implements RegionChangeBlockEvent.Explode {
 			
 			Explosion explosion;
 			boolean cencelled;

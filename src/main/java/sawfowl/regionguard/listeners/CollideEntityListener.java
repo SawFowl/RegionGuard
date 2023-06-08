@@ -11,7 +11,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.util.Tristate;
 
 import sawfowl.regionguard.Permissions;
@@ -48,7 +47,7 @@ public class CollideEntityListener {
 		}
 		Entity finalTarget = entityTarget;
 		boolean finalAllow = isAllow;
-		class CollideEvent extends AbstractEvent implements RegionCollideEntityEvent {
+		class CollideEvent implements RegionCollideEntityEvent {
 
 			boolean cencelled;
 			@Override

@@ -19,11 +19,11 @@ import org.spongepowered.api.event.command.ExecuteCommandEvent;
 import org.spongepowered.api.event.command.ExecuteCommandEvent.Pre;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Tristate;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -53,7 +53,7 @@ public class DamageEntityAndCommandListener {
 		boolean isPvP = lastDamage.containsKey(player.uniqueId()) && System.currentTimeMillis() - lastDamage.get(player.uniqueId()) < 20000;
 		boolean isAllow = isPvP ? isAllowPvPCommand(region, player, event.command()) : isAllowCommand(region, player, event.command());
 		Component message = isPvP ? plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_EXECUTE_PVP) : plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_EXECUTE);
-		class CommandEvent extends AbstractEvent implements RegionExecuteCommandEvent {
+		class CommandEvent implements RegionExecuteCommandEvent {
 
 			boolean cencelled;
 			Component message;
@@ -155,7 +155,7 @@ public class DamageEntityAndCommandListener {
 		}
 		boolean allowDamage = isAllow;
 		ServerPlayer finalPlayer = player;
-		class DamageEvent extends AbstractEvent implements RegionDamageEntityEvent {
+		class DamageEvent implements RegionDamageEntityEvent {
 
 			boolean cancelled;
 			Component message;

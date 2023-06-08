@@ -32,7 +32,6 @@ import org.spongepowered.api.event.block.ChangeBlockEvent.Pre;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
@@ -81,7 +80,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			return;
 		}
 		boolean allow = isAllowInteractBlockPrimary(entity, region, event.block(), true);
-		class InteractBlockRegionEventPrimary extends AbstractEvent implements RegionInteractBlockEvent {
+		class InteractBlockRegionEventPrimary implements RegionInteractBlockEvent {
 
 			Component message;
 			boolean cancelled;
@@ -161,7 +160,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			return;
 		}
 		boolean allow = isAllowInteractBlockSecondary(entity, region, event.block(), true);
-		class InteractBlockRegionEventSecondary extends AbstractEvent implements RegionInteractBlockEvent {
+		class InteractBlockRegionEventSecondary implements RegionInteractBlockEvent {
 
 			Component message;
 			boolean cancelled;
@@ -273,7 +272,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.BREAK.get());
 			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
 			boolean allow = isAllowExplosion(region, explosion, blockTransaction);
-			class ExplodeEvent extends AbstractEvent implements RegionChangeBlockEvent.Explode.Surface {
+			class ExplodeEvent implements RegionChangeBlockEvent.Explode.Surface {
 
 				Explosion explosion;
 				boolean cancellded;
@@ -365,7 +364,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.LIQUID_SPREAD.get());
 			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
 			boolean allow = isAllowLiquidFlow(region, blockTransaction);
-			class LiquidFlowEvent extends AbstractEvent implements RegionChangeBlockEvent.LiquidFlow {
+			class LiquidFlowEvent implements RegionChangeBlockEvent.LiquidFlow {
 
 				boolean cancelled;
 				@Override
@@ -445,7 +444,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
 			Entity entity = (Entity) event.source();
 			boolean allow = isAllowPlace(region, blockTransaction, entity, true);
-			class PlaceEvent extends AbstractEvent implements RegionChangeBlockEvent.Place {
+			class PlaceEvent implements RegionChangeBlockEvent.Place {
 
 				Component component;
 				boolean cancelled;
@@ -543,7 +542,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
 			Entity entity = event.source() instanceof Entity ? (Entity) event.source() : null;
 			boolean allow = isAllowBreak(region, blockTransaction, entity, true);
-			class BreakEvent extends AbstractEvent implements RegionChangeBlockEvent.Break {
+			class BreakEvent implements RegionChangeBlockEvent.Break {
 
 				Component component;
 				boolean cancelled;
@@ -659,7 +658,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		HashSet<Region> affectedRegions = getOtherRegions(event.world(), event.locations().stream().map(ServerLocation::blockPosition).collect(Collectors.toList()), direction, region, sources, targets);
 		if(affectedRegions.isEmpty()) {
 			boolean isAllow = isAllowPistonMove(region, sources, targets);
-			class MoveEvent extends AbstractEvent implements RegionPistonEvent.OneRegion {
+			class MoveEvent implements RegionPistonEvent.OneRegion {
 
 				Component text;
 				boolean cancelled;
@@ -734,7 +733,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			if(rgEvent.getMessage().isPresent() && rgEvent.getPlayer().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
 		} else {
 			boolean isAllow = isAllowPistonGrief(region, affectedRegions, sources, targets) && isAllowPistonMove(affectedRegions, sources, targets);
-			class GriefEvent extends AbstractEvent implements RegionPistonEvent.Grief {
+			class GriefEvent implements RegionPistonEvent.Grief {
 
 				Component text;
 				boolean cancelled;

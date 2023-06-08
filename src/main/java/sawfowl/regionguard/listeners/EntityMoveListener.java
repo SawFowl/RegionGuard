@@ -1,6 +1,7 @@
 package sawfowl.regionguard.listeners;
 
 import java.util.Optional;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
@@ -17,7 +18,6 @@ import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent.Reposition;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Task;
@@ -26,6 +26,7 @@ import org.spongepowered.math.vector.Vector3d;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -62,7 +63,7 @@ public class EntityMoveListener {
 		Region destination = plugin.getAPI().findRegion(worldKey, event.destinationPosition().toInt());
 		boolean isAllowRiding = isRiding ? isAllowRidingEntity(from, event.entity(), ridingEntity) : true;
 		boolean isAllowPortalUse = portal ? isAllowPortalUse(event.entity(), from) : true;
-		class MoveEvent extends AbstractEvent implements RegionMoveEntityEvent {
+		class MoveEvent implements RegionMoveEntityEvent {
 
 			boolean cancelled = false;
 			boolean allowFly = true;
@@ -236,7 +237,7 @@ public class EntityMoveListener {
 		}
 		boolean finalAllowTo = allowTo;
 		boolean finalAllowFrom = allowFrom;
-		class RegionMoveEvent extends AbstractEvent implements RegionMoveEntityEvent.ChangeRegion {
+		class RegionMoveEvent implements RegionMoveEntityEvent.ChangeRegion {
 
 			boolean fly;
 			boolean cancelled;
@@ -428,7 +429,7 @@ public class EntityMoveListener {
 				return;
 			}
 		}
-		class RegionEvent extends AbstractEvent implements RegionChangeEntityWorldEvent {
+		class RegionEvent implements RegionChangeEntityWorldEvent {
 			Component message;
 			Component stopFly;
 			boolean canceled;

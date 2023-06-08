@@ -11,12 +11,12 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Tristate;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -41,7 +41,7 @@ public class ItemUseListener {
 		Region region = plugin.getAPI().findRegion(worldKey, entity.blockPosition());
 		boolean isAllow = isAllowUse(region, entity, event.itemStackInUse().createStack());
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
-		class UseEvent extends AbstractEvent implements RegionUseItemStackEvent {
+		class UseEvent implements RegionUseItemStackEvent {
 
 			boolean cancelled;
 			Component message;

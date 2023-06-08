@@ -14,11 +14,11 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent.Impact;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Tristate;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -49,7 +49,7 @@ public class ImpactListener{
 		BlockState blockState = event.targetBlock();
 		Region region = plugin.getAPI().findRegion(event.impactPoint().world(), event.impactPoint().blockPosition());
 		boolean isAllow = isAllowImpactBlock(region, entity, blockState);
-		class ImpactEvent extends AbstractEvent implements RegionImpactEvent.Block {
+		class ImpactEvent implements RegionImpactEvent.Block {
 
 			boolean cancelled;
 			Component message;
@@ -128,7 +128,7 @@ public class ImpactListener{
 		ServerPlayer player = entity instanceof ServerPlayer ? (ServerPlayer) entity : null;
 		Region region = plugin.getAPI().findRegion(event.impactPoint().world(), event.impactPoint().blockPosition());
 		boolean isAllow = isAllowImpactEntity(region, entity, targetEntity);
-		class ImpactEvent extends AbstractEvent implements RegionImpactEvent.Entity {
+		class ImpactEvent implements RegionImpactEvent.Entity {
 
 			boolean cancelled;
 			Component message;

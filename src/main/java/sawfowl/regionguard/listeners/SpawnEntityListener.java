@@ -16,13 +16,13 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent.Pre;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Tristate;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.item.ItemEntity;
+
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -67,7 +67,7 @@ public class SpawnEntityListener {
 		}
 		boolean allowSpawnEntity = !spawnExp && !spawnItem && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
 		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowSpawnEntity;
-		class SpawnEvent extends AbstractEvent implements RegionSpawnEntityEvent {
+		class SpawnEvent implements RegionSpawnEntityEvent {
 
 			boolean cancelled;
 			Component message;

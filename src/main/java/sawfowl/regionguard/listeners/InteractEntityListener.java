@@ -14,10 +14,10 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.util.Tristate;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
@@ -41,7 +41,7 @@ public class InteractEntityListener {
 	public void onPrimary(InteractEntityEvent.Primary event, @Root ServerPlayer player) {
 		Region region = plugin.getAPI().findRegion(player.world(), event.entity().blockPosition());
 		boolean isAllow = isAllowSecondary(region, player, event.entity());
-		class InteractEvent extends AbstractEvent implements RegionInteractEntityEvent {
+		class InteractEvent implements RegionInteractEntityEvent {
 
 			boolean canceled;
 			Component message;
@@ -116,7 +116,7 @@ public class InteractEntityListener {
 		lastTime.put(player.uniqueId(), time);
 		Region region = plugin.getAPI().findRegion(player.world(), event.entity().blockPosition());
 		boolean isAllow = isAllowPrimary(region, player, event.entity());
-		class InteractEvent extends AbstractEvent implements RegionInteractEntityEvent {
+		class InteractEvent implements RegionInteractEntityEvent {
 
 			boolean canceled;
 			Component message;
