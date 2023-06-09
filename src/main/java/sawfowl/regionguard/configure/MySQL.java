@@ -31,10 +31,10 @@ public class MySQL {
 
 	public Connection openConnection() {
 		String url = "jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database;
-        Properties properties = new Properties();
-        properties.setProperty("user", this.user);
-        properties.setProperty("password", this.password);
-        properties.setProperty("useSSL", this.ssl);
+		Properties properties = new Properties();
+		properties.setProperty("user", this.user);
+		properties.setProperty("password", this.password);
+		properties.setProperty("useSSL", this.ssl);
 		try {
 			this.connection = DriverManager.getConnection(url, properties);
 		} catch (SQLException e) {

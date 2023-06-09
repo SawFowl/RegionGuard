@@ -6,52 +6,53 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 public final class SimpleLifecycled<T> implements Lifecycled<T> {
-    public static <T> SimpleLifecycled<T> valid(T value) {
-        return new SimpleLifecycled<>(Objects.requireNonNull(value));
-    }
 
-    public static <T> SimpleLifecycled<T> invalid() {
-        return new SimpleLifecycled<>(null);
-    }
+	public static <T> SimpleLifecycled<T> valid(T value) {
+		return new SimpleLifecycled<>(Objects.requireNonNull(value));
+	}
 
-    private final LifecycledCallbackHandler<T> events = new LifecycledCallbackHandler<>(this);
-    @Nullable
-    private T value;
+	public static <T> SimpleLifecycled<T> invalid() {
+		return new SimpleLifecycled<>(null);
+	}
 
-    private SimpleLifecycled(@Nullable T value) {
-        this.value = value;
-    }
+	private final LifecycledCallbackHandler<T> events = new LifecycledCallbackHandler<>(this);
+	@Nullable
+	private T value;
 
-    /**
-     * Set the value of this lifecycled and fire the new value event.
-     *
-     * @param value the value
-     */
-    public void newValue(T value) {
-        // Ensure lifecycle constraints are upheld.
-        invalidate();
-        this.value = Objects.requireNonNull(value);
-        events.fireOnNewValue();
-    }
+	private SimpleLifecycled(@Nullable T value) {
+		this.value = value;
+	}
 
-    /**
-     * Remove the value of this lifecycled and fire the invalidated event.
-     */
-    public void invalidate() {
-        boolean fire = this.value != null;
-        this.value = null;
-        if (fire) {
-            events.fireInvalidated();
-        }
-    }
+	/**
+	 * Set the value of this lifecycled and fire the new value event.
+	 *
+	 * @param value the value
+	 */
+	public void newValue(T value) {
+		// Ensure lifecycle constraints are upheld.
+		invalidate();
+		this.value = Objects.requireNonNull(value);
+		events.fireOnNewValue();
+	}
 
-    @Override
-    public Optional<T> value() {
-        return Optional.ofNullable(value);
-    }
+	/**
+	 * Remove the value of this lifecycled and fire the invalidated event.
+	 */
+	public void invalidate() {
+		boolean fire = this.value != null;
+		this.value = null;
+		if (fire) {
+			events.fireInvalidated();
+		}
+	}
 
-    @Override
-    public Events<T> events() {
-        return events;
-    }
+	@Override
+	public Optional<T> value() {
+		return Optional.ofNullable(value);
+	}
+
+	@Override
+	public Events<T> events() {
+		return events;
+	}
 }

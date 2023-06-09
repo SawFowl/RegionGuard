@@ -28,6 +28,7 @@ public abstract class CUIUser {
 	private Cuboid dragCuboid;
 	public CUIUser(ServerPlayer player) {
 		playerUUID = player.uniqueId();
+		if(Sponge.pluginManager().plugin("worldeditcuife3").isPresent()) cuiSupport = true;
 	}
 
 	public CUIUser(UUID uuid) {

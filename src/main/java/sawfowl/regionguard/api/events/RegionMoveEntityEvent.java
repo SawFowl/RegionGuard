@@ -29,14 +29,14 @@ public interface RegionMoveEntityEvent extends Event, Cancellable {
 		public boolean isAllowTo();
 
 		/**
-	     * Get the {@link Region} where the event occurred.
-	     */
+		 * Get the {@link Region} where the event occurred.
+		 */
 		public Region toRegion();
 	}
 
 	/**
-     * Get the {@link MoveEntityEvent}.
-     */
+	 * Get the {@link MoveEntityEvent}.
+	 */
 	public MoveEntityEvent spongeEvent();
 
 	/**
@@ -80,8 +80,8 @@ public interface RegionMoveEntityEvent extends Event, Cancellable {
 	public double getDistanceSquared();
 
 	/**
-     * Get the {@link Region} where the event occurred.
-     */
+	 * Get the {@link Region} where the event occurred.
+	 */
 	public Region fromRegion();
 
 	/**

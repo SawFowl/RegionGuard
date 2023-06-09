@@ -12,10 +12,10 @@ import sawfowl.regionguard.api.data.Region;
 public interface RegionDamageEntityEvent extends Event, RegionMessageEvent, Cancellable {
 
 	/**
-     * Get the {@link Region} where the event occurred.
-     *
-     * @return The world encompassing these block changes
-     */
+	 * Get the {@link Region} where the event occurred.
+	 *
+	 * @return The world encompassing these block changes
+	 */
 	public Region getRegion();
 
 	/**

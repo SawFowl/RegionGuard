@@ -25,8 +25,8 @@ public interface RegionInteractItemEvent extends RegionMessageEvent, Cancellable
 	public ItemStack getItemStack();
 
 	/**
-     * Get the {@link Region} where the event occurred.
-     */
+	 * Get the {@link Region} where the event occurred.
+	 */
 	public Region getRegion();
 
 	/**

@@ -33,8 +33,8 @@ public interface RegionInteractBlockEvent extends RegionMessageEvent, Cancellabl
 	public Optional<ServerPlayer> getPlayer();
 
 	/**
-     * Get the {@link Region} where the event occurred.
-     */
+	 * Get the {@link Region} where the event occurred.
+	 */
 	public Region getRegion();
 
 	/**

@@ -6,9 +6,9 @@ package sawfowl.regionguard.utils.worldedit.cuihandle.utils;
  * @param <T> the inner object
  */
 class Token<T> {
-    final T inner;
+	final T inner;
 
-    Token(T inner) {
-        this.inner = inner;
-    }
+	Token(T inner) {
+		this.inner = inner;
+	}
 }

@@ -19,30 +19,30 @@ public class MultiSelectionPointEvent implements CUIEvent {
 				String.valueOf(0)};
 	}
 
-    public MultiSelectionPointEvent(int id, Vector3i pos) {
+	public MultiSelectionPointEvent(int id, Vector3i pos) {
 		this.parameters = new String[] {
-	            String.valueOf(id),
-	            String.valueOf(pos.x()),
-	            String.valueOf(pos.y()),
-	            String.valueOf(pos.z()),
-	            String.valueOf(0)};
-    }
+				String.valueOf(id),
+				String.valueOf(pos.x()),
+				String.valueOf(pos.y()),
+				String.valueOf(pos.z()),
+				String.valueOf(0)};
+	}
 
-    public MultiSelectionPointEvent(int id, Vector3i pos, long area) {
+	public MultiSelectionPointEvent(int id, Vector3i pos, long area) {
 		this.parameters = new String[] {
-	            String.valueOf(id),
-	            String.valueOf(pos.x()),
-	            String.valueOf(pos.y()),
-	            String.valueOf(pos.z()),
-	            String.valueOf(area)};
-    }
+				String.valueOf(id),
+				String.valueOf(pos.x()),
+				String.valueOf(pos.y()),
+				String.valueOf(pos.z()),
+				String.valueOf(area)};
+	}
 
-    public String getTypeId() {
-        return MultiSelectionType.POINT;
-    }
+	public String getTypeId() {
+		return MultiSelectionType.POINT;
+	}
 
-    public String[] getParameters() {
-        return parameters;
-    }
+	public String[] getParameters() {
+		return parameters;
+	}
 
 }

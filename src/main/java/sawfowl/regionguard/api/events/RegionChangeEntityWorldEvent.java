@@ -12,8 +12,8 @@ import sawfowl.regionguard.api.data.Region;
 public interface RegionChangeEntityWorldEvent extends RegionMessageEvent, Cancellable {
 
 	/**
-     * Get the {@link ChangeEntityWorldEvent.Reposition}.
-     */
+	 * Get the {@link ChangeEntityWorldEvent.Reposition}.
+	 */
 	public ChangeEntityWorldEvent.Reposition spongeEvent();
 
 	/**
@@ -27,13 +27,13 @@ public interface RegionChangeEntityWorldEvent extends RegionMessageEvent, Cancel
 	public boolean isAllowTo();
 
 	/**
-     * Get the {@link Region} where the event occurred.
-     */
+	 * Get the {@link Region} where the event occurred.
+	 */
 	public Region fromRegion();
 
 	/**
-     * Get the {@link Region} where the event occurred.
-     */
+	 * Get the {@link Region} where the event occurred.
+	 */
 	public Region toRegion();
 
 	/**

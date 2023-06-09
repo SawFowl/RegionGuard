@@ -75,7 +75,7 @@ public class WorkTables extends Thread implements WorkData {
 			ResultSet results = resultSet("SELECT * FROM " + prefix + "worlds;");
 			while(!results.isClosed() && results.next()) {
 				String regionData = results.getString("region_data");
-	            StringReader source = new StringReader(regionData);
+				StringReader source = new StringReader(regionData);
 				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
 				ConfigurationNode node = loader.load();
 				Region region = node.node("Content").get(Region.class);
@@ -93,20 +93,20 @@ public class WorkTables extends Thread implements WorkData {
 	@Override
 	public void saveRegion(Region region) {
 		StringWriter sink = new StringWriter();
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).sink(() -> new BufferedWriter(sink)).build();
-        ConfigurationNode node = loader.createNode();
-        try {
+		HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).sink(() -> new BufferedWriter(sink)).build();
+		ConfigurationNode node = loader.createNode();
+		try {
 			node.node("Content").set(Region.class, region);
-            loader.save(node);
+			loader.save(node);
 		} catch (ConfigurateException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
-        String sql = null;
-        if(region.isGlobal()) {
-    		sql = "REPLACE INTO " + prefix + "worlds(world, region_data) VALUES('" + region.getServerWorldKey().toString() + "', '" + sink.toString() + "');";
-        } else {
-    		sql = "REPLACE INTO " + prefix + "world_" + region.getServerWorldKey().asString().replace(':', '_') + "(uuid, region_data) VALUES('" + region.getUniqueId().toString() + "', '" + sink.toString() + "');";
-        }
+		String sql = null;
+		if(region.isGlobal()) {
+			sql = "REPLACE INTO " + prefix + "worlds(world, region_data) VALUES('" + region.getServerWorldKey().toString() + "', '" + sink.toString() + "');";
+		} else {
+			sql = "REPLACE INTO " + prefix + "world_" + region.getServerWorldKey().asString().replace(':', '_') + "(uuid, region_data) VALUES('" + region.getUniqueId().toString() + "', '" + sink.toString() + "');";
+		}
 		executeSQL(sql);
 	}
 
@@ -122,7 +122,7 @@ public class WorkTables extends Thread implements WorkData {
 				ResultSet results = resultSet("SELECT * FROM " + prefix + "world_" + world.key().asString().replace(':', '_') + ";");
 				while(!results.isClosed() && results.next()) {
 					String regionData = results.getString("region_data");
-		            StringReader source = new StringReader(regionData);
+					StringReader source = new StringReader(regionData);
 					HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
 					ConfigurationNode node = loader.load();
 					Region region = node.node("Content").get(Region.class);
@@ -143,11 +143,11 @@ public class WorkTables extends Thread implements WorkData {
 	@Override
 	public void savePlayerData(UUID player, PlayerData playerData) {
 		StringWriter sink = new StringWriter();
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).sink(() -> new BufferedWriter(sink)).build();
-        ConfigurationNode node = loader.createNode();
-        try {
+		HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).sink(() -> new BufferedWriter(sink)).build();
+		ConfigurationNode node = loader.createNode();
+		try {
 			node.node("Content").set(PlayerData.class, playerData);
-            loader.save(node);
+			loader.save(node);
 		} catch (ConfigurateException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -161,7 +161,7 @@ public class WorkTables extends Thread implements WorkData {
 			ResultSet results = resultSet("SELECT " + player.uniqueId() + " FROM " + prefix + "player_data");
 			while(!results.isClosed() && results.next()) {
 				String playerData = results.getString("player_data");
-	            StringReader source = new StringReader(playerData);
+				StringReader source = new StringReader(playerData);
 				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
 				ConfigurationNode node = loader.load();
 				return node.node("Content").get(PlayerData.class);
@@ -179,7 +179,7 @@ public class WorkTables extends Thread implements WorkData {
 			while(!results.isClosed() && results.next()) {
 				UUID uuid = UUID.fromString(results.getString("uuid"));
 				String playerData = results.getString("player_data");
-	            StringReader source = new StringReader(playerData);
+				StringReader source = new StringReader(playerData);
 				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
 				ConfigurationNode node = loader.load();
 				plugin.getAPI().setPlayerData(uuid, node.node("Content").get(PlayerData.class));

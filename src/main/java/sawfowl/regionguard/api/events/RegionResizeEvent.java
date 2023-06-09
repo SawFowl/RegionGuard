@@ -15,4 +15,5 @@ public interface RegionResizeEvent extends RegionEvent {
 	 * Getting the opposite corner.
 	 */
 	public Vector3i getOppositeCorner();
+
 }

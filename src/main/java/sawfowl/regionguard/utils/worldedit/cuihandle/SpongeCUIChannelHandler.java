@@ -22,36 +22,36 @@ import sawfowl.regionguard.utils.worldedit.cuiusers.CUIUser;
 
 public class SpongeCUIChannelHandler implements RawPlayDataHandler<ServerPlayerConnection>{
 
-    public static final ResourceKey CUI_PLUGIN_CHANNEL = ResourceKey.of("worldedit", "cui");
-    private static final SimpleLifecycled<RawDataChannel> CHANNEL = SimpleLifecycled.invalid();
-    static RegionGuard plugin;
+	public static final ResourceKey CUI_PLUGIN_CHANNEL = ResourceKey.of("worldedit", "cui");
+	private static final SimpleLifecycled<RawDataChannel> CHANNEL = SimpleLifecycled.invalid();
+	static RegionGuard plugin;
 
-    public static final class RegistrationHandler {
-    	
-    	public RegistrationHandler(RegionGuard regionGuard) {
-    		plugin = regionGuard;
-    	}
-    	
-        @Listener(order = Order.LAST)
-        public void onChannelRegistration(RegisterChannelEvent event) {
-        	Optional<Channel> cuiChanel = Sponge.channelManager().get(CUI_PLUGIN_CHANNEL);
-            RawDataChannel channel = cuiChanel.isPresent() && cuiChanel.get() instanceof RawDataChannel ? (RawDataChannel) cuiChanel.get() : event.register(CUI_PLUGIN_CHANNEL, RawDataChannel.class);
-            channel.play().addHandler(ServerPlayerConnection.class, new SpongeCUIChannelHandler());
-            CHANNEL.newValue(channel);
-        }
-    }
+	public static final class RegistrationHandler {
+		
+		public RegistrationHandler(RegionGuard regionGuard) {
+			plugin = regionGuard;
+		}
+		
+		@Listener(order = Order.LAST)
+		public void onChannelRegistration(RegisterChannelEvent event) {
+			Optional<Channel> cuiChanel = Sponge.channelManager().get(CUI_PLUGIN_CHANNEL);
+			RawDataChannel channel = cuiChanel.isPresent() && cuiChanel.get() instanceof RawDataChannel ? (RawDataChannel) cuiChanel.get() : event.register(CUI_PLUGIN_CHANNEL, RawDataChannel.class);
+			channel.play().addHandler(ServerPlayerConnection.class, new SpongeCUIChannelHandler());
+			CHANNEL.newValue(channel);
+		}
+	}
 
-    public static RawDataChannel channel() {
-        return CHANNEL.valueOrThrow();
-    }
+	public static RawDataChannel channel() {
+		return CHANNEL.valueOrThrow();
+	}
 
-    @Override
-    public void handlePayload(ChannelBuf data, ServerPlayerConnection connection) {
-        ServerPlayer player = connection.player();
-        if(!player.hasPermission(Permissions.CUI_COMMAND)) return;
-        String packetData = new String(data.readBytes(data.available()), StandardCharsets.UTF_8);
-        CUIUser user = plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player);
-        user.handleCUIInitializationMessage(packetData);
-    }
+	@Override
+	public void handlePayload(ChannelBuf data, ServerPlayerConnection connection) {
+		ServerPlayer player = connection.player();
+		if(!player.hasPermission(Permissions.CUI_COMMAND)) return;
+		String packetData = new String(data.readBytes(data.available()), StandardCharsets.UTF_8);
+		CUIUser user = plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player);
+		user.handleCUIInitializationMessage(packetData);
+	}
 
 }

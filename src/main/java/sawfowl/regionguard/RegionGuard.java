@@ -88,11 +88,11 @@ public class RegionGuard {
 	private PluginContainer pluginContainer;
 	private Path configDir;
 	private ConfigurationReference<CommentedConfigurationNode> configurationReference;
-    private ValueReference<MainConfig, CommentedConfigurationNode> mainConfig;
+	private ValueReference<MainConfig, CommentedConfigurationNode> mainConfig;
 	private ConfigurationReference<CommentedConfigurationNode> flagsConfigurationReference;
-    private ValueReference<DefaultFlags, CommentedConfigurationNode> flagsConfig;
+	private ValueReference<DefaultFlags, CommentedConfigurationNode> flagsConfig;
 	private ConfigurationReference<CommentedConfigurationNode> cuiConfigurationReference;
-    private ValueReference<CuiConfig, CommentedConfigurationNode> cuiConfig;
+	private ValueReference<CuiConfig, CommentedConfigurationNode> cuiConfig;
 	private EconomyService economyService;
 	private Api api;
 	private RegionCommand mainCommand;
@@ -200,10 +200,10 @@ public class RegionGuard {
 		}
 		locales = new Locales(localeService, getConfig().isLocaleJsonSerialize());
 		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
-    	Sponge.game().eventManager().registerListeners(
-                pluginContainer,
-                new SpongeCUIChannelHandler.RegistrationHandler(instance)
-            );
+		Sponge.game().eventManager().registerListeners(
+				pluginContainer,
+				new SpongeCUIChannelHandler.RegistrationHandler(instance)
+			);
 		class PostAPIEvent extends AbstractEvent implements RegionAPIPostEvent.PostAPI {
 			@Override
 			public Cause cause() {
@@ -300,13 +300,13 @@ public class RegionGuard {
 
 	private boolean isForgePlatform() {
 		try {
-	        Class.forName("net.minecraft.entity.player.ServerPlayerEntity");
-	        Class.forName("net.minecraft.network.play.client.CCustomPayloadPacket");
-	        Class.forName("net.minecraft.network.PacketBuffer");
-	        return true;
-	    }  catch (ClassNotFoundException e) {
-	        return false;
-	    }
+			Class.forName("net.minecraft.entity.player.ServerPlayerEntity");
+			Class.forName("net.minecraft.network.play.client.CCustomPayloadPacket");
+			Class.forName("net.minecraft.network.PacketBuffer");
+			return true;
+		}  catch (ClassNotFoundException e) {
+			return false;
+		}
 	}
 
 }
