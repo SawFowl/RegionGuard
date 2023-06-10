@@ -626,7 +626,7 @@ public class Locales {
 		save = check(locale, toText("&cВы достигли лимита доступных вам регионов. Ваш лимит: &b%size%&c."), null, LocalesPaths.REGION_CREATE_EXCEPTION_LARGE_VOLUME_REGIONS) || save;
 		save = check(locale, toText("&cВы достигли лимита доступных вам дочерних регионов в текущем регионе. Ваш лимит: &b%size%&c."), null, LocalesPaths.REGION_CREATE_EXCEPTION_LARGE_VOLUME_SUBDIVISIONS) || save;
 		save = check(locale, toText("&cВы выбрали слишком большой объем: &b%selected%&c. Выделите меньшую область для создания региона. Вы можете выделить &b%max% &cблоков."), null, LocalesPaths.REGION_CREATE_EXCEPTION_LARGE_VOLUME_BLOCKS) || save;
-		save = check(locale, toText("&cУ точек совпадает одна из координат. Для кубоидов не допустимо совподение по XYZ. Для плоских регионов недопустимо совпадение по XZ."), null, LocalesPaths.REGION_CREATE_EXCEPTION_INCORRECT_COORDS) || save;
+		save = check(locale, toText("&cУ точек совпадает одна из координат. Для кубоидов не допустимо совпадение по XYZ. Для плоских регионов недопустимо совпадение по XZ."), null, LocalesPaths.REGION_CREATE_EXCEPTION_INCORRECT_COORDS) || save;
 		save = check(locale, toText("&cСоздаваемый регион частично или полностью перекрывает уже существующий. Выберите другие позиции."), null, LocalesPaths.REGION_CREATE_EXCEPTION_REGIONS_INTERSECT) || save;
 		save = check(locale, toText("&cСоздание региона было отменено."), null, LocalesPaths.REGION_CREATE_EXCEPTION_CENCELLED_EVENT) || save;
 		save = check(locale, toText("&cНевозможно создать дочерний регион, так как он выходит за границы родительского региона. Базовые регионы так же не могут пересекаться."), null, LocalesPaths.REGION_CREATE_EXCEPTION_WRONG_SUBDIVISION_POSITIONS) || save;

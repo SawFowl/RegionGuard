@@ -1,15 +1,21 @@
 package sawfowl.regionguard.utils.worldedit.cuiusers;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+
 import io.netty.buffer.Unpooled;
+
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.fml.network.PacketDistributor;
+
 import sawfowl.regionguard.utils.worldedit.StringUtil;
 import sawfowl.regionguard.utils.worldedit.cuievents.CUIEvent;
 
@@ -17,10 +23,14 @@ public class ForgeUser extends CUIUser {
 
 	public ForgeUser(ServerPlayer player) {
 		super(player);
+		setSupportCUI(getModList(player).contains("worldeditcuife3"));
 	}
 
 	public ForgeUser(UUID uuid) {
 		super(uuid);
+		Sponge.server().player(uuid).ifPresent(player -> {
+			setSupportCUI(getModList(player).contains("worldeditcuife3"));
+		});
 	}
 
 	@Override
@@ -39,6 +49,10 @@ public class ForgeUser extends CUIUser {
 				return player;
 			}
 		}).send(packet);
+	}
+
+	private List<String> getModList(ServerPlayer player) {
+		return NetworkHooks.getConnectionData(((ServerPlayerEntity) player).connection.connection).getModList();
 	}
 
 }
