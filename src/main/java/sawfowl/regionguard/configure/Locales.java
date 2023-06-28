@@ -183,7 +183,7 @@ public class Locales {
 		save = check(locale, toText("&cYou are not the owner or manager of this region and cannot exclude other players from it."), null, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_NEED_TRUST_TYPE) || save;
 		save = check(locale, toText("&cOne cannot exclude oneself from the region."), null, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_TARGET_SELF) || save;
 		save = check(locale, toText("&cYou do not owner the region and cannot exclude another manager from it."), null, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_TARGET_MANAGER) || save;
-		save = check(locale, toText("&aYou have excluded a player from the region &b%player%&c."), null, LocalesPaths.COMMAND_UNTRUST_SUCCESS_PLAYER) || save;
+		save = check(locale, toText("&aYou have excluded a player from the region &b%player%&a."), null, LocalesPaths.COMMAND_UNTRUST_SUCCESS_PLAYER) || save;
 		save = check(locale, toText("&b%player% &eexcludes you from the region in the world &b%world% &eas the boundaries from &e%min% &ato &e%max%&a."), null, LocalesPaths.COMMAND_UNTRUST_SUCCESS_TARGET) || save;
 
 		save = check(locale, toText("&cYou already have a tool for creating regions and getting information about them."), null, LocalesPaths.COMMAND_WAND_EXCEPTION_ITEM_EXIST) || save;
@@ -504,7 +504,7 @@ public class Locales {
 		save = check(locale, toText("&cВы не являетесь владельцем или менеджером этого региона и не можете исключать из него других игроков."), null, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_NEED_TRUST_TYPE) || save;
 		save = check(locale, toText("&cНельзя исключить из региона самого себя."), null, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_TARGET_SELF) || save;
 		save = check(locale, toText("&cВы не владелец региона и не можте исключить из него другого менеджера."), null, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_TARGET_MANAGER) || save;
-		save = check(locale, toText("&aВЫ исключили из региона игрока &b%player%&c."), null, LocalesPaths.COMMAND_UNTRUST_SUCCESS_PLAYER) || save;
+		save = check(locale, toText("&aВы исключили из региона игрока &b%player%&a."), null, LocalesPaths.COMMAND_UNTRUST_SUCCESS_PLAYER) || save;
 		save = check(locale, toText("&b%player% &eисключает вас из региона в мире &b%world% &eс границами от &e%min% &aдо &e%max%&a."), null, LocalesPaths.COMMAND_UNTRUST_SUCCESS_TARGET) || save;
 
 		save = check(locale, toText("&cУ вас уже есть инструмент для создания регионов и получения о них информации."), null, LocalesPaths.COMMAND_WAND_EXCEPTION_ITEM_EXIST) || save;

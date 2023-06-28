@@ -66,7 +66,7 @@ public class ListCommand implements PluginRawCommand {
 		if(regions.size() == 0) throw new CommandException(Component.text(otherPlayer ? "У игрока нет регионов" : "У вас нет регионов"));
 		List<Component> list = new ArrayList<>();
 		for(Region region : regions) {
-			Component tp = region.getServerWorld().isPresent() && (player.hasPermission(Permissions.TELEPORT) || player.hasPermission(Permissions.STAFF_LIST)) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
+			Component tp = region.getServerWorld().isPresent() && ((player.hasPermission(Permissions.TELEPORT) && region.isTrusted(player)) || player.hasPermission(Permissions.STAFF_LIST)) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
 				ServerWorld world = region.getServerWorld().get();
 				Vector3i vector3i = world.highestPositionAt(region.getCuboid().getCenter().toInt());
 				boolean safePos = player.gameMode().get() == GameModes.CREATIVE.get() || player.gameMode().get() == GameModes.SPECTATOR.get() || (world.block(vector3i.add(0, 1, 0)).type() == BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.LAVA.get());

@@ -243,7 +243,7 @@ public class Region {
 	 * false - if the player or entity does not have the type of trust specified in the check, or region is global, or region is admin
 	 */
 	public boolean isCurrentTrustType(UUID uuid, TrustTypes level) {
-		return !isAdmin() && !isGlobal() && getTrustType(uuid) == level;
+		return !isAdmin() && !isGlobal() && (getTrustType(uuid) == level || getTrustType(uuid).equals(level));
 	}
 
 	/**

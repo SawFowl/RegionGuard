@@ -50,7 +50,7 @@ public class TrustCommand implements PluginRawCommand {
 		if((!region.isCurrentTrustType(player, TrustTypes.OWNER) || !region.isCurrentTrustType(player, TrustTypes.MANAGER)) && !player.hasPermission(Permissions.STAFF_TRUST)) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_NEED_TRUST_TYPE));
 		String plainArgs = arguments.input();
 		while(plainArgs.contains("  ")) plainArgs = plainArgs.replace("  ", " ");
-		if(!args.isEmpty() || !Sponge.server().player(args.get(0)).isPresent()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT));
+		if(args.isEmpty() || !Sponge.server().player(args.get(0)).isPresent()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT));
 		ServerPlayer trustedPlayer = Sponge.server().player(args.get(0)).get();
 		if(!player.hasPermission(Permissions.UNLIMIT_MEMBERS) && plugin.getAPI().getLimitMembers(region.getOwnerUUID()) <= region.getTotalMembers() - 1 && !region.getMemberData(trustedPlayer).isPresent()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_LIMIT_REACHED));
 		args.remove(0);

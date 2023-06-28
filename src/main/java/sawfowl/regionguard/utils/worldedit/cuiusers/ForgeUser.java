@@ -13,6 +13,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.FMLConnectionData;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -23,13 +24,15 @@ public class ForgeUser extends CUIUser {
 
 	public ForgeUser(ServerPlayer player) {
 		super(player);
-		setSupportCUI(getModList(player).contains("worldeditcuife3"));
+		List<String> mods = getModList(player);
+		if(mods != null) setSupportCUI(getModList(player).contains("worldeditcuife3"));
 	}
 
 	public ForgeUser(UUID uuid) {
 		super(uuid);
 		Sponge.server().player(uuid).ifPresent(player -> {
-			setSupportCUI(getModList(player).contains("worldeditcuife3"));
+			List<String> mods = getModList(player);
+			if(mods != null) setSupportCUI(getModList(player).contains("worldeditcuife3"));
 		});
 	}
 
@@ -52,7 +55,8 @@ public class ForgeUser extends CUIUser {
 	}
 
 	private List<String> getModList(ServerPlayer player) {
-		return NetworkHooks.getConnectionData(((ServerPlayerEntity) player).connection.connection).getModList();
+		FMLConnectionData data = NetworkHooks.getConnectionData(((ServerPlayerEntity) player).connection.connection);
+		return data == null ? null : NetworkHooks.getConnectionData(((ServerPlayerEntity) player).connection.connection).getModList();
 	}
 
 }

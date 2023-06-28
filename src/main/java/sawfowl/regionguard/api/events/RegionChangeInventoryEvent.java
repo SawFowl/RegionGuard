@@ -18,7 +18,7 @@ public interface RegionChangeInventoryEvent extends Event, Cancellable {
 		/**
 		 * Get {@link ChangeInventoryEvent.Pickup}
 		 */
-		public ChangeInventoryEvent.Pickup spongeEvent();
+		public ChangeInventoryEvent.Pickup.Pre spongeEvent();
 
 	}
 
