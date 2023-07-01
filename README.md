@@ -124,11 +124,18 @@ regionguard.transaction.currency - Currency in which the player will be buying a
 
 #### Example set metaperms:
 ```
+1.
 lp group default meta set regionguard.limit.claims 3
 lp group default meta set regionguard.limit.subdivisions 5
 lp group default meta set regionguard.limit.blocks 1000
 lp group default meta set regionguard.limit.members 5
+2.
+lp group default meta set regionguard.limit.max.claims 3
+lp group default meta set regionguard.limit.max.subdivisions 5
+lp group default meta set regionguard.limit.max.blocks 1000
+lp group default meta set regionguard.limit.max.members 5
 ```
+Starting with update 1.16.1 you need to set both variants of the limits. The same values are allowed. The first option indicates the base value of the limit by the player. The second indicates the maximum value. The first cannot be greater than the second. If the second is missing the player's limit will be 0.
 
 WECui forge version -> https://www.curseforge.com/minecraft/mc-mods/worldeditcui-forge-edition-3
 
