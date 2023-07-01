@@ -3,6 +3,7 @@ package sawfowl.regionguard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -60,6 +62,7 @@ class Api implements RegionAPI {
 	private Map<UUID, List<Region>> playersRegions = new HashMap<UUID, List<Region>>();
 	private Map<ResourceKey, Region> globalRegionsPerWorlds = new HashMap<ResourceKey, Region>();
 	private Map<ResourceKey, Map<ChunkNumber, ArrayList<Region>>> regionsPerWorld = new HashMap<ResourceKey, Map<ChunkNumber, ArrayList<Region>>>();
+	private Map<ResourceKey, HashSet<Region>> forFindIntersects = new HashMap<ResourceKey, HashSet<Region>>();
 	private Map<UUID, SelectorTypes> selectorsPerPlayer = new HashMap<UUID, SelectorTypes>();
 	private Map<UUID, RegionTypes> selectedRegionTypes = new HashMap<UUID, RegionTypes>();
 	private Map<UUID, PlayerData> dataPlayers = new HashMap<UUID, PlayerData>();
@@ -183,6 +186,8 @@ class Api implements RegionAPI {
 	public void registerRegion(Region region) {
 		ResourceKey worldKey = region.getServerWorldKey();
 		if(!regionsPerWorld.containsKey(worldKey)) regionsPerWorld.put(worldKey, new HashMap<ChunkNumber, ArrayList<Region>>());
+		if(!forFindIntersects.containsKey(worldKey)) forFindIntersects.put(worldKey, new HashSet<Region>());
+		forFindIntersects.get(worldKey).add(region);
 		for(ChunkNumber chunkNumber : region.getChunkNumbers()) {
 			if(!regionsPerWorld.get(worldKey).containsKey(chunkNumber)) {
 				ArrayList<Region> regions = new ArrayList<Region>();
@@ -231,6 +236,7 @@ class Api implements RegionAPI {
 			updatePlayerData(region.getOwnerUUID());
 		}
 		if(regionsByUUID.containsKey(region.getUniqueId())) regionsByUUID.remove(region.getUniqueId());
+		if(forFindIntersects.containsKey(worldKey)) forFindIntersects.get(worldKey).remove(region);
 	}
 
 	@Override
@@ -250,6 +256,17 @@ class Api implements RegionAPI {
 			} else return optRegion.get();
 		}
 		return getGlobalRegion(worldkey);
+	}
+
+	@Override
+	public Region findIntersectsRegion(Region region) {
+		ResourceKey world = region.getServerWorldKey();
+		if(forFindIntersects.containsKey(world)) {
+			AABB aabb = region.getCuboid().getAABB();
+			Optional<Region> find = forFindIntersects.get(world).stream().filter(rg -> !rg.equals(region) && rg.getCuboid().getAABB().intersects(aabb)).findFirst();
+			if(find.isPresent()) return find.get();
+		}
+		return region;
 	}
 
 	@Override

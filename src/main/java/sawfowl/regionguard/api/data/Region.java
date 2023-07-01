@@ -967,11 +967,10 @@ public class Region {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(this == obj) return true;
 		if(obj == null) return false;
+		if(this == obj) return true;
 		if(getClass() != obj.getClass()) return false;
-		Region other = (Region) obj;
-		return Objects.equals(regionUUID, other.regionUUID);
+		return Objects.equals(regionUUID, ((Region) obj).regionUUID);
 	}
 
 	public boolean equalsOwners(Region region) {

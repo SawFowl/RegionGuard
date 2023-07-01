@@ -18,6 +18,7 @@
 package sawfowl.regionguard;
 
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,9 +31,11 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -218,7 +221,7 @@ public class RegionGuard {
 		Sponge.eventManager().post(toPost);
 	}
 
-	@Listener
+	@Listener(order = Order.LAST)
 	public void onStart(StartedEngineEvent<Server> event) {
 		if(localeService == null) return;
 		boolean mysql = getConfig().getMySQLConfig().isEnable();
@@ -271,25 +274,25 @@ public class RegionGuard {
 		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
-		Sponge.asyncScheduler().executor(pluginContainer).execute(() -> {
+		Sponge.asyncScheduler().submit(Task.builder().plugin(pluginContainer).delay(10, TimeUnit.SECONDS).execute(() -> {
 			long time = System.currentTimeMillis();
 			regionsDataWork.loadRegions();
 			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
-		});
-		mainCommand.getFlagCommand().updateCompletions();
-		class PostEvent extends AbstractEvent implements RegionAPIPostEvent.CompleteLoadRegions {
-			@Override
-			public Cause cause() {
-				return Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, pluginContainer).build(), pluginContainer);
+			mainCommand.getFlagCommand().updateCompletions();
+			class PostEvent extends AbstractEvent implements RegionAPIPostEvent.CompleteLoadRegions {
+				@Override
+				public Cause cause() {
+					return Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, pluginContainer).build(), pluginContainer);
+				}
+				@Override
+				public long getTotalLoaded() {
+					return api.getRegions().size();
+				}
 			}
-			@Override
-			public long getTotalLoaded() {
-				return api.getRegions().size();
-			}
-		}
-		PostEvent toPost = new PostEvent();
-		Sponge.eventManager().post(toPost);
-		mainCommand.genEconomyCommands();
+			PostEvent toPost = new PostEvent();
+			Sponge.eventManager().post(toPost);
+			mainCommand.genEconomyCommands();
+		}).build());
 	}
 
 	@Listener

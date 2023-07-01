@@ -186,6 +186,8 @@ public interface RegionAPI {
 	 */
 	public Region findRegion(ResourceKey worldkey, Vector3i position);
 
+	public Region findIntersectsRegion(Region region);
+
 	/**
 	 * Obtaining all player regions.
 	 * 

@@ -1,9 +1,6 @@
 package sawfowl.regionguard.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
@@ -14,8 +11,6 @@ import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.math.vector.Vector3i;
 
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -40,14 +35,11 @@ public class ClaimCommand implements PluginRawCommand {
 		if(!optRegion.isPresent()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND));
 		Region region = optRegion.get();
 		if(!region.getServerWorld().isPresent()) throw new CommandException(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.WORLD), Arrays.asList(region.getServerWorldKey().toString())), LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND));
-		ServerWorld world = region.getServerWorld().get();
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			for(Vector3i vector3i : region.getCuboid().getAllPositions()) {
-				Optional<Region> find = plugin.getAPI().getRegions().parallelStream().filter(rg -> (rg.isIntersectsWith(world, vector3i))).findFirst();
-				if(find.isPresent()) {
-					player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(find.get().getCuboid().getMin().toString(), find.get().getCuboid().getMax().toString())), LocalesPaths.COMMAND_CLAIM_CANCEL));
-					return;
-				}
+			Region find = plugin.getAPI().findIntersectsRegion(region);
+			if(!plugin.getAPI().findIntersectsRegion(region).equals(region)) {
+				player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(find.getCuboid().getMin().toString(), find.getCuboid().getMax().toString())), LocalesPaths.COMMAND_CLAIM_CANCEL));
+				return;
 			}
 			if(region.isBasicClaim()) region.setFlags(plugin.getDefaultFlagsConfig().getClaimFlags());
 			if(region.isArena()) region.setFlags(plugin.getDefaultFlagsConfig().getArenaFlags());

@@ -874,16 +874,14 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 					return;
 				}
 			}
-			for(Vector3i vector3i : positions.get(player.uniqueId()).tempRegion.getCuboid().getAllPositions()) {
-				Region find = plugin.getAPI().findRegion(positions.get(player.uniqueId()).tempRegion.getServerWorldKey(), vector3i);
-				if(!find.isGlobal()) {
-					plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
-					plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, positions.get(player.uniqueId()).tempRegion.getUniqueId());
-					plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(find, player, false, false);
-					player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_CREATE_EXCEPTION_REGIONS_INTERSECT));
-					positions.get(player.uniqueId()).clear();
-					return;
-				}
+			Region find = plugin.getAPI().findIntersectsRegion(positions.get(player.uniqueId()).tempRegion);
+			if(!find.equals(positions.get(player.uniqueId()).tempRegion)) {
+				plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
+				plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, positions.get(player.uniqueId()).tempRegion.getUniqueId());
+				plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(find, player, false, false);
+				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_CREATE_EXCEPTION_REGIONS_INTERSECT));
+				positions.get(player.uniqueId()).clear();
+				return;
 			}
 			RegionCreateEvent createRegionEvent = createRegion(player, positions.get(player.uniqueId()).tempRegion);
 			if(!createRegionEvent.isCancelled()) {
@@ -954,7 +952,20 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			}
 		}
 		if(positions.get(player.uniqueId()).tempRegion != null) {
-			Region find = plugin.getAPI().findRegion(positions.get(player.uniqueId()).tempRegion.getServerWorldKey(), blockPosition);
+			Region find = plugin.getAPI().findIntersectsRegion(positions.get(player.uniqueId()).tempRegion);
+			if(!find.isGlobal() && !find.equals(positions.get(player.uniqueId()).tempRegion)) {
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setClaimResizing(null);
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(false);
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDragCuboid(null);
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setLastWandLocation(null);
+				plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
+				plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, null);
+				plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(find, player, false, false);
+				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_RESIZE_EXCEPTION_REGIONS_INTERSECT));
+				positions.get(player.uniqueId()).clear();
+				return true;
+			}
+			find = plugin.getAPI().findRegion(positions.get(player.uniqueId()).tempRegion.getServerWorldKey(), blockPosition);
 			if(!find.isGlobal() && !find.equals(positions.get(player.uniqueId()).tempRegion)) {
 				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setClaimResizing(null);
 				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).setDrag(false);
