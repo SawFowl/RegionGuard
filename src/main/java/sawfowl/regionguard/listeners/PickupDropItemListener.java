@@ -9,17 +9,16 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 
@@ -44,7 +43,7 @@ public class PickupDropItemListener {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onPickup(ChangeInventoryEvent.Pickup.Pre event, @First Entity entity) {
 		if(entity.get(Keys.HEALTH).isPresent() && entity.get(Keys.HEALTH).get() <= 0) return;
-		ResourceKey worldKey = entity.createSnapshot().world();
+		ResourceKey worldKey = ((ServerWorld) entity.world()).key();
 		Region region = plugin.getAPI().findRegion(worldKey, entity.blockPosition());
 		List<ItemStackSnapshot> items = event.finalStacks();
 		boolean allowPickup = isAllowItemPickup(region, entity, items);
@@ -121,7 +120,7 @@ public class PickupDropItemListener {
 		if(!event.cause().first(Entity.class).isPresent()) return;
 		Entity entity = event.cause().first(Entity.class).get();
 		if(entity.get(Keys.HEALTH).isPresent() && entity.get(Keys.HEALTH).get() <= 0) return;
-		ResourceKey worldKey = entity.createSnapshot().world();
+		ResourceKey worldKey = ((ServerWorld) entity.world()).key();
 		Region region = plugin.getAPI().findRegion(worldKey, entity.blockPosition());
 		List<ItemStackSnapshot> items = new ArrayList<ItemStackSnapshot>();
 		for(SlotTransaction slotTransaction : event.transactions()) {

@@ -24,7 +24,9 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.impl.AbstractEvent;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -67,16 +69,7 @@ public class ListCommand implements PluginRawCommand {
 		List<Component> list = new ArrayList<>();
 		for(Region region : regions) {
 			Component tp = region.getServerWorld().isPresent() && ((player.hasPermission(Permissions.TELEPORT) && region.isTrusted(player)) || player.hasPermission(Permissions.STAFF_LIST)) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
-				ServerWorld world = region.getServerWorld().get();
-				Vector3i vector3i = world.highestPositionAt(region.getCuboid().getCenter().toInt());
-				boolean safePos = player.gameMode().get() == GameModes.CREATIVE.get() || player.gameMode().get() == GameModes.SPECTATOR.get() || (world.block(vector3i.add(0, 1, 0)).type() == BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.LAVA.get());
-				if(safePos) {
-					teleport(player, region, world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
-				} else {
-					player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_LIST_EXCEPTION_NOTSAFE).clickEvent(SpongeComponents.executeCallback(callback2 -> {
-						teleport(player, region, world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
-					})));
-				}
+				teleport(player, region, true);
 			})) : Component.empty();
 			Component positions = Component.text("§6" + region.getCuboid().getMin() + " ➢ " + region.getCuboid().getMax());
 			Component uuidOrName = (region.getName(player.locale()).isPresent() ? region.asComponent(player.locale()) : Component.text("§2<" + region.getUniqueId() + ">").clickEvent(SpongeComponents.executeCallback(callback -> {
@@ -110,6 +103,26 @@ public class ListCommand implements PluginRawCommand {
 		.padding(plugin.getLocales().getText(locale, LocalesPaths.PADDING))
 		.linesPerPage(lines)
 		.sendTo(audience);
+	}
+
+	private void teleport(ServerPlayer player, Region region, boolean repeat) {
+		ServerWorld world = region.getServerWorld().get();
+		Vector3i vector3i = world.highestPositionAt(region.getCuboid().getCenter().toInt());
+		boolean safePos = player.gameMode().get() == GameModes.CREATIVE.get() || player.gameMode().get() == GameModes.SPECTATOR.get() || (world.block(vector3i.add(0, 1, 0)).type() == BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.LAVA.get());
+		if(safePos) {
+			teleport(player, region, world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
+			if(repeat) Sponge.server().scheduler().submit(Task.builder().plugin(plugin.getPluginContainer()).delay(Ticks.single()).execute(() -> {
+				teleport(player, region, false);
+			}).build());
+		} else {
+			player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_LIST_EXCEPTION_NOTSAFE).clickEvent(SpongeComponents.executeCallback(callback2 -> {
+				teleport(player, region, world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
+				if(repeat) Sponge.server().scheduler().submit(Task.builder().plugin(plugin.getPluginContainer()).delay(Ticks.single()).execute(() -> {
+					teleport(player, region, false);
+				}).build());
+			})));
+		}
+	
 	}
 
 	private void teleport(ServerPlayer player, Region region, ServerWorld world, Vector3d location) {

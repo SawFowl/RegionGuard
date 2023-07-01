@@ -868,7 +868,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			if(!player.hasPermission(Permissions.UNLIMIT_BLOCKS)) {
 				long limit = plugin.getAPI().getLimitBlocks(player) - plugin.getAPI().getClaimedBlocks(player);
 				limit = limit >= 0 ? limit : 0;
-				if(limit - plugin.getAPI().getClaimedBlocks(player) - positions.get(player.uniqueId()).tempRegion.getCuboid().getSize() <= 0) {
+				if(limit - positions.get(player.uniqueId()).tempRegion.getCuboid().getSize() <= 0) {
 					player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SELECTED, ReplaceUtil.Keys.MAX), Arrays.asList(positions.get(player.uniqueId()).tempRegion.getCuboid().getSize(), (limit + "/" + plugin.getAPI().getLimitBlocks(player)))), LocalesPaths.REGION_CREATE_EXCEPTION_LARGE_VOLUME_BLOCKS));
 					positions.get(player.uniqueId()).clear();
 					return;
@@ -911,6 +911,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 					region.addChild(createSubdivisionEvent.getRegion());
 					if(createSubdivisionEvent.getMessage().isPresent()) player.sendMessage(createSubdivisionEvent.getMessage().get());
 					plugin.getAPI().saveRegion(region.getPrimaryParent());
+					plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(createSubdivisionEvent.getRegion(), player, true, false);
 				} else {
 					player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_CREATE_EXCEPTION_CENCELLED_EVENT));
 					if(createSubdivisionEvent.getMessage().isPresent()) player.sendMessage(createSubdivisionEvent.getMessage().get());

@@ -42,7 +42,7 @@ public class BuyBlocksCommand implements PluginRawCommand {
 		long toBuy = Long.valueOf(args.get(0));
 		if(toBuy <= 0) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYBLOCKS_EXCEPTION_ENTERED_ZERO));
 		if(plugin.getAPI().getLimitMaxBlocks(player) < toBuy + plugin.getAPI().getLimitBlocks(player)) {
-			long max = plugin.getAPI().getLimitMaxBlocks(player) -  plugin.getAPI().getLimitBlocks(player);
+			long max = plugin.getAPI().getLimitMaxBlocks(player) - plugin.getAPI().getLimitBlocks(player);
 			if(max < 0) max = 0;
 			throw new CommandException(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(max)), LocalesPaths.COMMAND_BUYBLOCKS_EXCEPTION_TO_MUCH_VOLUME));
 		}
@@ -52,7 +52,7 @@ public class BuyBlocksCommand implements PluginRawCommand {
 		if(!plugin.getEconomy().removeFromPlayerBalance(player, currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYBLOCKS_EXCEPTION_ECONOMY_EXCEPTION));
 		if(!plugin.getAPI().getPlayerData(player).isPresent()) plugin.getAPI().setPlayerData(player, new PlayerData());
 		if(plugin.getAPI().getPlayerData(player).get().getLimits() == null) plugin.getAPI().getPlayerData(player).get().setLimits(new PlayerLimits());
-		plugin.getAPI().setLimitBlocks(player, plugin.getAPI().getLimitBlocks(player) + toBuy);
+		plugin.getAPI().setLimitBlocks(player, toBuy);
 		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.VOLUME), Arrays.asList(toBuy, plugin.getAPI().getLimitBlocks(player))), LocalesPaths.COMMAND_BUYBLOCKS_SUCCESS));
 		return CommandResult.success();
 	}

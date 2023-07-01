@@ -1,7 +1,5 @@
 package sawfowl.regionguard.listeners;
 
-import java.util.Optional;
-
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -11,7 +9,9 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -30,11 +30,8 @@ public class CollideEntityListener {
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
-	public void onCollide(CollideEntityEvent event) {
-		Optional<Entity> optEntitySource = event.cause().first(Entity.class);
-		if(!optEntitySource.isPresent()) return;
-		Entity entitySource = optEntitySource.get();
-		ResourceKey worldKey = ResourceKey.resolve(entitySource.world().context().getValue());
+	public void onCollide(CollideEntityEvent event, @First Entity entitySource) {
+		ResourceKey worldKey = ((ServerWorld) entitySource.world()).key();
 		Region region = plugin.getAPI().findRegion(worldKey, entitySource.blockPosition());
 		boolean isAllow = true;
 		Entity entityTarget = null;

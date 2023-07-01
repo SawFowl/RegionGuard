@@ -19,6 +19,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent.Pre;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -48,7 +49,7 @@ public class SpawnEntityListener {
 		if(!event.context().get(EventContextKeys.SPAWN_TYPE).isPresent() || event.entities().isEmpty()) return;
 		Optional<Entity> optSource = event.cause().first(Entity.class);
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
-		ResourceKey worldKey = event.entities().get(0).createSnapshot().world();
+		ResourceKey worldKey = ((ServerWorld) event.entities().get(0).world()).key();
 		Region region = plugin.getAPI().findRegion(worldKey, event.entities().get(0).blockPosition());
 		String spawnKey = Sponge.game().registry(RegistryTypes.SPAWN_TYPE).valueKey(event.context().get(EventContextKeys.SPAWN_TYPE).get()).asString();
 		boolean spawnExp = event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.EXPERIENCE.get();

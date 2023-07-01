@@ -22,6 +22,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
 
 import net.kyori.adventure.text.Component;
@@ -58,7 +59,7 @@ public class EntityMoveListener {
 		boolean enderPeal = movementType.isPresent() && movementType.get() == MovementTypes.ENDER_PEARL.get();
 		boolean portal = movementType.isPresent() && movementType.get() == MovementTypes.PORTAL.get();
 		boolean teleport = command || portal || enderPeal || movementType.isPresent() && (movementType.get() == MovementTypes.ENTITY_TELEPORT.get() || movementType.get() == MovementTypes.END_GATEWAY.get() || movementType.get() == MovementTypes.PORTAL.get());
-		ResourceKey worldKey = event.entity().createSnapshot().world();
+		ResourceKey worldKey = ((ServerWorld) event.entity().world()).key();
 		Region from = plugin.getAPI().findRegion(worldKey, event.originalPosition().toInt());
 		Region destination = plugin.getAPI().findRegion(worldKey, event.destinationPosition().toInt());
 		boolean isAllowRiding = isRiding ? isAllowRidingEntity(from, event.entity(), ridingEntity) : true;

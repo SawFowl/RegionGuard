@@ -18,6 +18,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 
@@ -42,7 +43,7 @@ public class InteractItemListener{
 	public void onInteract(InteractItemEvent.Secondary event, @Root Entity entity) {
 		DataContainer container = event.itemStack().toContainer();
 		if(container.get(DataQuery.of("UnsafeData")).isPresent() && container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) return;
-		ResourceKey worldKey = entity.createSnapshot().world();
+		ResourceKey worldKey = ((ServerWorld) entity.world()).key();
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		Optional<RayTraceResult<LocatableBlock>> blockRay = Optional.empty();
 		String itemid = ListenerUtils.itemId(event.itemStack().createStack());

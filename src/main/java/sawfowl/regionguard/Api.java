@@ -3,16 +3,15 @@ package sawfowl.regionguard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.math.NumberUtils;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -21,6 +20,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import sawfowl.localeapi.serializetools.SerializedItemStack;
+
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.RegionAPI;
 import sawfowl.regionguard.api.RegionTypes;
@@ -240,19 +240,16 @@ class Api implements RegionAPI {
 
 	@Override
 	public Region findRegion(ResourceKey worldkey, Vector3i position) {
+		if(!regionsPerWorld.containsKey(worldkey)) return getGlobalRegion(worldkey);
 		ChunkNumber chunkNumber = new ChunkNumber(position);
-		if(!regionsPerWorld.containsKey(worldkey) || !regionsPerWorld.get(worldkey).containsKey(chunkNumber)) return getGlobalRegion(worldkey);
-		Stream<Region> stream = regionsPerWorld.get(worldkey).get(chunkNumber).size() > 10 ? regionsPerWorld.get(worldkey).get(chunkNumber).parallelStream() : regionsPerWorld.get(worldkey).get(chunkNumber).stream();
-		Region region = getGlobalRegion(worldkey);
-		Iterator<Region> iterator = stream.filter(rg -> (rg.isIntersectsWith(worldkey, position))).iterator();
-		if(iterator.hasNext()) {
-			region = iterator.next();
+		if(!regionsPerWorld.get(worldkey).containsKey(chunkNumber)) return getGlobalRegion(worldkey);
+		Optional<Region> optRegion = (regionsPerWorld.get(worldkey).get(chunkNumber).size() > 10 ? regionsPerWorld.get(worldkey).get(chunkNumber).parallelStream() : regionsPerWorld.get(worldkey).get(chunkNumber).stream()).filter(rg -> (rg.isIntersectsWith(worldkey, position))).findFirst();
+		if(optRegion.isPresent()) {
+			if(optRegion.get().containsChilds()) {
+				return optRegion.get().getAllChilds().parallelStream().filter(rg -> (rg.isIntersectsWith(worldkey, position))).findFirst().orElse(optRegion.get());
+			} else return optRegion.get();
 		}
-		if(region.containsChilds()) {
-			Optional<Region> child = region.getAllChilds().parallelStream().filter(rg -> (rg.isIntersectsWith(worldkey, position))).findFirst();
-			if(child.isPresent()) return child.get();
-		}
-		return region;
+		return getGlobalRegion(worldkey);
 	}
 
 	@Override
@@ -298,22 +295,22 @@ class Api implements RegionAPI {
 
 	@Override
 	public long getLimitBlocks(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getBlocks() != null ? dataPlayers.get(player.uniqueId()).getLimits().getBlocks() : getOptionLongValue(player, Permissions.LIMIT_BLOCKS);
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getBlocks() != null ? (dataPlayers.get(player.uniqueId()).getLimits().getBlocks() + getOptionLongValue(player, Permissions.LIMIT_BLOCKS) <= getLimitMaxBlocks(player) ? dataPlayers.get(player.uniqueId()).getLimits().getBlocks() + getOptionLongValue(player, Permissions.LIMIT_BLOCKS) : getLimitMaxBlocks(player)) : getOptionLongValue(player, Permissions.LIMIT_BLOCKS);
 	}
 
 	@Override
 	public long getLimitClaims(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getClaims() != null ? dataPlayers.get(player.uniqueId()).getLimits().getClaims() : getOptionLongValue(player, Permissions.LIMIT_CLAIMS);
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getClaims() != null ? (dataPlayers.get(player.uniqueId()).getLimits().getClaims() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) <= getLimitMaxClaims(player) ? dataPlayers.get(player.uniqueId()).getLimits().getClaims() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) : getLimitMaxClaims(player)) : getOptionLongValue(player, Permissions.LIMIT_CLAIMS);
 	}
 
 	@Override
 	public long getLimitSubdivisions(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() != null ? dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() : getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS);
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() != null ? (dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() + getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS) <= getLimitMaxSubdivisions(player) ? dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() + getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS) : getLimitMaxSubdivisions(player)) : getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS);
 	}
 
 	@Override
 	public long getLimitMembers(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() != null ? dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() : getOptionLongValue(player, Permissions.LIMIT_MEMBERS);
+		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() != null ? (dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) <= getLimitMaxMembers(player) ? dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) : getLimitMaxMembers(player)) : getOptionLongValue(player, Permissions.LIMIT_MEMBERS);
 	}
 
 	@Override
@@ -415,7 +412,7 @@ class Api implements RegionAPI {
 
 	@Override
 	public String getCurrency(ServerPlayer player) {
-		return optionIsPresent(player, Permissions.TRANSACRION_CURRENCY) ? player.user().subjectData().allOptions().values().stream().findFirst().get().get(Permissions.TRANSACRION_CURRENCY) : null;
+		return optionIsPresent(player, Permissions.TRANSACRION_CURRENCY) ? player.option(Permissions.TRANSACRION_CURRENCY).get() : null;
 	}
 
 	@Override
@@ -451,7 +448,7 @@ class Api implements RegionAPI {
 
 	@Override
 	public Optional<PlayerData> getPlayerData(UUID player) {
-		return dataPlayers.containsKey(player) ? Optional.ofNullable(dataPlayers.get(player)) : Optional.empty();
+		return Optional.ofNullable(dataPlayers.getOrDefault(player, null));
 	}
 
 	@Override

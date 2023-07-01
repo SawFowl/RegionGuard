@@ -708,7 +708,7 @@ public class Locales {
 	}
 
 	private AbstractLocaleUtil getAbstractLocaleUtil(Locale locale) {
-		return localeService.getPluginLocales("regionguard").get(locale);
+		return localeService.getPluginLocales("regionguard").getOrDefault(locale, localeService.getPluginLocales("regionguard").get(org.spongepowered.api.util.locale.Locales.DEFAULT));
 	}
 
 	private Component toText(String string) {

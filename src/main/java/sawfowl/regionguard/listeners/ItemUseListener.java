@@ -14,6 +14,7 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 
@@ -37,7 +38,7 @@ public class ItemUseListener {
 	public void onUse(UseItemStackEvent.Start event, @Root Entity entity) {
 		DataContainer container = event.itemStackInUse().toContainer();
 		if(container.get(DataQuery.of("UnsafeData")).isPresent() && container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) return;
-		ResourceKey worldKey = entity.createSnapshot().world();
+		ResourceKey worldKey = ((ServerWorld) entity.world()).key();
 		Region region = plugin.getAPI().findRegion(worldKey, entity.blockPosition());
 		boolean isAllow = isAllowUse(region, entity, event.itemStackInUse().createStack());
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);

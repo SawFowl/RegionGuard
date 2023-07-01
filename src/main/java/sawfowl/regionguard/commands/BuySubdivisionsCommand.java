@@ -52,7 +52,7 @@ public class BuySubdivisionsCommand implements PluginRawCommand {
 		if(!plugin.getEconomy().removeFromPlayerBalance(player, currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION));
 		if(!plugin.getAPI().getPlayerData(player).isPresent()) plugin.getAPI().setPlayerData(player, new PlayerData());
 		if(plugin.getAPI().getPlayerData(player).get().getLimits() == null) plugin.getAPI().getPlayerData(player).get().setLimits(new PlayerLimits());
-		plugin.getAPI().setLimitSubdivisions(player, plugin.getAPI().getLimitSubdivisions(player) + toBuy);
+		plugin.getAPI().setLimitSubdivisions(player, toBuy);
 		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.VOLUME), Arrays.asList(toBuy, plugin.getAPI().getLimitSubdivisions(player))), LocalesPaths.COMMAND_BUYSUBDIVISIONS_SUCCESS));
 		return CommandResult.success();
 	}

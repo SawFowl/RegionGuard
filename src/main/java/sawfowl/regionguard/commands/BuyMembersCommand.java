@@ -52,7 +52,7 @@ public class BuyMembersCommand implements PluginRawCommand {
 		if(!plugin.getEconomy().removeFromPlayerBalance(player, currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_ECONOMY_EXCEPTION));
 		if(!plugin.getAPI().getPlayerData(player).isPresent()) plugin.getAPI().setPlayerData(player, new PlayerData());
 		if(plugin.getAPI().getPlayerData(player).get().getLimits() == null) plugin.getAPI().getPlayerData(player).get().setLimits(new PlayerLimits());
-		plugin.getAPI().setLimitMembers(player, plugin.getAPI().getLimitMembers(player) + toBuy);
+		plugin.getAPI().setLimitMembers(player, toBuy);
 		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.VOLUME), Arrays.asList(toBuy, plugin.getAPI().getLimitMembers(player))), LocalesPaths.COMMAND_BUYMEMBERS_SUCCESS));
 		return CommandResult.success();
 	}
