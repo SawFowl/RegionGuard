@@ -186,6 +186,12 @@ public interface RegionAPI {
 	 */
 	public Region findRegion(ResourceKey worldkey, Vector3i position);
 
+	/**
+	 * Search for the region with which the intersection occurs.
+	 * 
+	 * @param region - Original region.
+	 * @return The first region found with which there is an intersection.<br>Or the original region if no intersection is found.
+	 */
 	public Region findIntersectsRegion(Region region);
 
 	/**
