@@ -249,7 +249,7 @@ class Api implements RegionAPI {
 		if(!regionsPerWorld.containsKey(worldkey)) return getGlobalRegion(worldkey);
 		ChunkNumber chunkNumber = new ChunkNumber(position);
 		if(!regionsPerWorld.get(worldkey).containsKey(chunkNumber)) return getGlobalRegion(worldkey);
-		Optional<Region> optRegion = (regionsPerWorld.get(worldkey).get(chunkNumber).size() > 10 ? regionsPerWorld.get(worldkey).get(chunkNumber).parallelStream() : regionsPerWorld.get(worldkey).get(chunkNumber).stream()).filter(rg -> (rg.isIntersectsWith(worldkey, position))).findFirst();
+		Optional<Region> optRegion = (regionsPerWorld.get(worldkey).get(chunkNumber).size() > 10000 ? regionsPerWorld.get(worldkey).get(chunkNumber).parallelStream() : regionsPerWorld.get(worldkey).get(chunkNumber).stream()).filter(rg -> (rg.isIntersectsWith(worldkey, position))).findFirst();
 		if(optRegion.isPresent()) {
 			if(optRegion.get().containsChilds()) {
 				return optRegion.get().getAllChilds().parallelStream().filter(rg -> (rg.isIntersectsWith(worldkey, position))).findFirst().orElse(optRegion.get());
@@ -263,7 +263,7 @@ class Api implements RegionAPI {
 		ResourceKey world = region.getServerWorldKey();
 		if(forFindIntersects.containsKey(world)) {
 			AABB aabb = region.getCuboid().getAABB();
-			Optional<Region> find = forFindIntersects.get(world).stream().filter(rg -> !rg.equals(region) && rg.getCuboid().getAABB().intersects(aabb)).findFirst();
+			Optional<Region> find = (forFindIntersects.get(world).size() > 10000 ? forFindIntersects.get(world).parallelStream() : forFindIntersects.get(world).stream()).filter(rg -> !rg.equals(region) && (rg.getCuboid().getAABB().intersects(aabb) || aabb.intersects(rg.getCuboid().getAABB()))).findFirst();
 			if(find.isPresent()) return find.get();
 		}
 		return region;

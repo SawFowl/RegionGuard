@@ -319,7 +319,12 @@ public class Region {
 	 * Getting the world key.
 	 */
 	public ResourceKey getServerWorldKey() {
-		return ResourceKey.resolve(world);
+		try {
+			return ResourceKey.resolve(world);
+		} catch (Exception e) {
+			RegionGuard.getInstance().getLogger().error("Error in region " + regionUUID + " configuration. Failed to parse world key " + world + "\n" + e.getLocalizedMessage());
+		}
+		return null;
 	}
 
 	/**
@@ -415,6 +420,11 @@ public class Region {
 			second = Vector3i.from(second.x(), Sponge.server().worldManager().defaultWorld().max().y(), second.z());
 		}
 		if(getServerWorld().isPresent() && first != null && second != null) cuboid.setPositions(first, second, selectorType, getServerWorld().get());
+		return this;
+	}
+
+	public Region setCuboid(Cuboid cuboid) {
+		this.cuboid = cuboid;
 		return this;
 	}
 
@@ -975,6 +985,25 @@ public class Region {
 
 	public boolean equalsOwners(Region region) {
 		return Objects.equals(getOwnerUUID(), region.getOwnerUUID());
+	}
+
+	public Region copy() {
+		Region region = new Region();
+		region.childs = childs;
+		region.creationTime = creationTime;
+		region.cuboid = cuboid;
+		region.enhancedData = enhancedData;
+		region.exitMessages = exitMessages;
+		region.flagValues = flagValues;
+		region.flat = flat;
+		region.joinMessages = joinMessages;
+		region.members = members;
+		region.names = names;
+		region.parrent = parrent;
+		region.regionType = regionType;
+		region.regionUUID = regionUUID;
+		region.world = world;
+		return region;
 	}
 
 	@Override

@@ -47,7 +47,7 @@ public class TrustCommand implements PluginRawCommand {
 		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
 		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
 		if(region.isAdmin()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_ADMINCLAIM));
-		if((!region.isCurrentTrustType(player, TrustTypes.OWNER) || !region.isCurrentTrustType(player, TrustTypes.MANAGER)) && !player.hasPermission(Permissions.STAFF_TRUST)) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_NEED_TRUST_TYPE));
+		if((!region.isCurrentTrustType(player, TrustTypes.OWNER) && !region.isCurrentTrustType(player, TrustTypes.MANAGER)) && !player.hasPermission(Permissions.STAFF_TRUST)) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_NEED_TRUST_TYPE));
 		String plainArgs = arguments.input();
 		while(plainArgs.contains("  ")) plainArgs = plainArgs.replace("  ", " ");
 		if(args.isEmpty() || !Sponge.server().player(args.get(0)).isPresent()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT));

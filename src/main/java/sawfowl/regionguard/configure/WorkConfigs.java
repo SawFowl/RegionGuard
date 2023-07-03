@@ -111,7 +111,7 @@ public class WorkConfigs implements WorkData {
 			try {
 				worldNode = worldConfigLoader.load();
 				Region region = worldNode.node("RegionData").get(Region.class);
-				plugin.getAPI().updateGlobalRegionData(world, region);
+				if(region.getServerWorldKey() != null) plugin.getAPI().updateGlobalRegionData(world, region);
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -123,8 +123,10 @@ public class WorkConfigs implements WorkData {
 						try {
 							regionNode = regionConfigLoader.load();
 							Region region = regionNode.node("RegionData").get(Region.class);
-							setParentAfterLoad(region);
-							plugin.getAPI().registerRegion(region);
+							if(region.getServerWorldKey() != null) {
+								setParentAfterLoad(region);
+								plugin.getAPI().registerRegion(region);
+							}
 						} catch (ConfigurateException e) {
 							plugin.getLogger().error(e.getLocalizedMessage());
 						}

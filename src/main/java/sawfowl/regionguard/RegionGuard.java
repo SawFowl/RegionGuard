@@ -274,7 +274,7 @@ public class RegionGuard {
 		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
-		Sponge.asyncScheduler().submit(Task.builder().plugin(pluginContainer).delay(10, TimeUnit.SECONDS).execute(() -> {
+		Sponge.asyncScheduler().executor(pluginContainer).submit(() -> {
 			long time = System.currentTimeMillis();
 			regionsDataWork.loadRegions();
 			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
@@ -292,7 +292,7 @@ public class RegionGuard {
 			PostEvent toPost = new PostEvent();
 			Sponge.eventManager().post(toPost);
 			mainCommand.genEconomyCommands();
-		}).build());
+		});
 	}
 
 	@Listener
