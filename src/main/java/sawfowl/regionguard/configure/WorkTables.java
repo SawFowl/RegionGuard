@@ -19,7 +19,9 @@ import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionTypes;
+import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.PlayerData;
+import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
 
 public class WorkTables extends Thread implements WorkData {
@@ -78,7 +80,14 @@ public class WorkTables extends Thread implements WorkData {
 				StringReader source = new StringReader(regionData);
 				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
 				ConfigurationNode node = loader.load();
-				Region region = node.node("Content").get(Region.class);
+				Region region = getRegionFromConfig(node.node("Content"), results.getString("world"));
+				if(region == null) {
+					region = new Region(serverOwnerUUID, world, null, null, null);
+					region.setRegionType(RegionTypes.GLOBAL);
+					region.setName("Global#World[" + world.key().asString() + "]", Locales.DEFAULT);
+					region.setFlags(plugin.getDefaultFlagsConfig().getGlobalFlags());
+					saveRegion(region);
+				}
 				if(region.getServerWorldKey().equals(world.key())) {
 					globalsCreated = true;
 					return region;
@@ -125,9 +134,11 @@ public class WorkTables extends Thread implements WorkData {
 					StringReader source = new StringReader(regionData);
 					HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
 					ConfigurationNode node = loader.load();
-					Region region = node.node("Content").get(Region.class);
-					setParentAfterLoad(region);
-					plugin.getAPI().registerRegion(region);
+					Region region = getRegionFromConfig(node.node("Content"), world.key().asString() + " " + results.getString("uuid"));
+					if(region != null && region.getServerWorldKey() != null) {
+						setParentAfterLoad(region);
+						plugin.getAPI().registerRegion(region);
+					}
 				}
 			} catch (SQLException | ConfigurateException e) {
 				plugin.getLogger().error("Load region data\n" + e.getLocalizedMessage());
@@ -164,7 +175,14 @@ public class WorkTables extends Thread implements WorkData {
 				StringReader source = new StringReader(playerData);
 				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
 				ConfigurationNode node = loader.load();
-				return node.node("Content").get(PlayerData.class);
+				if(!node.node("Content").virtual()) {
+					PlayerData data = getPlayerDataFromConfig(node.node("Content"), player.uniqueId().toString());
+					if(data == null) {
+						data = new PlayerData(new PlayerLimits(0l, 0l, 0l, 0l), new ClaimedByPlayer(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player)));
+						savePlayerData(player, data);
+					}
+					return data;
+				}
 			}
 		} catch (SQLException | ConfigurateException e) {
 			plugin.getLogger().error("Get player data. Player: " + player.name() + "\n" + e.getLocalizedMessage());
@@ -182,7 +200,11 @@ public class WorkTables extends Thread implements WorkData {
 				StringReader source = new StringReader(playerData);
 				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocales().getLocaleService().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
 				ConfigurationNode node = loader.load();
-				plugin.getAPI().setPlayerData(uuid, node.node("Content").get(PlayerData.class));
+				if(!node.node("Content").virtual()) {
+					PlayerData data = getPlayerDataFromConfig(node.node("Content"), uuid.toString());
+					if(playerData == null) savePlayerData(uuid, new PlayerData(new PlayerLimits(0l, 0l, 0l, 0l), new ClaimedByPlayer()));
+					plugin.getAPI().setPlayerData(uuid, data);
+				} else plugin.getAPI().setPlayerData(uuid, new PlayerData(new PlayerLimits(0l, 0l, 0l, 0l), new ClaimedByPlayer()));
 			}
 		} catch (SQLException | ConfigurateException e) {
 			plugin.getLogger().error("Get players data.\n" + e.getLocalizedMessage());

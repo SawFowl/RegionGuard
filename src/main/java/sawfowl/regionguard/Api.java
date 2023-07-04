@@ -71,6 +71,7 @@ class Api implements RegionAPI {
 	void generateDefaultGlobalRegion() {
 		defaultGlobal = new Region(new UUID(0, 0), Sponge.server().worldManager().defaultWorld(), null, null, null);
 		defaultGlobal.setRegionType(RegionTypes.GLOBAL);
+		defaultGlobal.setFlags(getDefaultFlags(RegionTypes.GLOBAL));
 	}
 
 	@Override

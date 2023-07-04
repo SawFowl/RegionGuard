@@ -13,7 +13,9 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionTypes;
+import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.PlayerData;
+import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
 
 public class WorkConfigs implements WorkData {
@@ -57,13 +59,24 @@ public class WorkConfigs implements WorkData {
 			CommentedConfigurationNode worldNode;
 			try {
 				worldNode = configLoader.load();
-				return worldNode.node("RegionData").get(Region.class);
+				Region region = getRegionFromConfig(worldNode.node("RegionData"), File.separator + world.key().asString() + " WorldRegion.conf");
+				if(region == null) {
+					region = new Region(new UUID(0, 0), world, null, null, null);
+					region.setRegionType(RegionTypes.GLOBAL);
+					region.setName("Global#World[" + world.key().asString() + "]", Locales.DEFAULT);
+					region.setFlags(plugin.getDefaultFlagsConfig().getGlobalFlags());
+					saveRegion(region);
+				}
+				return region;
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		}
 		Region region = new Region(new UUID(0, 0), world, null, null, null);
 		region.setRegionType(RegionTypes.GLOBAL);
+		region.setName("Global#World[" + world.key().asString() + "]", Locales.DEFAULT);
+		region.setFlags(plugin.getDefaultFlagsConfig().getGlobalFlags());
+		saveRegion(region);
 		return region;
 	}
 
@@ -122,8 +135,8 @@ public class WorkConfigs implements WorkData {
 						CommentedConfigurationNode regionNode;
 						try {
 							regionNode = regionConfigLoader.load();
-							Region region = regionNode.node("RegionData").get(Region.class);
-							if(region.getServerWorldKey() != null) {
+							Region region = getRegionFromConfig(regionNode.node("RegionData"), world.key().asString() + " " + file.getName());
+							if(region != null && region.getServerWorldKey() != null) {
 								setParentAfterLoad(region);
 								plugin.getAPI().registerRegion(region);
 							}
@@ -161,11 +174,18 @@ public class WorkConfigs implements WorkData {
 		ConfigurationLoader<CommentedConfigurationNode> playerConfig = HoconConfigurationLoader.builder().defaultOptions(plugin.getConfigurationOptions()).path(plugin.getConfigDir().resolve("PlayersData" + File.separator + player.uniqueId().toString() + ".conf")).build();
 		try {
 			CommentedConfigurationNode playerNode = playerConfig.load();
-			if(!playerNode.node("Content").virtual()) return playerNode.node("Content").get(PlayerData.class);
+			if(!playerNode.node("Content").virtual()) {
+				PlayerData playerData = getPlayerDataFromConfig(playerNode.node("Content"), player.uniqueId().toString());
+				if(playerData == null) {
+					playerData = new PlayerData(new PlayerLimits(0l, 0l, 0l, 0l), new ClaimedByPlayer(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player)));
+					savePlayerData(player, playerData);
+				}
+				return playerData;
+			}
 		} catch (ConfigurateException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
-		return new PlayerData();
+		return new PlayerData(new PlayerLimits(0l, 0l, 0l, 0l), new ClaimedByPlayer(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player)));
 	}
 
 	@Override
@@ -176,7 +196,12 @@ public class WorkConfigs implements WorkData {
 				ConfigurationLoader<CommentedConfigurationNode> regionConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getConfigurationOptions()).path(file.toPath()).build();
 				try {
 					CommentedConfigurationNode playerNode = regionConfigLoader.load();
-					if(!playerNode.node("Content").virtual()) plugin.getAPI().setPlayerData(UUID.fromString(file.getName().split(".conf")[0]), playerNode.node("Content").get(PlayerData.class));
+					if(!playerNode.node("Content").virtual()) {
+						PlayerData playerData = getPlayerDataFromConfig(playerNode.node("Content"), file.getName());
+						UUID uuid = UUID.fromString(file.getName().split(".conf")[0]);
+						if(playerData == null) savePlayerData(uuid, new PlayerData(new PlayerLimits(0l, 0l, 0l, 0l), new ClaimedByPlayer()));
+						plugin.getAPI().setPlayerData(uuid, playerData);
+					} else plugin.getAPI().setPlayerData(UUID.fromString(file.getName().split(".conf")[0]), new PlayerData(new PlayerLimits(0l, 0l, 0l, 0l), new ClaimedByPlayer()));
 				} catch (ConfigurateException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());
 				}
