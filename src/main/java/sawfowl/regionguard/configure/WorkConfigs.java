@@ -130,7 +130,8 @@ public class WorkConfigs implements WorkData {
 			}
 			if(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().exists()) {
 				for(File file : plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().listFiles()) {
-					if(file.getName().contains(".conf")) {
+					if(file.getName().startsWith(".") && file.getName().endsWith(".tmp")) file.delete();
+					if(file.getName().endsWith(".conf")) {
 						ConfigurationLoader<CommentedConfigurationNode> regionConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getConfigurationOptions()).path(file.toPath()).build();
 						CommentedConfigurationNode regionNode;
 						try {
