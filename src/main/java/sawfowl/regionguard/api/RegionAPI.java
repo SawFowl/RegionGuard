@@ -153,6 +153,12 @@ public interface RegionAPI {
 	public void registerRegionAsync(Region region);
 
 	/**
+	 * Remove the region from the list of registered regions.<br>
+	 * This method will not remove the region from the disk.
+	 */
+	public void unregisterRegion(Region region);
+
+	/**
 	 * Saving region data to disk.
 	 * 
 	 * @param region - Preservable region..

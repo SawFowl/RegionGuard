@@ -29,6 +29,8 @@ public class MemberData {
 	private String memberName;
 	@Setting("TrustLevel")
 	private String trustLevel;
+	@Setting("ReplaceNameInTitle")
+	private boolean replaceNameInTitle = false;
 
 	/**
 	 * Getting member name
@@ -42,6 +44,13 @@ public class MemberData {
 	 */
 	public Component asComponent() {
 		return Component.text(memberName);
+	}
+
+	/**
+	 * Getting member name as kyori component
+	 */
+	public Component asComponent(ServerPlayer joiner) {
+		return replaceNameInTitle ? Component.text(memberName.replace(memberName, joiner.name())) : asComponent();
 	}
 
 	/**
@@ -74,6 +83,14 @@ public class MemberData {
 	 */
 	public void setTrustType(TrustTypes level) {
 		trustLevel = level.toString();
+	}
+
+	public boolean isReplaceNameInTitle() {
+		return replaceNameInTitle;
+	}
+
+	public void setReplaceNameInTitle(boolean replaceNameInTitle) {
+		this.replaceNameInTitle = replaceNameInTitle;
 	}
 
 }

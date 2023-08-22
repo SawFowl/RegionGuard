@@ -51,7 +51,7 @@ public class SetMessageCommand implements PluginRawCommand {
 		Object src = cause.root();
 		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
 		ServerPlayer player = (ServerPlayer) src;
-		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition()).getPrimaryParent();
+		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
 		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
 		if(!player.hasPermission(Permissions.STAFF_SET_MESSAGE)) {
 			if(!region.isTrusted(player)) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_MESSAGE_NOT_TRUSTED));

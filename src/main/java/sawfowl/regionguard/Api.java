@@ -223,13 +223,7 @@ class Api implements RegionAPI {
 	}
 
 	@Override
-	public void saveRegion(Region region) {
-		plugin.getRegionsDataWork().saveRegion(region);
-	}
-
-	@Override
-	public void deleteRegion(Region region) {
-		plugin.getRegionsDataWork().deleteRegion(region);
+	public void unregisterRegion(Region region) {
 		ResourceKey worldKey = region.getServerWorldKey();
 		for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(regionsPerWorld.get(worldKey).containsKey(chunkNumber) && regionsPerWorld.get(worldKey).get(chunkNumber).contains(region)) regionsPerWorld.get(worldKey).get(chunkNumber).remove(region);
 		if(playersRegions.containsKey(region.getOwnerUUID()) && playersRegions.get(region.getOwnerUUID()).contains(region)) {
@@ -238,6 +232,17 @@ class Api implements RegionAPI {
 		}
 		if(regionsByUUID.containsKey(region.getUniqueId())) regionsByUUID.remove(region.getUniqueId());
 		if(forFindIntersects.containsKey(worldKey)) forFindIntersects.get(worldKey).remove(region);
+	}
+
+	@Override
+	public void saveRegion(Region region) {
+		plugin.getRegionsDataWork().saveRegion(region);
+	}
+
+	@Override
+	public void deleteRegion(Region region) {
+		plugin.getRegionsDataWork().deleteRegion(region);
+		unregisterRegion(region);
 	}
 
 	@Override

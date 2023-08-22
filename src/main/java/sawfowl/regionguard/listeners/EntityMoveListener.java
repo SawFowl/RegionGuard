@@ -396,9 +396,9 @@ public class EntityMoveListener {
 				if(rgEvent.getMessage().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
 			}
 		} else {
-			if(rgEvent.getPlayer().isPresent() && !rgEvent.fromRegion().getChilds().contains(rgEvent.toRegion()) && !rgEvent.toRegion().getChilds().contains(rgEvent.fromRegion())) {
-				if(rgEvent.fromRegion().getExitMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.fromRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.fromRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.fromRegion().getOwnerData().asComponent(), rgEvent.fromRegion().getExitMessage(rgEvent.getPlayer().get().locale()).get()));
-				if(rgEvent.toRegion().getJoinMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.toRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.toRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.toRegion().getOwnerData().asComponent(), rgEvent.toRegion().getJoinMessage(rgEvent.getPlayer().get().locale()).get()));
+			if(rgEvent.getPlayer().isPresent()) {
+				if(rgEvent.fromRegion().getExitMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.fromRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.fromRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.fromRegion().getOwnerData().asComponent(rgEvent.getPlayer().get()), rgEvent.fromRegion().getExitMessage(rgEvent.getPlayer().get().locale()).get()));
+				if(rgEvent.toRegion().getJoinMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.toRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.toRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.toRegion().getOwnerData().asComponent(rgEvent.getPlayer().get()), rgEvent.toRegion().getJoinMessage(rgEvent.getPlayer().get().locale()).get()));
 			}
 		}
 		if(rgEvent.getPlayer().isPresent() && !rgEvent.isAllowFly() && rgEvent.getPlayer().get().get(Keys.CAN_FLY).isPresent() && rgEvent.getPlayer().get().get(Keys.CAN_FLY).get()) {

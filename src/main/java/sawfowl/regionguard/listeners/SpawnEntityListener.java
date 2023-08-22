@@ -19,7 +19,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent.Pre;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -49,11 +48,12 @@ public class SpawnEntityListener {
 		if(!event.context().get(EventContextKeys.SPAWN_TYPE).isPresent() || event.entities().isEmpty()) return;
 		Optional<Entity> optSource = event.cause().first(Entity.class);
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
-		ResourceKey worldKey = ((ServerWorld) event.entities().get(0).world()).key();
+		ResourceKey worldKey = event.entities().get(0).serverLocation().world().key();
 		Region region = plugin.getAPI().findRegion(worldKey, event.entities().get(0).blockPosition());
 		String spawnKey = Sponge.game().registry(RegistryTypes.SPAWN_TYPE).valueKey(event.context().get(EventContextKeys.SPAWN_TYPE).get()).asString();
 		boolean spawnExp = event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.EXPERIENCE.get();
 		boolean spawnItem = event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.DROPPED_ITEM.get();
+		boolean spawnEntity = event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.WORLD_SPAWNER.get() || event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.MOB_SPAWNER.get() || event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.SPAWN_EGG.get();
 		if(optPlayer.isPresent() && (spawnExp || spawnItem)) return;
 		boolean allowSpawnExp = spawnExp && (optSource.isPresent() ? isAllowExpSpawn(region, optSource.get()) : isAllowExpSpawn(region, null));
 		boolean allowSpawnItem = true;
@@ -65,8 +65,8 @@ public class SpawnEntityListener {
 				List<ItemStack> items = event.entities().stream().map(entity -> ((ItemStack) ((Object) (((ItemEntity) entity).getItem())))).collect(Collectors.toList());
 				allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
 			}
-		}
-		boolean allowSpawnEntity = !spawnExp && !spawnItem && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
+		} else allowSpawnItem = false;
+		boolean allowSpawnEntity = spawnEntity && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
 		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowSpawnEntity;
 		class SpawnEvent implements RegionSpawnEntityEvent {
 
