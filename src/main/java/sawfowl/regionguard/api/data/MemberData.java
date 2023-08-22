@@ -50,7 +50,7 @@ public class MemberData {
 	 * Getting member name as kyori component
 	 */
 	public Component asComponent(ServerPlayer joiner) {
-		return replaceNameInTitle ? Component.text(memberName.replace(memberName, joiner.name())) : asComponent();
+		return replaceNameInTitle ? Component.text(joiner.name()) : asComponent();
 	}
 
 	/**
