@@ -51,9 +51,9 @@ public class SpawnEntityListener {
 		ResourceKey worldKey = event.entities().get(0).serverLocation().world().key();
 		Region region = plugin.getAPI().findRegion(worldKey, event.entities().get(0).blockPosition());
 		String spawnKey = Sponge.game().registry(RegistryTypes.SPAWN_TYPE).valueKey(event.context().get(EventContextKeys.SPAWN_TYPE).get()).asString();
-		boolean spawnExp = event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.EXPERIENCE.get();
-		boolean spawnItem = event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.DROPPED_ITEM.get();
-		boolean spawnEntity = event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.WORLD_SPAWNER.get() || event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.MOB_SPAWNER.get() || event.context().get(EventContextKeys.SPAWN_TYPE).get() == SpawnTypes.SPAWN_EGG.get();
+		boolean spawnExp = event.context().get(EventContextKeys.SPAWN_TYPE).get().equals(SpawnTypes.EXPERIENCE.get());
+		boolean spawnItem = event.context().get(EventContextKeys.SPAWN_TYPE).get().equals(SpawnTypes.DROPPED_ITEM.get());
+		boolean spawnEntity = event.context().get(EventContextKeys.SPAWN_TYPE).get().equals(SpawnTypes.WORLD_SPAWNER.get()) || event.context().get(EventContextKeys.SPAWN_TYPE).get().equals(SpawnTypes.MOB_SPAWNER.get()) || event.context().get(EventContextKeys.SPAWN_TYPE).get().equals(SpawnTypes.SPAWN_EGG.get()) || event.context().get(EventContextKeys.SPAWN_TYPE).get().equals(SpawnTypes.PLACEMENT.get());
 		if(optPlayer.isPresent() && (spawnExp || spawnItem)) return;
 		boolean allowSpawnExp = spawnExp && (optSource.isPresent() ? isAllowExpSpawn(region, optSource.get()) : isAllowExpSpawn(region, null));
 		boolean allowSpawnItem = true;
