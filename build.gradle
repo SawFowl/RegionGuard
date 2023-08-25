@@ -31,7 +31,7 @@ minecraft {
 }
 
 repositories {
-	
+
 	maven {
 		name = "Forge"
 		url = 'https://maven.minecraftforge.net'
@@ -40,7 +40,7 @@ repositories {
 		name = "Sponge"
 		url = "https://repo.spongepowered.org/repository/maven-public/"
 	}
-	maven { 
+	maven {
 		name = "JitPack"
 		url 'https://jitpack.io'
 	}
@@ -98,18 +98,18 @@ sponge {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+	classifier = 'sources'
+	from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+	classifier = 'javadoc'
+	from javadoc.destinationDir
 }
 
 artifacts {
-    archives sourcesJar
-    archives javadocJar
+	archives sourcesJar
+	archives javadocJar
 }
 
 configurations {
@@ -125,14 +125,19 @@ javadoc {
 }
 
 publishing {
-  repositories {
-    maven {
-      name = "GitHubPackages"
-      url = "https://maven.pkg.github.com/SawFowl/RegionGuard"
-      credentials {
-        username = System.getenv("GITHUB_ACTOR")
-        password = System.getenv("GITHUB_TOKEN")
-      }
-    }
-  }
+	repositories {
+		maven {
+			name = "GitHubPackages"
+			url = uri("https://maven.pkg.github.com/SawFowl/RegionGuard")
+			credentials {
+				username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+				password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+			}
+		}
+	}
+	publications {
+		gpr(MavenPublication) {
+			from(components.java)
+		}
+	}
 }
