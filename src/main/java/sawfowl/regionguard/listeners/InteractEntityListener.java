@@ -40,7 +40,7 @@ public class InteractEntityListener {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onPrimary(InteractEntityEvent.Primary event, @Root ServerPlayer player) {
 		Region region = plugin.getAPI().findRegion(player.world(), event.entity().blockPosition());
-		boolean isAllow = isAllowSecondary(region, player, event.entity());
+		boolean isAllow = isAllowPrimary(region, player, event.entity());
 		class InteractEvent implements RegionInteractEntityEvent {
 
 			boolean canceled;
@@ -104,8 +104,9 @@ public class InteractEntityListener {
 		rgEvent.setCancelled(!isAllow);
 		rgEvent.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_PRIMARY));
 		ListenerUtils.postEvent(rgEvent);
-		event.setCancelled(rgEvent.isCancelled());
-		if(rgEvent.isCancelled() && rgEvent.getMessage().isPresent()) player.sendMessage(rgEvent.getMessage().get());
+		if(!rgEvent.isCancelled()) return;
+		event.setCancelled(true);
+		if(rgEvent.getMessage().isPresent()) player.sendMessage(rgEvent.getMessage().get());
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
@@ -115,7 +116,7 @@ public class InteractEntityListener {
 		if(lastTime.containsKey(player.uniqueId())) lastTime.remove(player.uniqueId());
 		lastTime.put(player.uniqueId(), time);
 		Region region = plugin.getAPI().findRegion(player.world(), event.entity().blockPosition());
-		boolean isAllow = isAllowPrimary(region, player, event.entity());
+		boolean isAllow = isAllowSecondary(region, player, event.entity());
 		class InteractEvent implements RegionInteractEntityEvent {
 
 			boolean canceled;
@@ -179,8 +180,9 @@ public class InteractEntityListener {
 		rgEvent.setCancelled(!isAllow);
 		rgEvent.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_SECONDARY));
 		ListenerUtils.postEvent(rgEvent);
-		event.setCancelled(rgEvent.isCancelled());
-		if(rgEvent.isCancelled() && rgEvent.getMessage().isPresent()) player.sendMessage(rgEvent.getMessage().get());
+		if(!rgEvent.isCancelled()) return;
+		event.setCancelled(true);
+		if(rgEvent.getMessage().isPresent()) player.sendMessage(rgEvent.getMessage().get());
 	}
 
 	private boolean isAllowPrimary(Region region, ServerPlayer player, Entity entity) {
