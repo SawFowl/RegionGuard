@@ -269,9 +269,11 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		}
 		if(ListenerUtils.isExplosion(event.source())) {
 			Explosion explosion = ((Explosion) event.source());
-			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.BREAK.get());
-			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
-			boolean allow = isAllowExplosion(region, explosion, blockTransaction);
+			Region region = plugin.getAPI().findRegion(event.world(), explosion.blockPosition());
+			event.transactions().forEach(transaction -> {
+				if(!isAllowExplosion(plugin.getAPI().findRegion(event.world(), transaction.original().position()), explosion, transaction)) transaction.setValid(false);
+			});
+			boolean allow = isAllowExplosion(region, explosion);
 			class ExplodeEvent implements RegionChangeBlockEvent.Explode.Surface {
 
 				Explosion explosion;
@@ -339,23 +341,23 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 
 				@Override
 				public BlockTransaction getDefaultTransaction() {
-					return blockTransaction;
+					return ListenerUtils.getTransaction(event.transactions(), Operations.BREAK.get());
 				}
 
 				@Override
 				public BlockSnapshot afterTransaction() {
-					return blockTransaction.finalReplacement();
+					return getDefaultTransaction().finalReplacement();
 				}
 
 				@Override
 				public BlockSnapshot beforeTransaction() {
-					return blockTransaction.original();
+					return getDefaultTransaction().original();
 				}
 				
 			}
 			RegionChangeBlockEvent.Explode.Surface rgEvent = new ExplodeEvent();
 			rgEvent.setCancelled(!allow);
-			rgEvent.setExplosion((Explosion) event.source());
+			rgEvent.setExplosion(explosion);
 			ListenerUtils.postEvent(rgEvent);
 			event.setCancelled(rgEvent.isCancelled());
 			return;
@@ -1171,6 +1173,19 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			}
 		}
 		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion, transaction);
+	}
+
+	private boolean isAllowExplosion(Region region, Explosion explosion) {
+		if(explosion.sourceExplosive().isPresent()) {
+			for(String entityId : ListenerUtils.flagEntityArgs(explosion.sourceExplosive().get())) {
+				Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, entityId, null);
+				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+			}
+		} else {
+			Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, null, null);
+			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+		}
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion);
 	}
 
 	private boolean isAllowPistonMove(Region region, List<String> sources, List<String> targets) {
