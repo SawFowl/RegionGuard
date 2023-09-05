@@ -2,16 +2,10 @@ package sawfowl.regionguard.listeners.forge;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.registry.RegistryTypes;
 
 import net.minecraft.entity.Entity;
 import net.minecraftforge.common.MinecraftForge;
+
 import sawfowl.regionguard.RegionGuard;
 
 public class ForgeListener {
@@ -27,14 +21,11 @@ public class ForgeListener {
 	}
 
 	private String getEntityId(Entity entity) {
-		return entity.getEncodeId();
+		return entity.getType() == null || entity.getType().getCategory() == null || entity.getType().getCategory().getSerializedName() == null ? "all" : entity.getType().getRegistryName().toString();
 	}
 
 	private String getEntityCategory(Entity entity) {
-		String id = getEntityId(entity);
-		if(id == null) return "all";
-		Optional<EntityType<org.spongepowered.api.entity.Entity>> optType = EntityTypes.registry().findValue(ResourceKey.resolve(id));
-		return optType.isPresent() ? Sponge.game().registry(RegistryTypes.ENTITY_CATEGORY).valueKey(optType.get().category()).asString() : "all";
+		return entity.getType() == null || entity.getType().getCategory() == null || entity.getType().getCategory().getSerializedName() == null ? "all" : "sponge:" + entity.getType().getCategory().getSerializedName();
 	}
 
 }

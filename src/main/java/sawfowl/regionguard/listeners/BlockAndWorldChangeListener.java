@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.Keys;
@@ -274,7 +275,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			event.transactions().forEach(transaction -> {
 				if(!isAllowExplosion(plugin.getAPI().findRegion(event.world(), transaction.original().position()), explosion, transaction)) transaction.setValid(false);
 			});
-			boolean allow = isAllowExplosion(region, explosion);
+			boolean allow = isAllowExplosion(region, explosion, event.world().block(explosion.blockPosition()));
 			class ExplodeEvent implements RegionChangeBlockEvent.Explode.Surface {
 
 				Explosion explosion;
@@ -1161,9 +1162,9 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 
 	private boolean isAllowExplosion(Region region, Explosion explosion, BlockTransaction transaction) {
 		if(explosion.sourceExplosive().isPresent()) {
-			for(String entityId : ListenerUtils.flagEntityArgs(explosion.sourceExplosive().get())) {
-				for(String blockId : ListenerUtils.flagBlockArgs(transaction.original())) {
-					Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, entityId, blockId);
+			for(String source : ListenerUtils.flagEntityArgs(explosion.sourceExplosive().get())) {
+				for(String target : ListenerUtils.flagBlockArgs(transaction.original())) {
+					Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, source, target);
 					if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 				}
 			}
@@ -1176,17 +1177,19 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion, transaction);
 	}
 
-	private boolean isAllowExplosion(Region region, Explosion explosion) {
+	private boolean isAllowExplosion(Region region, Explosion explosion, BlockState blockState) {
 		if(explosion.sourceExplosive().isPresent()) {
-			for(String entityId : ListenerUtils.flagEntityArgs(explosion.sourceExplosive().get())) {
-				Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, entityId, null);
-				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+			for(String source : ListenerUtils.flagEntityArgs(explosion.sourceExplosive().get())) {
+				for(String target : Arrays.asList(ListenerUtils.blockID(blockState), "all")) {
+					Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, source, target);
+					if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+				}
 			}
 		} else {
 			Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, null, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion, blockState);
 	}
 
 	private boolean isAllowPistonMove(Region region, List<String> sources, List<String> targets) {

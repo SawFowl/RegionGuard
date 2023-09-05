@@ -1,11 +1,13 @@
-package sawfowl.regionguard.listeners;
+package sawfowl.regionguard.listeners.forge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.Cause;
@@ -23,7 +25,6 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionChangeBlockEvent;
-import sawfowl.regionguard.listeners.forge.ForgeListener;
 import sawfowl.regionguard.utils.ListenerUtils;
 
 public class ForgeExplosionListener extends ForgeListener {
@@ -39,7 +40,10 @@ public class ForgeExplosionListener extends ForgeListener {
 		ResourceKey worldKey = ResourceKey.resolve(event.getWorld().dimension().location().toString());
 		Vector3i position = Vector3i.from((int) explosion.getPosition().x, (int) explosion.getPosition().y, (int) explosion.getPosition().z);
 		Region region = plugin.getAPI().findRegion(worldKey, position);
-		boolean allow = isAllowExplosion(region, explosion);
+		List<String> sources = new ArrayList<String>();
+		if(explosion.getSourceMob() != null) sources.addAll(flagEntityArgs(explosion.getSourceMob()));
+		if(explosion.getExploder() != null) sources.addAll(flagEntityArgs(explosion.getExploder()));
+		boolean allow = isAllowExplosion(region, sources, region.getServerWorld().get().block(position));
 		List<BlockTransaction> transactions = new ArrayList<BlockTransaction>();
 		RegionChangeBlockEvent.Explode.Surface rgEvent = new RegionChangeBlockEvent.Explode.Surface() {
 
@@ -131,26 +135,25 @@ public class ForgeExplosionListener extends ForgeListener {
 			return;
 		}
 		positions.forEach(pos -> {
-			if(!isAllowExplosion(plugin.getAPI().findRegion(worldKey, Vector3i.from(pos.getX(), pos.getY(), pos.getZ())), explosion)) explosion.getToBlow().remove(pos);
+			Vector3i blockPos = Vector3i.from(pos.getX(), pos.getY(), pos.getZ());
+			Region find = plugin.getAPI().findRegion(worldKey, blockPos);
+			if(!isAllowExplosion(find, sources, find.getServerWorld().get().block(position))) explosion.getToBlow().remove(pos);
 		});
 	}
 
-	private boolean isAllowExplosion(Region region, Explosion explosion) {
-		if(explosion.getSourceMob() != null) {
-			for(String entityId : flagEntityArgs(explosion.getSourceMob())) {
-				Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, entityId, null);
-				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
-			}
-		} else if(explosion.getExploder() != null) {
-			for(String entityId : flagEntityArgs(explosion.getExploder())) {
-				Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, entityId, null);
-				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+	private boolean isAllowExplosion(Region region, List<String> sources, BlockState blockState) {
+		if(!sources.isEmpty()) {
+			for(String source : sources) {
+				for(String target : Arrays.asList(ListenerUtils.blockID(blockState), "all")) {
+					Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, source, target);
+					if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
+				}
 			}
 		} else {
 			Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, null, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), sources, blockState);
 	}
 
 }
