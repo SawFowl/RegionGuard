@@ -1,4 +1,4 @@
-package sawfowl.regionguard.listeners;
+package sawfowl.regionguard.listeners.forge;
 
 import java.util.Optional;
 

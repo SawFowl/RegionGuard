@@ -50,6 +50,10 @@ public class MainConfig {
 	@Setting("WandItem")
 	private WandItem wanditem = new WandItem();
 
+	@Setting("RegisterForgeListeners")
+	@Comment("Sometimes Sponge does not intercept Forge events. Enabling this option may fix the problem.\nIf the territory protection does not work at any action, please report it to the plugin developer's Discord server - https://discord.gg/4SMShjQ3Pe\nIn some cases, modifications to the mod code may be required.")
+	private boolean registerForgeListeners = true;
+
 	public boolean isUnloadRegions() {
 		return unloadRegions;
 	}
@@ -88,6 +92,10 @@ public class MainConfig {
 
 	public boolean isDebugEconomy() {
 		return debugEconomy;
+	}
+
+	public boolean isRegisterForgeListeners() {
+		return registerForgeListeners;
 	}
 
 }

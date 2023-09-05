@@ -245,6 +245,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onBlockChange(ChangeBlockEvent.All event) {
+		if(event.isCancelled()) return;
 		boolean isPlayer = event.source() instanceof ServerPlayer;
 		ServerPlayer player = isPlayer ? (ServerPlayer) event.source() : null;
 		if(isPlayer) {
