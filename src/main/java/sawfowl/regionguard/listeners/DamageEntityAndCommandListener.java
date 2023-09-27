@@ -131,7 +131,7 @@ public class DamageEntityAndCommandListener {
 		if(optPlayer.isPresent() && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get()) && !optPlayer.get().uniqueId().equals(event.entity().uniqueId())) {
 			isAllow = false;
 			message = plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.PVP);
-		} else if(optEntity.isPresent())  {
+		} else if(optEntity.isPresent() && !optEntity.get().uniqueId().equals(event.entity().uniqueId())) {
 			Entity entity = optEntity.get();
 			if(entity instanceof Projectile) {
 				Projectile projectile = (Projectile) entity;
@@ -140,19 +140,18 @@ public class DamageEntityAndCommandListener {
 					if(projectileSource instanceof Entity) entity = (Entity) projectileSource;
 				}
 			}
-			if(entity.uniqueId().equals(event.entity().uniqueId())) return;
-			if(player != null && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get())) {
-				isAllow = false;
-				message = plugin.getLocales().getText(player.locale(), LocalesPaths.PVP);
-			} else if(!isAllowDamage(region, event.entity(), entity)) {
-				if(player != null) {
-					message = plugin.getLocales().getText(player.locale(), LocalesPaths.ENTITY_DAMAGE);
+			if(!entity.uniqueId().equals(event.entity().uniqueId())) {
+				if(player != null && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get())) {
+					isAllow = false;
+					message = plugin.getLocales().getText(player.locale(), LocalesPaths.PVP);
+				} else if(!isAllowDamage(region, event.entity(), entity)) {
+					if(player != null) {
+						message = plugin.getLocales().getText(player.locale(), LocalesPaths.ENTITY_DAMAGE);
+					}
+					isAllow = false;
 				}
-				isAllow = false;
 			}
-		} else if(optDamageSource.isPresent() && !isAllowDamage(region, event.entity(), optDamageSource.get())) {
-			isAllow = false;
-		}
+		} else if(optDamageSource.isPresent()) isAllow = isAllowDamage(region, event.entity(), optDamageSource.get());
 		boolean allowDamage = isAllow;
 		ServerPlayer finalPlayer = player;
 		class DamageEvent implements RegionDamageEntityEvent {

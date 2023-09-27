@@ -461,6 +461,14 @@ public class Region {
 	}
 
 	/**
+	 * Searching for a child region.<br>
+	 * If no region is found, it will return the current region.
+	 */
+	public Region getChild(Vector3i position) {
+		return containsChilds() ? (childs.size() > 10000 ? childs.parallelStream() : childs.stream()).filter(child -> child.isIntersectsWith(position)).findFirst().orElse(this) : this;
+	}
+
+	/**
 	 * Adding a child region.
 	 */
 	public Region addChild(Region region) {
@@ -584,8 +592,7 @@ public class Region {
 	 * Getting the value of the flag if there is one. <br>
 	 */
 	public Tristate getFlagResultWhithoutParrents(String flag, String source, String target) {
-		FlagValue flagValue = new FlagValue(true, source, target);
-		return flagValues.containsKey(flag) && flagValues.get(flag).contains(flagValue) ? Tristate.fromBoolean(flagValues.get(flag).get(flagValues.get(flag).indexOf(flagValue)).getValue()) : Tristate.UNDEFINED;
+		return flagValues.containsKey(flag) ? flagValues.get(flag).stream().filter(value -> value.equalsTo(source, target)).findFirst().map(value -> value.asTristate()).orElse(Tristate.UNDEFINED) : Tristate.UNDEFINED;
 	}
 
 	/**
@@ -807,6 +814,16 @@ public class Region {
 	 */
 	public boolean isIntersectsWith(ResourceKey worldkey, Vector3i vector3i) {
 		return world.equals(worldkey.asString()) && getCuboid().containsIntersectsPosition(vector3i);
+	}
+
+	/**
+	 * Checking whether the position belongs to the region.
+	 * This method should only be applied to child regions, as it does not perform a world matching check.
+	 *
+	 * @param vector3i - checkable position
+	 */
+	public boolean isIntersectsWith(Vector3i vector3i) {
+		return getCuboid().containsIntersectsPosition(vector3i);
 	}
 
 	/**

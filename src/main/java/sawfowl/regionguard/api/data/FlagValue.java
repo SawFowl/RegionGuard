@@ -2,6 +2,7 @@ package sawfowl.regionguard.api.data;
 
 import java.util.Objects;
 
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
@@ -42,6 +43,14 @@ public class FlagValue {
 
 	public boolean isBasic() {
 		return source.equals("all") && target.equals("all");
+	}
+
+	public Tristate asTristate() {
+		return Tristate.fromBoolean(value);
+	}
+
+	public boolean equalsTo(String source, String target) {
+		return (source == null ? this.source.equals("all") : source.equals(this.source)) && (target == null ? this.target.equals("all") : target.equals(this.target));
 	}
 
 	@Override

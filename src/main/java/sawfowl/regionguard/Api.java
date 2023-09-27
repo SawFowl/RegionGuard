@@ -253,15 +253,10 @@ class Api implements RegionAPI {
 	@Override
 	public Region findRegion(ResourceKey worldkey, Vector3i position) {
 		if(!regionsPerWorld.containsKey(worldkey)) return getGlobalRegion(worldkey);
-		ChunkNumber chunkNumber = new ChunkNumber(position);
-		if(!regionsPerWorld.get(worldkey).containsKey(chunkNumber)) return getGlobalRegion(worldkey);
-		Optional<Region> optRegion = (regionsPerWorld.get(worldkey).get(chunkNumber).size() > 10000 ? regionsPerWorld.get(worldkey).get(chunkNumber).parallelStream() : regionsPerWorld.get(worldkey).get(chunkNumber).stream()).filter(rg -> (rg.isIntersectsWith(worldkey, position))).findFirst();
-		if(optRegion.isPresent()) {
-			if(optRegion.get().containsChilds()) {
-				return optRegion.get().getAllChilds().parallelStream().filter(rg -> (rg.isIntersectsWith(worldkey, position))).findFirst().orElse(optRegion.get());
-			} else return optRegion.get();
-		}
-		return getGlobalRegion(worldkey);
+		return (regionsPerWorld.get(worldkey).size() > 10000 ? regionsPerWorld.get(worldkey).entrySet().parallelStream() : regionsPerWorld.get(worldkey).entrySet().stream()).filter(entry -> entry.getKey().equalsTo(position)).findFirst()
+		.map(entry -> (entry.getValue().size() > 10000 ? entry.getValue().parallelStream() : entry.getValue().stream()).filter(rg -> (rg.isIntersectsWith(position))).findFirst()
+			.map(rg -> rg.getChild(position)).orElse(getGlobalRegion(worldkey)))
+		.orElse(getGlobalRegion(worldkey));
 	}
 
 	@Override

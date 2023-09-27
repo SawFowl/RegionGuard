@@ -34,6 +34,10 @@ public class ChunkNumber {
 		return z;
 	}
 
+	public boolean equalsTo(Vector3i vector3i) {
+		return x == vector3i.x() / 16 && z == vector3i.z() / 16;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(this == obj) return true;

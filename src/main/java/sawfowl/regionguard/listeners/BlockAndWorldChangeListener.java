@@ -443,6 +443,12 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			event.setCancelled(rgEvent.isCancelled());
 			return;
 		}
+		if(ListenerUtils.isModify(event.transactions()) && ListenerUtils.blockID(ListenerUtils.getTransaction(event.transactions(), Operations.MODIFY.get()).defaultReplacement()).equals("minecraft:fire")) {
+			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.MODIFY.get());
+			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
+			if(!isAllowFireSpread(region, blockTransaction)) event.setCancelled(true);
+			return;
+		}
 		if(ListenerUtils.isPlaceBlock(event.transactions()) && event.source() instanceof Entity) {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.PLACE.get());
 			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
@@ -637,12 +643,6 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			ListenerUtils.postEvent(rgEvent);
 			event.setCancelled(rgEvent.isCancelled());
 			if(rgEvent.isCancelled() && rgEvent.getMessage().isPresent() && isPlayer) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
-			return;
-		}
-		if(ListenerUtils.isModify(event.transactions()) && ListenerUtils.blockID(ListenerUtils.getTransaction(event.transactions(), Operations.MODIFY.get()).defaultReplacement()).equals("minecraft:fire")) {
-			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.MODIFY.get());
-			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
-			if(!isAllowFireSpread(region, blockTransaction)) event.setCancelled(true);
 			return;
 		}
 	}
@@ -1128,8 +1128,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	}
 
 	private boolean isAllowFireSpread(Region region, BlockTransaction transaction) {
-		region.getFlagResult(Flags.FIRE_SPREAD, null, null);
-		return region.isGlobal() ? true : isAllowFireSpread(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), transaction);
+		return region.getFlagResult(Flags.FIRE_SPREAD, null, null).asBoolean();
 	}
 
 	private boolean isAllowGrowth(Region region, BlockTransaction transaction, Object source, boolean first) {
