@@ -1,6 +1,6 @@
 # RegionGuard
 
- ![Maven Central](https://github.com/SawFowl/RegionGuard/actions/workflows/gradle-publish.yml/badge.svg?branch=1.9.0)
+ ![Maven Central](https://github.com/SawFowl/RegionGuard/actions/workflows/gradle-publish.yml/badge.svg?branch=1.10.0)
 
 ### For server admins:
 #### Features:
@@ -179,6 +179,6 @@ repositories {
 }
 dependencies {
 	...
-	implementation 'com.github.SawFowl:RegionGuard:1.9.0'
+	implementation 'com.github.SawFowl:RegionGuard:1.10.0'
 }
 ```
