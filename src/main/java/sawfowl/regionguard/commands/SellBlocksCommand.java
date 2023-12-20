@@ -41,7 +41,7 @@ public class SellBlocksCommand implements PluginRawCommand {
 		if(!NumberUtils.isParsable(args.get(0))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_WRONG_ARGUMENT));
 		long toSell = Long.valueOf(args.get(0));
 		if(toSell <= 0) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_ENTERED_ZERO));
-		if(!plugin.getAPI().getPlayerData(player).isPresent()) plugin.getAPI().setPlayerData(player, new PlayerData(new PlayerLimits(0l, 0l, 0l, 0l), new ClaimedByPlayer(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player))));
+		if(!plugin.getAPI().getPlayerData(player).isPresent()) plugin.getAPI().setPlayerData(player, PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player))));
 		if(plugin.getAPI().getPlayerData(player).get().getLimits().getBlocks() < toSell) throw new CommandException(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(plugin.getAPI().getPlayerData(player).get().getLimits().getBlocks())), LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_TO_MUCH_VOLUME));
 		if(!plugin.getEconomy().addToPlayerBalance(player, plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(player)), BigDecimal.valueOf(toSell * plugin.getAPI().getSellBlockPrice(player)))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_ECONOMY_EXCEPTION));
 		plugin.getAPI().setLimitBlocks(player, plugin.getAPI().getPlayerData(player).get().getLimits().getBlocks() - toSell);

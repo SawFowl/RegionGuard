@@ -17,8 +17,8 @@ import org.spongepowered.api.network.channel.raw.play.RawPlayDataHandler;
 
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
+import sawfowl.regionguard.api.worldedit.CUIUser;
 import sawfowl.regionguard.utils.worldedit.cuihandle.utils.SimpleLifecycled;
-import sawfowl.regionguard.utils.worldedit.cuiusers.CUIUser;
 
 public class SpongeCUIChannelHandler implements RawPlayDataHandler<ServerPlayerConnection>{
 

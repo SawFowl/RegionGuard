@@ -224,7 +224,7 @@ public class DamageEntityAndCommandListener {
 	private boolean isAllowPvP(Region region, ServerPlayer player) {
 		if(player.hasPermission(Permissions.bypassFlag(Flags.PVP))) return true;
 		Tristate finalFlagResult = region.getFlagResult(Flags.PVP, null, null);
-		return region.isGlobal() ? (finalFlagResult == Tristate.UNDEFINED ? true : finalFlagResult.asBoolean()) : isAllowPvP(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), player);
+		return region.isGlobal() ? (finalFlagResult == Tristate.UNDEFINED ? true : finalFlagResult.asBoolean()) : isAllowPvP(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player);
 	}
 
 	private boolean isAllowDamage(Region region, Entity entity, Object damageSource) {
@@ -250,7 +250,7 @@ public class DamageEntityAndCommandListener {
 				}
 			}
 		}
-		return region.isGlobal() ? true : isAllowDamage(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), entity, damageSource);
+		return region.isGlobal() ? true : isAllowDamage(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, damageSource);
 	}
 
 	private boolean isAllowPvPCommand(Region region, ServerPlayer player, String command) {
@@ -260,7 +260,7 @@ public class DamageEntityAndCommandListener {
 		}
 		Tristate flagResult = region.getFlagResult(Flags.COMMAND_EXECUTE_PVP, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
-		return region.isGlobal() ? true : isAllowPvPCommand(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), player, command);
+		return region.isGlobal() ? true : isAllowPvPCommand(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player, command);
 	}
 
 	private boolean isAllowCommand(Region region, ServerPlayer player, String command) {
@@ -270,7 +270,7 @@ public class DamageEntityAndCommandListener {
 		}
 		Tristate flagResult = region.getFlagResult(Flags.COMMAND_EXECUTE, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
-		return region.isGlobal() ? true : isAllowCommand(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), player, command);
+		return region.isGlobal() ? true : isAllowCommand(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player, command);
 	}
 
 }

@@ -18,6 +18,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
 
+import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.TrustTypes;
@@ -97,11 +98,11 @@ public class SetMessageCommand implements PluginRawCommand {
 			if(message.equals("")) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_MESSAGE_NOT_PRESENT));
 			if(removeDecor(message).length() > 50) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_MESSAGE_TOO_LONG));
 			if(join) {
-				region.setJoinMessage(message, locale);
+				region.setJoinMessage(TextUtils.deserialize(message), locale);
 				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_JOIN));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else if(exit) {
-				region.setExitMessage(message, locale);
+				region.setExitMessage(TextUtils.deserialize(message), locale);
 				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_EXIT));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else {

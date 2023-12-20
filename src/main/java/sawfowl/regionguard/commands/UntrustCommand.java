@@ -70,7 +70,7 @@ public class UntrustCommand implements PluginRawCommand {
 		region.untrust(untrustedPlayer.uniqueId());
 		plugin.getAPI().saveRegion(region);
 		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER), Arrays.asList(untrustedPlayer.name().orElse(untrustedPlayer.examinableName()))), LocalesPaths.COMMAND_UNTRUST_SUCCESS_PLAYER));
-		if(Sponge.server().player(untrustedPlayer.uuid()).isPresent()) Sponge.server().player(untrustedPlayer.uuid()).get().sendMessage(plugin.getLocales().getTextWithReplaced(Sponge.server().player(untrustedPlayer.uuid()).get().locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(player.name(), region.getServerWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_UNTRUST_SUCCESS_TARGET));
+		if(Sponge.server().player(untrustedPlayer.uuid()).isPresent()) Sponge.server().player(untrustedPlayer.uuid()).get().sendMessage(plugin.getLocales().getTextWithReplaced(Sponge.server().player(untrustedPlayer.uuid()).get().locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(player.name(), region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_UNTRUST_SUCCESS_TARGET));
 		return CommandResult.success();
 	}
 

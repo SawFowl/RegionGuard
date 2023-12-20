@@ -1,10 +1,15 @@
 buildscript {
 	repositories {
+		mavenCentral()
 		maven { url = 'https://maven.minecraftforge.net' }
 		maven { url = 'https://maven.blamejared.com' }
+		maven {
+			name = "Sponge"
+			url = "https://repo.spongepowered.org/repository/maven-public"
+		}
 	}
 	dependencies {
-		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.+', changing: true
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
 	}
 }
 
@@ -21,16 +26,15 @@ apply plugin: 'net.minecraftforge.gradle'
 group = "sawfowl.regionguard"
 version = "${major}.${minor}.${patch}-${api}-${suffix}"
 
-java {
-	sourceCompatibility = JavaVersion.VERSION_1_8
-	targetCompatibility = JavaVersion.VERSION_1_8
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+compileJava.options.compilerArgs << "-Xmaxerrs" << "9999"
 
 minecraft {
-	mappings channel: 'official', version: '1.16.5'
+	mappings channel: 'official', version: '1.19.4'
 }
 
 repositories {
+	mavenCentral()
 
 	maven {
 		name = "Forge"
@@ -38,7 +42,7 @@ repositories {
 	}
 	maven {
 		name = "Sponge"
-		url = "https://repo.spongepowered.org/repository/maven-public/"
+		url = "https://repo.spongepowered.org/repository/maven-public"
 	}
 	maven {
 		name = "JitPack"
@@ -51,16 +55,16 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-	implementation "org.spongepowered:spongeapi:8.0.0"
-	implementation 'org.spongepowered:spongevanilla:1.16.5-8.0.0-RC1111:universal'
-	implementation 'com.github.SawFowl:LocaleAPI:2.3.0'
-	minecraft 'net.minecraftforge:forge:1.16.5-36.1.16'
-	implementation fileTree(dir: 'libs', include: '*.jar')
+	implementation "org.spongepowered:spongeapi:10.0.0"
+	implementation 'org.spongepowered:spongevanilla:1.19.4-10.0.0-RC1397:universal'
+	implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
+	implementation "com.github.SawFowl:CommandPack:${commandpack}"
+	minecraft 'net.minecraftforge:forge:1.19.4-45.2.0'
+	//implementation fileTree(dir: 'libs', include: '*.jar')
 }
 
-
 sponge {
-	apiVersion("8.0.0")
+	apiVersion("${api}")
 	loader {
 		name("java_plain")
 		version("1.0")
@@ -68,9 +72,14 @@ sponge {
 	license("GPL-3.0")
 	plugin("regionguard") {
 		displayName(project.name.capitalize())
-		version("${major}.${minor}.${patch}")
+		version("${project.version}")
 		entrypoint("${project.group}.${rootProject.name}")
 		description("Create regions and protect them from various actions of other players.")
+		links {
+			homepage("https://discord.gg/7xnZGSYJH9")
+			source("https://github.com/SawFowl/RegionGuard")
+			issues("https://discord.gg/7xnZGSYJH9")
+		}
 		contributor("SawFowl") {
 			description("Lead Developer")
 		}
@@ -82,9 +91,19 @@ sponge {
 		dependency("localeapi") {
 			optional(false)
 			loadOrder("after")
-			version("2.3.0")
+			version("${localeapi}")
+		}
+		dependency("commandpack") {
+			optional(false)
+			loadOrder("after")
+			version("${commandpack}")
 		}
 		dependency("mysqldriver") {
+			optional(true)
+			loadOrder("after")
+			version("1.0.0")
+		}
+		dependency("h2driver") {
 			optional(true)
 			loadOrder("after")
 			version("1.0.0")
@@ -98,12 +117,12 @@ sponge {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = 'sources'
+	archiveClassifier = 'sources'
 	from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-	classifier = 'javadoc'
+	archiveClassifier = 'javadoc'
 	from javadoc.destinationDir
 }
 
@@ -119,25 +138,7 @@ configurations {
 }
 
 javadoc {
+	options.encoding = 'UTF-8'
 	source configurations.doc.collect { zipTree(it) }
-	include '**/*.java'
 	options.addStringOption('Xdoclint:none', '-quiet')
-}
-
-publishing {
-	repositories {
-		maven {
-			name = "GitHubPackages"
-			url = uri("https://maven.pkg.github.com/SawFowl/RegionGuard")
-			credentials {
-				username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-				password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
-			}
-		}
-	}
-	publications {
-		gpr(MavenPublication) {
-			from(components.java)
-		}
-	}
 }

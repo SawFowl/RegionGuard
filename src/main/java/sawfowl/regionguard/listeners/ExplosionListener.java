@@ -110,7 +110,7 @@ public class ExplosionListener {
 			Tristate flagResult = region.getFlagResult(Flags.EXPLOSION, null, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getWorldKey()), explosion);
 	}
 
 }

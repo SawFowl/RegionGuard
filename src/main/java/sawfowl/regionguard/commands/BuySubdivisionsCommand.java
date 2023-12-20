@@ -19,7 +19,6 @@ import org.spongepowered.api.util.locale.Locales;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.PlayerData;
-import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
 
@@ -50,8 +49,7 @@ public class BuySubdivisionsCommand implements PluginRawCommand {
 		Currency currency = plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(player));
 		if(!plugin.getEconomy().checkPlayerBalance(player.uniqueId(), currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_NOT_ENOUGH_MONEY));
 		if(!plugin.getEconomy().removeFromPlayerBalance(player, currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION));
-		if(!plugin.getAPI().getPlayerData(player).isPresent()) plugin.getAPI().setPlayerData(player, new PlayerData());
-		if(plugin.getAPI().getPlayerData(player).get().getLimits() == null) plugin.getAPI().getPlayerData(player).get().setLimits(new PlayerLimits());
+		if(!plugin.getAPI().getPlayerData(player).isPresent()) plugin.getAPI().setPlayerData(player, PlayerData.zero());
 		plugin.getAPI().setLimitSubdivisions(player, toBuy);
 		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.VOLUME), Arrays.asList(toBuy, plugin.getAPI().getLimitSubdivisions(player))), LocalesPaths.COMMAND_BUYSUBDIVISIONS_SUCCESS));
 		return CommandResult.success();

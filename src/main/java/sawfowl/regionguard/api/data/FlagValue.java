@@ -1,75 +1,54 @@
 package sawfowl.regionguard.api.data;
 
-import java.util.Objects;
-
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataSerializable;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+
+import net.kyori.adventure.builder.AbstractBuilder;
 
 @ConfigSerializable
-public class FlagValue {
+public interface FlagValue extends DataSerializable {
 
-	public FlagValue() {}
-
-	public FlagValue(String source, String target) {
-		if(source != null) this.source = source;
-		if(target != null) this.target = target;
+	static Builder builder() {
+		return Sponge.game().builderProvider().provide(Builder.class);
 	}
 
-	public FlagValue(boolean value, String source, String target) {
-		this.value = value;
-		if(source != null) this.source = source;
-		if(target != null) this.target = target;
+	static FlagValue simple(boolean value) {
+		return builder().setValue(value).build();
 	}
 
-	@Setting("Value")
-	private boolean value = true;
-	@Setting("Source")
-	private String source = "all";
-	@Setting("Target")
-	private String target = "all";
-
-	public String getSource() {
-		return source;
+	static FlagValue of(boolean value, String source, String target) {
+		return builder().setValue(value).build();
 	}
 
-	public String getTarget() {
-		return target;
-	}
+	String getSource();
 
-	public boolean getValue() {
-		return value;
-	}
+	String getTarget();
 
-	public boolean isBasic() {
-		return source.equals("all") && target.equals("all");
-	}
+	boolean getValue();
 
-	public Tristate asTristate() {
-		return Tristate.fromBoolean(value);
-	}
+	boolean isBasic();
 
-	public boolean equalsTo(String source, String target) {
-		return (source == null ? this.source.equals("all") : source.equals(this.source)) && (target == null ? this.target.equals("all") : target.equals(this.target));
-	}
+	Tristate asTristate();
 
-	@Override
-	public boolean equals(Object obj) {
-		if(this == obj) return true;
-		if(obj == null) return false;
-		if(getClass() != obj.getClass()) return false;
-		FlagValue other = (FlagValue) obj;
-		return Objects.equals(source, other.source) && Objects.equals(target, other.target);
-	}
+	boolean equalsTo(String source, String target);
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(source, target);
-	}
+	interface Builder extends AbstractBuilder<FlagValue>, org.spongepowered.api.util.Builder<FlagValue, Builder> {
 
-	@Override
-	public String toString() {
-		return "FlagValue(Source=" + source + ", Target" + target + ")";
+		Builder setValue(boolean value);
+
+		Builder setSource(String id);
+
+		Builder setTarget(String id);
+
+		default Builder setSource(Entity entity) {
+			return setSource(EntityTypes.registry().findValueKey(entity.type()).map(ResourceKey::asString).orElse("all"));
+		}
+
 	}
 
 }

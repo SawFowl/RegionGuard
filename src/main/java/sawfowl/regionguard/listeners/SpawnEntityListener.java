@@ -37,11 +37,9 @@ public class SpawnEntityListener {
 
 	private final RegionGuard plugin;
 	private Cause cause;
-	private final boolean isForge;
 	public SpawnEntityListener(RegionGuard plugin) {
 		this.plugin = plugin;
 		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
-		isForge = isForge();
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
@@ -60,13 +58,8 @@ public class SpawnEntityListener {
 		boolean allowSpawnExp = spawnExp && (optSource.isPresent() ? isAllowExpSpawn(region, optSource.get()) : isAllowExpSpawn(region, null));
 		boolean allowSpawnItem = true;
 		if(spawnItem) {
-			if(isForge) {
-				List<ItemStack> items = event.entities().stream().map(entity -> ((ItemStack) ((Object) (((net.minecraft.entity.item.ItemEntity) entity).getItem())))).collect(Collectors.toList());
-				allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
-			} else {
-				List<ItemStack> items = event.entities().stream().map(entity -> ((ItemStack) ((Object) (((ItemEntity) entity).getItem())))).collect(Collectors.toList());
-				allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
-			}
+			List<ItemStack> items = event.entities().stream().map(entity -> ((ItemStack) ((Object) (((ItemEntity) entity).getItem())))).collect(Collectors.toList());
+			allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
 		} else allowSpawnItem = false;
 		boolean allowSpawnEntity = spawnEntity && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
 		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowSpawnEntity;
@@ -144,7 +137,7 @@ public class SpawnEntityListener {
 			Tristate flagResult = region.getFlagResult(Flags.EXP_SPAWN, entityId, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExpSpawn(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source);
+		return region.isGlobal() ? true : isAllowExpSpawn(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source);
 	}
 
 	private boolean isAllowItemSpawn(Region region, Entity source, List<ItemStack> stacks) {
@@ -157,7 +150,7 @@ public class SpawnEntityListener {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowItemSpawn(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, stacks);
+		return region.isGlobal() ? true : isAllowItemSpawn(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, stacks);
 	}
 
 	private boolean isAllowEntitySpawn(Region region, Entity source, List<Entity> entities, String spawnType) {
@@ -180,16 +173,7 @@ public class SpawnEntityListener {
 				if(flagResult2 != Tristate.UNDEFINED) return flagResult2.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowEntitySpawn(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, entities, spawnType);
-	}
-
-	private boolean isForge() {
-		try {
-			Class.forName("net.minecraft.entity.item.ItemEntity");
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
+		return region.isGlobal() ? true : isAllowEntitySpawn(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, entities, spawnType);
 	}
 
 }

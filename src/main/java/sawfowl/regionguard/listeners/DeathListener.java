@@ -74,13 +74,13 @@ public class DeathListener {
 	private boolean isKeepInventory(Region region) {
 		Tristate flagResult = region.getFlagResult(Flags.KEEP_INVENTORY, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
-		return region.isGlobal() ? true : isKeepInventory(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+		return region.isGlobal() ? true : isKeepInventory(plugin.getAPI().getGlobalRegion(region.getWorldKey()));
 	}
 
 	private boolean isKeepExp(Region region) {
 		Tristate flagResult = region.getFlagResult(Flags.KEEP_EXP, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
-		return region.isGlobal() ? true : isKeepInventory(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+		return region.isGlobal() ? true : isKeepInventory(plugin.getAPI().getGlobalRegion(region.getWorldKey()));
 	}
 
 }

@@ -859,9 +859,9 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				return;
 			}
 			if(!region.isGlobal() && region.getCuboid().getAABB().intersects(AABB.of(positions.get(player.uniqueId()).pos1, positions.get(player.uniqueId()).pos2))) {
-				positions.get(player.uniqueId()).tempRegion = new Region(player, player.world(), positions.get(player.uniqueId()).pos1, positions.get(player.uniqueId()).pos2, SelectorTypes.CUBOID);
+				positions.get(player.uniqueId()).tempRegion = Region.builder().setOwner(player).setWorld(player.world()).setCuboid(Cuboid.of(positions.get(player.uniqueId()).pos1, positions.get(player.uniqueId()).pos2)).build();
 			} else {
-				positions.get(player.uniqueId()).tempRegion = new Region(player, player.world(), positions.get(player.uniqueId()).pos1, positions.get(player.uniqueId()).pos2, plugin.getAPI().getSelectorType(player.uniqueId()));
+				positions.get(player.uniqueId()).tempRegion = Region.builder().setOwner(player).setWorld(player.world()).setCuboid(Cuboid.of(plugin.getAPI().getSelectorType(player.uniqueId()), positions.get(player.uniqueId()).pos1, positions.get(player.uniqueId()).pos2)).build();
 			}
 		} else return;
 		if(region.isGlobal()) {
@@ -934,8 +934,8 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			if(out || !positions.get(player.uniqueId()).tempRegion.getChilds().isEmpty()) {
 				Optional<Region> optChild = Optional.empty();
 				if(!out) {
-					Cuboid cuboid = new Cuboid();
-					cuboid.setPositions(positions.get(player.uniqueId()).oppositeCorner, blockPosition, positions.get(player.uniqueId()).tempRegion.getCuboid().getSelectorType(), player.world());
+					Cuboid cuboid = Cuboid.of(positions.get(player.uniqueId()).oppositeCorner, blockPosition);
+					if(positions.get(player.uniqueId()).tempRegion.getCuboid().getSelectorType() == SelectorTypes.FLAT) cuboid.toFlat(player.world());
 					optChild = positions.get(player.uniqueId()).tempRegion.getChilds().stream().filter(rg -> (!cuboid.containsIntersectsPosition(rg.getCuboid().getMin()) || !cuboid.containsIntersectsPosition(rg.getCuboid().getMax()))).findFirst();
 				}
 				if(optChild.isPresent() || out) {
@@ -987,8 +987,8 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			if(blockPosition.x() == oppositeCorner.x() || (blockPosition.y() == oppositeCorner.y() && region.getCuboid().getSelectorType() == SelectorTypes.CUBOID) || blockPosition.z() == oppositeCorner.z()) {
 				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_RESIZE_EXCEPTION_INCORRECT_COORDS));
 			} else {
-				Cuboid cuboid = new Cuboid();
-				cuboid.setPositions(oppositeCorner, blockPosition, region.getCuboid().getSelectorType(), player.world());
+				Cuboid cuboid = Cuboid.of(oppositeCorner, blockPosition);
+				if(region.getCuboid().getSelectorType() == SelectorTypes.FLAT) cuboid.toFlat(player.world());
 				if(cuboid.getSize() < plugin.getAPI().getMinimalRegionSize(region.getCuboid().getSelectorType())) {
 					player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.VOLUME), Arrays.asList(plugin.getAPI().getMinimalRegionSize(region.getCuboid().getSelectorType()) - cuboid.getSize())), LocalesPaths.REGION_RESIZE_EXCEPTION_SMALL_VOLUME));
 					positions.get(player.uniqueId()).clear();
@@ -1003,7 +1003,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				RegionResizeEvent resizeEvent = tryResizeRegion(player, region, blockPosition, oppositeCorner);
 				if(!resizeEvent.isCancelled()) {
 					if(isIntersects(positions.get(player.uniqueId()).tempRegion, player, blockPosition, resizeEvent.getOppositeCorner())) return true;
-					region.setCuboid(resizeEvent.getOppositeCorner(), blockPosition, region.getCuboid().getSelectorType());
+					region.setCuboid(cuboid);
 					if(resizeEvent.getMessage().isPresent()) player.sendMessage(resizeEvent.getMessage().get());
 					positions.get(player.uniqueId()).clear();
 					plugin.getAPI().unregisterRegion(region.getPrimaryParent());
@@ -1076,7 +1076,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowInteractBlockPrimary(entity, plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), block, false);
+		return region.isGlobal() ? true : isAllowInteractBlockPrimary(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()), block, false);
 	}
 
 	private boolean isAllowInteractBlockSecondary(Entity entity, Region region, BlockSnapshot block, boolean first) {
@@ -1089,7 +1089,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowInteractBlockSecondary(entity, plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), block, false);
+		return region.isGlobal() ? true : isAllowInteractBlockSecondary(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()), block, false);
 	}
 
 	private boolean isAllowLiquidFlow(Region region, BlockTransaction transaction) {
@@ -1098,7 +1098,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			Tristate flagResult = region.getFlagResult(Flags.LIQUID_FLOW, null, block);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true: isAllowLiquidFlow(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), transaction);
+		return region.isGlobal() ? true: isAllowLiquidFlow(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction);
 	}
 
 	private boolean isAllowPlace(Region region, BlockTransaction transaction, Entity entity, boolean first) {
@@ -1111,7 +1111,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowPlace(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), transaction, entity, false);
+		return region.isGlobal() ? true : isAllowPlace(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction, entity, false);
 	}
 
 	private boolean isAllowBreak(Region region, BlockTransaction transaction, Entity entity, boolean first) {
@@ -1124,7 +1124,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowPlace(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), transaction, entity, false);
+		return region.isGlobal() ? true : isAllowPlace(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction, entity, false);
 	}
 
 	private boolean isAllowFireSpread(Region region, BlockTransaction transaction) {
@@ -1148,7 +1148,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowGrowth(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), transaction, source, false);
+		return region.isGlobal() ? true : isAllowGrowth(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction, source, false);
 	}
 
 	private boolean isAllowDecay(Region region, BlockTransaction transaction) {
@@ -1156,7 +1156,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			Tristate flagResult = region.getFlagResult(Flags.BLOCK_DECAY, null, blockId);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowDecay(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), transaction);
+		return region.isGlobal() ? true : isAllowDecay(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction);
 	}
 
 	private boolean isAllowExplosion(Region region, Explosion explosion, BlockTransaction transaction) {
@@ -1173,7 +1173,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion, transaction);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getWorldKey()), explosion, transaction);
 	}
 
 	private boolean isAllowExplosion(Region region, Explosion explosion, BlockState blockState) {
@@ -1188,7 +1188,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, null, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), explosion, blockState);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getWorldKey()), explosion, blockState);
 	}
 
 	private boolean isAllowPistonMove(Region region, List<String> sources, List<String> targets) {

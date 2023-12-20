@@ -138,7 +138,7 @@ public class InteractItemListener{
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowInteractItem(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), entity, itemStack);
+		return region.isGlobal() ? true : isAllowInteractItem(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, itemStack);
 	}
 
 	boolean isLiquidInteract(Optional<RayTraceResult<LocatableBlock>> blockRay) {
@@ -154,7 +154,7 @@ public class InteractItemListener{
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowInteractBlockSecondary(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), entity, block, false);
+		return region.isGlobal() ? true : isAllowInteractBlockSecondary(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, block, false);
 	}
 
 	private boolean isAllowBreak(Region region, Entity entity, BlockState block, boolean first) {
@@ -166,7 +166,7 @@ public class InteractItemListener{
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowBreak(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), entity, block, false);
+		return region.isGlobal() ? true : isAllowBreak(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, block, false);
 	}
 
 }

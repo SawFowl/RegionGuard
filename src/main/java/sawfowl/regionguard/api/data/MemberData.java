@@ -3,63 +3,50 @@ package sawfowl.regionguard.api.data;
 import java.util.Optional;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.api.TrustTypes;
 
 @ConfigSerializable
-public class MemberData {
-	
-	public MemberData() {}
-	
-	public MemberData(ServerPlayer player, TrustTypes level) {
-		memberName = player.name();
-		setTrustType(level);
+public interface MemberData extends DataSerializable {
+
+	static Builder builder() {
+		return Sponge.game().builderProvider().provide(Builder.class);
 	}
 
-	public MemberData(TrustTypes level) {
-		memberName = "Server";
-		setTrustType(level);
+	static MemberData of(ServerPlayer player, TrustTypes trustType) {
+		return builder().setPlayer(player, trustType).build();
 	}
 
-	@Setting("MemberName")
-	private String memberName;
-	@Setting("TrustLevel")
-	private String trustLevel;
-	@Setting("ReplaceNameInTitle")
-	private boolean replaceNameInTitle = false;
+	static MemberData forServer() {
+		return builder().setServer();
+	}
 
 	/**
 	 * Getting member name
 	 */
-	public String getName() {
-		return memberName;
-	}
+	String getName();
 
 	/**
 	 * Getting member name as kyori component
 	 */
-	public Component asComponent() {
-		return Component.text(memberName);
-	}
+	Component asComponent();
 
 	/**
 	 * Getting member name as kyori component
 	 */
-	public Component asComponent(ServerPlayer joiner) {
-		return replaceNameInTitle ? Component.text(joiner.name()) : asComponent();
-	}
+	Component asComponent(ServerPlayer joiner);
 
 	/**
 	 * Checking if the owner is a player <br>
 	 * The check is performed by the name of the owner.
 	 */
-	public boolean isPlayer() {
-		return !memberName.equals("Server");
-	}
+	boolean isPlayer();
 
 	/**
 	 * Getting a player object
@@ -67,30 +54,30 @@ public class MemberData {
 	 * @return - player if a player is found <br>
 	 * - empty if a player is not found
 	 */
-	public Optional<ServerPlayer> getPlayer() {
-		return isPlayer() ? Sponge.server().player(memberName) : Optional.empty();
-	}
+	Optional<ServerPlayer> getPlayer();
 
 	/**
 	 * Obtaining a region member's trust type
 	 */
-	public TrustTypes getTrustType() {
-		return TrustTypes.checkType(trustLevel);
-	}
+	TrustTypes getTrustType();
 
 	/**
 	 * Setting the type of trust for a region member
 	 */
-	public void setTrustType(TrustTypes level) {
-		trustLevel = level.toString();
-	}
+	void setTrustType(TrustTypes level);
 
-	public boolean isReplaceNameInTitle() {
-		return replaceNameInTitle;
-	}
+	boolean isReplaceNameInTitle();
 
-	public void setReplaceNameInTitle(boolean replaceNameInTitle) {
-		this.replaceNameInTitle = replaceNameInTitle;
+	void setReplaceNameInTitle(boolean replaceNameInTitle);
+
+	interface Builder extends AbstractBuilder<MemberData>, org.spongepowered.api.util.Builder<MemberData, Builder> {
+
+		Builder setPlayer(ServerPlayer player, TrustTypes type);
+
+		Builder setTrustType(TrustTypes type);
+
+		MemberData setServer();
+
 	}
 
 }

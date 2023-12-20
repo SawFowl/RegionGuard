@@ -68,11 +68,11 @@ public class ListCommand implements PluginRawCommand {
 		if(regions.size() == 0) throw new CommandException(Component.text(otherPlayer ? "У игрока нет регионов" : "У вас нет регионов"));
 		List<Component> list = new ArrayList<>();
 		for(Region region : regions) {
-			Component tp = region.getServerWorld().isPresent() && ((player.hasPermission(Permissions.TELEPORT) && region.isTrusted(player)) || player.hasPermission(Permissions.STAFF_LIST)) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
+			Component tp = region.getWorld().isPresent() && ((player.hasPermission(Permissions.TELEPORT) && region.isTrusted(player)) || player.hasPermission(Permissions.STAFF_LIST)) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
 				teleport(player, region, true);
 			})) : Component.empty();
 			Component positions = Component.text("§6" + region.getCuboid().getMin() + " ➢ " + region.getCuboid().getMax());
-			Component uuidOrName = (region.getName(player.locale()).isPresent() ? region.asComponent(player.locale()) : Component.text("§2<" + region.getUniqueId() + ">").clickEvent(SpongeComponents.executeCallback(callback -> {
+			Component uuidOrName = (region.getPlainName(player.locale()).isPresent() ? region.getName(player.locale()) : Component.text("§2<" + region.getUniqueId() + ">").clickEvent(SpongeComponents.executeCallback(callback -> {
 				Calendar calendar = Calendar.getInstance(player.locale());
 				calendar.setTimeInMillis(region.getCreationTime());
 				generateInfoMessage(player, region, calendar);
@@ -106,7 +106,7 @@ public class ListCommand implements PluginRawCommand {
 	}
 
 	private void teleport(ServerPlayer player, Region region, boolean repeat) {
-		ServerWorld world = region.getServerWorld().get();
+		ServerWorld world = region.getWorld().get();
 		Vector3i vector3i = world.highestPositionAt(region.getCuboid().getCenter().toInt());
 		boolean safePos = player.gameMode().get() == GameModes.CREATIVE.get() || player.gameMode().get() == GameModes.SPECTATOR.get() || (world.block(vector3i.add(0, 1, 0)).type() == BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.LAVA.get());
 		if(safePos) {
@@ -341,7 +341,7 @@ public class ListCommand implements PluginRawCommand {
 		}
 		messages.add(Component.text(" "));
 		messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.UUID), Arrays.asList(region.getUniqueId())), LocalesPaths.COMMAND_INFO_REGION_UUID));
-		if(region.getName(player.locale()).isPresent()) messages.add(plugin.getLocales().getTextReplaced(player.locale(), ReplaceUtil.replaceMapComponents(Arrays.asList(ReplaceUtil.Keys.NAME), Arrays.asList(region.asComponent(player.locale()))), LocalesPaths.COMMAND_INFO_REGION_NAME));
+		if(region.getPlainName(player.locale()).isPresent()) messages.add(plugin.getLocales().getTextReplaced(player.locale(), ReplaceUtil.replaceMapComponents(Arrays.asList(ReplaceUtil.Keys.NAME), Arrays.asList(region.getName(player.locale()))), LocalesPaths.COMMAND_INFO_REGION_NAME));
 		messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TYPE), Arrays.asList(region.getType())), LocalesPaths.COMMAND_INFO_REGION_TYPE));
 		messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.DATE), Arrays.asList(format.format(calendar.getTime()))), LocalesPaths.COMMAND_INFO_CREATED));
 		messages.add(Component.text("  "));

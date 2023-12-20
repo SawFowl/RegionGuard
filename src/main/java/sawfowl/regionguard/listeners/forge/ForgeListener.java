@@ -3,7 +3,7 @@ package sawfowl.regionguard.listeners.forge;
 import java.util.Arrays;
 import java.util.List;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.MinecraftForge;
 
 import sawfowl.regionguard.RegionGuard;
@@ -21,7 +21,7 @@ public class ForgeListener {
 	}
 
 	private String getEntityId(Entity entity) {
-		return entity.getType() == null || entity.getType().getCategory() == null || entity.getType().getCategory().getSerializedName() == null ? "all" : entity.getType().getRegistryName().toString();
+		return entity.getType() == null ? "all" : entity.getEncodeId();
 	}
 
 	private String getEntityCategory(Entity entity) {

@@ -30,8 +30,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.data.MemoryDataView;
 import org.spongepowered.math.vector.Vector3i;
 
-import net.minecraft.block.BedBlock;
-import sawfowl.regionguard.RegionGuard;
+import net.minecraft.world.level.block.BedBlock;
 
 public class ListenerUtils {
 
@@ -151,7 +150,7 @@ public class ListenerUtils {
 	}
 
 	public static boolean isBedBlock(BlockSnapshot block) {
-		return RegionGuard.getInstance().getAPI().isForgePlatform() ? block.state().type() instanceof BedBlock : block.state().type() instanceof net.minecraft.world.level.block.BedBlock;
+		return block.state().type() instanceof BedBlock;
 	}
 
 	public static boolean isPiston(BlockSnapshot blockSnapshot) {

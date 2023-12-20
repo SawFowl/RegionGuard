@@ -193,7 +193,7 @@ public class InteractEntityListener {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowPrimary(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), player, entity);
+		return region.isGlobal() ? true : isAllowPrimary(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player, entity);
 	}
 
 	private boolean isAllowSecondary(Region region, ServerPlayer player, Entity entity) {
@@ -204,7 +204,7 @@ public class InteractEntityListener {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowSecondary(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), player, entity);
+		return region.isGlobal() ? true : isAllowSecondary(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player, entity);
 	}
 
 }

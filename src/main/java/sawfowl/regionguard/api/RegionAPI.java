@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import sawfowl.regionguard.api.data.FlagSettings;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 
 public interface RegionAPI {
 
@@ -259,7 +261,7 @@ public interface RegionAPI {
 	/**
 	 * Get the default flags for a certain type of region.
 	 */
-	public Map<String, List<FlagValue>> getDefaultFlags(RegionTypes regionType);
+	public Map<String, Set<FlagValue>> getDefaultFlags(RegionTypes regionType);
 
 	/**
 	 * Get the number of blocks that belong to the player.
@@ -462,11 +464,5 @@ public interface RegionAPI {
 	 * Go to the API for visually highlighting regions with a mod on the WECui client.
 	 */
 	public WorldEditCUIAPI getWorldEditCUIAPI();
-
-	/**
-	 * If true, then the plugin is running in Forge compatibility mode. <br>
-	 * If false, then the plugin is running in Vanilla compatibility mode.
-	 */
-	boolean isForgePlatform();
 
 }

@@ -16,31 +16,28 @@ import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
+
 import com.google.common.collect.Maps;
 
 import sawfowl.regionguard.RegionGuard;
-import sawfowl.regionguard.api.WorldEditCUIAPI;
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.worldedit.CUIUser;
+import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 import sawfowl.regionguard.configure.CuiConfigPaths;
 import sawfowl.regionguard.utils.worldedit.cuievents.MultiSelectionClearEvent;
 import sawfowl.regionguard.utils.worldedit.cuievents.MultiSelectionColorEvent;
 import sawfowl.regionguard.utils.worldedit.cuievents.MultiSelectionCuboidEvent;
 import sawfowl.regionguard.utils.worldedit.cuievents.MultiSelectionGridEvent;
 import sawfowl.regionguard.utils.worldedit.cuievents.MultiSelectionPointEvent;
-import sawfowl.regionguard.utils.worldedit.cuiusers.CUIUser;
-import sawfowl.regionguard.utils.worldedit.cuiusers.ForgeUser;
-import sawfowl.regionguard.utils.worldedit.cuiusers.VanillaUser;
 
 public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 
-	private final boolean isForgePlatform;
 	private final RegionGuard plugin;
 	private Map<UUID, CUIUser> worldEditPlayers = Maps.newHashMap();
 	private Map<String, String[]> cuiColors = new HashMap<String, String[]>();
 	private Map<String, Integer> cuiSpaces = new HashMap<String, Integer>();
-	public WorldEditAPI(RegionGuard plugin, boolean isForgePlatform) {
-		this.isForgePlatform = isForgePlatform;
+	public WorldEditAPI(RegionGuard plugin) {
 		this.plugin = plugin;
 		Sponge.asyncScheduler().submit(Task.builder().interval(10, TimeUnit.SECONDS).plugin(plugin.getPluginContainer()).execute(() -> {
 			for(CUIUser user : worldEditPlayers.values()) if(!user.isDrag() && user.getPlayer().isPresent() && System.currentTimeMillis() - user.getLastTimeSendBorders() > 30000) revertVisuals(user.getPlayer().get(), null);
@@ -66,7 +63,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public CUIUser getOrCreateUser(ServerPlayer player) {
 		if (worldEditPlayers.containsKey(player.uniqueId())) return worldEditPlayers.get(player.uniqueId());
-		final CUIUser user = isForgePlatform ? new ForgeUser(player) : new VanillaUser(player);
+		final CUIUser user = new CUIUserImpl(player);
 		worldEditPlayers.put(player.uniqueId(), user);
 		return getOrCreateUser(player.uniqueId());
 	}
@@ -74,7 +71,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public CUIUser getOrCreateUser(UUID uuid) {
 		if (worldEditPlayers.containsKey(uuid)) return worldEditPlayers.get(uuid);
-		final CUIUser user = isForgePlatform ? new ForgeUser(uuid) : new VanillaUser(uuid);
+		final CUIUser user = new CUIUserImpl(uuid);
 		worldEditPlayers.put(uuid, user);
 		return user;
 	}
@@ -97,7 +94,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 		if(!user.isSupportCUI()) return;
 		// revert any current visuals if investigating
 		if(investigating) revertVisuals(player, null);
-		Cuboid cuboid = new Cuboid(pos1, pos2);
+		Cuboid cuboid = Cuboid.of(pos1, pos2);
 		user.dispatchCUIEvent(new MultiSelectionCuboidEvent(region.getUniqueId()));
 		user.dispatchCUIEvent(new MultiSelectionPointEvent(0, pos1, cuboid.getSize3D()));
 		if (user.getClaimResizing() != null) {
@@ -143,7 +140,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	public void sendVisualDrag(ServerPlayer player, Vector3i pos) {
 		CUIUser user = getOrCreateUser(player);
 		if(!user.isSupportCUI()) return;
-		final ServerLocation location = getTargetBlock(player, user, 50).orElse(null);
+		final ServerLocation location = getTargetBlock(player, 50).orElse(null);
 		Vector3i point1 = null;
 		if (user.getLastWandLocation() != null) {
 			point1 = user.getLastWandLocation();
@@ -162,7 +159,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	}
 
 	@Override
-	public Optional<ServerLocation> getTargetBlock(ServerPlayer player, CUIUser user, int maxDistance) {
+	public Optional<ServerLocation> getTargetBlock(ServerPlayer player, int maxDistance) {
 		Optional<RayTraceResult<LocatableBlock>> blockRay = Optional.empty();
 		blockRay = RayTrace.block()
 				.world(player.world())

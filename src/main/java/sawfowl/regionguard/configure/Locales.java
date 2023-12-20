@@ -10,7 +10,7 @@ import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import sawfowl.localeapi.api.ConfigTypes;
 import sawfowl.localeapi.api.LocaleService;
-import sawfowl.localeapi.utils.AbstractLocaleUtil;
+import sawfowl.localeapi.api.PluginLocale;
 
 public class Locales {
 
@@ -707,7 +707,7 @@ public class Locales {
 		return component;
 	}
 
-	private AbstractLocaleUtil getAbstractLocaleUtil(Locale locale) {
+	private PluginLocale getAbstractLocaleUtil(Locale locale) {
 		return localeService.getPluginLocales("regionguard").getOrDefault(locale, localeService.getPluginLocales("regionguard").get(org.spongepowered.api.util.locale.Locales.DEFAULT));
 	}
 

@@ -1,44 +1,42 @@
 package sawfowl.regionguard.api.data;
 
-
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+
+import net.kyori.adventure.builder.AbstractBuilder;
 
 @ConfigSerializable
-public class PlayerData {
+public interface PlayerData extends DataSerializable {
 
-	public PlayerData(){}
-
-	public PlayerData(PlayerLimits limits, ClaimedByPlayer claimed) {
-		this.limits = limits;
-		this.claimed = claimed;
+	static Builder builder() {
+		return Sponge.game().builderProvider().provide(Builder.class);
 	}
 
-	@Setting("Limits")
-	private PlayerLimits limits;
-	@Setting("Claimed")
-	private ClaimedByPlayer claimed;
-
-	public PlayerLimits getLimits() {
-		return limits;
+	static PlayerData of(PlayerLimits limits, ClaimedByPlayer claimed) {
+		return builder().setLimits(limits).setClaimed(claimed).build();
 	}
 
-	public PlayerData setLimits(PlayerLimits limits) {
-		this.limits = limits;
-		return this;
+	static PlayerData zero() {
+		return builder().setLimits(PlayerLimits.zero()).setClaimed(ClaimedByPlayer.zero()).build();
 	}
 
-	public ClaimedByPlayer getClaimed() {
-		return claimed;
-	}
+	PlayerLimits getLimits();
 
-	public PlayerData setClaimed(ClaimedByPlayer claimed) {
-		this.claimed = claimed;
-		return this;
-	}
+	PlayerData setLimits(PlayerLimits limits);
 
-	public boolean isEmpty( ) {
-		return limits == null && claimed == null;
+	ClaimedByPlayer getClaimed();
+
+	PlayerData setClaimed(ClaimedByPlayer claimed);
+
+	boolean isEmpty();
+
+	interface Builder extends AbstractBuilder<PlayerData>, org.spongepowered.api.util.Builder<PlayerData, Builder> {
+
+		Builder setLimits(PlayerLimits limits);
+
+		Builder setClaimed(ClaimedByPlayer claimed);
+
 	}
 
 }

@@ -1,41 +1,40 @@
 package sawfowl.regionguard.api.data;
 
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+
+import net.kyori.adventure.builder.AbstractBuilder;
 
 @ConfigSerializable
-public class ClaimedByPlayer {
+public interface ClaimedByPlayer extends DataSerializable {
 
-	public ClaimedByPlayer() {}
-
-	public ClaimedByPlayer(Long blocks, Long regions) {
-		this.blocks = blocks;
-		this.regions = regions;
+	static Builder builder() {
+		return Sponge.game().builderProvider().provide(Builder.class);
 	}
 
-	@Setting("Blocks")
-	private Long blocks = 0l;
-	@Setting("Regions")
-	private Long regions = 0l;
-
-	public Long getBlocks() {
-		return blocks;
+	static ClaimedByPlayer of(long blocks, long regions) {
+		return builder().setBlocks(blocks).setRegions(regions).build();
 	}
 
-	public Long getRegions() {
-		return regions;
+	static ClaimedByPlayer zero() {
+		return builder().build();
 	}
 
-	public ClaimedByPlayer setBlocks(Long limit) {
-		blocks = limit;
-		if(blocks < 0) blocks = 0l;
-		return this;
-	}
+	Long getBlocks();
 
-	public ClaimedByPlayer setRegions(Long limit) {
-		regions = limit;
-		if(regions < 0) regions = 0l;
-		return this;
+	Long getRegions();
+
+	ClaimedByPlayer setBlocks(long value);
+
+	ClaimedByPlayer setRegions(long value);
+
+	interface Builder extends AbstractBuilder<ClaimedByPlayer>, org.spongepowered.api.util.Builder<ClaimedByPlayer, Builder> {
+
+		Builder setBlocks(long value);
+
+		Builder setRegions(long value);
+
 	}
 
 }

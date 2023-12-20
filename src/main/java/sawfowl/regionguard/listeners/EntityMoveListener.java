@@ -397,8 +397,8 @@ public class EntityMoveListener {
 			}
 		} else {
 			if(rgEvent.getPlayer().isPresent()) {
-				if(rgEvent.fromRegion().getExitMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.fromRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.fromRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.fromRegion().getOwnerData().asComponent(rgEvent.getPlayer().get()), rgEvent.fromRegion().getExitMessage(rgEvent.getPlayer().get().locale()).get()));
-				if(rgEvent.toRegion().getJoinMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.toRegion().getName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.toRegion().asComponent(rgEvent.getPlayer().get().locale()) : rgEvent.toRegion().getOwnerData().asComponent(rgEvent.getPlayer().get()), rgEvent.toRegion().getJoinMessage(rgEvent.getPlayer().get().locale()).get()));
+				if(rgEvent.fromRegion().getExitMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.fromRegion().getPlainName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.fromRegion().getName(rgEvent.getPlayer().get().locale()) : rgEvent.fromRegion().getOwnerData().asComponent(rgEvent.getPlayer().get()), rgEvent.fromRegion().getExitMessage(rgEvent.getPlayer().get().locale()).get()));
+				if(rgEvent.toRegion().getJoinMessage(rgEvent.getPlayer().get().locale()).isPresent()) rgEvent.getPlayer().get().showTitle(Title.title(rgEvent.toRegion().getPlainName(rgEvent.getPlayer().get().locale()).isPresent() ? rgEvent.toRegion().getName(rgEvent.getPlayer().get().locale()) : rgEvent.toRegion().getOwnerData().asComponent(rgEvent.getPlayer().get()), rgEvent.toRegion().getJoinMessage(rgEvent.getPlayer().get().locale()).get()));
 			}
 		}
 		if(rgEvent.getPlayer().isPresent() && !rgEvent.isAllowFly() && rgEvent.getPlayer().get().get(Keys.CAN_FLY).isPresent() && rgEvent.getPlayer().get().get(Keys.CAN_FLY).get()) {
@@ -553,7 +553,7 @@ public class EntityMoveListener {
 			Tristate flagResult = region.getFlagResult(Flags.ENTITY_TELEPORT_FROM, source, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowTeleportFrom(entity, plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+		return region.isGlobal() ? true : isAllowTeleportFrom(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
 	}
 
 	private boolean isAllowPortalUse(Entity entity, Region region) {
@@ -563,7 +563,7 @@ public class EntityMoveListener {
 			Tristate flagResult = region.getFlagResult(Flags.PORTAL_USE, targetid, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowPortalUse(entity, plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+		return region.isGlobal() ? true : isAllowPortalUse(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
 	}
 
 	private boolean isAllowTeleportTo(Entity entity, Region region) {
@@ -573,7 +573,7 @@ public class EntityMoveListener {
 			Tristate flagResult = region.getFlagResult(Flags.ENTITY_TELEPORT_TO, source, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowTeleportTo(entity, plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+		return region.isGlobal() ? true : isAllowTeleportTo(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
 	}
 
 	private boolean isAllowPlayerJoin(ServerPlayer player, Region region) {
@@ -583,7 +583,7 @@ public class EntityMoveListener {
 			Tristate flagResult = region.getFlagResultWhithoutParrents(Flags.ENTER_CLAIM, targetid, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowPlayerJoin(player, plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+		return region.isGlobal() ? true : isAllowPlayerJoin(player, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
 	}
 
 	private boolean isAllowPlayerExit(ServerPlayer player, Region region) {
@@ -593,7 +593,7 @@ public class EntityMoveListener {
 			Tristate flagResult = region.getFlagResultWhithoutParrents(Flags.EXIT_CLAIM, targetid, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowPlayerExit(player, plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+		return region.isGlobal() ? true : isAllowPlayerExit(player, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
 	}
 
 	private boolean isAllowPlayerFly(ServerPlayer player, Region region) {
@@ -603,7 +603,7 @@ public class EntityMoveListener {
 			Tristate flagResult = region.getFlagResult(Flags.ALLOW_FLY, targetid, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowPlayerFly(player, plugin.getAPI().getGlobalRegion(region.getServerWorldKey()));
+		return region.isGlobal() ? true : isAllowPlayerFly(player, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
 	}
 
 	private boolean isAllowRidingEntity(Region region, Entity source, Entity vehicle) {
@@ -617,7 +617,7 @@ public class EntityMoveListener {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowRidingEntity(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, vehicle);
+		return region.isGlobal() ? true : isAllowRidingEntity(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, vehicle);
 	}
 
 }

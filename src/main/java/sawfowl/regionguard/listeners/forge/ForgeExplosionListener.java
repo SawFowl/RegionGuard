@@ -5,19 +5,24 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.explosion.Explosion.Builder;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
-import net.minecraftforge.event.world.ExplosionEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Explosion;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -37,13 +42,13 @@ public class ForgeExplosionListener extends ForgeListener {
 	public void onExplosion(ExplosionEvent.Start event) {
 		if(event.isCanceled()) return;
 		Explosion explosion = event.getExplosion();
-		ResourceKey worldKey = ResourceKey.resolve(event.getWorld().dimension().location().toString());
+		ResourceKey worldKey = ResourceKey.resolve(event.getLevel().dimension().location().toString());
 		Vector3i position = Vector3i.from((int) explosion.getPosition().x, (int) explosion.getPosition().y, (int) explosion.getPosition().z);
 		Region region = plugin.getAPI().findRegion(worldKey, position);
 		List<String> sources = new ArrayList<String>();
-		if(explosion.getSourceMob() != null) sources.addAll(flagEntityArgs(explosion.getSourceMob()));
+		if(explosion.getDirectSourceEntity() != null) sources.addAll(flagEntityArgs(explosion.getDirectSourceEntity()));
 		if(explosion.getExploder() != null) sources.addAll(flagEntityArgs(explosion.getExploder()));
-		boolean allow = isAllowExplosion(region, sources, region.getServerWorld().get().block(position));
+		boolean allow = isAllowExplosion(region, sources, region.getWorld().get().block(position));
 		List<BlockTransaction> transactions = new ArrayList<BlockTransaction>();
 		RegionChangeBlockEvent.Explode.Surface rgEvent = new RegionChangeBlockEvent.Explode.Surface() {
 
@@ -87,7 +92,7 @@ public class ForgeExplosionListener extends ForgeListener {
 
 			@Override
 			public ServerWorld getWorld() {
-				return region.getServerWorld().get();
+				return region.getWorld().get();
 			}
 
 			@Override
@@ -128,7 +133,14 @@ public class ForgeExplosionListener extends ForgeListener {
 		};
 		rgEvent.setCancelled(!allow);
 		List<BlockPos> positions = new ArrayList<BlockPos>(explosion.getToBlow());
-		rgEvent.setExplosion(org.spongepowered.api.world.explosion.Explosion.builder().location(region.getServerWorld().get().location(position)).shouldBreakBlocks(positions.size() > 0).shouldDamageEntities(explosion.getHitPlayers().size() > 0).build());
+		Builder builder = org.spongepowered.api.world.explosion.Explosion.builder().location(region.getWorld().get().location(position)).shouldBreakBlocks(positions.size() > 0).shouldDamageEntities(explosion.getHitPlayers().size() > 0);
+		if(explosion.getDirectSourceEntity() != null) {
+			Optional<Entity> optSource = EntityTypes.registry().findValue(ResourceKey.resolve(explosion.getDirectSourceEntity().getEncodeId())).map(type -> Sponge.server().worldManager().world(worldKey).get().createEntity(type, position));
+			if(optSource.isPresent() && optSource.get() instanceof Explosive) {
+				builder = builder.sourceExplosive((@Nullable Explosive) optSource.get());
+			}
+		}
+		rgEvent.setExplosion(builder.build());
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCanceled(true);
@@ -137,7 +149,7 @@ public class ForgeExplosionListener extends ForgeListener {
 		positions.forEach(pos -> {
 			Vector3i blockPos = Vector3i.from(pos.getX(), pos.getY(), pos.getZ());
 			Region find = plugin.getAPI().findRegion(worldKey, blockPos);
-			if(!isAllowExplosion(find, sources, find.getServerWorld().get().block(position))) explosion.getToBlow().remove(pos);
+			if(!isAllowExplosion(find, sources, find.getWorld().get().block(position))) explosion.getToBlow().remove(pos);
 		});
 	}
 
@@ -153,7 +165,7 @@ public class ForgeExplosionListener extends ForgeListener {
 			Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, null, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), sources, blockState);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getWorldKey()), sources, blockState);
 	}
 
 }

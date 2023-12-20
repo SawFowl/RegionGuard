@@ -23,10 +23,10 @@ public class ChunkListener {
 	@Listener
 	public void chunkLoad(ChunkEvent.Load event) {
 		if(!Sponge.server().worldManager().world(event.worldKey()).isPresent()) return;
-		ChunkNumber chunkNumber = new ChunkNumber(event.chunkPosition());
+		ChunkNumber chunkNumber = ChunkNumber.of(event.chunkPosition());
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			for(Region region : plugin.getAPI().getRegions()) {
-				if(event.worldKey().equals(region.getServerWorldKey()) && region.getChunkNumbers().contains(chunkNumber)) {
+				if(event.worldKey().equals(region.getWorldKey()) && region.getChunkNumbers().contains(chunkNumber)) {
 					if(plugin.getAPI().getRegionsPerWorld().containsKey(event.worldKey())) {
 						if(!plugin.getAPI().getRegionsPerWorld().get(event.worldKey()).containsKey(chunkNumber)) {
 							ArrayList<Region> regions = new ArrayList<>();
@@ -50,7 +50,7 @@ public class ChunkListener {
 	@Listener
 	public void chunkUnLoad(ChunkEvent.Unload.Pre event) {
 		if(!Sponge.server().worldManager().world(event.worldKey()).isPresent()) return;
-		ChunkNumber chunkNumber = new ChunkNumber(event.chunkPosition());
+		ChunkNumber chunkNumber = ChunkNumber.of(event.chunkPosition());
 		if(plugin.getAPI().getRegionsPerWorld().containsKey(event.worldKey()) && plugin.getAPI().getRegionsPerWorld().get(event.worldKey()).containsKey(chunkNumber)) {
 			Map<ChunkNumber, ArrayList<Region>> map = new HashMap<ChunkNumber, ArrayList<Region>>();
 			map.putAll(plugin.getAPI().getRegionsPerWorld().get(event.worldKey()));

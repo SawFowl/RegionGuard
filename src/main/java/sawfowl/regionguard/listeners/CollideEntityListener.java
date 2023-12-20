@@ -110,6 +110,6 @@ public class CollideEntityListener {
 				}
 			}
 		}
-		return region.isGlobal() ? (finalFlagResult == Tristate.UNDEFINED ? true : finalFlagResult.asBoolean()) : isAllowCollideEntity(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, target);
+		return region.isGlobal() ? (finalFlagResult == Tristate.UNDEFINED ? true : finalFlagResult.asBoolean()) : isAllowCollideEntity(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, target);
 	}
 }

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -18,38 +19,31 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.AABB;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
-import sawfowl.localeapi.serializetools.SerializedItemStack;
-
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.RegionAPI;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.SelectorTypes;
-import sawfowl.regionguard.api.WorldEditCUIAPI;
 import sawfowl.regionguard.api.data.ChunkNumber;
 import sawfowl.regionguard.api.data.FlagSettings;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 import sawfowl.regionguard.utils.worldedit.WorldEditAPI;
 
 class Api implements RegionAPI {
 
 	private final RegionGuard plugin;
 	private final WorldEditCUIAPI cuiapi;
-	private final boolean isForgePlatform;
-	Api(RegionGuard plugin, boolean isForgePlatform) {
+	Api(RegionGuard plugin) {
 		this.plugin = plugin;
-		this.isForgePlatform = isForgePlatform;
-		if(isForgePlatform) {
-			plugin.getLogger().info("The plugin is running in Forge compatibility mode.");
-		} else {
-			plugin.getLogger().info("The plugin is running in Vanilla compatibility mode.");
-		}
-		cuiapi = new WorldEditAPI(plugin, isForgePlatform);
+		cuiapi = new WorldEditAPI(plugin);
 		for(Flags flag : Flags.values()) {
 			registeredFlags.put(flag.toString(), flag.getFlagSettings());
 		}
@@ -69,9 +63,7 @@ class Api implements RegionAPI {
 	private ItemStack wandItem;
 
 	void generateDefaultGlobalRegion() {
-		defaultGlobal = new Region(new UUID(0, 0), Sponge.server().worldManager().defaultWorld(), null, null, null);
-		defaultGlobal.setRegionType(RegionTypes.GLOBAL);
-		defaultGlobal.setFlags(getDefaultFlags(RegionTypes.GLOBAL));
+		defaultGlobal = Region.createGlobal(DefaultWorldKeys.DEFAULT, getDefaultFlags(RegionTypes.GLOBAL));
 	}
 
 	@Override
@@ -185,7 +177,7 @@ class Api implements RegionAPI {
 
 	@Override
 	public void registerRegion(Region region) {
-		ResourceKey worldKey = region.getServerWorldKey();
+		ResourceKey worldKey = region.getWorldKey();
 		if(!regionsPerWorld.containsKey(worldKey)) regionsPerWorld.put(worldKey, new HashMap<ChunkNumber, ArrayList<Region>>());
 		if(!forFindIntersects.containsKey(worldKey)) forFindIntersects.put(worldKey, new HashSet<Region>());
 		forFindIntersects.get(worldKey).add(region);
@@ -224,7 +216,7 @@ class Api implements RegionAPI {
 
 	@Override
 	public void unregisterRegion(Region region) {
-		ResourceKey worldKey = region.getServerWorldKey();
+		ResourceKey worldKey = region.getWorldKey();
 		for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(regionsPerWorld.get(worldKey).containsKey(chunkNumber) && regionsPerWorld.get(worldKey).get(chunkNumber).contains(region)) regionsPerWorld.get(worldKey).get(chunkNumber).remove(region);
 		if(playersRegions.containsKey(region.getOwnerUUID()) && playersRegions.get(region.getOwnerUUID()).contains(region)) {
 			playersRegions.get(region.getOwnerUUID()).remove(region);
@@ -261,7 +253,7 @@ class Api implements RegionAPI {
 
 	@Override
 	public Region findIntersectsRegion(Region region) {
-		ResourceKey world = region.getServerWorldKey();
+		ResourceKey world = region.getWorldKey();
 		if(forFindIntersects.containsKey(world)) {
 			AABB aabb = region.getCuboid().getAABB();
 			Optional<Region> find = (forFindIntersects.get(world).size() > 10000 ? forFindIntersects.get(world).parallelStream() : forFindIntersects.get(world).stream()).filter(rg -> !rg.equals(region) && (rg.getCuboid().getAABB().intersects(aabb) || aabb.intersects(rg.getCuboid().getAABB()))).findFirst();
@@ -292,7 +284,7 @@ class Api implements RegionAPI {
 	}
 
 	@Override
-	public Map<String, List<FlagValue>> getDefaultFlags(RegionTypes regionType) {
+	public Map<String, Set<FlagValue>> getDefaultFlags(RegionTypes regionType) {
 		if(regionType == RegionTypes.ADMIN) return plugin.getDefaultFlagsConfig().getAdminFlags();
 		if(regionType == RegionTypes.ARENA) return plugin.getDefaultFlagsConfig().getArenaFlags();
 		if(regionType == RegionTypes.GLOBAL) return plugin.getDefaultFlagsConfig().getGlobalFlags();
@@ -313,27 +305,27 @@ class Api implements RegionAPI {
 
 	@Override
 	public long getLimitBlocks(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getBlocks() != null ? (dataPlayers.get(player.uniqueId()).getLimits().getBlocks() + getOptionLongValue(player, Permissions.LIMIT_BLOCKS) <= getLimitMaxBlocks(player) ? dataPlayers.get(player.uniqueId()).getLimits().getBlocks() + getOptionLongValue(player, Permissions.LIMIT_BLOCKS) : getLimitMaxBlocks(player)) : getOptionLongValue(player, Permissions.LIMIT_BLOCKS);
+		return containsLimits(player.uniqueId()) ? (dataPlayers.get(player.uniqueId()).getLimits().getBlocks() + getOptionLongValue(player, Permissions.LIMIT_BLOCKS) <= getLimitMaxBlocks(player) ? dataPlayers.get(player.uniqueId()).getLimits().getBlocks() + getOptionLongValue(player, Permissions.LIMIT_BLOCKS) : getLimitMaxBlocks(player)) : getOptionLongValue(player, Permissions.LIMIT_BLOCKS);
 	}
 
 	@Override
 	public long getLimitClaims(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getClaims() != null ? (dataPlayers.get(player.uniqueId()).getLimits().getClaims() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) <= getLimitMaxClaims(player) ? dataPlayers.get(player.uniqueId()).getLimits().getClaims() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) : getLimitMaxClaims(player)) : getOptionLongValue(player, Permissions.LIMIT_CLAIMS);
+		return containsLimits(player.uniqueId()) ? (dataPlayers.get(player.uniqueId()).getLimits().getClaims() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) <= getLimitMaxClaims(player) ? dataPlayers.get(player.uniqueId()).getLimits().getClaims() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) : getLimitMaxClaims(player)) : getOptionLongValue(player, Permissions.LIMIT_CLAIMS);
 	}
 
 	@Override
 	public long getLimitSubdivisions(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() != null ? (dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() + getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS) <= getLimitMaxSubdivisions(player) ? dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() + getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS) : getLimitMaxSubdivisions(player)) : getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS);
+		return containsLimits(player.uniqueId()) ? (dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() + getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS) <= getLimitMaxSubdivisions(player) ? dataPlayers.get(player.uniqueId()).getLimits().getSubdivisions() + getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS) : getLimitMaxSubdivisions(player)) : getOptionLongValue(player, Permissions.LIMIT_SUBDIVISIONS);
 	}
 
 	@Override
 	public long getLimitMembers(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() != null ? (dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) <= getLimitMaxMembers(player) ? dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) : getLimitMaxMembers(player)) : getOptionLongValue(player, Permissions.LIMIT_MEMBERS);
+		return containsLimits(player.uniqueId()) ? (dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) <= getLimitMaxMembers(player) ? dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) : getLimitMaxMembers(player)) : getOptionLongValue(player, Permissions.LIMIT_MEMBERS);
 	}
 
 	@Override
 	public long getLimitMembers(UUID player) {
-		return containsLimits(player) && dataPlayers.get(player).getLimits().getMembersPerRegion() != null ? dataPlayers.get(player).getLimits().getMembersPerRegion() : 0;
+		return containsLimits(player) ? dataPlayers.get(player).getLimits().getMembersPerRegion() : 0;
 	}
 
 	@Override
@@ -358,32 +350,32 @@ class Api implements RegionAPI {
 
 	@Override
 	public void setLimitBlocks(ServerPlayer player, long limit) {
-		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), new PlayerData());
-		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(new PlayerLimits());
+		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), PlayerData.zero());
+		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(PlayerLimits.zero());
 		dataPlayers.get(player.uniqueId()).getLimits().setBlocks(limit);
 		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
 	}
 
 	@Override
 	public void setLimitClaims(ServerPlayer player, long limit) {
-		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), new PlayerData());
-		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(new PlayerLimits());
+		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), PlayerData.zero());
+		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(PlayerLimits.zero());
 		dataPlayers.get(player.uniqueId()).getLimits().setClaims(limit);
 		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
 	}
 
 	@Override
 	public void setLimitSubdivisions(ServerPlayer player, long limit) {
-		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), new PlayerData());
-		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(new PlayerLimits());
+		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), PlayerData.zero());
+		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(PlayerLimits.zero());
 		dataPlayers.get(player.uniqueId()).getLimits().setSubdivisions(limit);
 		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
 	}
 
 	@Override
 	public void setLimitMembers(ServerPlayer player, long limit) {
-		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), new PlayerData());
-		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(new PlayerLimits());
+		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), PlayerData.zero());
+		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(PlayerLimits.zero());
 		dataPlayers.get(player.uniqueId()).getLimits().setMembersPerRegion(limit);
 		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
 	}
@@ -474,18 +466,13 @@ class Api implements RegionAPI {
 		return cuiapi;
 	}
 
-	@Override
-	public boolean isForgePlatform() {
-		return isForgePlatform;
-	}
-
 	void updateWandItem() {
 		wandItem = setNBT(getWandItemFromConfig());
 	}
 
 	private ItemStack setNBT(ItemStack itemStack) {
 		SerializedItemStack serializedItemStack = new SerializedItemStack(itemStack);
-		serializedItemStack.getOrCreateTag().putInteger("WandItem", 1);
+		serializedItemStack.getOrCreateTag().putInteger(plugin.getPluginContainer(), "WandItem", 1);
 		return serializedItemStack.getItemStack();
 	}
 

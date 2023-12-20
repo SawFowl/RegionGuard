@@ -206,7 +206,7 @@ public class ImpactListener{
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowImpactBlock(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), entity, blockState);
+		return region.isGlobal() ? true : isAllowImpactBlock(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, blockState);
 	}
 
 	private boolean isAllowImpactEntity(Region region, Entity source, Entity target) {
@@ -221,7 +221,7 @@ public class ImpactListener{
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowImpactEntity(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, target);
+		return region.isGlobal() ? true : isAllowImpactEntity(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, target);
 	}
 
 }

@@ -14,8 +14,8 @@ import org.spongepowered.api.util.locale.Locales;
 
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
+import sawfowl.regionguard.api.worldedit.CUIUser;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.worldedit.cuiusers.CUIUser;
 
 public class WeCUICommand implements PluginRawCommand {
 

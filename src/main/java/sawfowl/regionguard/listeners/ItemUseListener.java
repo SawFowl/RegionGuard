@@ -121,7 +121,7 @@ public class ItemUseListener {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowUse(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), entity, itemStack);
+		return region.isGlobal() ? true : isAllowUse(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, itemStack);
 	}
 
 }

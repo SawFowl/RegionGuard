@@ -206,7 +206,7 @@ public class PickupDropItemListener {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowItemPickup(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, snapshots);
+		return region.isGlobal() ? true : isAllowItemPickup(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, snapshots);
 	}
 
 	private boolean isAllowItemDrop(Region region, Entity source, List<ItemStackSnapshot> snapshots) {
@@ -220,7 +220,7 @@ public class PickupDropItemListener {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowItemDrop(plugin.getAPI().getGlobalRegion(region.getServerWorldKey()), source, snapshots);
+		return region.isGlobal() ? true : isAllowItemDrop(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, snapshots);
 	}
 
 }

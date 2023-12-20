@@ -2,22 +2,15 @@ package sawfowl.regionguard.api.data;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import com.google.gson.JsonObject;
+
 @ConfigSerializable
-public abstract class AdditionalData {
+public interface AdditionalData {
 
 	/**
-	 * Getting a class to deserialize a custom data.
-	 * 
-	 * @param clazz - The class is a descendant of CompoundTag.
+	 * Convert class objects to json data array.<br>
+	 * It is recommended not to do `return null`.
 	 */
-	@SuppressWarnings({"unchecked" }) 
-	public static Class<AdditionalData> getClass(Class<?> clazz) {
-		try {
-			return (Class<AdditionalData>) (Object) clazz;
-		} catch (ClassCastException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+	JsonObject toJsonObject();
 
 }

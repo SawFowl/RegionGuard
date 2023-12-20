@@ -22,7 +22,7 @@ public class ClientConnectionListener {
 		plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
 		plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, null);
 		if(plugin.getAPI().getPlayerData(event.player().uniqueId()).isPresent()) return;
-		plugin.getAPI().setPlayerData(player.uniqueId(), new PlayerData(new PlayerLimits(0l, 0l, 0l, 0l), new ClaimedByPlayer(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player))));
+		plugin.getAPI().setPlayerData(player.uniqueId(), PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player))));
 		plugin.getAPI().updatePlayerData(player);
 	}
 

@@ -1,60 +1,53 @@
 package sawfowl.regionguard.api.data;
 
-import java.util.Objects;
-
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataSerializable;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-public class ChunkNumber {
+import net.kyori.adventure.builder.AbstractBuilder;
 
-	public ChunkNumber(int x, int z) {
-		this.x = x;
-		this.z = z;
+public interface ChunkNumber extends DataSerializable {
+
+	private static Builder builder() {
+		return Sponge.game().builderProvider().provide(Builder.class);
 	}
 
-	public ChunkNumber(Vector3i vector3i) {
-		x = vector3i.x() / 16;
-		z = vector3i.z() / 16;
+	static ChunkNumber of(Vector3i vector3i) {
+		return builder().from(vector3i);
 	}
 
-	int x;
-	int z;
+	static ChunkNumber of(Vector3d vector3d) {
+		return of(vector3d.toInt());
+	}
+
+	static ChunkNumber from(Chunk<?> chunk) {
+		return of(chunk.chunkPosition());
+	}
+
+	static ChunkNumber from(Entity entity) {
+		return of(entity.blockPosition());
+	}
 
 	/**
 	 * Getting a chunk position.
 	 */
-	public Vector3i chunkPosition() {
-		return Vector3i.from(x * 16, 0, z * 16);
-	}
+	Vector3i chunkPosition();
 
-	public int getX() {
-		return x;
-	}
+	public int getX();
 
-	public int getZ() {
-		return z;
-	}
+	public int getZ();
 
-	public boolean equalsTo(Vector3i vector3i) {
-		return x == vector3i.x() / 16 && z == vector3i.z() / 16;
-	}
+	public boolean equalsTo(Vector3i vector3i);
 
-	@Override
-	public boolean equals(Object obj) {
-		if(this == obj) return true;
-		if(obj == null) return false;
-		if(getClass() != obj.getClass()) return false;
-		ChunkNumber other = (ChunkNumber) obj;
-		return x == other.x && z == other.z;
-	}
+	interface Builder extends AbstractBuilder<ChunkNumber>, org.spongepowered.api.util.Builder<ChunkNumber, Builder> {
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(x, z);
-	}
+		ChunkNumber from(Vector3i vector3i);
 
-	@Override
-	public String toString() {
-		return "ChunkNumber(" + x + ", " + z + ")";
+		ChunkNumber from(Vector3d vector3d);
+
 	}
 
 }

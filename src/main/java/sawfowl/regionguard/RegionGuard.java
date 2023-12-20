@@ -32,13 +32,12 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.impl.AbstractEvent;
+import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.reference.ValueReference;
 import org.spongepowered.plugin.PluginContainer;
@@ -46,9 +45,19 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import com.google.inject.Inject;
 
+import sawfowl.commandpack.api.CommandPack;
 import sawfowl.localeapi.api.LocaleService;
-import sawfowl.localeapi.event.LocaleServiseEvent;
+import sawfowl.localeapi.api.event.LocaleServiseEvent;
+import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.regionguard.api.RegionAPI;
+import sawfowl.regionguard.api.data.ChunkNumber;
+import sawfowl.regionguard.api.data.ClaimedByPlayer;
+import sawfowl.regionguard.api.data.Cuboid;
+import sawfowl.regionguard.api.data.FlagValue;
+import sawfowl.regionguard.api.data.MemberData;
+import sawfowl.regionguard.api.data.PlayerData;
+import sawfowl.regionguard.api.data.PlayerLimits;
+import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionAPIPostEvent;
 import sawfowl.regionguard.commands.RegionCommand;
 import sawfowl.regionguard.configure.CuiConfig;
@@ -60,6 +69,14 @@ import sawfowl.regionguard.configure.MySQL;
 import sawfowl.regionguard.configure.WorkConfigs;
 import sawfowl.regionguard.configure.WorkData;
 import sawfowl.regionguard.configure.WorkTables;
+import sawfowl.regionguard.data.ChunkNumberImpl;
+import sawfowl.regionguard.data.ClaimedByPlayerImpl;
+import sawfowl.regionguard.data.CuboidImpl;
+import sawfowl.regionguard.data.FlagValueImpl;
+import sawfowl.regionguard.data.MemberDataImpl;
+import sawfowl.regionguard.data.PlayerDataImpl;
+import sawfowl.regionguard.data.PlayerLimitsImpl;
+import sawfowl.regionguard.data.RegionImpl;
 import sawfowl.regionguard.listeners.BlockAndWorldChangeListener;
 import sawfowl.regionguard.listeners.ChunkListener;
 import sawfowl.regionguard.listeners.ClientConnectionListener;
@@ -103,6 +120,7 @@ public class RegionGuard {
 	private WorkData regionsDataWork;
 	private RegenUtil regenUtil;
 	private Economy economy;
+	private CommandPack commandPack;
 
 	public static RegionGuard getInstance() {
 		return instance;
@@ -114,10 +132,6 @@ public class RegionGuard {
 
 	public Path getConfigDir() {
 		return configDir;
-	}
-
-	public ConfigurationOptions getConfigurationOptions() {
-		return localeService.getConfigurationOptions();
 	}
 
 	public Locales getLocales() {
@@ -168,6 +182,10 @@ public class RegionGuard {
 		return economy;
 	}
 
+	public CommandPack getCommandPack() {
+		return commandPack;
+	}
+
 	@Inject
 	public RegionGuard(PluginContainer pluginContainer, @ConfigDir(sharedRoot = false) Path configDirectory) {
 		instance = this;
@@ -175,7 +193,7 @@ public class RegionGuard {
 		this.pluginContainer = pluginContainer;
 		configDir = configDirectory;
 		configDirectory.toFile();
-		api = new Api(instance, isForgePlatform());
+		api = new Api(instance);
 		regenUtil = new RegenUtil(instance);
 	}
 
@@ -186,15 +204,15 @@ public class RegionGuard {
 			getConfigDir().resolve("Worlds").toFile().mkdir();
 		}
 		try {
-			configurationReference = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("Config.conf")).build().loadToReference();
+			configurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("Config.conf")).build().loadToReference();
 			this.mainConfig = configurationReference.referenceTo(MainConfig.class);
 			configurationReference.save();
 			
-			flagsConfigurationReference = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
+			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
 			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
 			flagsConfigurationReference.save();
 			
-			cuiConfigurationReference = HoconConfigurationLoader.builder().defaultOptions(getConfigurationOptions()).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
+			cuiConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
 			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
 			cuiConfigurationReference.save();
 		} catch (ConfigurateException e) {
@@ -218,6 +236,11 @@ public class RegionGuard {
 		}
 		PostAPIEvent toPost = new PostAPIEvent();
 		Sponge.eventManager().post(toPost);
+	}
+
+	@Listener
+	public void getCommandPackAPI(CommandPack.PostAPI event) {
+		commandPack = event.getAPI();
 	}
 
 	@Listener(order = Order.LAST)
@@ -273,12 +296,11 @@ public class RegionGuard {
 		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
-		if(getConfig().isRegisterForgeListeners() && isForgePlatform()) new ForgeExplosionListener(instance);
+		if(getConfig().isRegisterForgeListeners() && commandPack.isForgeServer()) new ForgeExplosionListener(instance);
 		Sponge.asyncScheduler().executor(pluginContainer).submit(() -> {
 			long time = System.currentTimeMillis();
 			regionsDataWork.loadRegions();
 			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
-			mainCommand.getFlagCommand().updateCompletions();
 			class PostEvent extends AbstractEvent implements RegionAPIPostEvent.CompleteLoadRegions {
 				@Override
 				public Cause cause() {
@@ -297,19 +319,19 @@ public class RegionGuard {
 
 	@Listener
 	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
-		mainCommand = new RegionCommand(instance, event);
+		mainCommand = new RegionCommand(instance);
 		event.register(pluginContainer, mainCommand, "regionguard", "region", "rg");
 	}
 
-	private boolean isForgePlatform() {
-		try {
-			Class.forName("net.minecraft.entity.player.ServerPlayerEntity");
-			Class.forName("net.minecraft.network.play.client.CCustomPayloadPacket");
-			Class.forName("net.minecraft.network.PacketBuffer");
-			return true;
-		}  catch (ClassNotFoundException e) {
-			return false;
-		}
+	public void registerBuilders(RegisterBuilderEvent event) {
+		event.register(ChunkNumber.Builder.class, () -> new ChunkNumberImpl().builder());
+		event.register(ClaimedByPlayer.Builder.class, () -> new ClaimedByPlayerImpl().builder());
+		event.register(Cuboid.Builder.class, () -> new CuboidImpl().builder());
+		event.register(FlagValue.Builder.class, () -> new FlagValueImpl().builder());
+		event.register(MemberData.Builder.class, () -> new MemberDataImpl().builder());
+		event.register(PlayerData.Builder.class, () -> new PlayerDataImpl().builder());
+		event.register(PlayerLimits.Builder.class, () -> new PlayerLimitsImpl().builder());
+		event.register(Region.Builder.class, () -> new RegionImpl().builder());
 	}
 
 }

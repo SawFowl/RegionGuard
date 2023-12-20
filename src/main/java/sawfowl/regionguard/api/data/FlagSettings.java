@@ -1,20 +1,21 @@
 package sawfowl.regionguard.api.data;
 
-public abstract class FlagSettings {
+public interface FlagSettings {
 
-	public abstract boolean isAllowArgs();
+	boolean isAllowArgs();
 
-	public abstract boolean isAllowSource(String source);
+	boolean isAllowSource(String source);
 
-	public abstract boolean isAllowTarget(String target);
+	boolean isAllowTarget(String target);
 
-	public abstract boolean isAllowSourceEntity();
+	boolean isAllowSourceEntity();
 
-	public abstract boolean isAllowSourceDamageType();
+	boolean isAllowSourceDamageType();
 
-	public abstract boolean isAllowTargetEntity();
+	boolean isAllowTargetEntity();
 
-	public abstract boolean isAllowTargetItem();
+	boolean isAllowTargetItem();
 
-	public abstract boolean isAllowTargetBlock();
+	boolean isAllowTargetBlock();
+
 }

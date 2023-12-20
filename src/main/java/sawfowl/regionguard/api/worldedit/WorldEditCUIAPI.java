@@ -1,4 +1,4 @@
-package sawfowl.regionguard.api;
+package sawfowl.regionguard.api.worldedit;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +9,6 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
 
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.utils.worldedit.cuiusers.CUIUser;
 
 public interface WorldEditCUIAPI {
 
@@ -92,6 +91,6 @@ public interface WorldEditCUIAPI {
 	 * 
 	 * @return @link ServerLocation}
 	 */
-	public Optional<ServerLocation> getTargetBlock(ServerPlayer player, CUIUser user, int maxDistance);
+	public Optional<ServerLocation> getTargetBlock(ServerPlayer player, int maxDistance);
 
 }

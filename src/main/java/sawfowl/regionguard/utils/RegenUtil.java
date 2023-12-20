@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
@@ -29,12 +30,12 @@ public class RegenUtil {
 	}
 
 	public boolean regenSync(Region region) {
-		if(region == null || !region.getServerWorld().isPresent() || !region.getServerWorld().get().isLoaded() || region.getCuboid() == null) return false;
+		if(region == null || !region.getWorld().isPresent() || !region.getWorld().get().isLoaded() || region.getCuboid() == null) return false;
 		WorldTemplate template = createWorldTemplate(region);
 		return Sponge.server().worldManager().loadWorld(template).thenRun(() -> {
 			ServerWorld tempWorld = Sponge.server().worldManager().world(template.key()).get();
 			for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(!tempWorld.isChunkLoaded(chunkNumber.chunkPosition(), true)) tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
-			ServerWorld world = region.getServerWorld().get();
+			ServerWorld world = region.getWorld().get();
 			for(Vector3i vector3i : region.getCuboid().getAllPositions()) {
 				world.setBlock(vector3i, tempWorld.block(vector3i));
 			}
@@ -44,12 +45,12 @@ public class RegenUtil {
 	}
 
 	public boolean regenAsync(Region region, int delay) {
-		if(region == null || !region.getServerWorld().isPresent() || !region.getServerWorld().get().isLoaded() || region.getCuboid() == null) return false;
+		if(region == null || !region.getWorld().isPresent() || !region.getWorld().get().isLoaded() || region.getCuboid() == null) return false;
 		WorldTemplate template = createWorldTemplate(region);
 		Sponge.server().worldManager().loadWorld(template).thenRunAsync(() -> {
 			ServerWorld tempWorld = Sponge.server().worldManager().world(template.key()).get();
 			for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(!tempWorld.isChunkLoaded(chunkNumber.chunkPosition(), true)) tempWorld.loadChunk(chunkNumber.chunkPosition(), true);
-			ServerWorld world = region.getServerWorld().get();
+			ServerWorld world = region.getWorld().get();
 			Map<Vector3i, BlockState> blocks = new HashMap<Vector3i, BlockState>();
 			for(Vector3i vector3i : region.getCuboid().getAllPositions()) if(tempWorld.block(vector3i).type() != world.block(vector3i).type()) blocks.put(vector3i, tempWorld.block(vector3i));
 			if(!blocks.isEmpty()) {
@@ -78,13 +79,13 @@ public class RegenUtil {
 	}
 
 	private WorldTemplate createWorldTemplate(Region region) {
-		ServerWorld world = region.getServerWorld().get();
-		WorldGenerationConfig baseConfig = world.asTemplate().generationConfig();
-		WorldTemplate tempWorldProperties = world.asTemplate().asBuilder()
+		ServerWorld world = region.getWorld().get();
+		WorldGenerationConfig baseConfig = world.properties().worldGenerationConfig();
+		WorldTemplate tempWorldProperties = WorldTemplate.builder().from(world)
 			.key(ResourceKey.of("regionguard", "tempworld_" + world.key().value()))
-			.loadOnStartup(true)
-			.serializationBehavior(SerializationBehavior.NONE)
-			.generationConfig(baseConfig)
+			.add(Keys.IS_LOAD_ON_STARTUP, true)
+			.add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
+			.add(Keys.WORLD_GEN_CONFIG, baseConfig)
 			.build();
 		lockWorld(region, tempWorldProperties.key());
 		return tempWorldProperties;

@@ -1,63 +1,52 @@
 package sawfowl.regionguard.api.data;
 
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+
+import net.kyori.adventure.builder.AbstractBuilder;
 
 @ConfigSerializable
-public class PlayerLimits {
+public interface PlayerLimits extends DataSerializable {
 
-	public PlayerLimits(){}
-
-	public PlayerLimits(Long blocks, Long claims, Long subdivisions, Long membersPerRegion) {
-		this.blocks = blocks;
-		this.claims = claims;
-		this.subdivisions = subdivisions;
-		this.membersPerRegion = membersPerRegion;
+	static Builder builder() {
+		return Sponge.game().builderProvider().provide(Builder.class);
 	}
 
-	@Setting("Blocks")
-	private Long blocks;
-	@Setting("Claims")
-	private Long claims;
-	@Setting("Subdivisions")
-	private Long subdivisions;
-	@Setting("MembersPerRegion")
-	private Long membersPerRegion;
-
-	public Long getBlocks() {
-		return blocks;
+	static PlayerLimits of(long blocks, long claims, long subdivisions, long membersPerRegion) {
+		return builder().setBlocks(blocks).setClaims(claims).setSubdivisions(subdivisions).setMembersPerRegion(membersPerRegion).build();
 	}
 
-	public Long getClaims() {
-		return claims;
+	static PlayerLimits zero() {
+		return builder().build();
 	}
 
-	public Long getSubdivisions() {
-		return subdivisions;
-	}
+	long getBlocks();
 
-	public Long getMembersPerRegion() {
-		return membersPerRegion;
-	}
+	long getClaims();
 
-	public PlayerLimits setBlocks(Long limit) {
-		blocks = limit;
-		return this;
-	}
+	long getSubdivisions();
 
-	public PlayerLimits setClaims(Long limit) {
-		claims = limit;
-		return this;
-	}
+	long getMembersPerRegion();
 
-	public PlayerLimits setSubdivisions(Long limit) {
-		subdivisions = limit;
-		return this;
-	}
+	PlayerLimits setBlocks(long limit);
 
-	public PlayerLimits setMembersPerRegion(Long limit) {
-		membersPerRegion = limit;
-		return this;
+	PlayerLimits setClaims(long limit);
+
+	PlayerLimits setSubdivisions(long limit);
+
+	PlayerLimits setMembersPerRegion(long limit);
+
+	interface Builder extends AbstractBuilder<PlayerLimits>, org.spongepowered.api.util.Builder<PlayerLimits, Builder> {
+
+		Builder setBlocks(long limit);
+
+		Builder setClaims(long limit);
+
+		Builder setSubdivisions(long limit);
+
+		Builder setMembersPerRegion(long limit);
+
 	}
 
 }

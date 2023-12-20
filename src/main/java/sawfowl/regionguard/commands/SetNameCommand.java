@@ -17,6 +17,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.api.util.locale.Locales;
 
+import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.TrustTypes;
@@ -77,7 +78,7 @@ public class SetNameCommand implements PluginRawCommand {
 			}
 			if(newName.equals("")) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_NAME_NOT_PRESENT));
 			if(removeDecor(newName).length() > 20) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_NAME_TOO_LONG));
-			region.setName(newName, locale);
+			region.setName(TextUtils.deserialize(newName), locale);
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
 			player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_SET_NAME_SUCCESS));
 		}

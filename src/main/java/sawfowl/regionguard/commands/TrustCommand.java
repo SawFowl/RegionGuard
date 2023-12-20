@@ -60,7 +60,7 @@ public class TrustCommand implements PluginRawCommand {
 		if(!region.isCurrentTrustType(player, TrustTypes.OWNER) && trustLevel == TrustTypes.MANAGER) throw new CommandException(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_PLAYER_IS_NOT_OWNER));
 		region.setTrustType(trustedPlayer, trustLevel);
 		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TRUST_TYPE, ReplaceUtil.Keys.PLAYER), Arrays.asList(trustLevel.toString(), trustedPlayer.name())), LocalesPaths.COMMAND_TRUST_SUCCESS_PLAYER));
-		trustedPlayer.sendMessage(plugin.getLocales().getTextWithReplaced(trustedPlayer.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TRUST_TYPE, ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(trustLevel.toString(), player.name(), region.getServerWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_TRUST_SUCCESS_TARGET));
+		trustedPlayer.sendMessage(plugin.getLocales().getTextWithReplaced(trustedPlayer.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TRUST_TYPE, ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(trustLevel.toString(), player.name(), region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_TRUST_SUCCESS_TARGET));
 		plugin.getAPI().saveRegion(region.getPrimaryParent());
 		return CommandResult.success();
 	}
