@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.Optional;
 
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
 import org.spongepowered.api.service.pagination.PaginationList;
@@ -19,6 +18,10 @@ import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
+import sawfowl.regionguard.commands.abstractcommands.AbstractCommand;
+import sawfowl.regionguard.commands.child.Claim;
+import sawfowl.regionguard.commands.child.Delete;
+import sawfowl.regionguard.commands.child.Limits;
 import sawfowl.regionguard.configure.LocalesPaths;
 
 public class RegionCommand extends AbstractCommand {
@@ -29,7 +32,7 @@ public class RegionCommand extends AbstractCommand {
 
 	@Override
 	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
-		generateHelp(cause, locale);
+		sendCommandsList(audience, locale, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList(), 35);
 	}
 
 	@Override
@@ -54,17 +57,16 @@ public class RegionCommand extends AbstractCommand {
 
 	@Override
 	public List<RawCommand> getChilds() {
-		return Arrays.asList(new Claim(plugin));
+		return Arrays.asList(
+			new Claim(plugin),
+			new Delete(plugin),
+			new Limits(plugin)
+		);
 	}
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		return null;
-	}
-
-	@Override
-	public boolean canExecute(CommandCause cause) {
-		return cause.hasPermission(Permissions.HELP);
 	}
 
 	@Override
@@ -84,11 +86,11 @@ public class RegionCommand extends AbstractCommand {
 
 	/*private void generateChild() {
 		childExecutors.put("claim", new Claim(plugin));
-		childExecutors.put("delete", new DeleteCommand(plugin));
+		childExecutors.put("delete", new Delete(plugin));
 		childExecutors.put("flag", new FlagCommand(plugin));
 		childExecutors.put("info", new InfoCommand(plugin));
 		childExecutors.put("leave", new LeaveCommand(plugin));
-		childExecutors.put("limits", new LimitsCommand(plugin));
+		childExecutors.put("limits", new Limits(plugin));
 		SetCreatingTypeCommand setCreatingTypeCommand = new SetCreatingTypeCommand(plugin);
 		childExecutors.put("setcreatingtype", setCreatingTypeCommand);
 		childExecutors.put("creatingtype", setCreatingTypeCommand);
@@ -112,17 +114,12 @@ public class RegionCommand extends AbstractCommand {
 		childExecutors.put("wand", new WandCommand(plugin));
 		childExecutors.put("wecui", new WeCUICommand(plugin));
 		childExecutors.put("list", new ListCommand(plugin));
-		childExecutors.put("setlimit", new SetLimitsCommand(plugin));
+		childExecutors.put("setlimit", new Set(plugin));
 		UpdateDefaultFlagsCommand updateDefaultFlagsCommand = new UpdateDefaultFlagsCommand(plugin);
 		childExecutors.put("updatedefaultflags", updateDefaultFlagsCommand);
 		childExecutors.put("udf", updateDefaultFlagsCommand);
 		childs.addAll(childExecutors.keySet().stream().map(CommandCompletion::of).collect(Collectors.toList()));
 	}*/
-
-	private CommandResult generateHelp(CommandCause cause, Locale locale) {
-		sendCommandsList(cause.audience(), locale, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList(), 35);
-		return CommandResult.success();
-	}
 
 	private void sendCommandsList(Audience audience, Locale locale, List<Component> messages, int lines) {
 		PaginationList.builder()
@@ -135,8 +132,8 @@ public class RegionCommand extends AbstractCommand {
 
 	public void genEconomyCommands() {
 		if(plugin.getEconomyService() == null) return;
-		//getChildExecutors().put("buylimit", new BuyLimitsCommand(plugin));
-		//getChildExecutors().put("selllimit", new SellLimitsCommand(plugin));
+		//getChildExecutors().put("buylimit", new Buy(plugin));
+		//getChildExecutors().put("selllimit", new Sell(plugin));
 	}
 
 	@Override

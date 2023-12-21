@@ -46,9 +46,9 @@ public class LocalesPaths {
 
 	private static final String PATH_COMMAND_BUYLIMIT = "BuyLimit";
 
-	private static final String PATH_COMMAND_BUYBLOCKS = "BuyBlocks";
+	private static final String PATH_COMMAND_BUYBLOCKS = "Blocks";
 
-	private static final String PATH_COMMAND_BUYCLAIMS = "BuyClaims";
+	private static final String PATH_COMMAND_BUYCLAIMS = "Claims";
 
 	private static final String PATH_COMMAND_BUYSUBDIVISIONS = "BuySubdivisions";
 
