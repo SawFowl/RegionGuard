@@ -106,7 +106,7 @@ public class Flag extends AbstractPlayerCommand {
 			RawArgument.of(
 				String.class,
 				(cause, args) -> getArgument(FlagConfig.class, args, 0).map(config -> config.getSettings().getSources()).orElse(Stream.of("all")),
-				(cause, args) -> args.length < 4 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getTargets().filter(target -> target.startsWith(args[2])).findFirst().orElse("all")),
+				(cause, args) -> args.length < 4 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getTargets().filter(target -> target.startsWith(args[3])).findFirst().orElse("all")),
 				true,
 				true,
 				3,
