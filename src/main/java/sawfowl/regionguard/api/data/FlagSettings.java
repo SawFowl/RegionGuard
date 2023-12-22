@@ -1,21 +1,21 @@
 package sawfowl.regionguard.api.data;
 
+import java.util.stream.Stream;
+
 public interface FlagSettings {
 
 	boolean isAllowArgs();
 
-	boolean isAllowSource(String source);
+	Stream<String> getSources();
 
-	boolean isAllowTarget(String target);
+	Stream<String> getTargets();
 
-	boolean isAllowSourceEntity();
+	default boolean isAllowSource(String source) {
+		return isAllowArgs() && (source.equals("all") || (getSources() != null && getSources().filter(id -> id.equals(source)).findFirst().isPresent()));
+	}
 
-	boolean isAllowSourceDamageType();
-
-	boolean isAllowTargetEntity();
-
-	boolean isAllowTargetItem();
-
-	boolean isAllowTargetBlock();
+	default boolean isAllowTarget(String target) {
+		return isAllowArgs() && (target.equals("all") || (getTargets() != null && getTargets().filter(id -> id.equals(target)).findFirst().isPresent()));
+	}
 
 }

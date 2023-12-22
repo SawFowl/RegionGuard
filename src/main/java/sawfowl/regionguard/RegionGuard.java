@@ -53,13 +53,13 @@ import sawfowl.regionguard.api.RegionAPI;
 import sawfowl.regionguard.api.data.ChunkNumber;
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.Cuboid;
+import sawfowl.regionguard.api.data.FlagConfig;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.MemberData;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionAPIPostEvent;
-import sawfowl.regionguard.commands.RegionCommand;
 import sawfowl.regionguard.configure.CuiConfig;
 import sawfowl.regionguard.configure.DefaultFlags;
 import sawfowl.regionguard.configure.Locales;
@@ -72,6 +72,7 @@ import sawfowl.regionguard.configure.WorkTables;
 import sawfowl.regionguard.data.ChunkNumberImpl;
 import sawfowl.regionguard.data.ClaimedByPlayerImpl;
 import sawfowl.regionguard.data.CuboidImpl;
+import sawfowl.regionguard.data.FlagConfigImpl;
 import sawfowl.regionguard.data.FlagValueImpl;
 import sawfowl.regionguard.data.MemberDataImpl;
 import sawfowl.regionguard.data.PlayerDataImpl;
@@ -114,7 +115,7 @@ public class RegionGuard {
 	private ValueReference<CuiConfig, CommentedConfigurationNode> cuiConfig;
 	private EconomyService economyService;
 	private Api api;
-	private RegionCommand mainCommand;
+	private sawfowl.regionguard.commands.Region mainCommand;
 	private MySQL mySQL;
 	private WorkData playersDataWork;
 	private WorkData regionsDataWork;
@@ -319,8 +320,8 @@ public class RegionGuard {
 
 	@Listener
 	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
-		mainCommand = new RegionCommand(instance);
-		event.register(pluginContainer, mainCommand, "regionguard", "region", "rg");
+		mainCommand = new sawfowl.regionguard.commands.Region(instance);
+		mainCommand.register(event);
 	}
 
 	public void registerBuilders(RegisterBuilderEvent event) {
@@ -332,6 +333,7 @@ public class RegionGuard {
 		event.register(PlayerData.Builder.class, () -> new PlayerDataImpl().builder());
 		event.register(PlayerLimits.Builder.class, () -> new PlayerLimitsImpl().builder());
 		event.register(Region.Builder.class, () -> new RegionImpl().builder());
+		event.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
 	}
 
 }

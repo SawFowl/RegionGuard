@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
-import org.spongepowered.api.service.pagination.PaginationList;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -21,18 +20,22 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.commands.abstractcommands.AbstractCommand;
 import sawfowl.regionguard.commands.child.Claim;
 import sawfowl.regionguard.commands.child.Delete;
+import sawfowl.regionguard.commands.child.Flag;
+import sawfowl.regionguard.commands.child.Info;
+import sawfowl.regionguard.commands.child.Leave;
 import sawfowl.regionguard.commands.child.Limits;
+import sawfowl.regionguard.commands.child.ListRegions;
 import sawfowl.regionguard.configure.LocalesPaths;
 
-public class RegionCommand extends AbstractCommand {
+public class Region extends AbstractCommand {
 
-	public RegionCommand(RegionGuard plugin) {
+	public Region(RegionGuard plugin) {
 		super(plugin);
 	}
 
 	@Override
 	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
-		sendCommandsList(audience, locale, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList(), 35);
+		sendPaginationList(audience, getComponent(locale, LocalesPaths.COMMANDS_TITLE), getComponent(locale, LocalesPaths.PADDING), 15, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList());
 	}
 
 	@Override
@@ -60,7 +63,11 @@ public class RegionCommand extends AbstractCommand {
 		return Arrays.asList(
 			new Claim(plugin),
 			new Delete(plugin),
-			new Limits(plugin)
+			new Limits(plugin),
+			new Flag(plugin),
+			new Info(plugin),
+			new Leave(plugin),
+			new ListRegions(plugin)
 		);
 	}
 
@@ -87,9 +94,9 @@ public class RegionCommand extends AbstractCommand {
 	/*private void generateChild() {
 		childExecutors.put("claim", new Claim(plugin));
 		childExecutors.put("delete", new Delete(plugin));
-		childExecutors.put("flag", new FlagCommand(plugin));
-		childExecutors.put("info", new InfoCommand(plugin));
-		childExecutors.put("leave", new LeaveCommand(plugin));
+		childExecutors.put("flag", new Flag(plugin));
+		childExecutors.put("info", new Info(plugin));
+		childExecutors.put("leave", new Leave(plugin));
 		childExecutors.put("limits", new Limits(plugin));
 		SetCreatingTypeCommand setCreatingTypeCommand = new SetCreatingTypeCommand(plugin);
 		childExecutors.put("setcreatingtype", setCreatingTypeCommand);
@@ -113,22 +120,13 @@ public class RegionCommand extends AbstractCommand {
 		childExecutors.put("untrust", new UntrustCommand(plugin));
 		childExecutors.put("wand", new WandCommand(plugin));
 		childExecutors.put("wecui", new WeCUICommand(plugin));
-		childExecutors.put("list", new ListCommand(plugin));
+		childExecutors.put("list", new ListRegions(plugin));
 		childExecutors.put("setlimit", new Set(plugin));
 		UpdateDefaultFlagsCommand updateDefaultFlagsCommand = new UpdateDefaultFlagsCommand(plugin);
 		childExecutors.put("updatedefaultflags", updateDefaultFlagsCommand);
 		childExecutors.put("udf", updateDefaultFlagsCommand);
 		childs.addAll(childExecutors.keySet().stream().map(CommandCompletion::of).collect(Collectors.toList()));
 	}*/
-
-	private void sendCommandsList(Audience audience, Locale locale, List<Component> messages, int lines) {
-		PaginationList.builder()
-		.contents(messages)
-		.title(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_TITLE))
-		.padding(plugin.getLocales().getText(locale, LocalesPaths.PADDING))
-		.linesPerPage(lines)
-		.sendTo(audience);
-	}
 
 	public void genEconomyCommands() {
 		if(plugin.getEconomyService() == null) return;

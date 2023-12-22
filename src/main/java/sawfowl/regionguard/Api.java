@@ -29,7 +29,7 @@ import sawfowl.regionguard.api.RegionAPI;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.SelectorTypes;
 import sawfowl.regionguard.api.data.ChunkNumber;
-import sawfowl.regionguard.api.data.FlagSettings;
+import sawfowl.regionguard.api.data.FlagConfig;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
@@ -45,11 +45,11 @@ class Api implements RegionAPI {
 		this.plugin = plugin;
 		cuiapi = new WorldEditAPI(plugin);
 		for(Flags flag : Flags.values()) {
-			registeredFlags.put(flag.toString(), flag.getFlagSettings());
+			registeredFlags.put(flag.toString(), flag.getFlagConfig());
 		}
 	}
 
-	private SortedMap<String, FlagSettings> registeredFlags = new TreeMap<String, FlagSettings>();
+	private SortedMap<String, FlagConfig> registeredFlags = new TreeMap<String, FlagConfig>();
 	private Region defaultGlobal;
 	private Map<UUID, Region> regionsByUUID = new HashMap<UUID, Region>();
 	private Map<UUID, Region> tempRegions = new HashMap<UUID, Region>();
@@ -67,14 +67,14 @@ class Api implements RegionAPI {
 	}
 
 	@Override
-	public SortedMap<String, FlagSettings> getRegisteredFlags() {
-		SortedMap<String, FlagSettings> copy = new TreeMap<String, FlagSettings>();
+	public SortedMap<String, FlagConfig> getRegisteredFlags() {
+		SortedMap<String, FlagConfig> copy = new TreeMap<String, FlagConfig>();
 		copy.putAll(registeredFlags);
 		return copy;
 	}
 
 	@Override
-	public void registerFlag(String flagName, FlagSettings settings) {
+	public void registerFlag(String flagName, FlagConfig settings) {
 		if(flagName == null) throw new NullPointerException("The name of the flag is not specified!");
 		if(settings == null) throw new NullPointerException("The flag settings are not specified!");
 		if(registeredFlags.containsKey(flagName)) throw new RuntimeException("The flag is already registered!");

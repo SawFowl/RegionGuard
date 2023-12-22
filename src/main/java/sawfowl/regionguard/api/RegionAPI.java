@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -16,7 +15,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import sawfowl.regionguard.api.data.ChunkNumber;
-import sawfowl.regionguard.api.data.FlagSettings;
+import sawfowl.regionguard.api.data.FlagConfig;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.Region;
@@ -25,23 +24,14 @@ import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 public interface RegionAPI {
 
 	/**
-	 * Getting all registered flags.<br>
-	 * See {@link #getRegisteredFlags()}
-	 */
-	@Deprecated
-	public default List<String> getFlags() {
-		return getRegisteredFlags().keySet().stream().collect(Collectors.toList());
-	}
-
-	/**
 	 * Getting all registered flags.
 	 */
-	public Map<String, FlagSettings> getRegisteredFlags();
+	public Map<String, FlagConfig> getRegisteredFlags();
 
 	/**
-	 * Flag registration. Values cannot be null.
+	 * FlagConfig registration. Values cannot be null.
 	 */
-	public void registerFlag(String flagName, FlagSettings settings);
+	public void registerFlag(String flagName, FlagConfig settings);
 
 	/**
 	 * Update global region data.

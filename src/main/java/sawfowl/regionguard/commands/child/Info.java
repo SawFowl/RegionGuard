@@ -8,203 +8,83 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.command.CommandCompletion;
-import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.impl.AbstractEvent;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.util.Ticks;
-import org.spongepowered.api.util.locale.LocaleSource;
-import org.spongepowered.api.util.locale.Locales;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.math.vector.Vector3d;
-import org.spongepowered.math.vector.Vector3i;
 
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+
+import sawfowl.commandpack.api.commands.raw.RawCommand;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.TrustTypes;
+import sawfowl.regionguard.api.data.ClaimedByPlayer;
+import sawfowl.regionguard.api.data.PlayerData;
+import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionCommandTeleportEvent;
 import sawfowl.regionguard.api.events.RegionDeleteEvent;
+import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
 
-public class ListCommand implements PluginRawCommand {
+public class Info extends AbstractPlayerCommand {
 
-	private final RegionGuard plugin;
-	private List<CommandCompletion> empty = new ArrayList<>();
-	private Cause cause;
 	private final SimpleDateFormat format;
-	public ListCommand(RegionGuard plugin) {
-		this.plugin = plugin;
-		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+	public Info(RegionGuard plugin) {
+		super(plugin);
 		format = new SimpleDateFormat("d.MM.yyyy HH:mm:s");
 	}
 
 	@Override
-	public CommandResult process(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
-		Object src = cause.root();
-		if(!(src instanceof ServerPlayer)) throw new CommandException(plugin.getLocales().getText(src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT, LocalesPaths.COMMANDS_ONLY_PLAYER));
-		ServerPlayer player = (ServerPlayer) src;
-		boolean otherPlayer = !args.isEmpty() && !args.get(0).equals(player.name()) && player.hasPermission(Permissions.STAFF_LIST) && Sponge.server().player(args.get(0)).isPresent();
-		List<Region> regions = otherPlayer ? plugin.getAPI().getPlayerRegions(Sponge.server().player(args.get(0)).get()) : plugin.getAPI().getPlayerRegions(player);
-		if(regions.size() == 0) throw new CommandException(Component.text(otherPlayer ? "У игрока нет регионов" : "У вас нет регионов"));
-		List<Component> list = new ArrayList<>();
-		for(Region region : regions) {
-			Component tp = region.getWorld().isPresent() && ((player.hasPermission(Permissions.TELEPORT) && region.isTrusted(player)) || player.hasPermission(Permissions.STAFF_LIST)) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
-				teleport(player, region, true);
-			})) : Component.empty();
-			Component positions = Component.text("§6" + region.getCuboid().getMin() + " ➢ " + region.getCuboid().getMax());
-			Component uuidOrName = (region.getPlainName(player.locale()).isPresent() ? region.getName(player.locale()) : Component.text("§2<" + region.getUniqueId() + ">").clickEvent(SpongeComponents.executeCallback(callback -> {
-				Calendar calendar = Calendar.getInstance(player.locale());
-				calendar.setTimeInMillis(region.getCreationTime());
-				generateInfoMessage(player, region, calendar);
-			})));
-			list.add(Component.text().append(tp).append(Component.text(" ")).append(positions).append(Component.text(" ")).append(uuidOrName).build());
-		}
-		sendRegionsList(player, player.locale(), list, 10, otherPlayer ? args.get(0) : player.name());
-		return CommandResult.success();
+	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
+		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
+		Calendar calendar = Calendar.getInstance(src.locale());
+		calendar.setTimeInMillis(region.getCreationTime());
+		generateMessage(src, region, calendar);
 	}
 
 	@Override
-	public List<CommandCompletion> complete(CommandCause cause, Mutable arguments, List<String> args) throws CommandException {
-		if(cause.hasPermission(Permissions.STAFF_LIST)) {
-			if(args.isEmpty()) return Sponge.server().onlinePlayers().stream().map(player -> (CommandCompletion.of(player.name()))).collect(Collectors.toList());
-		}
-		return empty;
+	public Component extendedDescription(Locale locale) {
+		return getComponent(locale, LocalesPaths.COMMANDS_INFO);
 	}
 
 	@Override
-	public boolean canExecute(CommandCause cause) {
-		return cause.hasPermission(Permissions.LIST) || cause.hasPermission(Permissions.STAFF_LIST);
+	public String permission() {
+		return Permissions.INFO;
 	}
 
-	private void sendRegionsList(Audience audience, Locale locale, List<Component> messages, int lines, String name) {
-		PaginationList.builder()
-		.contents(messages)
-		.title(plugin.getLocales().getTextWithReplaced(locale, ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER), Arrays.asList(name)), LocalesPaths.COMMAND_LIST_TITLE))
-		.padding(plugin.getLocales().getText(locale, LocalesPaths.PADDING))
-		.linesPerPage(lines)
-		.sendTo(audience);
+	@Override
+	public String command() {
+		return "info";
 	}
 
-	private void teleport(ServerPlayer player, Region region, boolean repeat) {
-		ServerWorld world = region.getWorld().get();
-		Vector3i vector3i = world.highestPositionAt(region.getCuboid().getCenter().toInt());
-		boolean safePos = player.gameMode().get() == GameModes.CREATIVE.get() || player.gameMode().get() == GameModes.SPECTATOR.get() || (world.block(vector3i.add(0, 1, 0)).type() == BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.AIR.get() && world.block(vector3i.sub(0, 1, 0)).type() != BlockTypes.LAVA.get());
-		if(safePos) {
-			teleport(player, region, world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
-			if(repeat) Sponge.server().scheduler().submit(Task.builder().plugin(plugin.getPluginContainer()).delay(Ticks.single()).execute(() -> {
-				teleport(player, region, false);
-			}).build());
-		} else {
-			player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_LIST_EXCEPTION_NOTSAFE).clickEvent(SpongeComponents.executeCallback(callback2 -> {
-				teleport(player, region, world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
-				if(repeat) Sponge.server().scheduler().submit(Task.builder().plugin(plugin.getPluginContainer()).delay(Ticks.single()).execute(() -> {
-					teleport(player, region, false);
-				}).build());
-			})));
-		}
-	
+	@Override
+	public Component usage(CommandCause cause) {
+		return TextUtils.deserializeLegacy("&6/rg info &f - ").clickEvent(ClickEvent.runCommand("/rg info ")).append(extendedDescription(getLocale(cause)));
 	}
 
-	private void teleport(ServerPlayer player, Region region, ServerWorld world, Vector3d location) {
-		Vector3d playerPos = player.position();
-		class RegionTPEvent extends AbstractEvent implements RegionCommandTeleportEvent {
-			boolean cancelled = false;
-			Component message;
-			Vector3d destination;
-			@Override
-			public Cause cause() {
-				return cause;
-			}
-
-			@Override
-			public ServerPlayer getPlayer() {
-				return player;
-			}
-
-			@Override
-			public Region getRegion() {
-				return region;
-			}
-
-			@Override
-			public Region getOriginalDestinationRegion() {
-				return plugin.getAPI().findRegion(world, location.toInt());
-			}
-
-			@Override
-			public void setMessage(Component message) {
-				this.message = message;
-			}
-
-			@Override
-			public Optional<Component> getMessage() {
-				return Optional.ofNullable(message);
-			}
-
-			@Override
-			public boolean isCancelled() {
-				return cancelled;
-			}
-
-			@Override
-			public void setCancelled(boolean cancel) {
-				cancelled = cancel;
-			}
-
-			@Override
-			public Region from() {
-				return plugin.getAPI().findRegion(world, player.blockPosition());
-			}
-
-			@Override
-			public Vector3d getOriginalLocation() {
-				return playerPos;
-			}
-
-			@Override
-			public Vector3d getOriginalDestinationLocation() {
-				return location;
-			}
-
-			@Override
-			public Vector3d getDestinationLocation() {
-				return destination;
-			}
-
-			@Override
-			public void setDestination(Vector3d location) {
-				if(location != null) destination = location;
-			}
-		}
-		RegionCommandTeleportEvent rgEvent = new RegionTPEvent();
-		rgEvent.setDestination(location);
-		Sponge.eventManager().post(rgEvent);
-		if(!rgEvent.isCancelled()) player.transferToWorld(world, rgEvent.getDestinationLocation());
-		if(rgEvent.getMessage().isPresent()) player.sendMessage(rgEvent.getMessage().get());
+	@Override
+	public List<RawCommand> getChilds() {
+		return null;
 	}
 
-	private void generateInfoMessage(ServerPlayer player, Region region, Calendar calendar) {
+	@Override
+	public List<RawArgument<?>> getArgs() {
+		return null;
+	}
+
+	private void generateMessage(ServerPlayer player, Region region, Calendar calendar) {
 		if(region == null || calendar == null) return;
+		if(!region.isGlobal()) plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region, player, false, false);
 		List<Component> messages = new ArrayList<Component>();
 		Component padding = plugin.getLocales().getText(player.locale(), LocalesPaths.PADDING);
 		Component headerPart = Component.empty();
@@ -308,6 +188,18 @@ public class ListCommand implements PluginRawCommand {
 								region.setRegionType(RegionTypes.UNSET);
 								if(regen) region.regen(plugin.getConfig().getRegenerateTerritory().isAsync(), plugin.getConfig().getRegenerateTerritory().getDelay());
 								plugin.getAPI().deleteRegion(region);
+								Optional<PlayerData> optPlayerData = plugin.getAPI().getPlayerData(player);
+								if(optPlayerData.isPresent()) {
+									optPlayerData.get().getClaimed().setRegions(plugin.getAPI().getClaimedRegions(player) - 1);
+									optPlayerData.get().getClaimed().setBlocks(plugin.getAPI().getClaimedBlocks(player) - region.getCuboid().getSize());
+									plugin.getPlayersDataWork().savePlayerData(player, optPlayerData.get());
+								} else {
+									PlayerData playerData = PlayerData.of(
+										PlayerLimits.of(plugin.getAPI().getLimitBlocks(player), plugin.getAPI().getLimitClaims(player), plugin.getAPI().getLimitSubdivisions(player), plugin.getAPI().getLimitMembers(player)), 
+										ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player))
+									);
+									plugin.getPlayersDataWork().savePlayerData(player, playerData);
+								}
 							}
 							if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());
 						}
@@ -319,17 +211,17 @@ public class ListCommand implements PluginRawCommand {
 				claim = region.isBasicClaim() ? Component.text("§7[§6Claim§7]  ") : Component.text("§7[§eClaim§7]  ").clickEvent(SpongeComponents.executeCallback(cause -> {
 					region.setRegionType(RegionTypes.CLAIM);
 					plugin.getAPI().saveRegion(region);
-					generateInfoMessage(player, region, calendar);
+					generateMessage(player, region, calendar);
 				}));
 				arena = region.isArena() ? Component.text("§7[§2Arena§7]  ") : Component.text("§7[§aArena§7]  ").clickEvent(SpongeComponents.executeCallback(cause -> {
 					region.setRegionType(RegionTypes.ARENA);
 					plugin.getAPI().saveRegion(region);
-					generateInfoMessage(player, region, calendar);
+					generateMessage(player, region, calendar);
 				}));
 				admin = region.isAdmin() ? Component.text("§7[§4Admin§7]") : Component.text("§7[§cAdmin§7]").clickEvent(SpongeComponents.executeCallback(cause -> {
 					region.setRegionType(RegionTypes.ADMIN);
 					plugin.getAPI().saveRegion(region);
-					generateInfoMessage(player, region, calendar);
+					generateMessage(player, region, calendar);
 				}));
 				messages.add(Component.empty().append(delete).append(claim).append(arena).append(admin));
 			} else {
@@ -367,12 +259,7 @@ public class ListCommand implements PluginRawCommand {
 	}
 
 	private int headerWithoutDecorLength(Component component) {
-		return removeDecor(component).length();
-	}
-
-	@Override
-	public CommandException usage() throws CommandException {
-		throw new CommandException(text("Usage: /rg list"));
+		return TextUtils.clearDecorations(component).length();
 	}
 
 }
