@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -678,12 +679,11 @@ public class RegionImpl implements Region {
 	 *
 	 * @param flags - Map with flags and their values.
 	 */
-	@SuppressWarnings("unchecked")
 	public RegionImpl setFlags(Map<String, Set<FlagValue>> flags) {
-		flags.keySet().forEach(name -> {
-			if(flagValues.containsKey(name)) flagValues.remove(name);
+		flags.entrySet().forEach(entry -> {
+			if(flagValues.containsKey(entry.getKey())) flagValues.remove(entry.getKey());
+			flagValues.put(entry.getKey(), entry.getValue().stream().map(value -> (FlagValueImpl) value).collect(Collectors.toSet()));
 		});
-		flagValues.putAll((Map<String, ? extends Set<FlagValueImpl>>) flags);
 		return this;
 	}
 
