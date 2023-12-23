@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -15,6 +16,8 @@ import sawfowl.regionguard.api.data.Region;
 
 @ConfigSerializable
 public class DefaultFlags {
+
+	public DefaultFlags(){}
 
 	@Setting("ClaimFlags")
 	private Map<String, Set<FlagValue>> claimFlags = claimDefaultFlags();
@@ -27,6 +30,8 @@ public class DefaultFlags {
 
 	@Setting("GlobalFlags")
 	private Map<String, Set<FlagValue>> globalFlags = globalDefaultFlags();
+
+	private Consumer<DefaultFlags> save;
 
 	public Map<String, Set<FlagValue>> getClaimFlags() {
 		return claimFlags;
@@ -65,6 +70,11 @@ public class DefaultFlags {
 		if(region.isArena()) setArenaFlags(region.getFlags());
 		if(region.isBasicClaim()) setClaimFlags(region.getFlags());
 		if(region.isAdmin()) setAdminFlags(region.getFlags());
+		if(save != null) save.accept(this);
+	}
+
+	public void setSaveConsumer(Consumer<DefaultFlags> save) {
+		this.save = save;
 	}
 
 	private Map<String, Set<FlagValue>> claimDefaultFlags() {

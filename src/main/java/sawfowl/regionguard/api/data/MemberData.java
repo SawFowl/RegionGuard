@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import net.kyori.adventure.builder.AbstractBuilder;
@@ -20,6 +21,10 @@ public interface MemberData extends DataSerializable {
 	}
 
 	static MemberData of(ServerPlayer player, TrustTypes trustType) {
+		return builder().setPlayer(player, trustType).build();
+	}
+
+	static MemberData of(GameProfile player, TrustTypes trustType) {
 		return builder().setPlayer(player, trustType).build();
 	}
 
@@ -73,6 +78,8 @@ public interface MemberData extends DataSerializable {
 	interface Builder extends AbstractBuilder<MemberData>, org.spongepowered.api.util.Builder<MemberData, Builder> {
 
 		Builder setPlayer(ServerPlayer player, TrustTypes type);
+
+		Builder setPlayer(GameProfile player, TrustTypes trustType);
 
 		Builder setTrustType(TrustTypes type);
 

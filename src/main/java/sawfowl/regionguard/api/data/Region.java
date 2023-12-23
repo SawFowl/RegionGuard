@@ -1,5 +1,6 @@
 package sawfowl.regionguard.api.data;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.chunk.WorldChunk;
@@ -96,12 +98,27 @@ public interface Region extends DataSerializable {
 	Region setOwner(ServerPlayer owner);
 
 	/**
+	 * Make the player the new owner of the region.
+	 *
+	 * @param owner - new owner
+	 */
+	Region setOwner(GameProfile owner);
+
+	/**
 	 * Adding a player to a region.
 	 *
 	 * @param player - addable player
 	 * @param type - assignable trust type
 	 */
 	Region setTrustType(ServerPlayer player, TrustTypes type);
+
+	/**
+	 * Adding a player to a region.
+	 *
+	 * @param player - addable player
+	 * @param type - assignable trust type
+	 */
+	Region setTrustType(GameProfile player, TrustTypes type);
 
 	/**
 	 * Adding a entity to a region.
@@ -115,6 +132,11 @@ public interface Region extends DataSerializable {
 	 * Getting the data of the region owner
 	 */
 	MemberData getOwnerData();
+
+	/**
+	 * Getting a collection of the region's members.
+	 */
+	Collection<MemberData> getMembers();
 
 	/**
 	 * Getting the data of the region member.

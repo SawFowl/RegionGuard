@@ -2,6 +2,7 @@ package sawfowl.regionguard.data;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.DefaultWorldKeys;
@@ -213,6 +215,17 @@ public class RegionImpl implements Region {
 	}
 
 	/**
+	 * Make the player the new owner of the region.
+	 *
+	 * @param owner - new owner
+	 */
+	@Override
+	public RegionImpl setOwner(GameProfile owner) {
+		members.remove(getOwnerUUID());
+		return setTrustType(owner, TrustTypes.OWNER);
+	}
+
+	/**
 	 * Adding a player to a region.
 	 *
 	 * @param player - addable player
@@ -220,6 +233,20 @@ public class RegionImpl implements Region {
 	 */
 	public RegionImpl setTrustType(ServerPlayer player, TrustTypes type) {
 		untrust(player);
+		if(type == TrustTypes.OWNER) members.entrySet().removeIf(entry -> entry.getValue().getTrustType() == TrustTypes.OWNER);
+		members.put(player.uniqueId(), (MemberDataImpl) MemberData.of(player, type));
+		return this;
+	}
+
+	/**
+	 * Adding a player to a region.
+	 *
+	 * @param player - addable player
+	 * @param type - assignable trust type
+	 */
+	@Override
+	public RegionImpl setTrustType(GameProfile player, TrustTypes type) {
+		untrust(player.uniqueId());
 		if(type == TrustTypes.OWNER) members.entrySet().removeIf(entry -> entry.getValue().getTrustType() == TrustTypes.OWNER);
 		members.put(player.uniqueId(), (MemberDataImpl) MemberData.of(player, type));
 		return this;
@@ -244,6 +271,11 @@ public class RegionImpl implements Region {
 	public MemberData getOwnerData() {
 		Optional<MemberDataImpl> data = members.size() > 20 ? members.values().parallelStream().filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst() : members.values().stream().filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst();
 		return data.isPresent() ? (MemberData) data.get() : parrent != null ? parrent.getOwnerData() : setTrustType(new UUID(0, 0), TrustTypes.OWNER).getOwnerData();
+	}
+
+	@Override
+	public Collection<MemberData> getMembers() {
+		return members.values().stream().map(member -> (MemberData) member).collect(Collectors.toUnmodifiableList());
 	}
 
 	/**

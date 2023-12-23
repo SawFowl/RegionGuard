@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
@@ -46,6 +47,12 @@ public class MemberDataImpl implements MemberData {
 			public Builder setPlayer(ServerPlayer player, TrustTypes type) {
 				memberName = player.name();
 				return setTrustType(type);
+			}
+
+			@Override
+			public Builder setPlayer(GameProfile player, TrustTypes trustType) {
+				memberName = player.name().orElse(player.examinableName());
+				return setTrustType(trustType);
 			}
 		};
 	}

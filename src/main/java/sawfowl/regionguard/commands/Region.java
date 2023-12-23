@@ -25,6 +25,16 @@ import sawfowl.regionguard.commands.child.Info;
 import sawfowl.regionguard.commands.child.Leave;
 import sawfowl.regionguard.commands.child.Limits;
 import sawfowl.regionguard.commands.child.ListRegions;
+import sawfowl.regionguard.commands.child.SetCreatingType;
+import sawfowl.regionguard.commands.child.SetMessage;
+import sawfowl.regionguard.commands.child.SetName;
+import sawfowl.regionguard.commands.child.SetOwner;
+import sawfowl.regionguard.commands.child.SetSelectorType;
+import sawfowl.regionguard.commands.child.Trust;
+import sawfowl.regionguard.commands.child.Untrust;
+import sawfowl.regionguard.commands.child.UpdateDefaultFlags;
+import sawfowl.regionguard.commands.child.Wand;
+import sawfowl.regionguard.commands.child.WeCUI;
 import sawfowl.regionguard.configure.LocalesPaths;
 
 public class Region extends AbstractCommand {
@@ -67,7 +77,17 @@ public class Region extends AbstractCommand {
 			new Flag(plugin),
 			new Info(plugin),
 			new Leave(plugin),
-			new ListRegions(plugin)
+			new ListRegions(plugin),
+			new SetCreatingType(plugin),
+			new SetMessage(plugin),
+			new SetName(plugin),
+			new SetOwner(plugin),
+			new SetSelectorType(plugin),
+			new Trust(plugin),
+			new Untrust(plugin),
+			new UpdateDefaultFlags(plugin),
+			new Wand(plugin),
+			new WeCUI(plugin)
 		);
 	}
 
@@ -89,49 +109,6 @@ public class Region extends AbstractCommand {
 	@Override
 	public Component usage(CommandCause cause) {
 		return Component.text("/rg");
-	}
-
-	/*private void generateChild() {
-		childExecutors.put("claim", new Claim(plugin));
-		childExecutors.put("delete", new Delete(plugin));
-		childExecutors.put("flag", new Flag(plugin));
-		childExecutors.put("info", new Info(plugin));
-		childExecutors.put("leave", new Leave(plugin));
-		childExecutors.put("limits", new Limits(plugin));
-		SetCreatingTypeCommand setCreatingTypeCommand = new SetCreatingTypeCommand(plugin);
-		childExecutors.put("setcreatingtype", setCreatingTypeCommand);
-		childExecutors.put("creatingtype", setCreatingTypeCommand);
-		childExecutors.put("type", setCreatingTypeCommand);
-		SetMessageCommand messageCommand = new SetMessageCommand(plugin);
-		childExecutors.put("setmessage", messageCommand);
-		childExecutors.put("message", messageCommand);
-		SetNameCommand nameCommand = new SetNameCommand(plugin);
-		childExecutors.put("setname", nameCommand);
-		childExecutors.put("name", nameCommand);
-		childExecutors.put("setowner", new SetOwnerCommand(plugin));
-		SetSelectorTypeCommand selectorTypeCommand = new SetSelectorTypeCommand(plugin);
-		childExecutors.put("setselector", selectorTypeCommand);
-		childExecutors.put("selector", selectorTypeCommand);
-		SetCreatingTypeCommand selectorCreatingTypeCommand = new SetCreatingTypeCommand(plugin);
-		childExecutors.put("setcreatingtype", selectorCreatingTypeCommand);
-		childExecutors.put("creatingtype", selectorCreatingTypeCommand);
-		childExecutors.put("type", selectorCreatingTypeCommand);
-		childExecutors.put("trust", new TrustCommand(plugin));
-		childExecutors.put("untrust", new UntrustCommand(plugin));
-		childExecutors.put("wand", new WandCommand(plugin));
-		childExecutors.put("wecui", new WeCUICommand(plugin));
-		childExecutors.put("list", new ListRegions(plugin));
-		childExecutors.put("setlimit", new Set(plugin));
-		UpdateDefaultFlagsCommand updateDefaultFlagsCommand = new UpdateDefaultFlagsCommand(plugin);
-		childExecutors.put("updatedefaultflags", updateDefaultFlagsCommand);
-		childExecutors.put("udf", updateDefaultFlagsCommand);
-		childs.addAll(childExecutors.keySet().stream().map(CommandCompletion::of).collect(Collectors.toList()));
-	}*/
-
-	public void genEconomyCommands() {
-		if(plugin.getEconomyService() == null) return;
-		//getChildExecutors().put("buylimit", new Buy(plugin));
-		//getChildExecutors().put("selllimit", new Sell(plugin));
 	}
 
 	@Override

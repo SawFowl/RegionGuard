@@ -60,6 +60,8 @@ import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionAPIPostEvent;
+import sawfowl.regionguard.commands.child.limits.Buy;
+import sawfowl.regionguard.commands.child.limits.Sell;
 import sawfowl.regionguard.configure.CuiConfig;
 import sawfowl.regionguard.configure.DefaultFlags;
 import sawfowl.regionguard.configure.Locales;
@@ -212,6 +214,7 @@ public class RegionGuard {
 			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
 			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
 			flagsConfigurationReference.save();
+			flagsConfig.get().setSaveConsumer(consumer -> flagsConfig.setAndSave(flagsConfig.get()));
 			
 			cuiConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
 			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
@@ -278,6 +281,8 @@ public class RegionGuard {
 		if(Sponge.server().serviceProvider().economyService().isPresent()) {
 			economyService  = Sponge.server().serviceProvider().economyService().get();
 			economy = new Economy(instance);
+			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("buy", new Buy(instance));
+			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("sell", new Sell(instance));
 		} else {
 			logger.warn(locales.getText(Sponge.server().locale(), LocalesPaths.ECONOMY_NOT_FOUND));
 		}
@@ -314,7 +319,6 @@ public class RegionGuard {
 			}
 			PostEvent toPost = new PostEvent();
 			Sponge.eventManager().post(toPost);
-			mainCommand.genEconomyCommands();
 		});
 	}
 
@@ -322,6 +326,7 @@ public class RegionGuard {
 	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
 		mainCommand = new sawfowl.regionguard.commands.Region(instance);
 		mainCommand.register(event);
+		mainCommand.getChildExecutors().get("wand").register(event);
 	}
 
 	public void registerBuilders(RegisterBuilderEvent event) {

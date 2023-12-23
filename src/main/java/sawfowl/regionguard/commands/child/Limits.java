@@ -23,8 +23,6 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractCommand;
-import sawfowl.regionguard.commands.child.limits.Buy;
-import sawfowl.regionguard.commands.child.limits.Sell;
 import sawfowl.regionguard.commands.child.limits.Set;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ReplaceUtil;
@@ -94,7 +92,7 @@ public class Limits extends AbstractCommand {
 
 	@Override
 	public List<RawCommand> getChilds() {
-		return Arrays.asList(new Buy(plugin), new Sell(plugin), new Set(plugin));
+		return Arrays.asList(new Set(plugin));
 	}
 
 	@Override

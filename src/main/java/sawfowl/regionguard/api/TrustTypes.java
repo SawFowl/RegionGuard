@@ -1,5 +1,6 @@
 package sawfowl.regionguard.api;
 
+import java.util.stream.Stream;
 
 public enum TrustTypes {
 
@@ -46,6 +47,10 @@ public enum TrustTypes {
 		}
 	},
 	WITHOUT_TRUST;
+
+	public static Stream<String> getValues() {
+		return Stream.of(TrustTypes.values()).filter(value -> value != WITHOUT_TRUST).map(TrustTypes::toString);
+	}
 
 	/**
 	 * Search for a trust type by name.
