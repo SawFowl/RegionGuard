@@ -172,7 +172,7 @@ public class Delete extends AbstractPlayerCommand {
 			RawArgument.of(
 				String.class,
 				(cause, args) -> Stream.of("-regen", "-r"),
-				(cause, args) -> cause.hasPermission(Permissions.STAFF_DELETE) ? Stream.of("-regen", "-r").filter(string -> string.startsWith(args[0])).findFirst() : Optional.empty(),
+				(cause, args) -> args.length > 0 && cause.hasPermission(Permissions.STAFF_DELETE) ? Stream.of("-regen", "-r").filter(string -> string.equals(args[0])).findFirst() : Optional.empty(),
 				true,
 				true,
 				0,

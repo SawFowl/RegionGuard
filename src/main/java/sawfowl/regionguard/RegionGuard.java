@@ -31,7 +31,6 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
@@ -59,7 +58,6 @@ import sawfowl.regionguard.api.data.MemberData;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionAPIPostEvent;
 import sawfowl.regionguard.commands.child.limits.Buy;
 import sawfowl.regionguard.commands.child.limits.Sell;
 import sawfowl.regionguard.configure.CuiConfig;
@@ -196,8 +194,6 @@ public class RegionGuard {
 		this.pluginContainer = pluginContainer;
 		configDir = configDirectory;
 		configDirectory.toFile();
-		api = new Api(instance);
-		regenUtil = new RegenUtil(instance);
 	}
 
 	@Listener
@@ -210,36 +206,11 @@ public class RegionGuard {
 			configurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("Config.conf")).build().loadToReference();
 			this.mainConfig = configurationReference.referenceTo(MainConfig.class);
 			configurationReference.save();
-			
-			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
-			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
-			flagsConfigurationReference.save();
-			flagsConfig.get().setSaveConsumer(consumer -> flagsConfig.setAndSave(flagsConfig.get()));
-			
-			cuiConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
-			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
-			cuiConfigurationReference.save();
+			locales = new Locales(localeService, getConfig().isLocaleJsonSerialize());
 		} catch (ConfigurateException e) {
-			logger.warn(e.getLocalizedMessage());
+			e.printStackTrace();
 		}
-		locales = new Locales(localeService, getConfig().isLocaleJsonSerialize());
-		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
-		Sponge.game().eventManager().registerListeners(
-				pluginContainer,
-				new SpongeCUIChannelHandler.RegistrationHandler(instance)
-			);
-		class PostAPIEvent extends AbstractEvent implements RegionAPIPostEvent.PostAPI {
-			@Override
-			public Cause cause() {
-				return Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, pluginContainer).build(), pluginContainer);
-			}
-			@Override
-			public RegionAPI getAPI() {
-				return api;
-			}
-		}
-		PostAPIEvent toPost = new PostAPIEvent();
-		Sponge.eventManager().post(toPost);
+		
 	}
 
 	@Listener
@@ -250,6 +221,13 @@ public class RegionGuard {
 	@Listener(order = Order.LAST)
 	public void onStart(StartedEngineEvent<Server> event) {
 		if(localeService == null) return;
+		api = new Api(instance);
+		regenUtil = new RegenUtil(instance);
+		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
+		Sponge.game().eventManager().registerListeners(
+				pluginContainer,
+				new SpongeCUIChannelHandler.RegistrationHandler(instance)
+		);
 		boolean mysql = getConfig().getMySQLConfig().isEnable();
 		if(mysql) mySQL = new MySQL(instance, getConfig().getMySQLConfig().getHost(), getConfig().getMySQLConfig().getPort(), getConfig().getMySQLConfig().getDatabase(), getConfig().getMySQLConfig().getUser(), getConfig().getMySQLConfig().getPassword(), getConfig().getMySQLConfig().getSSL());
 		if(!mysql) {
@@ -307,18 +285,16 @@ public class RegionGuard {
 			long time = System.currentTimeMillis();
 			regionsDataWork.loadRegions();
 			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
-			class PostEvent extends AbstractEvent implements RegionAPIPostEvent.CompleteLoadRegions {
+			Sponge.eventManager().post(new RegionAPI.PostAPI() {
 				@Override
 				public Cause cause() {
 					return Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, pluginContainer).build(), pluginContainer);
 				}
 				@Override
-				public long getTotalLoaded() {
-					return api.getRegions().size();
+				public RegionAPI getAPI() {
+					return api;
 				}
-			}
-			PostEvent toPost = new PostEvent();
-			Sponge.eventManager().post(toPost);
+			});
 		});
 	}
 
@@ -329,6 +305,7 @@ public class RegionGuard {
 		mainCommand.getChildExecutors().get("wand").register(event);
 	}
 
+	@Listener
 	public void registerBuilders(RegisterBuilderEvent event) {
 		event.register(ChunkNumber.Builder.class, () -> new ChunkNumberImpl().builder());
 		event.register(ClaimedByPlayer.Builder.class, () -> new ClaimedByPlayerImpl().builder());
@@ -339,6 +316,22 @@ public class RegionGuard {
 		event.register(PlayerLimits.Builder.class, () -> new PlayerLimitsImpl().builder());
 		event.register(Region.Builder.class, () -> new RegionImpl().builder());
 		event.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
+		saveConfigs();
+	}
+
+	private void saveConfigs() {
+		try {
+			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
+			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
+			flagsConfigurationReference.save();
+			flagsConfig.get().setSaveConsumer(consumer -> flagsConfig.setAndSave(flagsConfig.get()));
+			
+			cuiConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
+			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
+			cuiConfigurationReference.save();
+		} catch (ConfigurateException e) {
+			logger.warn(e.getLocalizedMessage());
+		}
 	}
 
 }

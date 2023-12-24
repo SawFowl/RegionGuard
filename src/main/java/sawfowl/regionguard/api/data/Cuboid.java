@@ -58,7 +58,6 @@ public interface Cuboid extends DataSerializable {
 	 * @param position1 - first position
 	 * @param position2 - second position
 	 * @param selectorType - flat or cuboid
-	 * @param serverWorld - world
 	 */
 	Cuboid setPositions(Vector3i position1, Vector3i position2 , SelectorTypes selectorType);
 

@@ -115,34 +115,5 @@ public class Region extends AbstractCommand {
 	public Settings getCommandSettings() {
 		return Settings.builder().setEnable(true).setAliases(new String[] {"region", "rg"}).build();
 	}
-	
-	/**
-	 * 
-			Locale locale = src instanceof LocaleSource ? ((LocaleSource) src).locale() : Locales.DEFAULT;
-			messages.add(text("&6/rg setlimit &b[Args...]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETLIMIT)));
-			messages.add(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_USED_BY_NON_PLAYER));
-			messages.add(text("&6/rg wand&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_WAND)));
-			messages.add(text("&6/rg claim&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_CLAIM)));
-			messages.add(text("&6/rg delete&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_DELETE)));
-			messages.add(text("&6/rg info&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_INFO)));
-			messages.add(text("&6/rg limits&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_LIMITS)));
-			messages.add(text("&6/rg setname &b<ClearFlag> <OptionalLocale> [Name]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SET_NAME)));
-			messages.add(text("&6/rg setmessage &b<CommandFlags> <Locale> [Message]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SET_MESSAGE)));
-			messages.add(text("&6/rg flag &b[FlagName] [Value] <Source> <Target>&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_FLAG)));
-			messages.add(text("&6/rg leave&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_LEAVE)));
-			messages.add(text("&6/rg setowner &b[Player]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SETOWNER)));
-			messages.add(text("&6/rg trust &b[Player] [TrustType]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_TRUST)));
-			messages.add(text("&6/rg untrust &b[Player]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_UNTRUST)));
-			messages.add(text("&6/rg setselector &b[Type]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SET_SELECTOR_TYPE)));
-			messages.add(text("&6/rg setcreatingtype &b[Type]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SET_CREATING_TYPE)));
-			messages.add(text("&6/rg wecui&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_WECUI)));
-			messages.add(text("&6/rg list&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_LIST)));
-			if(childExecutors.containsKey("buylimit") && childExecutors.containsKey("selllimit")) {
-				messages.add(text("&6/rg buylimit &b[Limit] [Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_BUYLIMIT)));
-				messages.add(text("&6/rg selllimit &b[Limit] [Volume]&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_SELLLIMIT)));
-			}
-			messages.add(text("&6/rg updatedefaultflags&f - ").append(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_UPDATE_DEFAULT_FLAGS)));
-			sendCommandsList((Audience) src, locale, messages, 35);
-	 */
 
 }

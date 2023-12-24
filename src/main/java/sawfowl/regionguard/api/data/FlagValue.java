@@ -22,7 +22,7 @@ public interface FlagValue extends DataSerializable {
 	}
 
 	static FlagValue of(boolean value, String source, String target) {
-		return builder().setValue(value).build();
+		return builder().setValue(value).setSource(source).setTarget(target).build();
 	}
 
 	String getSource();

@@ -17,6 +17,8 @@ import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.data.PlayerDataImpl;
+import sawfowl.regionguard.data.RegionImpl;
 
 public class WorkConfigs implements WorkData {
 
@@ -33,8 +35,8 @@ public class WorkConfigs implements WorkData {
 			try {
 				CommentedConfigurationNode worldNode = configLoader.load();
 				if(worldNode.node("RegionData").virtual()) {
-					Region region = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
-					worldNode.node("RegionData").set(Region.class, region);
+					RegionImpl region = (RegionImpl) Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
+					worldNode.node("RegionData").set(RegionImpl.class, region);
 					configLoader.save(worldNode);
 					plugin.getAPI().updateGlobalRegionData(world, region);
 				} else {
@@ -50,15 +52,15 @@ public class WorkConfigs implements WorkData {
 	}
 
 	@Override
-	public Region getWorldRegion(ServerWorld world) {
+	public RegionImpl getWorldRegion(ServerWorld world) {
 		if((plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf")).toFile().exists()) {
 			ConfigurationLoader<CommentedConfigurationNode> configLoader = SerializeOptions.createHoconConfigurationLoader(2).path(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf")).build();
 			CommentedConfigurationNode worldNode;
 			try {
 				worldNode = configLoader.load();
-				Region region = getRegionFromConfig(worldNode.node("RegionData"), File.separator + world.key().asString() + " WorldRegion.conf");
+				RegionImpl region = getRegionFromConfig(worldNode.node("RegionData"), File.separator + world.key().asString() + " WorldRegion.conf");
 				if(region == null) {
-					region = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
+					region = (RegionImpl) Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
 					saveRegion(region);
 				}
 				return region;
@@ -66,7 +68,7 @@ public class WorkConfigs implements WorkData {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		}
-		Region region = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
+		RegionImpl region = (RegionImpl) Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
 		saveRegion(region);
 		return region;
 	}
@@ -89,7 +91,7 @@ public class WorkConfigs implements WorkData {
 		CommentedConfigurationNode regionNode;
 		try {
 			regionNode = configLoader.load();
-			regionNode.node("RegionData").set(Region.class, region);
+			regionNode.node("RegionData").set(RegionImpl.class, (RegionImpl) region);
 			configLoader.save(regionNode);
 		} catch (ConfigurateException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
@@ -114,7 +116,7 @@ public class WorkConfigs implements WorkData {
 			CommentedConfigurationNode worldNode;
 			try {
 				worldNode = worldConfigLoader.load();
-				Region region = worldNode.node("RegionData").get(Region.class);
+				RegionImpl region = worldNode.node("RegionData").get(RegionImpl.class);
 				if(region.getWorldKey() != null) plugin.getAPI().updateGlobalRegionData(world, region);
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
@@ -152,7 +154,7 @@ public class WorkConfigs implements WorkData {
 		ConfigurationLoader<CommentedConfigurationNode> playerConfig = SerializeOptions.createHoconConfigurationLoader(2).path(plugin.getConfigDir().resolve("PlayersData" + File.separator + player.toString() + ".conf")).build();
 		try {
 			CommentedConfigurationNode playerNode = playerConfig.load();
-			playerNode.node("Content").set(PlayerData.class, playerData);
+			playerNode.node("Content").set(PlayerDataImpl.class, playerData);
 			playerConfig.save(playerNode);
 		} catch (ConfigurateException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
@@ -161,15 +163,15 @@ public class WorkConfigs implements WorkData {
 	}
 
 	@Override
-	public PlayerData getPlayerData(ServerPlayer player) {
+	public PlayerDataImpl getPlayerData(ServerPlayer player) {
 		checkPlayersFolder();
 		ConfigurationLoader<CommentedConfigurationNode> playerConfig = SerializeOptions.createHoconConfigurationLoader(2).path(plugin.getConfigDir().resolve("PlayersData" + File.separator + player.uniqueId().toString() + ".conf")).build();
 		try {
 			CommentedConfigurationNode playerNode = playerConfig.load();
 			if(!playerNode.node("Content").virtual()) {
-				PlayerData playerData = getPlayerDataFromConfig(playerNode.node("Content"), player.uniqueId().toString());
+				PlayerDataImpl playerData = getPlayerDataFromConfig(playerNode.node("Content"), player.uniqueId().toString());
 				if(playerData == null) {
-					playerData = PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player)));
+					playerData = (PlayerDataImpl) PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player)));
 					savePlayerData(player, playerData);
 				}
 				return playerData;
@@ -177,7 +179,7 @@ public class WorkConfigs implements WorkData {
 		} catch (ConfigurateException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
-		return PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player)));
+		return (PlayerDataImpl) PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player)));
 	}
 
 	@Override

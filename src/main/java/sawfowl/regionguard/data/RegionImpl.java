@@ -699,10 +699,10 @@ public class RegionImpl implements Region {
 	 * Setting the value of the flag.
 	 */
 	public RegionImpl setFlag(String flagName, boolean value, String source, String target) {
-		FlagValue flagValue = FlagValue.of(value, source, target);
+		FlagValueImpl flagValue = (FlagValueImpl) FlagValue.of(value, source, target);
 		removeFlag(flagName, flagValue);
 		if(!flagValues.containsKey(flagName)) flagValues.put(flagName, new HashSet<>());
-		flagValues.get(flagName).add((FlagValueImpl) flagValue);
+		flagValues.get(flagName).add(flagValue);
 		return this;
 	}
 

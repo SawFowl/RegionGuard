@@ -1,11 +1,11 @@
 package sawfowl.regionguard.commands.child;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -30,12 +30,9 @@ import sawfowl.regionguard.configure.LocalesPaths;
 
 public class SetName extends AbstractPlayerCommand {
 
-	private final Map<String, Locale> locales = new HashMap<String, Locale>();
+	private Map<String, Locale> locales;
 	public SetName(RegionGuard plugin) {
 		super(plugin);
-		plugin.getLocales().getLocaleService().getLocalesList().forEach(locale -> {
-			locales.put(locale.toLanguageTag(), locale);
-		});
 	}
 
 	@Override
@@ -88,6 +85,7 @@ public class SetName extends AbstractPlayerCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
+		if(locales == null) locales = plugin.getLocales().getLocaleService().getLocalesList().stream().collect(Collectors.toMap(locale -> locale.toLanguageTag(), locale -> locale));
 		return Arrays.asList(
 			RawArguments.createStringArgument(locales.keySet(), true, true, 0, null, null),
 			RawArguments.createStringArgument(Arrays.asList("-c", "-clear"), true, true, 1, null, null),

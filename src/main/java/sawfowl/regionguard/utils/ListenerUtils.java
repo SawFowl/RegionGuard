@@ -18,9 +18,12 @@ import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -39,7 +42,7 @@ public class ListenerUtils {
 	}
 
 	public static String entityId(Entity entity) {
-		return Sponge.game().registry(RegistryTypes.ENTITY_TYPE).valueKey(entity.type()).asString();
+		return EntityTypes.registry().valueKey(entity.type()).asString();
 	}
 
 	public static String entityCategory(Entity entity) {
@@ -47,19 +50,19 @@ public class ListenerUtils {
 	}
 
 	public static String blockID(BlockSnapshot block) {
-		return Sponge.game().registry(RegistryTypes.BLOCK_TYPE).valueKey(block.state().type()).asString();
+		return blockID(block.state());
 	}
 
 	public static String blockID(BlockState block) {
-		return Sponge.game().registry(RegistryTypes.BLOCK_TYPE).valueKey(block.type()).asString();
+		return BlockTypes.registry().valueKey(block.type()).asString();
 	}
 
 	public static String damageTypeId(DamageType damageType) {
-		return Sponge.game().registry(RegistryTypes.DAMAGE_TYPE).valueKey(damageType).asString();
+		return DamageTypes.registry().valueKey(damageType).asString();
 	}
 
 	public static String itemId(ItemStack itemStack) {
-		return Sponge.game().registry(RegistryTypes.ITEM_TYPE).valueKey(itemStack.type()).asString();
+		return ItemTypes.registry().valueKey(itemStack.type()).asString();
 	}
 
 	public static BlockTransaction getTransaction(List<BlockTransaction> transactions, Operation operation) {

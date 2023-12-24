@@ -102,9 +102,8 @@ public class CuboidImpl implements Cuboid {
 	 * @param position1 - first position
 	 * @param position2 - second position
 	 * @param selectorType - flat or cuboid
-	 * @param serverWorld - world
 	 */
-	public CuboidImpl setPositions(Vector3i position1, Vector3i position2 , SelectorTypes selectorType) {
+	public CuboidImpl setPositions(Vector3i position1, Vector3i position2, SelectorTypes selectorType) {
 		this.selectorType = selectorType.toString();
 		if(position1.x() == position2.x()) position1 = Vector3i.from(position1.x() + 1, position1.y(), position1.z());
 		if(position1.y() == position2.y() && !selectorType.equals(SelectorTypes.FLAT)) position1 = Vector3i.from(position1.x(), position1.y() + 1, position1.z());
@@ -318,7 +317,7 @@ public class CuboidImpl implements Cuboid {
 	}
 
 	Optional<ServerWorld> getWorld() {
-		return world == null && world.get().isPresent() ? Optional.empty() : world.get();
+		return world == null ? Optional.empty() : world.get();
 	}
 
 	@Override

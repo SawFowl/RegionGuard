@@ -10,12 +10,14 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.data.PlayerDataImpl;
+import sawfowl.regionguard.data.RegionImpl;
 
 public interface WorkData {
 
 	public void createDataForWorlds();
 
-	public Region getWorldRegion(ServerWorld world);
+	public RegionImpl getWorldRegion(ServerWorld world);
 
 	public void saveRegion(Region region);
 
@@ -27,7 +29,7 @@ public interface WorkData {
 
 	public void savePlayerData(UUID player, PlayerData playerData);
 
-	public PlayerData getPlayerData(ServerPlayer player);
+	public PlayerDataImpl getPlayerData(ServerPlayer player);
 
 	public void loadDataOfPlayers();
 
@@ -39,18 +41,18 @@ public interface WorkData {
 		}
 	}
 
-	default Region getRegionFromConfig(ConfigurationNode node, String fileOrUUID) {
+	default RegionImpl getRegionFromConfig(ConfigurationNode node, String fileOrUUID) {
 		try {
-			return node.get(Region.class);
+			return node.get(RegionImpl.class);
 		} catch (SerializationException e) {
 			RegionGuard.getInstance().getLogger().error("Error when loading region: " + fileOrUUID + "\n" + e.getLocalizedMessage());
 			return null;
 		}
 	}
 
-	default PlayerData getPlayerDataFromConfig(ConfigurationNode node, String fileOrUUID) {
+	default PlayerDataImpl getPlayerDataFromConfig(ConfigurationNode node, String fileOrUUID) {
 		try {
-			return node.get(PlayerData.class);
+			return node.get(PlayerDataImpl.class);
 		} catch (SerializationException e) {
 			RegionGuard.getInstance().getLogger().error("Error when loading player data: " + fileOrUUID + "\n" + e.getLocalizedMessage());
 			return null;

@@ -28,11 +28,6 @@ public class Claim extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public boolean canExecute(CommandCause cause) {
-		return cause.hasPermission(Permissions.CLAIM);
-	}
-
-	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		Optional<Region> optRegion = plugin.getAPI().getTempRegion(src.uniqueId());
 		if(!optRegion.isPresent()) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND));

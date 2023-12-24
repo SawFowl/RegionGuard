@@ -59,6 +59,69 @@ public class ListRegions extends AbstractCommand {
 	}
 
 	@Override
+	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
+		Optional<GameProfile> optProfile = getArgument(GameProfile.class, cause, args, 0);
+		if(!isPlayer && !optProfile.isPresent()) throw new CommandException(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT));
+		List<Region> regions = optProfile.isPresent() ? plugin.getAPI().getPlayerRegions(optProfile.get().uniqueId()) : plugin.getAPI().getPlayerRegions((ServerPlayer) audience);
+		if(regions.size() == 0) throw new CommandException(Component.text(optProfile.isPresent() ? "У игрока нет регионов" : "У вас нет регионов"));
+		List<Component> list = new ArrayList<>();
+		for(Region region : regions) {
+			Component tp = region.getWorld().isPresent() && ((isPlayer && cause.hasPermission(Permissions.TELEPORT) && region.isTrusted((ServerPlayer) audience)) || (isPlayer && cause.hasPermission(Permissions.STAFF_LIST))) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
+				if(isPlayer) teleport((ServerPlayer) audience, region, true);
+			})) : Component.empty();
+			Component positions = Component.text((isPlayer ? "§6" : "") + region.getCuboid().getMin() + " ➢ " + region.getCuboid().getMax());
+			Component uuidOrName = (region.getPlainName(locale).isPresent() ? region.getName(locale) : Component.text((isPlayer ? "§2" : "") + "<" + region.getUniqueId() + ">").clickEvent(SpongeComponents.executeCallback(callback -> {
+				if(!isPlayer) return;
+				Calendar calendar = Calendar.getInstance(locale);
+				calendar.setTimeInMillis(region.getCreationTime());
+				generateInfoMessage((ServerPlayer) audience, region, calendar);
+			})));
+			list.add(Component.text().append(tp).append(Component.text(" ")).append(positions).append(Component.text(" ")).append(uuidOrName).build());
+		}
+		sendRegionsList(audience, locale, list, 10, optProfile.isPresent() ? optProfile.get().name().orElse(optProfile.get().examinableName()) : ((ServerPlayer) audience).name());
+	}
+
+	@Override
+	public Component extendedDescription(Locale locale) {
+		return getComponent(locale, LocalesPaths.COMMANDS_LIST);
+	}
+
+	@Override
+	public String permission() {
+		return null;
+	}
+
+	@Override
+	public String command() {
+		return "list";
+	}
+
+	@Override
+	public Component usage(CommandCause cause) {
+		return TextUtils.deserializeLegacy("&6/rg list &7[Player]&f - ").clickEvent(ClickEvent.runCommand("/rg list ")).append(extendedDescription(getLocale(cause)));
+	}
+
+	@Override
+	public List<RawCommand> getChilds() {
+		return null;
+	}
+
+	@Override
+	public List<RawArgument<?>> getArgs() {
+		return Arrays.asList(
+			RawArgument.of(
+				GameProfile.class,
+				(cause, args) -> cause.hasPermission(Permissions.STAFF_LIST) ? Sponge.server().userManager().streamAll().map(profile -> profile.name().orElse(profile.examinableName())) : Stream.empty(),
+				(cause, args) -> args.length > 0 && cause.hasPermission(Permissions.STAFF_LIST) ? Sponge.server().userManager().streamAll().filter(profile -> profile.name().orElse(profile.examinableName()).equals(args[0])).findFirst() : Optional.empty(),
+				true,
+				false,
+				0,
+				LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT
+			)
+		);
+	}
+
+	@Override
 	public boolean canExecute(CommandCause cause) {
 		return cause.hasPermission(Permissions.LIST) || cause.hasPermission(Permissions.STAFF_LIST);
 	}
@@ -331,70 +394,6 @@ public class ListRegions extends AbstractCommand {
 		components.forEach(component -> {
 			player.sendMessage(component);
 		});
-	}
-
-	@Override
-	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
-		Optional<GameProfile> optProfile = getArgument(GameProfile.class, args, 0);
-		if(!isPlayer && !optProfile.isPresent()) throw new CommandException(plugin.getLocales().getText(locale, LocalesPaths.COMMANDS_ONLY_PLAYER));
-		boolean otherPlayer = optProfile.isPresent() && !optProfile.get().name().orElse(optProfile.get().examinableName()).equals(((ServerPlayer) audience).name()) && cause.hasPermission(Permissions.STAFF_LIST);
-		List<Region> regions = otherPlayer ? plugin.getAPI().getPlayerRegions(optProfile.get().uniqueId()) : plugin.getAPI().getPlayerRegions((ServerPlayer) audience);
-		if(regions.size() == 0) throw new CommandException(Component.text(otherPlayer ? "У игрока нет регионов" : "У вас нет регионов"));
-		List<Component> list = new ArrayList<>();
-		for(Region region : regions) {
-			Component tp = region.getWorld().isPresent() && ((isPlayer && cause.hasPermission(Permissions.TELEPORT) && region.isTrusted((ServerPlayer) audience)) || (isPlayer && cause.hasPermission(Permissions.STAFF_LIST))) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
-				if(isPlayer) teleport((ServerPlayer) audience, region, true);
-			})) : Component.empty();
-			Component positions = Component.text("§6" + region.getCuboid().getMin() + " ➢ " + region.getCuboid().getMax());
-			Component uuidOrName = (region.getPlainName(locale).isPresent() ? region.getName(locale) : Component.text("§2<" + region.getUniqueId() + ">").clickEvent(SpongeComponents.executeCallback(callback -> {
-				if(!isPlayer) return;
-				Calendar calendar = Calendar.getInstance(locale);
-				calendar.setTimeInMillis(region.getCreationTime());
-				generateInfoMessage((ServerPlayer) audience, region, calendar);
-			})));
-			list.add(Component.text().append(tp).append(Component.text(" ")).append(positions).append(Component.text(" ")).append(uuidOrName).build());
-		}
-		sendRegionsList(audience, locale, list, 10, otherPlayer ? optProfile.get().name().orElse(optProfile.get().examinableName()) : ((ServerPlayer) audience).name());
-	}
-
-	@Override
-	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_LIST);
-	}
-
-	@Override
-	public String permission() {
-		return null;
-	}
-
-	@Override
-	public String command() {
-		return "list";
-	}
-
-	@Override
-	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg list &7[Player]&f - ").clickEvent(ClickEvent.runCommand("/rg list ")).append(extendedDescription(getLocale(cause)));
-	}
-
-	@Override
-	public List<RawCommand> getChilds() {
-		return null;
-	}
-
-	@Override
-	public List<RawArgument<?>> getArgs() {
-		return Arrays.asList(
-			RawArgument.of(
-				GameProfile.class,
-				(cause, args) -> cause.hasPermission(Permissions.STAFF_LIST) ? Sponge.server().userManager().streamAll().map(profile -> profile.name().orElse(profile.examinableName())) : Stream.empty(),
-				(cause, args) -> args.length > 0 && cause.hasPermission(Permissions.STAFF_LIST) ? Sponge.server().userManager().streamAll().filter(profile -> profile.name().orElse(profile.examinableName()).equals(args[0])).findFirst() : Optional.empty(),
-				true,
-				false,
-				0,
-				LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT
-			)
-		);
 	}
 
 }

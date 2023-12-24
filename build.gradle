@@ -73,7 +73,7 @@ sponge {
 	plugin("regionguard") {
 		displayName(project.name.capitalize())
 		version("${project.version}")
-		entrypoint("${project.group}.${rootProject.name}")
+		entrypoint("${project.group}.RegionGuard")
 		description("Create regions and protect them from various actions of other players.")
 		links {
 			homepage("https://discord.gg/7xnZGSYJH9")

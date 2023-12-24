@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -13,6 +14,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.data.FlagValueImpl;
 
 @ConfigSerializable
 public class DefaultFlags {
@@ -20,49 +22,33 @@ public class DefaultFlags {
 	public DefaultFlags(){}
 
 	@Setting("ClaimFlags")
-	private Map<String, Set<FlagValue>> claimFlags = claimDefaultFlags();
+	private Map<String, Set<FlagValueImpl>> claimFlags = claimDefaultFlags();
 
 	@Setting("ArenaFlags")
-	private Map<String, Set<FlagValue>> arenaFlags = claimDefaultFlags();
+	private Map<String, Set<FlagValueImpl>> arenaFlags = claimDefaultFlags();
 
 	@Setting("AdminFlags")
-	private Map<String, Set<FlagValue>> adminFlags = claimDefaultFlags();
+	private Map<String, Set<FlagValueImpl>> adminFlags = claimDefaultFlags();
 
 	@Setting("GlobalFlags")
-	private Map<String, Set<FlagValue>> globalFlags = globalDefaultFlags();
+	private Map<String, Set<FlagValueImpl>> globalFlags = globalDefaultFlags();
 
 	private Consumer<DefaultFlags> save;
 
 	public Map<String, Set<FlagValue>> getClaimFlags() {
-		return claimFlags;
-	}
-
-	public void setClaimFlags(Map<String, Set<FlagValue>> claimFlags) {
-		this.claimFlags = claimFlags;
+		return convert(claimFlags);
 	}
 
 	public Map<String, Set<FlagValue>> getArenaFlags() {
-		return arenaFlags;
-	}
-
-	public void setArenaFlags(Map<String, Set<FlagValue>> arenaFlags) {
-		this.arenaFlags = arenaFlags;
+		return convert(arenaFlags);
 	}
 
 	public Map<String, Set<FlagValue>> getAdminFlags() {
-		return adminFlags;
-	}
-
-	public void setAdminFlags(Map<String, Set<FlagValue>> adminFlags) {
-		this.adminFlags = adminFlags;
+		return convert(adminFlags);
 	}
 
 	public Map<String, Set<FlagValue>> getGlobalFlags() {
-		return globalFlags;
-	}
-
-	public void setGlobalFlags(Map<String, Set<FlagValue>> globalFlags) {
-		this.globalFlags = globalFlags;
+		return convert(globalFlags);
 	}
 
 	public void setDefaultFlags(Region region) {
@@ -77,31 +63,55 @@ public class DefaultFlags {
 		this.save = save;
 	}
 
-	private Map<String, Set<FlagValue>> claimDefaultFlags() {
-		Map<String, Set<FlagValue>> claimFlags = new HashMap<String, Set<FlagValue>>();
-		claimFlags.put(Flags.BLOCK_BREAK.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.BLOCK_PLACE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.PISTON_GRIEF.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.ENTITY_DAMAGE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.ETITY_RIDING.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.INTERACT_BLOCK_PRIMARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.INTERACT_BLOCK_SECONDARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.INTERACT_ENTITY_PRIMARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.INTERACT_ENTITY_SECONDARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.INTERACT_ITEM.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.ITEM_PICKUP.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.ITEM_USE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.PROJECTILE_IMPACT_BLOCK.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.PROJECTILE_IMPACT_ENTITY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		claimFlags.put(Flags.PORTAL_USE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(false))));
-		for(Flags flag : Flags.values()) if(!claimFlags.containsKey(flag.toString())) claimFlags.put(flag.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(true))));
+	private Map<String, Set<FlagValueImpl>> claimDefaultFlags() {
+		Map<String, Set<FlagValueImpl>> claimFlags = new HashMap<String, Set<FlagValueImpl>>();
+		claimFlags.put(Flags.BLOCK_BREAK.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.BLOCK_PLACE.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.PISTON_GRIEF.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.ENTITY_DAMAGE.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.ETITY_RIDING.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_BLOCK_PRIMARY.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_BLOCK_SECONDARY.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_ENTITY_PRIMARY.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_ENTITY_SECONDARY.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_ITEM.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.ITEM_PICKUP.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.ITEM_USE.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.PROJECTILE_IMPACT_BLOCK.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.PROJECTILE_IMPACT_ENTITY.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		claimFlags.put(Flags.PORTAL_USE.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(false).build())));
+		for(Flags flag : Flags.values()) if(!claimFlags.containsKey(flag.toString())) claimFlags.put(flag.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(true).build())));
 		return claimFlags;
 	}
 
-	private Map<String, Set<FlagValue>> globalDefaultFlags() {
-		Map<String, Set<FlagValue>> worldFlags = new HashMap<String, Set<FlagValue>>();
-		for(Flags flag : Flags.values()) worldFlags.put(flag.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.simple(true))));
+	private void setClaimFlags(Map<String, Set<FlagValue>> claimFlags) {
+		this.claimFlags = convert2(claimFlags);
+	}
+
+	private void setArenaFlags(Map<String, Set<FlagValue>> arenaFlags) {
+		this.arenaFlags = convert2(arenaFlags);
+	}
+
+	private void setAdminFlags(Map<String, Set<FlagValue>> adminFlags) {
+		this.adminFlags = convert2(adminFlags);
+	}
+
+	private void setGlobalFlags(Map<String, Set<FlagValue>> globalFlags) {
+		this.globalFlags = convert2(globalFlags);
+	}
+
+	private Map<String, Set<FlagValueImpl>> globalDefaultFlags() {
+		Map<String, Set<FlagValueImpl>> worldFlags = new HashMap<String, Set<FlagValueImpl>>();
+		for(Flags flag : Flags.values()) worldFlags.put(flag.toString(), new HashSet<FlagValueImpl>(Arrays.asList((FlagValueImpl) new FlagValueImpl().builder().setValue(true).build())));
 		return worldFlags;
+	}
+
+	private Map<String, Set<FlagValue>> convert(Map<String, Set<FlagValueImpl>> map) {
+		return map.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().stream().map(value -> (FlagValue) value).collect(Collectors.toSet())));
+	}
+
+	private Map<String, Set<FlagValueImpl>> convert2(Map<String, Set<FlagValue>> map) {
+		return map.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().stream().map(value -> (FlagValueImpl) value).collect(Collectors.toSet())));
 	}
 
 }

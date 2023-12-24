@@ -1,9 +1,13 @@
 package sawfowl.regionguard.utils.worldedit;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.logging.log4j.core.util.ReflectionUtil;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.math.vector.Vector3i;
@@ -13,6 +17,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.Cuboid;
@@ -53,7 +58,17 @@ public class CUIUserImpl implements CUIUser {
 		net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) getPlayer().get();
 		FriendlyByteBuf fbuf = new FriendlyByteBuf(Unpooled.copiedBuffer(send.getBytes(UTF_8_CHARSET)));
 		ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(loc, fbuf);
-		player.connection.send(packet);
+		// Forge obfuscates the fields and methods of a class. I had to use reflection.
+		for(Field field : player.getClass().getDeclaredFields()) if(field.getType().equals(ServerGamePacketListenerImpl.class)) try {
+			ServerGamePacketListenerImpl connection = ((ServerGamePacketListenerImpl) ReflectionUtil.getFieldValue(field, player));
+			for(Method method : connection.getClass().getMethods())
+				if(method.getGenericParameterTypes().length == 1 && method.getReturnType().toString().equals("void") && method.getGenericParameterTypes()[0].toString().equals("net.minecraft.network.protocol.Packet<?>")) 
+					method.invoke(connection, packet);
+			connection = null;
+		} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		//player.connection.send(packet);
 	}
 
 	/**

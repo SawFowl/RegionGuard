@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
@@ -26,12 +27,12 @@ public interface RegionAPI {
 	/**
 	 * Getting all registered flags.
 	 */
-	public Map<String, FlagConfig> getRegisteredFlags();
+	Map<String, FlagConfig> getRegisteredFlags();
 
 	/**
 	 * FlagConfig registration. Values cannot be null.
 	 */
-	public void registerFlag(String flagName, FlagConfig settings);
+	void registerFlag(String flagName, FlagConfig settings);
 
 	/**
 	 * Update global region data.
@@ -39,7 +40,7 @@ public interface RegionAPI {
 	 * @param serverWorld - world
 	 * @param region - world region.
 	 */
-	public void updateGlobalRegionData(ServerWorld serverWorld, Region region);
+	void updateGlobalRegionData(ServerWorld serverWorld, Region region);
 
 	/**
 	 * Adding a temporary region
@@ -47,27 +48,27 @@ public interface RegionAPI {
 	 * @param region
 	 */
 	@Deprecated
-	public void addTempRegion(Region region);
+	void addTempRegion(Region region);
 
 	/**
 	 * Adding a temporary region
 	 * 
 	 * @param region
 	 */
-	public void addTempRegion(UUID user, Region region);
+	void addTempRegion(UUID user, Region region);
 
 	/**
 	 * Removing a temporary region
 	 * 
 	 */
-	public void removeTempRegion(Region region);
+	void removeTempRegion(Region region);
 
 	/**
 	 * Removing a temporary region
 	 * 
 	 * @param uuid - owner uuid
 	 */
-	public void removeTempRegion(UUID uuid);
+	void removeTempRegion(UUID uuid);
 
 	/**
 	 * Get a temporary region
@@ -75,7 +76,7 @@ public interface RegionAPI {
 	 * @param uuid - owner uuid
 	 * @return Optional<Region> or empty
 	 */
-	public Optional<Region> getTempRegion(UUID uuid);
+	Optional<Region> getTempRegion(UUID uuid);
 
 	/**
 	 * Obtaining a type of region selector from the player.
@@ -83,14 +84,14 @@ public interface RegionAPI {
 	 * @param uuid
 	 * @return Player-selected region selector type, or default selection type.
 	 */
-	public SelectorTypes getSelectorType(UUID uuid);
+	SelectorTypes getSelectorType(UUID uuid);
 
 	/**
 	 * Set a type of region selector for the player.
 	 * 
 	 * @param selectorType - SelectorTypes
 	 */
-	public void setSelectorType(ServerPlayer player, SelectorTypes selectorType);
+	void setSelectorType(ServerPlayer player, SelectorTypes selectorType);
 
 	/**
 	 * Set a type of region selector for the player.
@@ -98,7 +99,7 @@ public interface RegionAPI {
 	 * @param uuid - player uuid
 	 * @param selectorType - SelectorTypes
 	 */
-	public void setSelectorType(UUID uuid, SelectorTypes selectorType);
+	void setSelectorType(UUID uuid, SelectorTypes selectorType);
 
 	/**
 	 * Get world region.
@@ -106,7 +107,7 @@ public interface RegionAPI {
 	 * @param serverWorld - the world of the region.
 	 * @return Region
 	 */
-	public Region getGlobalRegion(ServerWorld serverWorld);
+	Region getGlobalRegion(ServerWorld serverWorld);
 
 	/**
 	 * Get world region.
@@ -114,20 +115,20 @@ public interface RegionAPI {
 	 * @param worldkey - the world key of the region.
 	 * @return Region
 	 */
-	public Region getGlobalRegion(ResourceKey worldkey);
+	Region getGlobalRegion(ResourceKey worldkey);
 
 	/**
 	 * Getting all registered regions except globals.
 	 * 
 	 * @return Collection<Region>
 	 */
-	public Collection<Region> getRegions();
+	Collection<Region> getRegions();
 
 	/**
 	 * Obtaining a map of regions by worlds. <br>
 	 * Without global regions.
 	 */
-	public Map<ResourceKey, Map<ChunkNumber, ArrayList<Region>>> getRegionsPerWorld();
+	Map<ResourceKey, Map<ChunkNumber, ArrayList<Region>>> getRegionsPerWorld();
 
 	/**
 	 * Region registration. <br>
@@ -135,34 +136,34 @@ public interface RegionAPI {
 	 * 
 	 * @param region - Registrable region.
 	 */
-	public void registerRegion(Region region);
+	void registerRegion(Region region);
 
 	/**
 	 * Region registration in asynchronous mode.
 	 * 
 	 * @param region - Registrable region.
 	 */
-	public void registerRegionAsync(Region region);
+	void registerRegionAsync(Region region);
 
 	/**
 	 * Remove the region from the list of registered regions.<br>
 	 * This method will not remove the region from the disk.
 	 */
-	public void unregisterRegion(Region region);
+	void unregisterRegion(Region region);
 
 	/**
 	 * Saving region data to disk.
 	 * 
 	 * @param region - Preservable region..
 	 */
-	public void saveRegion(Region region);
+	void saveRegion(Region region);
 
 	/**
 	 * Deleting a region.
 	 * 
 	 * @param region - Removable region.
 	 */
-	public void deleteRegion(Region region);
+	void deleteRegion(Region region);
 
 	/**
 	 * Search for a region in the world using the specified coordinates. <br>
@@ -172,7 +173,7 @@ public interface RegionAPI {
 	 * @param position - Checkable position.
 	 * @return - Found region or global region.
 	 */
-	public Region findRegion(ServerWorld world, Vector3i position);
+	Region findRegion(ServerWorld world, Vector3i position);
 
 	/**
 	 * Search for a region in the world using the specified coordinates.<br>
@@ -182,7 +183,7 @@ public interface RegionAPI {
 	 * @param position - Checkable position.
 	 * @return - Found region or global region.
 	 */
-	public Region findRegion(ResourceKey worldkey, Vector3i position);
+	Region findRegion(ResourceKey worldkey, Vector3i position);
 
 	/**
 	 * Search for the region with which the intersection occurs.
@@ -190,7 +191,7 @@ public interface RegionAPI {
 	 * @param region - Original region.
 	 * @return The first region found with which there is an intersection.<br>Or the original region if no intersection is found.
 	 */
-	public Region findIntersectsRegion(Region region);
+	Region findIntersectsRegion(Region region);
 
 	/**
 	 * Obtaining all player regions.
@@ -198,7 +199,7 @@ public interface RegionAPI {
 	 * @param player - Owner of the regions.
 	 * @return - List of player regions.
 	 */
-	public List<Region> getPlayerRegions(ServerPlayer player);
+	List<Region> getPlayerRegions(ServerPlayer player);
 
 	/**
 	 * Obtaining all player regions.
@@ -206,19 +207,19 @@ public interface RegionAPI {
 	 * @param playerUUID - UUID of owner of the regions.
 	 * @return - List of player regions.
 	 */
-	public List<Region> getPlayerRegions(UUID playerUUID);
+	List<Region> getPlayerRegions(UUID playerUUID);
 
 	/**
 	 * Getting an item for selecting regions.
 	 */
-	public ItemStack getWandItem();
+	ItemStack getWandItem();
 
 	/**
 	 * Getting the type of regions creating by the player.
 	 * 
 	 * @return {@link RegionTypes}
 	 */
-	public RegionTypes getSelectRegionType(ServerPlayer player);
+	RegionTypes getSelectRegionType(ServerPlayer player);
 
 	/**
 	 * Getting the type of regions creating by the player.
@@ -226,19 +227,19 @@ public interface RegionAPI {
 	 * @param uuid - player uuid
 	 * @return {@link RegionTypes}
 	 */
-	public RegionTypes getSelectRegionType(UUID uuid);
+	RegionTypes getSelectRegionType(UUID uuid);
 
 	/**
 	 * Specifies the type of regions created by the player. <br>
 	 * You cannot assign the types: global, subdivision, unset.
 	 */
-	public void setCreatingRegionType(ServerPlayer player, RegionTypes claim);
+	void setCreatingRegionType(ServerPlayer player, RegionTypes claim);
 
 	/**
 	 * Specifies the type of regions created by the player. <br>
 	 * You cannot assign the types: global, subdivision, unset.
 	 */
-	public void setCreatingRegionType(UUID uuid, RegionTypes regionType);
+	void setCreatingRegionType(UUID uuid, RegionTypes regionType);
 
 	/**
 	 * Get the minimum size of the region, which is set in the main configuration file.
@@ -246,12 +247,12 @@ public interface RegionAPI {
 	 * @param selectorType - Type of region selection.
 	 * @return - The minimum number of blocks that should be in the region.
 	 */
-	public int getMinimalRegionSize(SelectorTypes selectorType);
+	int getMinimalRegionSize(SelectorTypes selectorType);
 
 	/**
 	 * Get the default flags for a certain type of region.
 	 */
-	public Map<String, Set<FlagValue>> getDefaultFlags(RegionTypes regionType);
+	Map<String, Set<FlagValue>> getDefaultFlags(RegionTypes regionType);
 
 	/**
 	 * Get the number of blocks that belong to the player.
@@ -259,7 +260,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The amount of blocks the player owns according to the type of allocation of each region.
 	 */
-	public long getClaimedBlocks(ServerPlayer player);
+	long getClaimedBlocks(ServerPlayer player);
 
 	/**
 	 * Get the number of regions belonging to the player.
@@ -267,7 +268,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The number of regions belonging to the player.
 	 */
-	public long getClaimedRegions(ServerPlayer player);
+	long getClaimedRegions(ServerPlayer player);
 
 	/**
 	 * Getting the limit of blocks that can claiming the player.
@@ -275,7 +276,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The number of blocks available to the player for claiming.
 	 */
-	public long getLimitBlocks(ServerPlayer player);
+	long getLimitBlocks(ServerPlayer player);
 
 	/**
 	 * Getting the limit of regions that can claiming the player.
@@ -283,7 +284,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The number of regions available to the player for claiming.
 	 */
-	public long getLimitClaims(ServerPlayer player);
+	long getLimitClaims(ServerPlayer player);
 
 	/**
 	 * Get the maximum number of child regions a player can create. <br>
@@ -292,7 +293,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @returnThe number of regions available to the player for creating.
 	 */
-	public long getLimitSubdivisions(ServerPlayer player);
+	long getLimitSubdivisions(ServerPlayer player);
 
 	/**
 	 * Getting the members limit for each region of a particular player.<br>
@@ -301,7 +302,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The number of members limit for each region of a particular player.
 	 */
-	public long getLimitMembers(ServerPlayer player);
+	long getLimitMembers(ServerPlayer player);
 
 	/**
 	 * Getting the members limit for each region of a particular player.<br>
@@ -310,7 +311,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The number of members limit for each region of a particular player.
 	 */
-	public long getLimitMembers(UUID player);
+	long getLimitMembers(UUID player);
 
 	/**
 	 * The maximum limit of blocks a player can claim.
@@ -318,7 +319,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The number of blocks available to the player for claiming.
 	 */
-	public long getLimitMaxBlocks(ServerPlayer player);
+	long getLimitMaxBlocks(ServerPlayer player);
 
 	/**
 	 * The maximum limit of regions a player can claim.
@@ -326,7 +327,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The number of regions available to the player for claiming.
 	 */
-	public long getLimitMaxClaims(ServerPlayer player);
+	long getLimitMaxClaims(ServerPlayer player);
 
 	/**
 	 * The maximum limit of child regions a player can create. <br>
@@ -335,7 +336,7 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The number of subdivisions available to the player for creating.
 	 */
-	public long getLimitMaxSubdivisions(ServerPlayer player);
+	long getLimitMaxSubdivisions(ServerPlayer player);
 
 	/**
 	 * The maximum limit of members of the player region.. <br>
@@ -344,91 +345,91 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The maximum number of region members a player can add.
 	 */
-	public long getLimitMaxMembers(ServerPlayer player);
+	long getLimitMaxMembers(ServerPlayer player);
 
 	/**
 	 * Get the value of the block price for the player. <br>
 	 * Depending on how the permissions plugin is set up, different players may have different prices.
 	 */
-	public double getBuyBlockPrice(ServerPlayer player);
+	double getBuyBlockPrice(ServerPlayer player);
 
 	/**
 	 * Get the value of the region price for the player. <br>
 	 * Depending on how the permissions plugin is set up, different players may have different prices.
 	 */
-	public double getBuyClaimPrice(ServerPlayer player);
+	double getBuyClaimPrice(ServerPlayer player);
 
 	/**
 	 * Get the value of the subdivision price for the player. <br>
 	 * Depending on how the permissions plugin is set up, different players may have different prices.
 	 */
-	public double getBuySubdivisionPrice(ServerPlayer player);
+	double getBuySubdivisionPrice(ServerPlayer player);
 
 	/**
 	 * Getting the value of the price of the region's participant limit increase. <br>
 	 * Depending on how the permissions plugin is set up, different players may have different prices.
 	 */
-	public double getBuyMembersPrice(ServerPlayer player);
+	double getBuyMembersPrice(ServerPlayer player);
 
 
 	/**
 	 * Get the value of the block price for the player. <br>
 	 * Depending on how the permissions plugin is set up, different players may have different prices.
 	 */
-	public double getSellBlockPrice(ServerPlayer player);
+	double getSellBlockPrice(ServerPlayer player);
 
 	/**
 	 * Get the value of the region price for the player. <br>
 	 * Depending on how the permissions plugin is set up, different players may have different prices.
 	 */
-	public double getSellClaimPrice(ServerPlayer player);
+	double getSellClaimPrice(ServerPlayer player);
 
 	/**
 	 * Get the value of the subdivision price for the player. <br>
 	 * Depending on how the permissions plugin is set up, different players may have different prices.
 	 */
-	public double getSellSubdivisionPrice(ServerPlayer player);
+	double getSellSubdivisionPrice(ServerPlayer player);
 
 	/**
 	 * Getting the value of the price of the region members limit decrease. <br>
 	 * Depending on how the permissions plugin is set up, different players may have different prices.
 	 */
-	public double getSellMembersPrice(ServerPlayer player);
+	double getSellMembersPrice(ServerPlayer player);
 	/**
 	 * Getting the currency in which the player will perform the transaction.
 	 * Depending on how the permissions plugin is set up, different players may have different currencies.
 	 */
-	public String getCurrency(ServerPlayer player);
+	String getCurrency(ServerPlayer player);
 
 	/**
 	 * Change the limit of blocks a player can claim.
 	 */
-	public void setLimitBlocks(ServerPlayer player, long limit);
+	void setLimitBlocks(ServerPlayer player, long limit);
 
 	/**
 	 * Set the number of regions a player can own.
 	 */
-	public void setLimitClaims(ServerPlayer player, long limit);
+	void setLimitClaims(ServerPlayer player, long limit);
 
 	/**
 	 * Set a limit to the subdivisions a player can create.
 	 */
-	public void setLimitSubdivisions(ServerPlayer player, long limit);
+	void setLimitSubdivisions(ServerPlayer player, long limit);
 
 	/**
 	 * Set the number of players that each player region can contain.
 	 */
-	public void setLimitMembers(ServerPlayer player, long limit);
+	void setLimitMembers(ServerPlayer player, long limit);
 
 	/**
 	 * Setting limits and other information on the player.
 	 */
-	public void setPlayerData(ServerPlayer player, PlayerData playerData);
+	void setPlayerData(ServerPlayer player, PlayerData playerData);
 
 	/**
 	 * Setting limits and other information on the player.
 	 */
-	public void setPlayerData(UUID player, PlayerData playerData);
+	void setPlayerData(UUID player, PlayerData playerData);
 
 	/**
 	 * Update cached data on regions and blocks claimed by the player.
@@ -443,16 +444,25 @@ public interface RegionAPI {
 	/**
 	 * Getting limits and other information on the player.
 	 */
-	public Optional<PlayerData> getPlayerData(ServerPlayer player);
+	Optional<PlayerData> getPlayerData(ServerPlayer player);
 
 	/**
 	 * Getting limits and other information on the player.
 	 */
-	public Optional<PlayerData> getPlayerData(UUID player);
+	Optional<PlayerData> getPlayerData(UUID player);
 
 	/**
 	 * Go to the API for visually highlighting regions with a mod on the WECui client.
 	 */
-	public WorldEditCUIAPI getWorldEditCUIAPI();
+	WorldEditCUIAPI getWorldEditCUIAPI();
+
+	/**
+	 * This interface is designed to access the plugin's API.
+	 */
+	interface PostAPI extends Event {
+
+		public RegionAPI getAPI();
+
+	}
 
 }

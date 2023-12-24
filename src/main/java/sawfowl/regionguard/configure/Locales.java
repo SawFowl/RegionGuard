@@ -27,7 +27,7 @@ public class Locales {
 	}
 
 	public Component getText(Locale locale, Object... path) {
-		return getAbstractLocaleUtil(locale).getComponent(json, path);
+		return getAbstractLocaleUtil(locale).getComponent(path);
 	}
 
 	public Component getTextWithReplaced(Locale locale, Map<String, String> map, Object... path) {
@@ -39,7 +39,7 @@ public class Locales {
 	}
 
 	public Component getTextFromDefault(Object... path) {
-		return getAbstractLocaleUtil(org.spongepowered.api.util.locale.Locales.DEFAULT).getComponent(json, path);
+		return getAbstractLocaleUtil(org.spongepowered.api.util.locale.Locales.DEFAULT).getComponent(path);
 	}
 
 	public LocaleService getLocaleService() {

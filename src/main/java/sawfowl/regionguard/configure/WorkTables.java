@@ -23,6 +23,8 @@ import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.data.PlayerDataImpl;
+import sawfowl.regionguard.data.RegionImpl;
 
 public class WorkTables extends Thread implements WorkData {
 
@@ -68,7 +70,7 @@ public class WorkTables extends Thread implements WorkData {
 	}
 
 	@Override
-	public Region getWorldRegion(ServerWorld world) {
+	public RegionImpl getWorldRegion(ServerWorld world) {
 		try {
 			ResultSet results = resultSet("SELECT * FROM " + prefix + "worlds;");
 			while(!results.isClosed() && results.next()) {
@@ -76,9 +78,9 @@ public class WorkTables extends Thread implements WorkData {
 				StringReader source = new StringReader(regionData);
 				HoconConfigurationLoader loader = SerializeOptions.createHoconConfigurationLoader(2).source(() -> new BufferedReader(source)).build();
 				ConfigurationNode node = loader.load();
-				Region region = getRegionFromConfig(node.node("Content"), results.getString("world"));
+				RegionImpl region = getRegionFromConfig(node.node("Content"), results.getString("world"));
 				if(region == null) {
-					region = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
+					region = (RegionImpl) Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
 					saveRegion(region);
 				}
 				if(region.getWorldKey().equals(world.key())) {
@@ -89,7 +91,7 @@ public class WorkTables extends Thread implements WorkData {
 		} catch (SQLException | ConfigurateException e) {
 			plugin.getLogger().error("Get global region data. World " + world.key().asString() + "\n" + e.getLocalizedMessage());
 		}
-		return globalsCreated ? Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags()) : null;
+		return globalsCreated ? (RegionImpl) Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags()) : null;
 	}
 
 	@Override
@@ -160,7 +162,7 @@ public class WorkTables extends Thread implements WorkData {
 	}
 
 	@Override
-	public PlayerData getPlayerData(ServerPlayer player) {
+	public PlayerDataImpl getPlayerData(ServerPlayer player) {
 		try {
 			ResultSet results = resultSet("SELECT " + player.uniqueId() + " FROM " + prefix + "player_data");
 			while(!results.isClosed() && results.next()) {
@@ -174,13 +176,13 @@ public class WorkTables extends Thread implements WorkData {
 						data = PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player)));
 						savePlayerData(player, data);
 					}
-					return data;
+					return (PlayerDataImpl) data;
 				}
 			}
 		} catch (SQLException | ConfigurateException e) {
 			plugin.getLogger().error("Get player data. Player: " + player.name() + "\n" + e.getLocalizedMessage());
 		}
-		return PlayerData.zero();
+		return (PlayerDataImpl) PlayerData.zero();
 	}
 
 	@Override

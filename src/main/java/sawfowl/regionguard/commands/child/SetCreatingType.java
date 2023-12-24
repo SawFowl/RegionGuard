@@ -29,11 +29,6 @@ public class SetCreatingType extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public boolean canExecute(CommandCause cause) {
-		return cause.hasPermission(Permissions.STAFF_SET_REGION_TYPE);
-	}
-
-	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		switch (RegionTypes.valueOfName(getString(args, 0).get())) {
 		case ARENA: {

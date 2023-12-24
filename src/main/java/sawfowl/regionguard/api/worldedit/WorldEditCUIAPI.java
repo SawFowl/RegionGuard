@@ -86,7 +86,6 @@ public interface WorldEditCUIAPI {
 	 * Location of the block the player is looking at.
 	 * 
 	 * @param player - target player
-	 * @param user - WECui user
 	 * @param maxDistance - distance to find the block
 	 * 
 	 * @return @link ServerLocation}

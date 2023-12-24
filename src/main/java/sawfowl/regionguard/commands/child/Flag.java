@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
@@ -20,7 +21,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
-import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -39,18 +39,16 @@ public class Flag extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		String plainArgs = arguments.input();
-		while(plainArgs.contains("  ")) plainArgs.replace("  ", " ");
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		Optional<FlagConfig> optFlag = getArgument(FlagConfig.class, args, 0);
+		Optional<FlagConfig> optFlag = getArgument(FlagConfig.class, cause, args, 0);
 		if(!optFlag.isPresent()) {
 			sendPaginationList(src, getComponent(locale, LocalesPaths.COMMAND_FLAG_LIST), getComponent(locale, LocalesPaths.PADDING), 10, getFlagList(src, region));
 			return;
 		} else {
 			FlagConfig flag = optFlag.get();
-			Boolean value = getBoolean(args, 1).orElse(false);
-			String source = getString(args, 2).orElse("all");
-			String target = getString(args, 3).orElse("all");
+			Boolean value = getBoolean(args, cause, 1).orElse(false);
+			String source = getString(args, cause, 2).orElse("all");
+			String target = getString(args, cause, 3).orElse("all");
 			setFlag(region, flag.getName(), value, source, target);
 			src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_FLAG_SUCCESS));
 		}
@@ -93,11 +91,18 @@ public class Flag extends AbstractPlayerCommand {
 				0,
 				null
 			),
-			RawArguments.createBooleanArgument(true, true, 1, false, LocalesPaths.COMMAND_FLAG_VALUE_NOT_PRESENT),
+			RawArgument.of(Boolean.class,
+				(cause, args) -> Stream.of("true", "false"),
+				(cause, args) -> args.length < 2 || !getArgument(FlagConfig.class, cause, args, 0).isPresent() ? Optional.empty() : Optional.ofNullable(BooleanUtils.toBooleanObject(args[1])),
+				true,
+				true,
+				1,
+				LocalesPaths.COMMAND_FLAG_VALUE_NOT_PRESENT
+			),
 			RawArgument.of(
 				String.class,
-				(cause, args) -> getArgument(FlagConfig.class, args, 0).map(config -> config.getSettings().getSources()).orElse(Stream.of("all")),
-				(cause, args) -> args.length < 3 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getSources().filter(source -> source.startsWith(args[2])).findFirst().orElse("all")),
+				(cause, args) -> getArgument(FlagConfig.class, cause, args, 0).map(config -> config.getSettings().getSources()).orElse(Stream.of("all")),
+				(cause, args) -> args.length < 3 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, cause, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
 				true,
 				true,
 				2,
@@ -105,8 +110,8 @@ public class Flag extends AbstractPlayerCommand {
 			),
 			RawArgument.of(
 				String.class,
-				(cause, args) -> getArgument(FlagConfig.class, args, 0).map(config -> config.getSettings().getSources()).orElse(Stream.of("all")),
-				(cause, args) -> args.length < 4 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getTargets().filter(target -> target.startsWith(args[3])).findFirst().orElse("all")),
+				(cause, args) -> getArgument(FlagConfig.class, cause, args, 0).map(config -> config.getSettings().getTargets()).orElse(Stream.of("all")),
+				(cause, args) -> args.length < 4 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, cause, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
 				true,
 				true,
 				3,

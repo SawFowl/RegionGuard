@@ -26,11 +26,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -45,11 +45,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -64,11 +64,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -83,11 +83,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -102,11 +102,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -121,11 +121,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -140,11 +140,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -159,11 +159,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -178,11 +178,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -197,11 +197,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 			});
 		}
@@ -216,11 +216,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -235,11 +235,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -254,11 +254,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -273,11 +273,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -292,11 +292,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -311,11 +311,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -330,11 +330,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -349,11 +349,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -368,11 +368,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getCommandsStream();
+					return concat(streamDefault(), getCommandsStream());
 				}
 			});
 		}
@@ -387,11 +387,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getCommandsStream();
+					return concat(streamDefault(), getCommandsStream());
 				}
 			});
 		}
@@ -406,11 +406,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 			});
 		}
@@ -429,11 +429,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 			});
 		}
@@ -448,11 +448,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 			});
 		}
@@ -467,11 +467,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return Stream.concat(getDamageTypesStream(), getEntitiesStream());
+					return concat(streamDefault(), getDamageTypesStream(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 			});
 		}
@@ -486,11 +486,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 			});
 		}
@@ -505,11 +505,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return Stream.concat(getSpawnTypesStream(), getEntitiesStream());
+					return concat(streamDefault(), getSpawnTypesStream(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 			});
 		}
@@ -524,11 +524,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -543,11 +543,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -562,11 +562,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getItemsStream();
+					return concat(streamDefault(), getItemsStream());
 				}
 			});
 		}
@@ -581,11 +581,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getItemsStream();
+					return concat(streamDefault(), getItemsStream());
 				}
 			});
 		}
@@ -600,11 +600,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getItemsStream();
+					return concat(streamDefault(), getItemsStream());
 				}
 			});
 		}
@@ -619,11 +619,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return Stream.concat(getSpawnTypesStream(), getEntitiesStream());
+					return concat(streamDefault(), getSpawnTypesStream(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getItemsStream();
+					return concat(streamDefault(), getItemsStream());
 				}
 			});
 		}
@@ -638,11 +638,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return Stream.concat(getSpawnTypesStream(), getEntitiesStream());
+					return concat(streamDefault(), getSpawnTypesStream(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -657,11 +657,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getItemsStream();
+					return concat(streamDefault(), getItemsStream());
 				}
 			});
 		}
@@ -676,11 +676,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getBlocksStream();
+					return concat(streamDefault(), getBlocksStream());
 				}
 			});
 		}
@@ -695,11 +695,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 			});
 		}
@@ -714,11 +714,11 @@ public enum Flags {
 				}
 				@Override
 				public Stream<String> getSources() {
-					return getEntitiesStream();
+					return concat(streamDefault(), getEntitiesStream());
 				}
 				@Override
 				public Stream<String> getTargets() {
-					return streamOnlyOne();
+					return streamDefault();
 				}
 			});
 		}
@@ -782,8 +782,16 @@ public enum Flags {
 		return Sponge.server().commandManager().knownAliases().stream();
 	}
 
-	private static Stream<String> streamOnlyOne() {
+	private static Stream<String> streamDefault() {
 		return Stream.of("all");
+	}
+
+	private static Stream<String> concat(Stream<String> stream1, Stream<String> stream2) {
+		return Stream.concat(stream1, stream2);
+	}
+
+	private static Stream<String> concat(Stream<String> stream1, Stream<String> stream2, Stream<String> stream3) {
+		return concat(concat(stream1, stream2), stream3);
 	}
 
 }
