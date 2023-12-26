@@ -17,7 +17,7 @@ public interface WorkData {
 
 	public void createDataForWorlds();
 
-	public RegionImpl getWorldRegion(ServerWorld world);
+	public Region getWorldRegion(ServerWorld world);
 
 	public void saveRegion(Region region);
 
@@ -29,7 +29,7 @@ public interface WorkData {
 
 	public void savePlayerData(UUID player, PlayerData playerData);
 
-	public PlayerDataImpl getPlayerData(ServerPlayer player);
+	public PlayerData getPlayerData(ServerPlayer player);
 
 	public void loadDataOfPlayers();
 

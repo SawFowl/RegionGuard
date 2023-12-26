@@ -48,6 +48,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.AdditionalData;
+import sawfowl.regionguard.api.data.AdditionalDataMap;
 import sawfowl.regionguard.api.data.ChunkNumber;
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.FlagValue;
@@ -69,59 +70,122 @@ public class RegionImpl implements Region {
 			public @NotNull Region build() {
 				return RegionImpl.this;
 			}
-			
+
+			@Override
+			public Builder setUniqueId(UUID uuid) {
+				if(uuid == null) return this;
+				regionUUID = uuid;
+				return this;
+			}
+
+			@Override
+			public Builder setCreationTime(long time) {
+				creationTime = time;;
+				return this;
+			}
+
 			@Override
 			public Builder setWorld(ResourceKey worldKey) {
+				if(worldKey == null) worldKey = DefaultWorldKeys.DEFAULT;
 				world = worldKey.asString();
 				return this;
 			}
-			
+
 			@Override
 			public Builder setWorld(ServerWorld serverWorld) {
 				return setWorld(serverWorld.key());
 			}
-			
+
 			@Override
 			public Builder setType(RegionTypes type) {
+				if(type == null) type = RegionTypes.CLAIM;
 				regionType = type.toString();
 				return this;
 			}
-			
+
 			@Override
 			public Builder setServerOwner() {
-				if(!members.isEmpty()) members.entrySet().removeIf(entry -> entry.getValue().getTrustType() == TrustTypes.OWNER);
-				members.put(new UUID(0,0), (MemberDataImpl) MemberData.forServer());
+				if(!members.isEmpty()) members.removeIf(member -> member.getTrustType() == TrustTypes.OWNER);
+				members.add(MemberData.forServer());
 				return this;
 			}
-			
+
 			@Override
 			public Builder setParrent(Region region) {
+				if(region == null) return this;
 				parrent = (RegionImpl) region;
 				return this;
 			}
-			
+
 			@Override
 			public Builder setOwner(ServerPlayer player) {
-				if(!members.isEmpty()) members.entrySet().removeIf(entry -> entry.getValue().getTrustType() == TrustTypes.OWNER);
+				if(!members.isEmpty()) members.removeIf(member -> member.getTrustType() == TrustTypes.OWNER);
 				setTrustType(player, TrustTypes.OWNER);
 				return this;
 			}
-			
+
 			@Override
 			public Builder setName(Locale locale, Component name) {
 				RegionImpl.this.setName(name, locale);
 				return this;
 			}
-			
+
 			@Override
 			public Builder setFlags(Map<String, Set<FlagValue>> flags) {
+				if(flags == null) return this;
 				RegionImpl.this.setFlags(flags);
 				return this;
 			}
-			
+
 			@Override
 			public Builder setCuboid(Cuboid cuboid) {
+				if(cuboid == null) return this;
 				RegionImpl.this.cuboid = (CuboidImpl) cuboid;
+				return this;
+			}
+
+			@Override
+			public Builder addMembers(Collection<MemberData> members) {
+				if(members == null) return this;
+				RegionImpl.this.members.addAll(members);
+				return this;
+			}
+
+			@Override
+			public Builder addJoinMessages(Map<String, Component> messages) {
+				if(messages == null) return this;
+				joinMessages.putAll(messages);
+				return this;
+			}
+
+			@Override
+			public Builder addExitMessages(Map<String, Component> messages) {
+				if(messages == null) return this;
+				exitMessages.putAll(messages);
+				return this;
+			}
+
+			@Override
+			public Builder addNames(Map<String, Component> names) {
+				if(names == null) return this;
+				RegionImpl.this.names.putAll(names);
+				return this;
+			}
+
+			@Override
+			public <T extends AdditionalData> Builder addAdditionalData(Map<String, Map<String, T>> dataMap) {
+				if(dataMap == null) return this;
+				if(additionalData == null) additionalData = new AdditionalDataHashMap<T>().from(dataMap);
+				return this;
+			}
+
+			@Override
+			public Builder addChilds(Collection<Region> regions) {
+				if(regions == null) return this;
+				childs.addAll(regions);
+				childs.forEach(child -> {
+					child.setParrent(RegionImpl.this);
+				});
 				return this;
 			}
 		};
@@ -129,18 +193,18 @@ public class RegionImpl implements Region {
 
 	@Setting("RegionName")
 	private Map<String, Component> names = new HashMap<String, Component>();
-	@Setting("RegionUUID")
+	@Setting("UUID")
 	private UUID regionUUID = UUID.randomUUID();
 	@Setting("World")
 	private String world = DefaultWorldKeys.DEFAULT.asString();
 	@Setting("Cuboid")
-	private CuboidImpl cuboid;
+	private Cuboid cuboid;
 	@Setting("Childs")
-	private List<RegionImpl> childs = new ArrayList<RegionImpl>();
+	private Set<Region> childs = new HashSet<Region>();
 	@Setting("Flags")
-	private Map<String, Set<FlagValueImpl>> flagValues = new HashMap<String, Set<FlagValueImpl>>();
+	private Map<String, Set<FlagValue>> flagValues = new HashMap<String, Set<FlagValue>>();
 	@Setting("Members")
-	private Map<UUID, MemberDataImpl> members = new HashMap<UUID, MemberDataImpl>();
+	private Set<MemberData> members = new HashSet<MemberData>();
 	@Setting("RegionType")
 	private String regionType;
 	@Setting("Created")
@@ -149,9 +213,9 @@ public class RegionImpl implements Region {
 	private Map<String, Component> joinMessages = new HashMap<String, Component>();
 	@Setting("ExitMessages")
 	private Map<String, Component> exitMessages = new HashMap<String, Component>();
-	@Setting("EnhancedData")
-	private Map<String, Map<String, ? extends AdditionalData>> additionalData = null;
-	private RegionImpl parrent;
+	@Setting("AdditionalData")
+	private AdditionalDataMap<? extends AdditionalData> additionalData = null;
+	private Region parrent;
 
 	/**
 	 * Getting the region name.
@@ -159,7 +223,7 @@ public class RegionImpl implements Region {
 	 * @param locale - language to be checked
 	 */
 	public Optional<String> getPlainName(Locale locale) {
-		return names.isEmpty() ? Optional.empty() : names.containsKey(locale.toLanguageTag()) ? Optional.of(toPlain(names.get(locale.toLanguageTag()))) : names.containsKey(Locales.DEFAULT.toLanguageTag()) ? Optional.of(toPlain(names.get(Locales.DEFAULT.toLanguageTag()))) : joinMessages.values().stream().findFirst().map(this::toPlain);
+		return names.isEmpty() ? Optional.empty() : names.containsKey(locale.toLanguageTag()) ? Optional.of(toPlain(names.get(locale.toLanguageTag()))) : names.containsKey(Locales.DEFAULT.toLanguageTag()) ? Optional.of(toPlain(names.get(Locales.DEFAULT.toLanguageTag()))) : names.values().stream().findFirst().map(this::toPlain);
 	}
 
 	/**
@@ -181,6 +245,11 @@ public class RegionImpl implements Region {
 		return this;
 	}
 
+	@Override
+	public Map<String, Component> getNames() {
+		return names;
+	}
+
 	/**
 	 * Getting the player-owner of the region, if the owner of the region is a player and he is online.
 	 */
@@ -192,8 +261,8 @@ public class RegionImpl implements Region {
 	 * Getting the UUID of the region owner.
 	 */
 	public UUID getOwnerUUID() {
-		Optional<Entry<UUID, MemberDataImpl>> optOwnerData = members.entrySet().stream().filter(entry -> entry.getValue().getTrustType() == TrustTypes.OWNER).findFirst();
-		UUID uuid = optOwnerData.isPresent() ? optOwnerData.get().getKey() : parrent != null ? parrent.getOwnerUUID() : new UUID(0, 0);
+		Optional<MemberData> optOwnerData = members.stream().filter(member -> member.getTrustType() == TrustTypes.OWNER).findFirst();
+		UUID uuid = optOwnerData.isPresent() ? optOwnerData.get().getUniqueId() : parrent != null ? parrent.getOwnerUUID() : new UUID(0, 0);
 		return uuid;
 	}
 
@@ -209,8 +278,7 @@ public class RegionImpl implements Region {
 	 *
 	 * @param owner - new owner
 	 */
-	public RegionImpl setOwner(ServerPlayer owner) {
-		members.remove(getOwnerUUID());
+	public Region setOwner(ServerPlayer owner) {
 		return setTrustType(owner, TrustTypes.OWNER);
 	}
 
@@ -220,8 +288,7 @@ public class RegionImpl implements Region {
 	 * @param owner - new owner
 	 */
 	@Override
-	public RegionImpl setOwner(GameProfile owner) {
-		members.remove(getOwnerUUID());
+	public Region setOwner(GameProfile owner) {
 		return setTrustType(owner, TrustTypes.OWNER);
 	}
 
@@ -231,11 +298,8 @@ public class RegionImpl implements Region {
 	 * @param player - addable player
 	 * @param type - assignable trust type
 	 */
-	public RegionImpl setTrustType(ServerPlayer player, TrustTypes type) {
-		untrust(player);
-		if(type == TrustTypes.OWNER) members.entrySet().removeIf(entry -> entry.getValue().getTrustType() == TrustTypes.OWNER);
-		members.put(player.uniqueId(), (MemberDataImpl) MemberData.of(player, type));
-		return this;
+	public Region setTrustType(ServerPlayer player, TrustTypes type) {
+		return setTrustType(player.profile(), type);
 	}
 
 	/**
@@ -245,23 +309,19 @@ public class RegionImpl implements Region {
 	 * @param type - assignable trust type
 	 */
 	@Override
-	public RegionImpl setTrustType(GameProfile player, TrustTypes type) {
+	public Region setTrustType(GameProfile player, TrustTypes type) {
 		untrust(player.uniqueId());
-		if(type == TrustTypes.OWNER) members.entrySet().removeIf(entry -> entry.getValue().getTrustType() == TrustTypes.OWNER);
-		members.put(player.uniqueId(), (MemberDataImpl) MemberData.of(player, type));
+		if(regionType.equals("Admin")) return this;
+		if(type == TrustTypes.OWNER) members.removeIf(member -> member.getTrustType() == TrustTypes.OWNER);
+		members.add(MemberData.of(player, type));
 		return this;
 	}
 
-	/**
-	 * Adding a entity to a region.
-	 *
-	 * @param uuid - addable entity
-	 * @param type - assignable trust type
-	 */
-	public RegionImpl setTrustType(UUID uuid, TrustTypes type) {
-		untrust(uuid);
-		if(type == TrustTypes.OWNER) members.entrySet().removeIf(entry -> entry.getValue().getTrustType() == TrustTypes.OWNER);
-		members.put(uuid, (MemberDataImpl) MemberData.builder().setTrustType(type).build());
+	@Override
+	public Region setTrustType(UUID uuid, TrustTypes type) {
+		getMemberData(uuid).ifPresent(member -> {
+			member.setTrustType(type);
+		});
 		return this;
 	}
 
@@ -269,13 +329,12 @@ public class RegionImpl implements Region {
 	 * Getting the data of the region owner
 	 */
 	public MemberData getOwnerData() {
-		Optional<MemberDataImpl> data = members.size() > 20 ? members.values().parallelStream().filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst() : members.values().stream().filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst();
-		return data.isPresent() ? (MemberData) data.get() : parrent != null ? parrent.getOwnerData() : setTrustType(new UUID(0, 0), TrustTypes.OWNER).getOwnerData();
+		return (members.size() > 10000 ? members.parallelStream() : members.stream()).filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst().orElse(parrent != null ? parrent.getOwnerData() : MemberData.forServer());
 	}
 
 	@Override
 	public Collection<MemberData> getMembers() {
-		return members.values().stream().map(member -> (MemberData) member).collect(Collectors.toUnmodifiableList());
+		return members.stream().collect(Collectors.toUnmodifiableList());
 	}
 
 	/**
@@ -293,7 +352,7 @@ public class RegionImpl implements Region {
 	 * @param uuid - checked player or entity.
 	 */
 	public Optional<MemberData> getMemberData(UUID uuid) {
-		return members.containsKey(uuid) ? Optional.ofNullable((MemberData) members.get(uuid)) : (parrent != null ? parrent.getMemberData(uuid) : Optional.empty());
+		return Optional.ofNullable(members.stream().filter(member -> member.getUniqueId().equals(uuid)).findFirst().orElse(parrent != null ? parrent.getMemberData(uuid).map(m -> m).orElse(null) : null));
 	}
 
 	/**
@@ -345,7 +404,7 @@ public class RegionImpl implements Region {
 	 * @return the type without trust(TrustTypes.WITHOUT_TRUST) if the entity is not a member of the region
 	 */
 	public TrustTypes getTrustType(UUID uuid) {
-		return members.containsKey(uuid) ? members.get(uuid).getTrustType() : (parrent != null ? parrent.getTrustType(uuid) : TrustTypes.WITHOUT_TRUST);
+		return getMemberData(uuid).map(member -> member.getTrustType()).orElse(TrustTypes.WITHOUT_TRUST);
 	}
 
 	/**
@@ -360,7 +419,7 @@ public class RegionImpl implements Region {
 	 * Removing a player or entity from a region.
 	 */
 	public void untrust(UUID uuid) {
-		if(members.containsKey(uuid)) members.remove(uuid);
+		members.removeIf(member -> member.getUniqueId().equals(uuid));
 		if(parrent != null) parrent.untrust(uuid);
 	}
 
@@ -379,7 +438,7 @@ public class RegionImpl implements Region {
 	 * @param uuid - checked entity
 	 */
 	public boolean isTrusted(UUID uuid) {
-		return members.containsKey(uuid) ? getTrustType(uuid) != TrustTypes.WITHOUT_TRUST : (parrent != null ? parrent.isTrusted(uuid) : false);
+		return members.stream().filter(member -> member.getUniqueId().equals(uuid)).findFirst().isPresent() || (parrent != null ? parrent.isTrusted(uuid) : false);
 	}
 
 	/**
@@ -413,7 +472,7 @@ public class RegionImpl implements Region {
 	 */
 	public Cuboid getCuboid() {
 		if(cuboid != null && cuboid.getSelectorType() == SelectorTypes.FLAT && getWorld().isPresent() && (getWorld().get().min().y() != cuboid.getAABB().min().y() || getWorld().get().max().y() != cuboid.getAABB().max().y())) {
-			if(!cuboid.getWorld().isPresent()) cuboid.setSupplier(getWorld());
+			if(!((CuboidImpl) cuboid).getWorld().isPresent()) ((CuboidImpl) cuboid).setSupplier(getWorld());
 			cuboid.setPositions(cuboid.getMin(), cuboid.getMax(), cuboid.getSelectorType());
 		}
 		return cuboid;
@@ -436,7 +495,7 @@ public class RegionImpl implements Region {
 		if(type == RegionTypes.UNSET) return false;
 		if(type == RegionTypes.ADMIN) {
 			members.clear();
-			members.put(new UUID(0, 0), (MemberDataImpl) MemberData.forServer());
+			members.add(MemberData.forServer());
 		}
 		regionType = type.toString();
 		return true;
@@ -487,7 +546,7 @@ public class RegionImpl implements Region {
 	public RegionImpl setCuboid(Vector3i first, Vector3i second, SelectorTypes selectorType) {
 		if(selectorType == null) return this;
 		cuboid = (CuboidImpl) Cuboid.builder(selectorType).setFirstPosition(first).setSecondPosition(second).build();
-		if(!cuboid.getWorld().isPresent()) cuboid.setSupplier(getWorld());
+		if(!((CuboidImpl) cuboid).getWorld().isPresent()) ((CuboidImpl) cuboid).setSupplier(getWorld());
 		if(selectorType.equals(SelectorTypes.FLAT)) {
 			first = Vector3i.from(first.x(), Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get().min().y(), first.z());
 			second = Vector3i.from(second.x(), Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get().max().y(), second.z());
@@ -498,7 +557,7 @@ public class RegionImpl implements Region {
 
 	public RegionImpl setCuboid(Cuboid cuboid) {
 		this.cuboid = (CuboidImpl) cuboid;
-		if(!this.cuboid.getWorld().isPresent()) this.cuboid.setSupplier(getWorld());
+		if(!((CuboidImpl) this.cuboid).getWorld().isPresent()) ((CuboidImpl) this.cuboid).setSupplier(getWorld());
 		return this;
 	}
 
@@ -514,7 +573,7 @@ public class RegionImpl implements Region {
 	 *
 	 * @return the primary parent region if it exists, or the current region if the region has no parent
 	 */
-	public RegionImpl getPrimaryParent() {
+	public Region getPrimaryParent() {
 		return parrent == null ? this : parrent.getPrimaryParent();
 	}
 
@@ -565,7 +624,7 @@ public class RegionImpl implements Region {
 		List<Region> childs = new ArrayList<Region>();
 		if(!this.childs.isEmpty()) {
 			childs.addAll(this.childs);
-			for(RegionImpl child : this.childs) {
+			for(Region child : this.childs) {
 				childs.addAll(child.getAllChilds());
 			}
 		}
@@ -583,12 +642,11 @@ public class RegionImpl implements Region {
 	/**
 	 * Recursively search and list flagValues from the current region to the oldest parent.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Map<String, Set<FlagValue>> getFlags() {
-		if(!getParrent().isPresent()) return (Map) flagValues;
+		if(!getParrent().isPresent()) return flagValues;
 		Map<String, Set<FlagValue>> flagValues = new HashMap<String, Set<FlagValue>>();
 		flagValues.putAll(getParrent().get().getFlags());
-		for(Entry<String, Set<FlagValueImpl>> entry : this.flagValues.entrySet()) flagValues.replace(entry.getKey(), (Set) entry.getValue());
+		for(Entry<String, Set<FlagValue>> entry : this.flagValues.entrySet()) flagValues.replace(entry.getKey(), entry.getValue());
 		return flagValues;
 	}
 
@@ -791,12 +849,15 @@ public class RegionImpl implements Region {
 	 * @param message - setting message
 	 * @param locale - setting locale
 	 */
-	public RegionImpl setJoinMessage(Component message, Locale locale) {
+	public Region setJoinMessage(Component message, Locale locale) {
 		if(joinMessages.containsKey(locale.toLanguageTag())) joinMessages.remove(locale.toLanguageTag());
 		if(message != null) joinMessages.put(locale.toLanguageTag(), message);
 		return this;
 	}
 
+	public Map<String, Component> getJoinMessages() {
+		return joinMessages;
+	}
 
 	/**
 	 * Getting region exit message.<br>
@@ -821,35 +882,37 @@ public class RegionImpl implements Region {
 		return this;
 	}
 
+	public Map<String, Component> getExitMessages() {
+		return exitMessages;
+	}
+
 	/**
 	 * Getting additional data that is created by other plugins.<br>
 	 * After getting the data, they must be converted to the desired type.<br>
 	 * Exemple: YourDataClass yourDataClass = (YourDataClass) additionalData;
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Optional<T> getAdditionalData(PluginContainer container, String dataName, Class<? extends AdditionalData> clazz) {
-		if(additionalData == null || !additionalData.containsKey(container.metadata().id()) || !additionalData.get(container.metadata().id()).containsKey(dataName)) return Optional.empty();
-		AdditionalData data = additionalData.get(container.metadata().id()).get(dataName);
-		return Optional.ofNullable((T) data);
+	public <T extends AdditionalData> Optional<T> getAdditionalData(PluginContainer container, String dataName, Class<T> clazz) {
+		return additionalData.getData(container, dataName, clazz).map(data -> (T) data);
 	}
 
 	/**
 	 * Write additional data created by another plugin.
 	 */
-	@SuppressWarnings("unchecked")
 	public void setAdditionalData(PluginContainer container, String dataName, AdditionalData additionalData) {
-		if(this.additionalData == null) this.additionalData = new HashMap<String, Map<String, ? extends AdditionalData>>();
-		removeAdditionalData(container, dataName, additionalData);
-		if(!this.additionalData.containsKey(container.metadata().id())) this.additionalData.put(container.metadata().id(), new HashMap<>());
-		if(this.additionalData.get(container.metadata().id()).containsKey(dataName)) this.additionalData.get(container.metadata().id()).remove(dataName);
-		((Map<String, AdditionalData>) this.additionalData.get(container.metadata().id())).put(dataName, additionalData);
+		if(this.additionalData == null) this.additionalData = new AdditionalDataHashMap<>();
+		this.additionalData.put(container, dataName, additionalData);
 	}
 
 	/**
 	 * Deleting additional data created by another plugin.
 	 */
-	public void removeAdditionalData(PluginContainer container, String dataName, AdditionalData additionalData) {
+	public void removeAdditionalData(PluginContainer container, String dataName) {
 		if(this.additionalData.containsKey(container.metadata().id()) && this.additionalData.get(container.metadata().id()).containsKey(dataName)) this.additionalData.get(container.metadata().id()).remove(dataName);
+	}
+
+	public AdditionalDataMap<? extends AdditionalData> getAllAdditionalData() {
+		return additionalData;
 	}
 
 	/**

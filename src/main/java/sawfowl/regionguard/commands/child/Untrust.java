@@ -83,8 +83,8 @@ public class Untrust extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				GameProfile.class,
-				(cause, args) -> cause.first(ServerPlayer.class).isPresent() ? plugin.getAPI().findRegion(cause.first(ServerPlayer.class).get().world(), cause.first(ServerPlayer.class).get().blockPosition()).getMembers().stream().filter(member -> member.getTrustType() != TrustTypes.OWNER).map(MemberData::getName) : Stream.empty(),
-				(cause, args) -> args.length > 0 && cause.first(ServerPlayer.class).isPresent() ? plugin.getAPI().findRegion(cause.first(ServerPlayer.class).get().world(), cause.first(ServerPlayer.class).get().blockPosition()).getMembers().stream().filter(member -> member.getTrustType() != TrustTypes.OWNER).filter(member -> member.getName().equals(args[0])).findFirst().map(member -> Sponge.server().userManager().streamAll().filter(profile -> member.getName().equals(profile.name().orElse(profile.examinableName()))).findFirst().orElse(null)) : Optional.empty(),
+				(cause, args) -> cause.first(ServerPlayer.class).isPresent() ? findRegion(cause.first(ServerPlayer.class).get()).map(region -> region.getMembers().stream().filter(member -> member.getTrustType() != TrustTypes.OWNER).map(MemberData::getName)).orElse(Stream.empty()) : Stream.empty(),
+				(cause, args) -> args.length > 0 && cause.first(ServerPlayer.class).isPresent() ? findRegion(cause.first(ServerPlayer.class).get()).map(region -> region.getMembers().stream().filter(member -> member.getTrustType() != TrustTypes.OWNER).filter(member -> member.getName().equals(args[0])).findFirst().orElse(null)).map(member -> Sponge.server().userManager().streamAll().filter(profile -> member.getUniqueId().equals(profile.uniqueId())).findFirst().orElse(null)) : Optional.empty(),
 				false,
 				false,
 				0,
@@ -98,6 +98,10 @@ public class Untrust extends AbstractPlayerCommand {
 		plugin.getAPI().saveRegion(region);
 		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER), Arrays.asList(untrustedPlayer.name().orElse(untrustedPlayer.examinableName()))), LocalesPaths.COMMAND_UNTRUST_SUCCESS_PLAYER));
 		if(Sponge.server().player(untrustedPlayer.uuid()).isPresent()) Sponge.server().player(untrustedPlayer.uuid()).get().sendMessage(plugin.getLocales().getTextWithReplaced(Sponge.server().player(untrustedPlayer.uuid()).get().locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(player.name(), region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_UNTRUST_SUCCESS_TARGET));
+	}
+
+	private Optional<Region> findRegion(ServerPlayer player) {
+		return plugin.getAPI().findRegion(player.world(), player.blockPosition(), rg -> (player.hasPermission(Permissions.STAFF_TRUST) || rg.isCurrentTrustType(player, TrustTypes.OWNER) || rg.isCurrentTrustType(player, TrustTypes.MANAGER)));
 	}
 
 }

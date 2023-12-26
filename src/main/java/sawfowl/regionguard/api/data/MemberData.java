@@ -1,6 +1,7 @@
 package sawfowl.regionguard.api.data;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
@@ -36,6 +37,11 @@ public interface MemberData extends DataSerializable {
 	 * Getting member name
 	 */
 	String getName();
+
+	/**
+	 * Getting member {@link UUID}
+	 */
+	UUID getUniqueId();
 
 	/**
 	 * Getting member name as kyori component
@@ -84,6 +90,8 @@ public interface MemberData extends DataSerializable {
 		Builder setTrustType(TrustTypes type);
 
 		MemberData setServer();
+
+		MemberData from(MemberData data);
 
 	}
 

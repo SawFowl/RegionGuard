@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -174,6 +175,16 @@ public interface RegionAPI {
 	 * @return - Found region or global region.
 	 */
 	Region findRegion(ServerWorld world, Vector3i position);
+
+	/**
+	 * Search for a region in the world using the specified coordinates. <br>
+	 * If the region contains child regions, the deepest child region will be returned.
+	 * 
+	 * @param world - The world in which the search will be performed.
+	 * @param position - Checkable position.
+	 * @return - Found region or global region.
+	 */
+	Optional<Region> findRegion(ServerWorld world, Vector3i position, Predicate<Region> filter);
 
 	/**
 	 * Search for a region in the world using the specified coordinates.<br>

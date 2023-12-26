@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -240,6 +241,13 @@ class Api implements RegionAPI {
 	@Override
 	public Region findRegion(ServerWorld world, Vector3i position) {
 		return findRegion(world.key(), position);
+	}
+
+	@Override
+	public Optional<Region> findRegion(ServerWorld world, Vector3i position, Predicate<Region> filter) {
+		return (regionsPerWorld.get(world.key()).size() > 10000 ? regionsPerWorld.get(world.key()).entrySet().parallelStream() : regionsPerWorld.get(world.key()).entrySet().stream()).filter(entry -> entry.getKey().equalsTo(position)).findFirst()
+				.map(entry -> (entry.getValue().size() > 10000 ? entry.getValue().parallelStream() : entry.getValue().stream()).filter(rg -> (rg.isIntersectsWith(position))).findFirst().filter(filter)
+					.map(rg -> rg.getChild(position)).orElse(null));
 	}
 
 	@Override

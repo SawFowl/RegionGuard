@@ -75,6 +75,8 @@ public interface Region extends DataSerializable {
 	 */
 	Region setName(Component name, Locale locale);
 
+	Map<String, Component> getNames();
+
 	/**
 	 * Getting the player-owner of the region, if the owner of the region is a player and he is online.
 	 */
@@ -472,6 +474,7 @@ public interface Region extends DataSerializable {
 	 */
 	Region setJoinMessage(Component message, Locale locale);
 
+	Map<String, Component> getJoinMessages();
 
 	/**
 	 * Getting region exit message.<br>
@@ -490,12 +493,14 @@ public interface Region extends DataSerializable {
 	 */
 	Region setExitMessage(Component message, Locale locale);
 
+	Map<String, Component> getExitMessages();
+
 	/**
 	 * Getting additional data that is created by other plugins.<br>
 	 * After getting the data, they must be converted to the desired type.<br>
 	 * Exemple: YourDataClass yourDataClass = (YourDataClass) additionalData;
 	 */
-	<T> Optional<T> getAdditionalData(PluginContainer container, String dataName, Class<? extends AdditionalData> clazz);
+	<T extends AdditionalData> Optional<T> getAdditionalData(PluginContainer container, String dataName, Class<T> clazz);
 
 	/**
 	 * Write additional data created by another plugin.
@@ -505,7 +510,9 @@ public interface Region extends DataSerializable {
 	/**
 	 * Deleting additional data created by another plugin.
 	 */
-	void removeAdditionalData(PluginContainer container, String dataName, AdditionalData additionalData);
+	void removeAdditionalData(PluginContainer container, String dataName);
+
+	AdditionalDataMap<? extends AdditionalData> getAllAdditionalData();
 
 	/**
 	 * Checking whether the position belongs to the region.
@@ -607,6 +614,10 @@ public interface Region extends DataSerializable {
 
 	interface Builder extends AbstractBuilder<Region>, org.spongepowered.api.util.Builder<Region, Builder> {
 
+		Builder setUniqueId(UUID uuid);
+
+		Builder setCreationTime(long time);
+
 		Builder setName(Locale locale, Component name);
 
 		Builder setOwner(ServerPlayer player);
@@ -624,6 +635,18 @@ public interface Region extends DataSerializable {
 		Builder setParrent(Region region);
 
 		Builder setFlags(Map<String, Set<FlagValue>> flags);
+
+		Builder addMembers(Collection<MemberData> members);
+
+		Builder addJoinMessages(Map<String, Component> messages);
+
+		Builder addExitMessages(Map<String, Component> messages);
+
+		Builder addNames(Map<String, Component> names);
+
+		<T extends AdditionalData> Builder addAdditionalData(Map<String, Map<String, T>> dataMap);
+
+		Builder addChilds(Collection<Region> regions);
 
 	}
 }

@@ -24,13 +24,13 @@ public class PlayerDataImpl implements PlayerData {
 			
 			@Override
 			public Builder setLimits(PlayerLimits limits) {
-				PlayerDataImpl.this.limits = PlayerDataImpl.this.limits;
+				PlayerDataImpl.this.limits = (PlayerLimitsImpl) (limits instanceof PlayerLimitsImpl ? limits : PlayerLimits.of(limits.getBlocks(), limits.getClaims(), limits.getSubdivisions(), limits.getMembersPerRegion()));
 				return this;
 			}
 			
 			@Override
 			public Builder setClaimed(ClaimedByPlayer claimed) {
-				PlayerDataImpl.this.claimed = PlayerDataImpl.this.claimed;
+				PlayerDataImpl.this.claimed = (ClaimedByPlayerImpl) (claimed instanceof ClaimedByPlayerImpl ? claimed : ClaimedByPlayer.of(claimed.getBlocks(), claimed.getRegions()));
 				return this;
 			}
 		};

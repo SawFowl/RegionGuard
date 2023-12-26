@@ -1,6 +1,7 @@
 package sawfowl.regionguard.data;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
@@ -19,6 +20,11 @@ import sawfowl.regionguard.api.data.MemberData;
 public class MemberDataImpl implements MemberData {
 	
 	public MemberDataImpl(){}
+	public MemberDataImpl(String name, UUID uuid, TrustTypes type) {
+		memberName = name;
+		this.uuid = uuid;
+		trustLevel = type;
+	}
 
 	public MemberData.Builder builder() {
 		return new Builder() {
@@ -31,36 +37,47 @@ public class MemberDataImpl implements MemberData {
 
 			@Override
 			public Builder setTrustType(TrustTypes type) {
-				trustLevel = type.toString();
+				trustLevel = type;
 				return this;
 			}
 
 			@Override
 			public MemberData setServer() {
-				trustLevel = TrustTypes.OWNER.toString();
+				trustLevel = TrustTypes.OWNER;
 				memberName = "Server";
+				uuid = new UUID(0,0);
 				replaceNameInTitle = true;
 				return build();
 			}
 
 			@Override
 			public Builder setPlayer(ServerPlayer player, TrustTypes type) {
-				memberName = player.name();
-				return setTrustType(type);
+				return setPlayer(player.profile(), type);
 			}
 
 			@Override
 			public Builder setPlayer(GameProfile player, TrustTypes trustType) {
 				memberName = player.name().orElse(player.examinableName());
+				uuid = player.uniqueId();
 				return setTrustType(trustType);
+			}
+
+			@Override
+			public MemberData from(MemberData data) {
+				memberName = data.getName();
+				uuid = data.getUniqueId();
+				trustLevel = data.getTrustType();
+				return MemberDataImpl.this;
 			}
 		};
 	}
 
-	@Setting("MemberName")
+	@Setting("Name")
 	private String memberName;
+	@Setting("UUID")
+	private UUID uuid;
 	@Setting("TrustLevel")
-	private String trustLevel;
+	private TrustTypes trustLevel;
 	@Setting("ReplaceNameInTitle")
 	private boolean replaceNameInTitle = false;
 
@@ -69,6 +86,10 @@ public class MemberDataImpl implements MemberData {
 	 */
 	public String getName() {
 		return memberName;
+	}
+
+	public UUID getUniqueId() {
+		return uuid;
 	}
 
 	/**
@@ -107,14 +128,14 @@ public class MemberDataImpl implements MemberData {
 	 * Obtaining a region member's trust type
 	 */
 	public TrustTypes getTrustType() {
-		return TrustTypes.checkType(trustLevel);
+		return trustLevel;
 	}
 
 	/**
 	 * Setting the type of trust for a region member
 	 */
 	public void setTrustType(TrustTypes level) {
-		trustLevel = level.toString();
+		trustLevel = level;
 	}
 
 	public boolean isReplaceNameInTitle() {
