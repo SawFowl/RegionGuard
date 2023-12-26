@@ -138,7 +138,7 @@ public interface Region extends DataSerializable {
 	/**
 	 * Getting a collection of the region's members.
 	 */
-	Collection<MemberData> getMembers();
+	List<MemberData> getMembers();
 
 	/**
 	 * Getting the data of the region member.

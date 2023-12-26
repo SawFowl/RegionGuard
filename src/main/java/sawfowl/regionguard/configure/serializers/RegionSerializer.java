@@ -52,9 +52,9 @@ public class RegionSerializer implements TypeSerializer<Region> {
 		node.node("UUID").set(region.getUniqueId());
 		node.node("World").set(region.getWorldKey().asString());
 		if(region.getCuboid() != null) node.node("Cuboid").set(region.getCuboid());
-		if(region.getChilds() != null && !region.getChilds().isEmpty()) node.node("Childs").set(region.getChilds());
+		if(region.getChilds() != null && !region.getChilds().isEmpty()) node.node("Childs").setList(Region.class, region.getChilds());
 		if(region.getFlags() != null && !region.getFlags().isEmpty()) node.node("Flags").set(flagsToken, region.getFlags());
-		if(region.getMembers() != null && !region.getMembers().isEmpty()) node.node("Members").set(region.getMembers());
+		if(region.getMembers() != null && !region.getMembers().isEmpty()) node.node("Members").setList(MemberData.class, region.getMembers());
 		node.node("Type").set(region.getType().toString());
 		node.node("Created").set(region.getCreationTime());
 		if(region.getJoinMessages() != null && !region.getJoinMessages().isEmpty()) node.node("JoinMessage").set(mapComponentsToken, region.getJoinMessages());

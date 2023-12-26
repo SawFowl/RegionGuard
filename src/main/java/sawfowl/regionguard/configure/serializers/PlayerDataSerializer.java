@@ -14,7 +14,7 @@ public class PlayerDataSerializer implements TypeSerializer<PlayerData> {
 
 	@Override
 	public PlayerData deserialize(Type type, ConfigurationNode node) throws SerializationException {
-		return node.virtual() || node.empty() ? PlayerData.zero() : node.get(PlayerDataImpl.class);
+		return node.virtual() || node.empty() ? PlayerData.zero() : (PlayerData) node.get(PlayerDataImpl.class);
 	}
 
 	@Override

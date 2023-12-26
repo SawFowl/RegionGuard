@@ -485,7 +485,7 @@ class Api implements RegionAPI {
 	}
 
 	private ItemStack getWandItemFromConfig() {
-		return setNBT(plugin.getConfig().getWanditem().getWandItem());
+		return setNBT(plugin.getConfig().getWanditem().getItemStack());
 	}
 
 	private long getOptionLongValue(ServerPlayer player, String option) {

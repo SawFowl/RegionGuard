@@ -7,6 +7,9 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import com.google.gson.JsonParser;
+
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 import sawfowl.regionguard.api.SelectorTypes;
 
 @ConfigSerializable
@@ -48,7 +51,7 @@ public class MainConfig {
 	private MySQLConfig mySQLConfig = new MySQLConfig();
 
 	@Setting("WandItem")
-	private WandItem wanditem = new WandItem();
+	private SerializedItemStackJsonNbt wanditem = new SerializedItemStackJsonNbt("minecraft:stone_axe", 1, JsonParser.parseString("{\"Damage\":131}").getAsJsonObject());
 
 	@Setting("RegisterForgeListeners")
 	@Comment("Sometimes Sponge does not intercept Forge events. Enabling this option may fix the problem.\nIf the territory protection does not work at any action, please report it to the plugin developer's Discord server - https://discord.gg/4SMShjQ3Pe\nIn some cases, modifications to the mod code may be required.")
@@ -86,7 +89,7 @@ public class MainConfig {
 		return mySQLConfig;
 	}
 
-	public WandItem getWanditem() {
+	public SerializedItemStackJsonNbt getWanditem() {
 		return wanditem;
 	}
 

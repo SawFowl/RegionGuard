@@ -4,19 +4,19 @@ import java.lang.reflect.Type;
 import java.util.UUID;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.MemberData;
-import sawfowl.regionguard.data.MemberDataImpl;
 
 public class MemberDataSerializer implements TypeSerializer<MemberData> {
 
 	@Override
 	public MemberData deserialize(Type type, ConfigurationNode node) throws SerializationException {
-		return node.virtual() || node.empty() ? null : new MemberDataImpl(node.node("Name").getString("UnknownUserName"), node.node("UUID").get(UUID.class, new UUID(0,0)), TrustTypes.checkType(node.node("TrustLevel").getString("WITHOUT_TRUST")));
+		return node.virtual() || node.empty() ? null : MemberData.builder().setPlayer(GameProfile.of(node.node("UUID").get(UUID.class, new UUID(0,0)), node.node("Name").getString("UnknownUserName")), TrustTypes.checkType(node.node("TrustLevel").getString("WITHOUT_TRUST"))).build();
 	}
 
 	@Override

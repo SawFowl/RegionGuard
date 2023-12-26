@@ -68,6 +68,7 @@ public class RegionImpl implements Region {
 			
 			@Override
 			public @NotNull Region build() {
+				setCreationTime(System.currentTimeMillis());
 				return RegionImpl.this;
 			}
 
@@ -333,7 +334,7 @@ public class RegionImpl implements Region {
 	}
 
 	@Override
-	public Collection<MemberData> getMembers() {
+	public List<MemberData> getMembers() {
 		return members.stream().collect(Collectors.toUnmodifiableList());
 	}
 
