@@ -1,4 +1,4 @@
-package sawfowl.regionguard.configure;
+package sawfowl.regionguard.configure.storage;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -19,13 +19,14 @@ import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.configure.WorkData;
 import sawfowl.regionguard.configure.serializers.PlayerDataSerializer;
 import sawfowl.regionguard.data.PlayerDataImpl;
 
-public class WorkConfigs implements WorkData {
+public class FileStorage implements WorkData {
 
 	private final RegionGuard plugin;
-	public WorkConfigs(RegionGuard plugin) {
+	public FileStorage(RegionGuard plugin) {
 		this.plugin = plugin;
 	}
 

@@ -66,9 +66,8 @@ import sawfowl.regionguard.configure.Locales;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.configure.MainConfig;
 import sawfowl.regionguard.configure.MySQL;
-import sawfowl.regionguard.configure.WorkConfigs;
 import sawfowl.regionguard.configure.WorkData;
-import sawfowl.regionguard.configure.WorkTables;
+import sawfowl.regionguard.configure.storage.FileStorage;
 import sawfowl.regionguard.data.ChunkNumberImpl;
 import sawfowl.regionguard.data.ClaimedByPlayerImpl;
 import sawfowl.regionguard.data.CuboidImpl;
@@ -228,33 +227,7 @@ public class RegionGuard {
 				pluginContainer,
 				new SpongeCUIChannelHandler.RegistrationHandler(instance)
 		);
-		boolean mysql = getConfig().getMySQLConfig().isEnable();
-		if(mysql) mySQL = new MySQL(instance, getConfig().getMySQLConfig().getHost(), getConfig().getMySQLConfig().getPort(), getConfig().getMySQLConfig().getDatabase(), getConfig().getMySQLConfig().getUser(), getConfig().getMySQLConfig().getPassword(), getConfig().getMySQLConfig().getSSL());
-		if(!mysql) {
-			playersDataWork = regionsDataWork = new WorkConfigs(instance);
-		} else if(mysql && getConfig().getSplitStorage().isEnable()) {
-			if(getConfig().getSplitStorage().isPlayers() && getConfig().getSplitStorage().isRegions()) {
-				playersDataWork = regionsDataWork = new WorkTables(instance);
-				((WorkTables) regionsDataWork).createWorldsTables();
-				((WorkTables) playersDataWork).createTableForPlayers();
-			} else if(getConfig().getSplitStorage().isPlayers() && !getConfig().getSplitStorage().isRegions()) {
-				playersDataWork = new WorkTables(instance);
-				((WorkTables) playersDataWork).createTableForPlayers();
-				regionsDataWork = new WorkConfigs(instance);
-			} else if(!getConfig().getSplitStorage().isPlayers() && getConfig().getSplitStorage().isRegions()) {
-				regionsDataWork = new WorkTables(instance);
-				((WorkTables) regionsDataWork).createWorldsTables();
-				playersDataWork = new WorkConfigs(instance);
-			} else {
-				playersDataWork = regionsDataWork = new WorkConfigs(instance);
-			}
-		} else if(mysql) {
-			playersDataWork = regionsDataWork = new WorkTables(instance);
-			((WorkTables) regionsDataWork).createWorldsTables();
-			((WorkTables) playersDataWork).createTableForPlayers();
-		} else {
-			playersDataWork = regionsDataWork = new WorkConfigs(instance);
-		}
+		playersDataWork = regionsDataWork = new FileStorage(instance);
 		api.updateWandItem();
 		if(Sponge.server().serviceProvider().economyService().isPresent()) {
 			economyService  = Sponge.server().serviceProvider().economyService().get();

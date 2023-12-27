@@ -3,6 +3,8 @@ package sawfowl.regionguard.configure;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import sawfowl.commandpack.utils.StorageType;
+
 @ConfigSerializable
 public class SplitStorage {
 
@@ -12,21 +14,21 @@ public class SplitStorage {
 	private boolean enable = false;
 
 	@Setting("Players")
-	private boolean players = false;
+	private String players = StorageType.FILE.typeName();
 
 	@Setting("Regions")
-	private boolean regions = false;
+	private String regions = StorageType.FILE.typeName();
 
 	public boolean isEnable() {
 		return enable;
 	}
 
-	public boolean isPlayers() {
-		return players;
+	public StorageType getPlayers() {
+		return StorageType.getType(players);
 	}
 
-	public boolean isRegions() {
-		return regions;
+	public StorageType getRegions() {
+		return StorageType.getType(regions);
 	}
 
 }

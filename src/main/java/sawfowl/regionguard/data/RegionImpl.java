@@ -192,7 +192,7 @@ public class RegionImpl implements Region {
 		};
 	}
 
-	@Setting("RegionName")
+	@Setting("Name")
 	private Map<String, Component> names = new HashMap<String, Component>();
 	@Setting("UUID")
 	private UUID regionUUID = UUID.randomUUID();
@@ -210,9 +210,9 @@ public class RegionImpl implements Region {
 	private String regionType;
 	@Setting("Created")
 	private long creationTime = 0;
-	@Setting("JoinMessages")
+	@Setting("JoinMessage")
 	private Map<String, Component> joinMessages = new HashMap<String, Component>();
-	@Setting("ExitMessages")
+	@Setting("ExitMessage")
 	private Map<String, Component> exitMessages = new HashMap<String, Component>();
 	@Setting("AdditionalData")
 	private AdditionalDataMap<? extends AdditionalData> additionalData = null;

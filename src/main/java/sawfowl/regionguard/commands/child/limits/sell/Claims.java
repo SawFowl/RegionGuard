@@ -38,9 +38,9 @@ public class Claims extends AbstractPlayerCommand {
 		long toSell = getLong(args, 0).get();
 		if(toSell <= 0) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_SELLCLAIMS_EXCEPTION_ENTERED_ZERO));
 		if(!plugin.getAPI().getPlayerData(src).isPresent()) plugin.getAPI().setPlayerData(src, PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(src), plugin.getAPI().getClaimedRegions(src))));
-		if(plugin.getAPI().getPlayerData(src).get().getLimits().getClaims() < toSell) throw new CommandException(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(plugin.getAPI().getPlayerData(src).get().getLimits().getClaims())), LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_TO_MUCH_VOLUME));
+		if(plugin.getAPI().getPlayerData(src).get().getLimits().getRegions() < toSell) throw new CommandException(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(plugin.getAPI().getPlayerData(src).get().getLimits().getRegions())), LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_TO_MUCH_VOLUME));
 		if(!plugin.getEconomy().addToPlayerBalance(src, plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(src)), BigDecimal.valueOf(toSell * plugin.getAPI().getSellClaimPrice(src)))) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_SELLCLAIMS_EXCEPTION_ECONOMY_EXCEPTION));
-		plugin.getAPI().setLimitClaims(src, plugin.getAPI().getPlayerData(src).get().getLimits().getClaims() - toSell);
+		plugin.getAPI().setLimitClaims(src, plugin.getAPI().getPlayerData(src).get().getLimits().getRegions() - toSell);
 		src.sendMessage(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.VOLUME), Arrays.asList(toSell, plugin.getAPI().getLimitClaims(src))), LocalesPaths.COMMAND_SELLCLAIMS_SUCCESS));
 	}
 

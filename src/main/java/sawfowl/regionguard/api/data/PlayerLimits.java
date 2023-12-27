@@ -13,8 +13,8 @@ public interface PlayerLimits extends DataSerializable {
 		return Sponge.game().builderProvider().provide(Builder.class);
 	}
 
-	static PlayerLimits of(long blocks, long claims, long subdivisions, long membersPerRegion) {
-		return builder().setBlocks(blocks).setClaims(claims).setSubdivisions(subdivisions).setMembersPerRegion(membersPerRegion).build();
+	static PlayerLimits of(long blocks, long regions, long subdivisions, long membersPerRegion) {
+		return builder().setBlocks(blocks).setRegions(regions).setSubdivisions(subdivisions).setMembersPerRegion(membersPerRegion).build();
 	}
 
 	static PlayerLimits zero() {
@@ -23,11 +23,11 @@ public interface PlayerLimits extends DataSerializable {
 
 	long getBlocks();
 
-	long getClaims();
+	long getRegions();
 
 	long getSubdivisions();
 
-	long getMembersPerRegion();
+	long getMembers();
 
 	PlayerLimits setBlocks(long limit);
 
@@ -41,7 +41,7 @@ public interface PlayerLimits extends DataSerializable {
 
 		Builder setBlocks(long limit);
 
-		Builder setClaims(long limit);
+		Builder setRegions(long limit);
 
 		Builder setSubdivisions(long limit);
 

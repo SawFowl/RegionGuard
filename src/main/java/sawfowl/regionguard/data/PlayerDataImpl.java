@@ -24,7 +24,7 @@ public class PlayerDataImpl implements PlayerData {
 			
 			@Override
 			public Builder setLimits(PlayerLimits limits) {
-				PlayerDataImpl.this.limits = (PlayerLimitsImpl) (limits instanceof PlayerLimitsImpl ? limits : PlayerLimits.of(limits.getBlocks(), limits.getClaims(), limits.getSubdivisions(), limits.getMembersPerRegion()));
+				PlayerDataImpl.this.limits = (PlayerLimitsImpl) (limits instanceof PlayerLimitsImpl ? limits : PlayerLimits.of(limits.getBlocks(), limits.getRegions(), limits.getSubdivisions(), limits.getMembers()));
 				return this;
 			}
 			

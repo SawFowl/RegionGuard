@@ -26,7 +26,7 @@ public class PlayerLimitsImpl implements PlayerLimits {
 			}
 
 			@Override
-			public Builder setClaims(long limit) {
+			public Builder setRegions(long limit) {
 				claims = limit;
 				return this;
 			}
@@ -51,14 +51,14 @@ public class PlayerLimitsImpl implements PlayerLimits {
 	private long claims;
 	@Setting("Subdivisions")
 	private long subdivisions;
-	@Setting("MembersPerRegion")
+	@Setting("Members")
 	private long membersPerRegion;
 
 	public long getBlocks() {
 		return blocks;
 	}
 
-	public long getClaims() {
+	public long getRegions() {
 		return claims;
 	}
 
@@ -66,7 +66,7 @@ public class PlayerLimitsImpl implements PlayerLimits {
 		return subdivisions;
 	}
 
-	public long getMembersPerRegion() {
+	public long getMembers() {
 		return membersPerRegion;
 	}
 

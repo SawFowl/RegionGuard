@@ -32,6 +32,9 @@ public class MySQLConfig {
 	@Setting("SSL")
 	private String ssl = "false";
 
+	@Setting("SyncInterval")
+	private long syncInterval = 10;
+
 	public boolean isEnable() {
 		return enable;
 	}
@@ -62,6 +65,10 @@ public class MySQLConfig {
 
 	public String getSSL() {
 		return ssl;
+	}
+
+	public long getSyncInterval() {
+		return syncInterval;
 	}
 
 }

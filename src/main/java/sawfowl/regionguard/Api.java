@@ -318,7 +318,7 @@ class Api implements RegionAPI {
 
 	@Override
 	public long getLimitClaims(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) ? (dataPlayers.get(player.uniqueId()).getLimits().getClaims() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) <= getLimitMaxClaims(player) ? dataPlayers.get(player.uniqueId()).getLimits().getClaims() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) : getLimitMaxClaims(player)) : getOptionLongValue(player, Permissions.LIMIT_CLAIMS);
+		return containsLimits(player.uniqueId()) ? (dataPlayers.get(player.uniqueId()).getLimits().getRegions() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) <= getLimitMaxClaims(player) ? dataPlayers.get(player.uniqueId()).getLimits().getRegions() + getOptionLongValue(player, Permissions.LIMIT_CLAIMS) : getLimitMaxClaims(player)) : getOptionLongValue(player, Permissions.LIMIT_CLAIMS);
 	}
 
 	@Override
@@ -328,12 +328,12 @@ class Api implements RegionAPI {
 
 	@Override
 	public long getLimitMembers(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) ? (dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) <= getLimitMaxMembers(player) ? dataPlayers.get(player.uniqueId()).getLimits().getMembersPerRegion() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) : getLimitMaxMembers(player)) : getOptionLongValue(player, Permissions.LIMIT_MEMBERS);
+		return containsLimits(player.uniqueId()) ? (dataPlayers.get(player.uniqueId()).getLimits().getMembers() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) <= getLimitMaxMembers(player) ? dataPlayers.get(player.uniqueId()).getLimits().getMembers() + getOptionLongValue(player, Permissions.LIMIT_MEMBERS) : getLimitMaxMembers(player)) : getOptionLongValue(player, Permissions.LIMIT_MEMBERS);
 	}
 
 	@Override
 	public long getLimitMembers(UUID player) {
-		return containsLimits(player) ? dataPlayers.get(player).getLimits().getMembersPerRegion() : 0;
+		return containsLimits(player) ? dataPlayers.get(player).getLimits().getMembers() : 0;
 	}
 
 	@Override
