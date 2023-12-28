@@ -11,6 +11,7 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.reference.ValueReference;
 
+import sawfowl.commandpack.utils.StorageType;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
 
 import sawfowl.regionguard.RegionGuard;
@@ -28,6 +29,10 @@ public class FileStorage implements WorkData {
 	private final RegionGuard plugin;
 	public FileStorage(RegionGuard plugin) {
 		this.plugin = plugin;
+		if(!plugin.getConfig().getSplitStorage().isEnable() || plugin.getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
+			createDataForWorlds();
+			loadDataOfPlayers();
+		}
 	}
 
 	@Override

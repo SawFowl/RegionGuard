@@ -45,6 +45,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 import com.google.inject.Inject;
 
 import sawfowl.commandpack.api.CommandPack;
+import sawfowl.commandpack.utils.StorageType;
 import sawfowl.localeapi.api.LocaleService;
 import sawfowl.localeapi.api.event.LocaleServiseEvent;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
@@ -68,6 +69,8 @@ import sawfowl.regionguard.configure.MainConfig;
 import sawfowl.regionguard.configure.MySQL;
 import sawfowl.regionguard.configure.WorkData;
 import sawfowl.regionguard.configure.storage.FileStorage;
+import sawfowl.regionguard.configure.storage.H2Storage;
+import sawfowl.regionguard.configure.storage.MySqlStorage;
 import sawfowl.regionguard.data.ChunkNumberImpl;
 import sawfowl.regionguard.data.ClaimedByPlayerImpl;
 import sawfowl.regionguard.data.CuboidImpl;
@@ -227,7 +230,88 @@ public class RegionGuard {
 				pluginContainer,
 				new SpongeCUIChannelHandler.RegistrationHandler(instance)
 		);
-		playersDataWork = regionsDataWork = new FileStorage(instance);
+		boolean h2 = Sponge.pluginManager().plugin("h2driver").isPresent();
+		boolean mysql = Sponge.pluginManager().plugin("mysqldriver").isPresent();
+		if(getConfig().getMySQLConfig().isEnable()) {
+			if(getConfig().getSplitStorage().isEnable()) {
+				switch (getConfig().getSplitStorage().getPlayers()) {
+				case FILE: {
+					playersDataWork = new FileStorage(instance);
+					if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
+						regionsDataWork = playersDataWork;
+					} else if(mysql && getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
+						regionsDataWork = new MySqlStorage(instance);
+					} else if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
+						regionsDataWork = new H2Storage(instance);;
+					} else regionsDataWork = playersDataWork;
+				}
+				case MYSQL: {
+					if(mysql) {
+						playersDataWork = new MySqlStorage(instance);
+						if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
+							regionsDataWork = new FileStorage(instance);
+						} else if(getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
+							regionsDataWork = playersDataWork;
+						} else if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
+							regionsDataWork = new H2Storage(instance);
+						} else regionsDataWork = playersDataWork;
+					} else if(h2) {
+						if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
+							regionsDataWork = new FileStorage(instance);
+						} else if(getConfig().getSplitStorage().getRegions() == StorageType.H2) {
+							regionsDataWork = new H2Storage(instance);
+						} else regionsDataWork = playersDataWork;
+					} else regionsDataWork = playersDataWork = new FileStorage(instance);
+				}
+				case H2: {
+					if(h2) {
+						playersDataWork = new H2Storage(instance);
+						if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
+							regionsDataWork = new FileStorage(instance);
+						} else if(mysql && getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
+							regionsDataWork = new MySqlStorage(instance);
+						} else if(getConfig().getSplitStorage().getRegions() == StorageType.H2) {
+							regionsDataWork = playersDataWork;
+						} else regionsDataWork = playersDataWork = new FileStorage(instance);
+					} else {
+						playersDataWork = new H2Storage(instance);
+						if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
+							regionsDataWork = new FileStorage(instance);
+						} else if(mysql && getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
+							regionsDataWork = new MySqlStorage(instance);
+						} else regionsDataWork = playersDataWork = new FileStorage(instance);
+					}
+				}
+				default:
+					playersDataWork = regionsDataWork = new MySqlStorage(instance);
+				}
+			} else playersDataWork = regionsDataWork = new MySqlStorage(instance);
+		} else {
+			if(getConfig().getSplitStorage().isEnable()) {
+				switch (getConfig().getSplitStorage().getPlayers()) {
+				case FILE: {
+					playersDataWork = new FileStorage(instance);
+					if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
+						regionsDataWork = new H2Storage(instance);;
+					} else regionsDataWork = playersDataWork;
+				}
+				case MYSQL: {
+					playersDataWork = new FileStorage(instance);
+					 if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
+						regionsDataWork = new H2Storage(instance);
+					} else regionsDataWork = playersDataWork;
+				}
+				case H2: {
+					playersDataWork = new H2Storage(instance);
+					if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
+						regionsDataWork = new FileStorage(instance);
+					} else regionsDataWork = playersDataWork;
+				}
+				default:
+					playersDataWork = regionsDataWork = new MySqlStorage(instance);
+				}
+			} else playersDataWork = regionsDataWork = new FileStorage(instance);
+		}
 		api.updateWandItem();
 		if(Sponge.server().serviceProvider().economyService().isPresent()) {
 			economyService  = Sponge.server().serviceProvider().economyService().get();
@@ -237,8 +321,6 @@ public class RegionGuard {
 		} else {
 			logger.warn(locales.getText(Sponge.server().locale(), LocalesPaths.ECONOMY_NOT_FOUND));
 		}
-		regionsDataWork.createDataForWorlds();
-		playersDataWork.loadDataOfPlayers();
 		api.generateDefaultGlobalRegion();
 		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance));
