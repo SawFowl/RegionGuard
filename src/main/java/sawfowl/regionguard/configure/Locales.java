@@ -1,16 +1,15 @@
 package sawfowl.regionguard.configure;
 
 import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
 import sawfowl.localeapi.api.ConfigTypes;
 import sawfowl.localeapi.api.LocaleService;
 import sawfowl.localeapi.api.PluginLocale;
+import sawfowl.localeapi.api.Text;
 
 public class Locales {
 
@@ -26,20 +25,12 @@ public class Locales {
 		generateRu();
 	}
 
-	public Component getText(Locale locale, Object... path) {
+	public Component getComponent(Locale locale, Object... path) {
 		return getAbstractLocaleUtil(locale).getComponent(path);
 	}
 
-	public Component getTextWithReplaced(Locale locale, Map<String, String> map, Object... path) {
-		return replace(getText(locale, path), map);
-	}
-
-	public Component getTextReplaced(Locale locale, Map<String, Component> map, Object... path) {
-		return replaceComponent(getText(locale, path), map);
-	}
-
-	public Component getTextFromDefault(Object... path) {
-		return getAbstractLocaleUtil(org.spongepowered.api.util.locale.Locales.DEFAULT).getComponent(path);
+	public Text getText(Locale locale, Object... path) {
+		return getAbstractLocaleUtil(locale).getText(path);
 	}
 
 	public LocaleService getLocaleService() {
@@ -691,20 +682,6 @@ public class Locales {
 		save = check(locale, toText("&cНе удалось списать игровую валюту у игрока %player%."), null, LocalesPaths.ECONOMY_ERROR_TAKE_MONEY) || save;
 		
 		if(save) save(locale);
-	}
-
-	private Component replace(Component component, Map<String, String> map) {
-		for(Entry<String, String> entry : map.entrySet()) {
-			component = component.replaceText(TextReplacementConfig.builder().match(entry.getKey()).replacement(Component.text(entry.getValue())).build());
-		}
-		return component;
-	}
-
-	private Component replaceComponent(Component component, Map<String, Component> map) {
-		for(Entry<String, Component> entry : map.entrySet()) {
-			component = component.replaceText(TextReplacementConfig.builder().match(entry.getKey()).replacement(entry.getValue()).build());
-		}
-		return component;
 	}
 
 	private PluginLocale getAbstractLocaleUtil(Locale locale) {

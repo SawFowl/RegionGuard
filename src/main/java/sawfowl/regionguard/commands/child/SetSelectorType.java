@@ -34,12 +34,12 @@ public class SetSelectorType extends AbstractPlayerCommand {
 		switch (getArgument(SelectorTypes.class, args, 0).get()) {
 		case CUBOID: {
 			plugin.getAPI().setSelectorType(src, SelectorTypes.CUBOID);
-			src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_SELECTOR_CUBOID));
+			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_SELECTOR_CUBOID));
 			break;
 		}
 		default:
 			plugin.getAPI().setSelectorType(src, SelectorTypes.FLAT);
-			src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_SELECTOR_FLAT));
+			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_SELECTOR_FLAT));
 		}
 	}
 

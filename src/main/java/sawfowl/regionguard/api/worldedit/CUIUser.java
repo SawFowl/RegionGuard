@@ -8,7 +8,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.utils.worldedit.cuievents.CUIEvent;
+import sawfowl.regionguard.implementsapi.worldedit.cui.events.CUIEvent;
 
 public interface CUIUser {
 

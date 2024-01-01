@@ -56,38 +56,35 @@ public class H2Storage extends AbstractSqlStorage {
 	public void saveRegion(Region region) {
 		String sql = null;
 		if(region.isGlobal()) {
-			sql = "MERGE INTO " + prefix + "worlds(UUID, WORLD, NAME, REGION_TYPE, CREATION_TIME, JOIN_MESSAGE, EXIT_MESSAGE, FLAGS, MEMBERS, ADDITIONAL_DATA) VALUES('"
+			sql = "MERGE INTO " + prefix + "worlds(UUID, WORLD, NAME, CREATION_TIME, JOIN_MESSAGE, EXIT_MESSAGE, FLAGS, MEMBERS, ADDITIONAL_DATA) VALUES('"
 			+ region.getUniqueId().toString() + "', '"
 			+ region.getWorldKey().asString() + "', '"
 			+ getSerializedData(region.getNames(), mapComponentsToken) + "', '"
-			+ region.getType().toString() + "', '"
 			+ region.getCreationTime() + "', '"
 			+ getSerializedData(region.getJoinMessages(), mapComponentsToken) + "', '"
 			+ getSerializedData(region.getExitMessages(), mapComponentsToken) + "', '"
 			+ getSerializedData(region.getFlags(), flagsToken) + "', '"
-			+ getSerializedData(region.getMembers(), membersToken) + "', '"
-			+ getSerializedData(region.getAllAdditionalData(), dataMapToken) + "', '"
-			+ region.getWorldKey().asString()
-			+ "');";
+			+ getSerializedData(convertMembersToMap(region.getMembers()), membersToken) + "', '"
+			+ getSerializedData(region.getAllAdditionalData(), dataMapToken) + "');";
 		} else {
 			sql = "MERGE INTO " + prefix + "world_" + region.getWorldKey().asString().replace(':', '_') + "(UUID, NAME, REGION_TYPE, CREATION_TIME, JOIN_MESSAGE, EXIT_MESSAGE, FLAGS, MEMBERS, MIN_X, MIN_Y, MIN_Z, MAX_X, MAX_Y, MAX_Z, SELECTOR_TYPE, ADDITIONAL_DATA, PARRENT) VALUES('"
-			+ region.getUniqueId().toString() + "', '"
-			+ getSerializedData(region.getNames(), mapComponentsToken) + "', '"
-			+ region.getType().toString() + "', '"
-			+ region.getCreationTime() + "', '"
-			+ getSerializedData(region.getJoinMessages(), mapComponentsToken) + "', '"
-			+ getSerializedData(region.getExitMessages(), mapComponentsToken) + "', '"
-			+ getSerializedData(region.getFlags(), flagsToken) + "', '"
-			+ getSerializedData(region.getMembers(), membersToken) + "', '"
-			+ region.getCuboid().getMin().x() + "', '"
-			+ region.getCuboid().getMin().y() + "', '"
-			+ region.getCuboid().getMin().z() + "', '"
-			+ region.getCuboid().getMax().x() + "', '"
-			+ region.getCuboid().getMax().y() + "', '"
-			+ region.getCuboid().getMax().z() + "', '"
-			+ getSerializedData(region.getAllAdditionalData(), dataMapToken) + "', '"
-			+ region.getParrent().map(rg -> rg.getUniqueId().toString()).orElse(null)
-			+ "');";
+					+ region.getUniqueId().toString() + "', '"
+					+ getSerializedData(region.getNames(), mapComponentsToken) + "', '"
+					+ region.getType().toString() + "', '"
+					+ region.getCreationTime() + "', '"
+					+ getSerializedData(region.getJoinMessages(), mapComponentsToken) + "', '"
+					+ getSerializedData(region.getExitMessages(), mapComponentsToken) + "', '"
+					+ getSerializedData(region.getFlags(), flagsToken) + "', '"
+					+ getSerializedData(convertMembersToMap(region.getMembers()), membersToken) + "', '"
+					+ region.getCuboid().getMin().x() + "', '"
+					+ region.getCuboid().getMin().y() + "', '"
+					+ region.getCuboid().getMin().z() + "', '"
+					+ region.getCuboid().getMax().x() + "', '"
+					+ region.getCuboid().getMax().y() + "', '"
+					+ region.getCuboid().getMax().z() + "', '"
+					+ region.getCuboid().getSelectorType().toString() + "', '"
+					+ getSerializedData(region.getAllAdditionalData(), dataMapToken) + "', '"
+					+ region.getParrent().map(rg -> rg.getUniqueId().toString()).orElse(null) + "');";
 		}
 		executeSQL(sql);
 		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::saveRegion);
@@ -110,7 +107,7 @@ public class H2Storage extends AbstractSqlStorage {
 					Region region = getRegionfromResultSet(results, world);
 					UUID uuid = region.getUniqueId();
 					String parrent = results.getString("PARRENT");
-					if(parrent != null) {
+					if(parrent != null && !parrent.equalsIgnoreCase("null")) {
 						if(plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().toString().equals(parrent)).findFirst().isPresent()) {
 							plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().toString().equals(parrent)).findFirst().get().addChild(region);
 						} else {
@@ -179,7 +176,7 @@ public class H2Storage extends AbstractSqlStorage {
 	}
 
 	private void createWorldsTables() {
-		executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "worlds(UUID VARCHAR(128) UNIQUE, WORLD VARCHAR(128) UNIQUE, NAME LONGTEXT, REGION_TYPE TEXT, CREATION_TIME BIGINT, JOIN_MESSAGE LONGTEXT, EXIT_MESSAGE LONGTEXT, FLAGS LONGTEXT, MEMBERS LONGTEXT, ADDITIONAL_DATA LONGTEXT, PRIMARY KEY(WORLD));");
+		executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "worlds(UUID VARCHAR(128) UNIQUE, WORLD VARCHAR(128) UNIQUE, NAME LONGTEXT, CREATION_TIME BIGINT, JOIN_MESSAGE LONGTEXT, EXIT_MESSAGE LONGTEXT, FLAGS LONGTEXT, MEMBERS LONGTEXT, ADDITIONAL_DATA LONGTEXT, PRIMARY KEY(WORLD));");
 		for(ResourceKey worldKey : Sponge.server().worldManager().worldKeys()) {
 			executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "world_" + worldKey.asString().replace(':', '_')  + "(UUID VARCHAR(128) UNIQUE, NAME LONGTEXT, REGION_TYPE TEXT, CREATION_TIME BIGINT, JOIN_MESSAGE LONGTEXT, EXIT_MESSAGE LONGTEXT, FLAGS LONGTEXT, MEMBERS LONGTEXT, MIN_X BIGINT, MIN_Y BIGINT, MIN_Z BIGINT, MAX_X BIGINT, MAX_Y BIGINT, MAX_Z BIGINT, SELECTOR_TYPE TEXT, ADDITIONAL_DATA LONGTEXT, PARRENT VARCHAR(128), PRIMARY KEY(UUID));");
 		}
@@ -199,7 +196,7 @@ public class H2Storage extends AbstractSqlStorage {
 
 	private Region getRegionfromResultSet(ResultSet results, ServerWorld world) throws SQLException, ConfigurateException {
 		UUID uuid = UUID.fromString(results.getString("UUID"));
-		String mames = results.getString("NAMES");
+		String mames = results.getString("NAME");
 		String joinMessage = results.getString("JOIN_MESSAGE");
 		String exitMessage = results.getString("EXIT_MESSAGE");
 		String flags = results.getString("FLAGS");
@@ -207,22 +204,21 @@ public class H2Storage extends AbstractSqlStorage {
 		String additionalData = results.getString("ADDITIONAL_DATA");
 		return Region.builder()
 				.setUniqueId(uuid)
-				.addNames(mames != null && !mames.isEmpty() ? createTempConfigReader(mames, mapComponentsToken).get() : null)
+				.addNames(mames != null && !mames.isEmpty() ? createTempConfigReader(mames, mapComponentsToken) : null)
 				.setType(RegionTypes.valueOfName(results.getString("REGION_TYPE")))
 				.setCreationTime(results.getLong("CREATION_TIME"))
 				.setWorld(world)
-				.addJoinMessages(joinMessage != null && !joinMessage.isEmpty() ? createTempConfigReader(joinMessage, mapComponentsToken).get() : null)
-				.addExitMessages(exitMessage != null && !exitMessage.isEmpty() ? createTempConfigReader(exitMessage, mapComponentsToken).get() : null)
-				.setFlags(flags != null && !flags.isEmpty() ? createTempConfigReader(flags, flagsToken).get() : null)
-				.addMembers(members != null && !members.isEmpty() ? createTempConfigReader(members, membersToken).get() : null)
+				.addJoinMessages(joinMessage != null && !joinMessage.isEmpty() ? createTempConfigReader(joinMessage, mapComponentsToken) : null)
+				.addExitMessages(exitMessage != null && !exitMessage.isEmpty() ? createTempConfigReader(exitMessage, mapComponentsToken) : null)
+				.setFlags(flags != null && !flags.isEmpty() ? createTempConfigReader(flags, flagsToken) : null)
+				.addMembers(members != null && !members.isEmpty() ? convertMembersToList(createTempConfigReader(members, membersToken)) : null)
 				.setCuboid(Cuboid.of(SelectorTypes.checkType(results.getString("SELECTOR_TYPE")), Vector3i.from(results.getInt("MIN_X"), results.getInt("MIN_Y"), results.getInt("MIN_Z")), Vector3i.from(results.getInt("MAX_X"), results.getInt("MAX_Y"), results.getInt("MAX_Z"))))
-				.addAdditionalData(additionalData != null && !additionalData.isEmpty() ? createTempConfigReader(additionalData, dataMapToken).get() : null)
-				.setServerOwner()
+				.addAdditionalData(additionalData != null && !additionalData.isEmpty() ? createTempConfigReader(additionalData, dataMapToken) : null)
 				.build();
 	}
 
 	private Region getGlobalRegionfromResultSet(ResultSet results, ServerWorld world) throws SQLException, ConfigurateException {
-		String mames = results.getString("NAMES");
+		String mames = results.getString("NAME");
 		String joinMessage = results.getString("JOIN_MESSAGE");
 		String exitMessage = results.getString("EXIT_MESSAGE");
 		String flags = results.getString("FLAGS");
@@ -232,13 +228,12 @@ public class H2Storage extends AbstractSqlStorage {
 				.setUniqueId(UUID.fromString(results.getString("UUID")))
 				.setCreationTime(results.getLong("CREATION_TIME"))
 				.setWorld(world)
-				.addNames(mames != null && !mames.isEmpty() ? createTempConfigReader(mames, mapComponentsToken).get() : null)
-				.addJoinMessages(joinMessage != null && !joinMessage.isEmpty() ? createTempConfigReader(joinMessage, mapComponentsToken).get() : null)
-				.addExitMessages(exitMessage != null && !exitMessage.isEmpty() ? createTempConfigReader(exitMessage, mapComponentsToken).get() : null)
-				.setFlags(flags != null && !flags.isEmpty() ? createTempConfigReader(flags, flagsToken).get() : null)
-				.addMembers(members != null && !members.isEmpty() ? createTempConfigReader(members, membersToken).get() : null)
-				.addAdditionalData(additionalData != null && !additionalData.isEmpty() ? createTempConfigReader(additionalData, dataMapToken).get() : null)
-				.setServerOwner()
+				.addNames(mames != null && !mames.isEmpty() ? createTempConfigReader(mames, mapComponentsToken) : null)
+				.addJoinMessages(joinMessage != null && !joinMessage.isEmpty() ? createTempConfigReader(joinMessage, mapComponentsToken) : null)
+				.addExitMessages(exitMessage != null && !exitMessage.isEmpty() ? createTempConfigReader(exitMessage, mapComponentsToken) : null)
+				.setFlags(flags != null && !flags.isEmpty() ? createTempConfigReader(flags, flagsToken) : null)
+				.addMembers(members != null && !members.isEmpty() ? convertMembersToList(createTempConfigReader(members, membersToken)) : null)
+				.addAdditionalData(additionalData != null && !additionalData.isEmpty() ? createTempConfigReader(additionalData, dataMapToken) : null)
 				.setType(RegionTypes.GLOBAL)
 				.build();
 	}

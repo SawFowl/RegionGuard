@@ -52,7 +52,7 @@ public class DamageEntityAndCommandListener {
 		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
 		boolean isPvP = lastDamage.containsKey(player.uniqueId()) && System.currentTimeMillis() - lastDamage.get(player.uniqueId()) < 20000;
 		boolean isAllow = isPvP ? isAllowPvPCommand(region, player, event.command()) : isAllowCommand(region, player, event.command());
-		Component message = isPvP ? plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_EXECUTE_PVP) : plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_EXECUTE);
+		Component message = isPvP ? plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_EXECUTE_PVP) : plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_EXECUTE);
 		class CommandEvent implements RegionExecuteCommandEvent {
 
 			boolean cencelled;
@@ -130,7 +130,7 @@ public class DamageEntityAndCommandListener {
 		boolean isAllow = true;
 		if(optPlayer.isPresent() && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get()) && !optPlayer.get().uniqueId().equals(event.entity().uniqueId())) {
 			isAllow = false;
-			message = plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.PVP);
+			message = plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.PVP);
 		} else if(optEntity.isPresent() && !optEntity.get().uniqueId().equals(event.entity().uniqueId())) {
 			Entity entity = optEntity.get();
 			if(entity instanceof Projectile) {
@@ -143,10 +143,10 @@ public class DamageEntityAndCommandListener {
 			if(!entity.uniqueId().equals(event.entity().uniqueId())) {
 				if(player != null && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get())) {
 					isAllow = false;
-					message = plugin.getLocales().getText(player.locale(), LocalesPaths.PVP);
+					message = plugin.getLocales().getComponent(player.locale(), LocalesPaths.PVP);
 				} else if(!isAllowDamage(region, event.entity(), entity)) {
 					if(player != null) {
-						message = plugin.getLocales().getText(player.locale(), LocalesPaths.ENTITY_DAMAGE);
+						message = plugin.getLocales().getComponent(player.locale(), LocalesPaths.ENTITY_DAMAGE);
 					}
 					isAllow = false;
 				}

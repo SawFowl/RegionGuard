@@ -8,7 +8,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import sawfowl.regionguard.api.data.PlayerData;
-import sawfowl.regionguard.data.PlayerDataImpl;
+import sawfowl.regionguard.implementsapi.data.PlayerDataImpl;
 
 public class PlayerDataSerializer implements TypeSerializer<PlayerData> {
 

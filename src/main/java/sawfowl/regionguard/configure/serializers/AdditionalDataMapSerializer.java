@@ -9,7 +9,7 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import sawfowl.regionguard.api.data.AdditionalData;
 import sawfowl.regionguard.api.data.AdditionalDataMap;
-import sawfowl.regionguard.data.AdditionalDataHashMap;
+import sawfowl.regionguard.implementsapi.data.AdditionalDataHashMap;
 
 public class AdditionalDataMapSerializer implements TypeSerializer<AdditionalDataMap<? extends AdditionalData>> {
 

@@ -121,7 +121,7 @@ public class InteractItemListener{
 		}
 		RegionInteractItemEvent rgEvent = new InteractEvent();
 		rgEvent.setCancelled(!isAllow);
-		if(optPlayer.isPresent()) rgEvent.setMessage(liquidInteract ? plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.CANCEL_BREAK) : plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.INTERACT_ITEM));
+		if(optPlayer.isPresent()) rgEvent.setMessage(liquidInteract ? plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.CANCEL_BREAK) : plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.INTERACT_ITEM));
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);

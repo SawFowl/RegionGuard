@@ -1,6 +1,5 @@
 package sawfowl.regionguard.commands.child;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -20,7 +19,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.ReplaceUtil;
+import sawfowl.regionguard.utils.Placeholders;
 
 public class UpdateDefaultFlags extends AbstractPlayerCommand {
 
@@ -32,7 +31,7 @@ public class UpdateDefaultFlags extends AbstractPlayerCommand {
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
 		plugin.getDefaultFlagsConfig().setDefaultFlags(region);
-		src.sendMessage(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TYPE), Arrays.asList(region.getPrimaryParent().getType().toString())), LocalesPaths.COMMAND_UPDATEDEFAULTFLAGS_SUCCESS));
+		src.sendMessage(getText(locale, LocalesPaths.COMMAND_UPDATEDEFAULTFLAGS_SUCCESS).replace(Placeholders.TYPE, region.getPrimaryParent().getType().toString()).get());
 	}
 
 	@Override

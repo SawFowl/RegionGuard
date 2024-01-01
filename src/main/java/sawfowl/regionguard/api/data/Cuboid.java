@@ -59,7 +59,7 @@ public interface Cuboid extends DataSerializable {
 	 * @param position2 - second position
 	 * @param selectorType - flat or cuboid
 	 */
-	Cuboid setPositions(Vector3i position1, Vector3i position2 , SelectorTypes selectorType);
+	Cuboid setPositions(Vector3i position1, Vector3i position2 , SelectorTypes selectorType, ServerWorld world);
 
 	/**
 	 * Get the type of area selection.

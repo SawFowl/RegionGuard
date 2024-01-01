@@ -19,7 +19,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.ReplaceUtil;
+import sawfowl.regionguard.utils.Placeholders;
 
 public class Claim extends AbstractPlayerCommand {
 
@@ -30,19 +30,19 @@ public class Claim extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		Optional<Region> optRegion = plugin.getAPI().getTempRegion(src.uniqueId());
-		if(!optRegion.isPresent()) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND));
+		if(!optRegion.isPresent()) exception(locale, LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND);
 		Region region = optRegion.get();
-		if(!region.getWorld().isPresent()) throw new CommandException(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.WORLD), Arrays.asList(region.getWorldKey().toString())), LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND));
+		if(!region.getWorld().isPresent()) exception(locale, LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND, new String[] {Placeholders.WORLD}, region.getWorldKey().toString());
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			Region find = plugin.getAPI().findIntersectsRegion(region);
 			if(!plugin.getAPI().findIntersectsRegion(region).equals(region)) {
-				src.sendMessage(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(find.getCuboid().getMin().toString(), find.getCuboid().getMax().toString())), LocalesPaths.COMMAND_CLAIM_CANCEL));
+				src.sendMessage(getText(locale, LocalesPaths.COMMAND_CLAIM_CANCEL, new String[] {Placeholders.MIN, Placeholders.MAX}, find.getCuboid().getMin().toString(), find.getCuboid().getMax().toString()).get());
 				return;
 			}
 			if(region.isBasicClaim()) region.setFlags(plugin.getDefaultFlagsConfig().getClaimFlags());
 			if(region.isArena()) region.setFlags(plugin.getDefaultFlagsConfig().getArenaFlags());
 			if(region.isAdmin()) region.setFlags(plugin.getDefaultFlagsConfig().getAdminFlags());
-			src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_CLAIM_SUCCESS));
+			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_CLAIM_SUCCESS));
 			plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region, src, false, false);
 			plugin.getAPI().registerRegion(region);
 			plugin.getAPI().saveRegion(region);

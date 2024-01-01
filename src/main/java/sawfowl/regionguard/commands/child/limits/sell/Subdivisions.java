@@ -25,7 +25,7 @@ import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.ReplaceUtil;
+import sawfowl.regionguard.utils.Placeholders;
 
 public class Subdivisions extends AbstractPlayerCommand {
 
@@ -36,12 +36,12 @@ public class Subdivisions extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		long toSell = getLong(args, 0).get();
-		if(toSell <= 0) throw new CommandException(plugin.getLocales().getText(locale, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ENTERED_ZERO));
+		if(toSell <= 0) exception(locale, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ENTERED_ZERO);
 		if(!plugin.getAPI().getPlayerData(src).isPresent()) plugin.getAPI().setPlayerData(src, PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(src), plugin.getAPI().getClaimedRegions(src))));
-		if(plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions() < toSell) throw new CommandException(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions())), LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_TO_MUCH_VOLUME));
-		if(!plugin.getEconomy().addToPlayerBalance(src, plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(src)), BigDecimal.valueOf(toSell * plugin.getAPI().getSellSubdivisionPrice(src)))) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION));
+		if(plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions() < toSell) exception(locale, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_TO_MUCH_VOLUME, new String[] {Placeholders.MAX}, plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions());
+		if(!plugin.getEconomy().addToPlayerBalance(src, plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(src)), BigDecimal.valueOf(toSell * plugin.getAPI().getSellSubdivisionPrice(src)))) exception(locale, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION);
 		plugin.getAPI().setLimitSubdivisions(src, plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions() - toSell);
-		src.sendMessage(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.VOLUME), Arrays.asList(toSell, plugin.getAPI().getLimitSubdivisions(src))), LocalesPaths.COMMAND_SELLSUBDIVISIONS_SUCCESS));
+		src.sendMessage(getText(locale, LocalesPaths.COMMAND_SELLSUBDIVISIONS_SUCCESS).replace(new String[] {Placeholders.SIZE, Placeholders.VOLUME}, toSell, plugin.getAPI().getLimitSubdivisions(src)).get());
 	}
 
 	@Override

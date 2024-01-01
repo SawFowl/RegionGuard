@@ -27,7 +27,7 @@ import sawfowl.regionguard.api.data.MemberData;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.ReplaceUtil;
+import sawfowl.regionguard.utils.Placeholders;
 
 public class Untrust extends AbstractPlayerCommand {
 
@@ -38,18 +38,18 @@ public class Untrust extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
+		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
 		GameProfile profile = getArgument(GameProfile.class, args, 0).get();
 		if(src.hasPermission(Permissions.STAFF_TRUST)) {
 			if(!region.isCurrentTrustType(profile.uniqueId(), TrustTypes.OWNER)) {
 				untrust(region, src, profile);
 				return;
 			}
-			throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_UNTRUST_EXCEPTION_PLAYER_IS_OWNER));
+			exception(locale, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_PLAYER_IS_OWNER);
 		}
-		if(!region.getOwnerUUID().equals(src.uniqueId()) && !region.isCurrentTrustType(src, TrustTypes.MANAGER)) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_UNTRUST_EXCEPTION_NEED_TRUST_TYPE));
-		if(src.uniqueId().equals(profile.uniqueId())) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_UNTRUST_EXCEPTION_TARGET_SELF));
-		if(region.isCurrentTrustType(src, TrustTypes.MANAGER) && (region.isCurrentTrustType(profile.uniqueId(), TrustTypes.OWNER) || region.isCurrentTrustType(profile.uniqueId(), TrustTypes.MANAGER))) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_UNTRUST_EXCEPTION_TARGET_MANAGER));
+		if(!region.getOwnerUUID().equals(src.uniqueId()) && !region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(locale, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_NEED_TRUST_TYPE);
+		if(src.uniqueId().equals(profile.uniqueId())) exception(locale, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_TARGET_SELF);
+		if(region.isCurrentTrustType(src, TrustTypes.MANAGER) && (region.isCurrentTrustType(profile.uniqueId(), TrustTypes.OWNER) || region.isCurrentTrustType(profile.uniqueId(), TrustTypes.MANAGER))) exception(locale, LocalesPaths.COMMAND_UNTRUST_EXCEPTION_TARGET_MANAGER);
 		untrust(region, src, profile);
 	}
 
@@ -96,8 +96,8 @@ public class Untrust extends AbstractPlayerCommand {
 	private void untrust(Region region, ServerPlayer player, GameProfile untrustedPlayer) {
 		region.untrust(untrustedPlayer.uniqueId());
 		plugin.getAPI().saveRegion(region);
-		player.sendMessage(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER), Arrays.asList(untrustedPlayer.name().orElse(untrustedPlayer.examinableName()))), LocalesPaths.COMMAND_UNTRUST_SUCCESS_PLAYER));
-		if(Sponge.server().player(untrustedPlayer.uuid()).isPresent()) Sponge.server().player(untrustedPlayer.uuid()).get().sendMessage(plugin.getLocales().getTextWithReplaced(Sponge.server().player(untrustedPlayer.uuid()).get().locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(player.name(), region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_UNTRUST_SUCCESS_TARGET));
+		player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_UNTRUST_SUCCESS_PLAYER).replace(Placeholders.PLAYER, untrustedPlayer.name().orElse(untrustedPlayer.examinableName())).get());
+		if(Sponge.server().player(untrustedPlayer.uuid()).isPresent()) Sponge.server().player(untrustedPlayer.uuid()).get().sendMessage(getText(Sponge.server().player(untrustedPlayer.uuid()).get().locale(), LocalesPaths.COMMAND_UNTRUST_SUCCESS_TARGET).replace(new String[] {Placeholders.PLAYER, Placeholders.WORLD, Placeholders.MIN, Placeholders.MAX}, player.name(), region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString()).get());
 	}
 
 	private Optional<Region> findRegion(ServerPlayer player) {

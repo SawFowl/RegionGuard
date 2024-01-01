@@ -38,23 +38,23 @@ public class SetName extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale srcLocale, String[] args, Mutable arguments) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
+		if(region.isGlobal()) exception(srcLocale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
 		if(!src.hasPermission(Permissions.STAFF_SET_NAME)) {
-			if(!region.isTrusted(src)) throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_NAME_NOT_TRUSTED));
-			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_NAME_LOW_TRUST));
+			if(!region.isTrusted(src)) exception(srcLocale, LocalesPaths.COMMAND_SET_NAME_NOT_TRUSTED);
+			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(srcLocale, LocalesPaths.COMMAND_SET_NAME_LOW_TRUST);
 		}
 		Locale locale = getString(args, 0).isPresent() ? locales.get(getString(args, 0).get()) : srcLocale;
 		boolean clearFlag = getString(args, 1).isPresent();
 		if(clearFlag) {
 			region.setName(null, locale);
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
-			src.sendMessage(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_NAME_CLEARED));
+			src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_NAME_CLEARED));
 		} else {
 			Component newName = getArgument(Component.class, args, 2).get();
-			if(TextUtils.clearDecorations(newName).length() > 20) throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_NAME_TOO_LONG));
+			if(TextUtils.clearDecorations(newName).length() > 20) exception(srcLocale, LocalesPaths.COMMAND_SET_NAME_TOO_LONG);
 			region.setName(newName, locale);
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
-			src.sendMessage(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_NAME_SUCCESS));
+			src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_NAME_SUCCESS));
 		}
 	}
 

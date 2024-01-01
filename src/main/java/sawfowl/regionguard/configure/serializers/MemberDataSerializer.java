@@ -21,9 +21,9 @@ public class MemberDataSerializer implements TypeSerializer<MemberData> {
 
 	@Override
 	public void serialize(Type arg0, @Nullable MemberData data, ConfigurationNode node) throws SerializationException {
-		node.node("Name").set(String.class, data.getName());
-		node.node("UUID").set(UUID.class, data.getUniqueId());
-		node.node("TrustLevel").set(String.class, data.getTrustType().toString());
+		if(data.getName() != null) node.node("Name").set(String.class, data.getName());
+		if(data.getUniqueId() != null) node.node("UUID").set(UUID.class, data.getUniqueId());
+		if(data.getTrustType() != null) node.node("TrustLevel").set(String.class, data.getTrustType().toString());
 		if(!data.isReplaceNameInTitle()) {
 			if(!node.node("ReplaceNameInTitle").virtual()) node.removeChild("ReplaceNameInTitle");
 		} else node.node("ReplaceNameInTitle").set(Boolean.class, true);

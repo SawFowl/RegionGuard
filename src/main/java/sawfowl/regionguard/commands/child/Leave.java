@@ -3,7 +3,6 @@ package sawfowl.regionguard.commands.child;
 import java.util.List;
 import java.util.Locale;
 
-import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
@@ -30,16 +29,16 @@ public class Leave extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
-		if(region.isCurrentTrustType(src, TrustTypes.OWNER)) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_LEAVE_PLAYER_IS_OWNER));
-		if(!region.isTrusted(src)) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_LEAVE_PLAYER_NOT_TRUSTED));
-		src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_LEAVE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(messageCause -> {
+		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
+		if(region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_LEAVE_PLAYER_IS_OWNER));
+		if(!region.isTrusted(src)) exception(locale, LocalesPaths.COMMAND_LEAVE_PLAYER_NOT_TRUSTED);
+		src.sendMessage(getText(locale, LocalesPaths.COMMAND_LEAVE_CONFIRMATION_REQUEST).createCallBack(messageCause -> {
 			if(region.isTrusted(src)) {
 				region.untrust(src);
 				plugin.getAPI().saveRegion(region);
-				src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_LEAVE_SUCCESS));
+				src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_LEAVE_SUCCESS));
 			}
-		})));
+		}).get());
 	}
 
 	@Override

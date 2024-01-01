@@ -9,6 +9,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.localeapi.api.TextUtils;
@@ -25,10 +26,10 @@ public class Wand extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		if(src.inventory().contains(plugin.getAPI().getWandItem())) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_WAND_EXCEPTION_ITEM_EXIST));
-		if(src.inventory().freeCapacity() == 0) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_WAND_EXCEPTION_INVENTORY_IS_FULL));
+		if(src.inventory().contains(plugin.getAPI().getWandItem())) exception(locale, LocalesPaths.COMMAND_WAND_EXCEPTION_ITEM_EXIST);
+		if(src.inventory().freeCapacity() == 0) exception(locale, LocalesPaths.COMMAND_WAND_EXCEPTION_INVENTORY_IS_FULL);
 		src.inventory().offer(plugin.getAPI().getWandItem());
-		src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_WAND_SUCCESS));
+		src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_WAND_SUCCESS));
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent.Pre;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.common.mixin.core.world.entity.item.ItemEntityMixin;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -32,6 +33,7 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionSpawnEntityEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
+import sawfowl.regionguard.utils.ReflectionUtil;
 
 public class SpawnEntityListener {
 
@@ -58,7 +60,7 @@ public class SpawnEntityListener {
 		boolean allowSpawnExp = spawnExp && (optSource.isPresent() ? isAllowExpSpawn(region, optSource.get()) : isAllowExpSpawn(region, null));
 		boolean allowSpawnItem = true;
 		if(spawnItem) {
-			List<ItemStack> items = event.entities().stream().map(entity -> ((ItemStack) ((Object) (((ItemEntity) entity).getItem())))).collect(Collectors.toList());
+			List<ItemStack> items = event.entities().stream().map(entity -> ReflectionUtil.getValueFromMethodWhithTypeNoArgs(net.minecraft.world.item.ItemStack.class, ItemStack.class, ((ItemEntity) entity))).toList();
 			allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
 		} else allowSpawnItem = false;
 		boolean allowSpawnEntity = spawnEntity && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
@@ -120,7 +122,7 @@ public class SpawnEntityListener {
 		}
 		RegionSpawnEntityEvent rgEvent = new SpawnEvent();
 		rgEvent.setCancelled(!allowSpawn);
-		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.SPAWN));
+		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.SPAWN));
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);

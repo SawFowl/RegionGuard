@@ -22,7 +22,7 @@ import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.commands.abstractcommands.AbstractCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.ReplaceUtil;
+import sawfowl.regionguard.utils.Placeholders;
 
 public class Subdivisions extends AbstractCommand {
 
@@ -35,10 +35,10 @@ public class Subdivisions extends AbstractCommand {
 		String sourceName = isPlayer ? ((ServerPlayer) audience).name() : "Server";
 		ServerPlayer target = getPlayer(args, 0).get();
 		long toSet = getLong(args, 1).get();
-		if(toSet < 0) throw new CommandException(plugin.getLocales().getText(locale, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_LESS_THEN_ZERO));
+		if(toSet < 0) exception(locale, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_LESS_THEN_ZERO);
 		plugin.getAPI().setLimitSubdivisions(target, toSet);
-		audience.sendMessage(plugin.getLocales().getTextWithReplaced(locale, ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.PLAYER), Arrays.asList(toSet, target.name())), LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_SOURCE));
-		target.sendMessage(plugin.getLocales().getTextWithReplaced(target.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.PLAYER), Arrays.asList(toSet, sourceName)), LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_TARGET));
+		audience.sendMessage(getText(locale, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_SOURCE).replace(new String[] {Placeholders.SIZE, Placeholders.PLAYER}, toSet, target.name()).get());
+		target.sendMessage(getText(target.locale(), LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_TARGET).replace(new String[] {Placeholders.SIZE, Placeholders.PLAYER}, toSet, sourceName).get());
 	}
 
 	@Override

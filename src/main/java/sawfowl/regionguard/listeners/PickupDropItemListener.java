@@ -105,7 +105,7 @@ public class PickupDropItemListener {
 		}
 		RegionChangeInventoryEvent rgEvent = new DropEvent();
 		rgEvent.setCancelled(!allowPickup);
-		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.ITEM_PICKUP));
+		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.ITEM_PICKUP));
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);
@@ -185,7 +185,7 @@ public class PickupDropItemListener {
 		}
 		RegionChangeInventoryEvent rgEvent = new DropEvent();
 		rgEvent.setCancelled(!allowDrop);
-		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.ITEM_DROP));
+		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.ITEM_DROP));
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);

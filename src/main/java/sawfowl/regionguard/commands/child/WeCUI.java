@@ -31,11 +31,11 @@ public class WeCUI extends AbstractPlayerCommand {
 		CUIUser user = plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(src);
 		boolean newValue = !user.isSupportCUI();
 		if(newValue) {
-			src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_WECUI_ENABLE));
+			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_WECUI_ENABLE));
 		} else {
 			plugin.getAPI().getWorldEditCUIAPI().revertVisuals(src, null);
 			plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(src);
-			src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_WECUI_DISABLE));
+			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_WECUI_DISABLE));
 		}
 		user.setSupportCUI(newValue);
 	}

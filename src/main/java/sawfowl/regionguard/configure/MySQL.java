@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import sawfowl.regionguard.RegionGuard;
+import sawfowl.regionguard.configure.configs.MySQLConfig;
 
 public class MySQL {
 
@@ -18,15 +19,15 @@ public class MySQL {
 	private final String ssl;
 	private Connection connection;
 
-	public MySQL(RegionGuard instance, String hostname, String port, String database, String username, String password, String ssl) {
+	public MySQL(RegionGuard instance, MySQLConfig config) {
 		this.plugin = instance;
-		this.hostname = hostname;
-		this.port = port;
-		this.database = database;
-		this.user = username;
-		this.password = password;
-		this.ssl = ssl;
-		this.connection = null;
+		this.hostname = config.getHost();
+		this.port = config.getPort();
+		this.database = config.getDatabase();
+		this.user = config.getUser();
+		this.password = config.getPassword();
+		this.ssl = config.getSSL();
+		openConnection();
 	}
 
 	public Connection openConnection() {
@@ -59,7 +60,7 @@ public class MySQL {
 		} catch (SQLException e) {
 			plugin.getLogger().error(e.getMessage());
 		}
-		return null;
+		return connection;
 	}
 
 	public void closeConnection() {

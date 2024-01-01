@@ -102,7 +102,7 @@ public class InteractEntityListener {
 		}
 		RegionInteractEntityEvent rgEvent = new InteractEvent();
 		rgEvent.setCancelled(!isAllow);
-		rgEvent.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_PRIMARY));
+		rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_PRIMARY));
 		ListenerUtils.postEvent(rgEvent);
 		if(!rgEvent.isCancelled()) return;
 		event.setCancelled(true);
@@ -178,7 +178,7 @@ public class InteractEntityListener {
 		}
 		RegionInteractEntityEvent rgEvent = new InteractEvent();
 		rgEvent.setCancelled(!isAllow);
-		rgEvent.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_SECONDARY));
+		rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_SECONDARY));
 		ListenerUtils.postEvent(rgEvent);
 		if(!rgEvent.isCancelled()) return;
 		event.setCancelled(true);

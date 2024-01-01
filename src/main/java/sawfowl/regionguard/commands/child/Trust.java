@@ -24,7 +24,7 @@ import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.ReplaceUtil;
+import sawfowl.regionguard.utils.Placeholders;
 
 public class Trust extends AbstractPlayerCommand {
 
@@ -35,18 +35,18 @@ public class Trust extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
-		if(region.isAdmin()) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_ADMINCLAIM));
-		if((!region.isCurrentTrustType(src, TrustTypes.OWNER) && !region.isCurrentTrustType(src, TrustTypes.MANAGER)) && !src.hasPermission(Permissions.STAFF_TRUST)) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_NEED_TRUST_TYPE));
+		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
+		if(region.isAdmin()) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_ADMINCLAIM);
+		if((!region.isCurrentTrustType(src, TrustTypes.OWNER) && !region.isCurrentTrustType(src, TrustTypes.MANAGER)) && !src.hasPermission(Permissions.STAFF_TRUST)) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_NEED_TRUST_TYPE);
 		GameProfile trustedPlayer = getArgument(GameProfile.class, args, 0).get();
-		if(!src.hasPermission(Permissions.UNLIMIT_MEMBERS) && plugin.getAPI().getLimitMembers(region.getOwnerUUID()) <= region.getTotalMembers() - 1 && !region.getMemberData(trustedPlayer.uniqueId()).isPresent()) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_LIMIT_REACHED));
+		if(!src.hasPermission(Permissions.UNLIMIT_MEMBERS) && plugin.getAPI().getLimitMembers(region.getOwnerUUID()) <= region.getTotalMembers() - 1 && !region.getMemberData(trustedPlayer.uniqueId()).isPresent()) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_LIMIT_REACHED);
 		TrustTypes trustLevel = getArgument(TrustTypes.class, args, 1).get();
-		if((src.uniqueId().equals(trustedPlayer.uniqueId()) && !src.hasPermission(Permissions.STAFF_TRUST)) || (src.uniqueId().equals(trustedPlayer.uniqueId()) && region.isCurrentTrustType(src, TrustTypes.OWNER))) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_TARGET_SELF));
-		if(!region.isCurrentTrustType(src, TrustTypes.OWNER) && trustLevel == TrustTypes.MANAGER) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_TRUST_EXCEPTION_PLAYER_IS_NOT_OWNER));
+		if((src.uniqueId().equals(trustedPlayer.uniqueId()) && !src.hasPermission(Permissions.STAFF_TRUST)) || (src.uniqueId().equals(trustedPlayer.uniqueId()) && region.isCurrentTrustType(src, TrustTypes.OWNER))) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_TARGET_SELF);
+		if(!region.isCurrentTrustType(src, TrustTypes.OWNER) && trustLevel == TrustTypes.MANAGER) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_PLAYER_IS_NOT_OWNER);
 		region.setTrustType(trustedPlayer, trustLevel);
-		src.sendMessage(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TRUST_TYPE, ReplaceUtil.Keys.PLAYER), Arrays.asList(trustLevel.toString(), trustedPlayer.name())), LocalesPaths.COMMAND_TRUST_SUCCESS_PLAYER));
+		src.sendMessage(getText(locale, LocalesPaths.COMMAND_TRUST_SUCCESS_PLAYER).replace(new String[] {Placeholders.TRUST_TYPE, Placeholders.PLAYER}, trustLevel.toString(), trustedPlayer.name().orElse(trustedPlayer.examinableName())).get());
 		Sponge.server().player(trustedPlayer.uniqueId()).ifPresent(trusted -> {
-			trusted.sendMessage(plugin.getLocales().getTextWithReplaced(trusted.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TRUST_TYPE, ReplaceUtil.Keys.PLAYER, ReplaceUtil.Keys.WORLD, ReplaceUtil.Keys.MIN, ReplaceUtil.Keys.MAX), Arrays.asList(trustLevel.toString(), src.name(), region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString())), LocalesPaths.COMMAND_TRUST_SUCCESS_TARGET));
+			trusted.sendMessage(getText(trusted.locale(), LocalesPaths.COMMAND_TRUST_SUCCESS_TARGET).replace(new String[] {Placeholders.TRUST_TYPE, Placeholders.PLAYER, Placeholders.WORLD, Placeholders.MIN, Placeholders.MAX}, trustLevel.toString(), src.name(), region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString()).get());
 		});
 		plugin.getAPI().saveRegion(region.getPrimaryParent());
 	}

@@ -33,17 +33,17 @@ public class SetCreatingType extends AbstractPlayerCommand {
 		switch (RegionTypes.valueOfName(getString(args, 0).get())) {
 		case ARENA: {
 			plugin.getAPI().setCreatingRegionType(src, RegionTypes.ARENA);
-			src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_REGION_TYPE_ARENA));
+			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_REGION_TYPE_ARENA));
 			break;
 		}
 		case ADMIN: {
 			plugin.getAPI().setCreatingRegionType(src, RegionTypes.ADMIN);
-			src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_REGION_TYPE_ADMIN));
+			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_REGION_TYPE_ADMIN));
 			break;
 		}
 		default:
 			plugin.getAPI().setCreatingRegionType(src, RegionTypes.CLAIM);
-			src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_REGION_TYPE_CLAIM));
+			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_REGION_TYPE_CLAIM));
 		}
 	}
 

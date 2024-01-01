@@ -47,13 +47,13 @@ public class DeathListener {
 			});
 			if(!map.isEmpty()) {
 				inventories.put(player.uniqueId(), map);
-				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.KEEP_INVENTORY));
+				player.sendMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.KEEP_INVENTORY));
 			}
 		}
 		if(keepExp && !event.keepInventory() && player.get(Keys.EXPERIENCE).isPresent() && player.get(Keys.EXPERIENCE).get() > 0) {
 			exps.put(player.uniqueId(), player.get(Keys.EXPERIENCE).get());
 			player.offer(Keys.EXPERIENCE, 0);
-			player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.KEEP_EXP));
+			player.sendMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.KEEP_EXP));
 		}
 	}
 

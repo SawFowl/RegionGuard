@@ -39,12 +39,12 @@ public class SetMessage extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale srcLocale, String[] args, Mutable arguments) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
+		if(region.isGlobal()) exception(srcLocale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
 		if(!src.hasPermission(Permissions.STAFF_SET_MESSAGE)) {
-			if(!region.isTrusted(src)) throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_TRUSTED));
-			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_LOW_TRUST));
+			if(!region.isTrusted(src)) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_TRUSTED);
+			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_LOW_TRUST);
 		}
-		if(args.length == 0) throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_PRESENT));
+		if(args.length == 0) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_PRESENT);
 		boolean clearFlag = getString(args, 2).isPresent();
 		boolean exit = getString(args, 1).filter(string -> string.equals("-e") || string.equals("-exit")).isPresent();
 		boolean join = getString(args, 1).filter(string -> string.equals("-j") || string.equals("-join")).isPresent() || !exit;
@@ -52,28 +52,28 @@ public class SetMessage extends AbstractPlayerCommand {
 		if(clearFlag) {
 			if(join) {
 				region.setJoinMessage(null, locale);
-				src.sendMessage(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_CLEAR_JOIN));
+				src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_CLEAR_JOIN));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else if(exit) {
 				region.setExitMessage(null, locale);
-				src.sendMessage(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_CLEAR_EXIT));
+				src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_CLEAR_EXIT));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else {
-				throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT));
+				exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT);
 			}
 		} else {
 			Component message = getArgument(Component.class, args, 3).get();
-			if(TextUtils.clearDecorations(message).length() > 50) throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TOO_LONG));
+			if(TextUtils.clearDecorations(message).length() > 50) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TOO_LONG);
 			if(join) {
 				region.setJoinMessage(message, locale);
-				src.sendMessage(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_JOIN));
+				src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_JOIN));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else if(exit) {
 				region.setExitMessage(message, locale);
-				src.sendMessage(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_EXIT));
+				src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_EXIT));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else {
-				throw new CommandException(plugin.getLocales().getText(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT));
+				exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT);
 			}
 		}
 	}

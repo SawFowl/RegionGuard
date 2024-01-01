@@ -25,7 +25,7 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractCommand;
 import sawfowl.regionguard.commands.child.limits.Set;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.ReplaceUtil;
+import sawfowl.regionguard.utils.Placeholders;
 
 public class Limits extends AbstractCommand {
 
@@ -54,8 +54,8 @@ public class Limits extends AbstractCommand {
 		for(Region playerRegion : plugin.getAPI().getPlayerRegions(player)) {
 			claimedBlocks += playerRegion.getCuboid().getSize();
 		}
-		messages.add(plugin.getLocales().getTextWithReplaced(locale, ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.MAX), Arrays.asList(claimedBlocks, limitBlocks)), LocalesPaths.COMMAND_LIMITS_BLOCKS));
-		messages.add(plugin.getLocales().getTextWithReplaced(locale, ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.MAX), Arrays.asList(plugin.getAPI().getPlayerRegions(player).size(), limitClaims)), LocalesPaths.COMMAND_LIMITS_CLAIMS));
+		messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_BLOCKS).replace(new String[] {Placeholders.SIZE, Placeholders.MAX}, claimedBlocks, limitBlocks).get());
+		messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_CLAIMS).replace(new String[] {Placeholders.SIZE, Placeholders.MAX}, plugin.getAPI().getPlayerRegions(player).size(), limitClaims).get());
 		if(region.isCurrentTrustType(player, TrustTypes.OWNER)) {
 			if(region.containsChilds()) {
 				List<Region> list = new ArrayList<>();
@@ -65,7 +65,7 @@ public class Limits extends AbstractCommand {
 			} else {
 				plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region, player, true, false);
 			}
-			messages.add(plugin.getLocales().getTextWithReplaced(locale, ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.MAX), Arrays.asList(region.getAllChilds().size(), limitSubdivisions)), LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS));	
+			messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS).replace(new String[] {Placeholders.SIZE, Placeholders.MAX}, region.getAllChilds().size(), limitSubdivisions).get());	
 		}
 		sendPaginationList(player, getComponent(locale, LocalesPaths.COMMAND_LIMITS_HEADER), getComponent(locale, LocalesPaths.PADDING), 10, messages);
 	}

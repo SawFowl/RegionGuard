@@ -10,8 +10,8 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.data.PlayerDataImpl;
-import sawfowl.regionguard.data.RegionImpl;
+import sawfowl.regionguard.implementsapi.data.PlayerDataImpl;
+import sawfowl.regionguard.implementsapi.data.RegionImpl;
 
 public interface WorkData {
 

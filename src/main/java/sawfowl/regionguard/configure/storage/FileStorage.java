@@ -22,7 +22,7 @@ import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.WorkData;
 import sawfowl.regionguard.configure.serializers.PlayerDataSerializer;
-import sawfowl.regionguard.data.PlayerDataImpl;
+import sawfowl.regionguard.implementsapi.data.PlayerDataImpl;
 
 public class FileStorage implements WorkData {
 
@@ -37,6 +37,7 @@ public class FileStorage implements WorkData {
 
 	@Override
 	public void createDataForWorlds() {
+		checkWorldsFolder();
 		Sponge.server().worldManager().worlds().forEach(world -> {
 			if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-")).toFile().exists()) plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-")).toFile().mkdir();
 			try {
@@ -54,6 +55,7 @@ public class FileStorage implements WorkData {
 
 	@Override
 	public Region getWorldRegion(ServerWorld world) {
+		checkWorldsFolder();
 		if((plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf")).toFile().exists()) {
 			try {
 				ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
@@ -70,6 +72,7 @@ public class FileStorage implements WorkData {
 
 	@Override
 	public void saveRegion(Region region) {
+		checkWorldsFolder();
 		try {
 			ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(region.isGlobal() ? plugin.getConfigDir().resolve("Worlds" + File.separator + region.getWorldKey().asString().replace(":", "-") + File.separator + "WorldRegion.conf") : plugin.getConfigDir().resolve(
 					"Worlds" + File.separator + 
@@ -96,6 +99,7 @@ public class FileStorage implements WorkData {
 
 	@Override
 	public void loadRegions() {
+		checkWorldsFolder();
 		Sponge.server().worldManager().worlds().forEach(world -> {
 			try {
 				ValueReference<Region, CommentedConfigurationNode> globalReference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
@@ -169,11 +173,14 @@ public class FileStorage implements WorkData {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		}
-		
 	}
 
 	private void checkPlayersFolder() {
 		if(!plugin.getConfigDir().resolve("PlayersData").toFile().exists()) plugin.getConfigDir().resolve("PlayersData").toFile().mkdir();
+	}
+
+	private void checkWorldsFolder() {
+		if(!plugin.getConfigDir().resolve("Worlds").toFile().exists()) plugin.getConfigDir().resolve("Worlds").toFile().mkdir();
 	}
 
 	private ValueReference<Region, CommentedConfigurationNode> createRegionConfig(Path path) throws ConfigurateException {

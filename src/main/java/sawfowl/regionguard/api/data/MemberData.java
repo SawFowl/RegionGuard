@@ -87,6 +87,10 @@ public interface MemberData extends DataSerializable {
 
 		Builder setPlayer(GameProfile player, TrustTypes trustType);
 
+		Builder setName(String name);
+
+		Builder setUUID(UUID uuid);
+
 		Builder setTrustType(TrustTypes type);
 
 		MemberData setServer();

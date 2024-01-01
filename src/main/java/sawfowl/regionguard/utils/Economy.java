@@ -51,7 +51,7 @@ public class Economy {
                 if (result.result() == ResultType.SUCCESS) {
                 	return true;
                 } else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
-                	plugin.getLogger().error(plugin.getLocales().getText(player.locale(), LocalesPaths.ECONOMY_ERROR_GIVE_MONEY)
+                	plugin.getLogger().error(plugin.getLocales().getComponent(player.locale(), LocalesPaths.ECONOMY_ERROR_GIVE_MONEY)
                 				.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build()));
                 } else {
                 }
@@ -70,7 +70,7 @@ public class Economy {
                 if (result.result() == ResultType.SUCCESS) {
                 	return true;
                 } else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
-                	plugin.getLogger().error(plugin.getLocales().getText(player.locale(), LocalesPaths.ECONOMY_ERROR_TAKE_MONEY)
+                	plugin.getLogger().error(plugin.getLocales().getComponent(player.locale(), LocalesPaths.ECONOMY_ERROR_TAKE_MONEY)
             				.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build()));
                 } else {
                 }

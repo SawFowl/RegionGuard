@@ -39,11 +39,11 @@ public class Delete extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		if(region.isGlobal()) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND));
-		if(!region.getOwnerUUID().equals(src.uniqueId()) && !src.hasPermission(Permissions.STAFF_DELETE)) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_OWNER));
+		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
+		if(!region.getOwnerUUID().equals(src.uniqueId()) && !src.hasPermission(Permissions.STAFF_DELETE)) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_OWNER);
 		boolean regen = !region.getParrent().isPresent() && (src.hasPermission(Permissions.STAFF_DELETE) ? (getString(args, 0).isPresent()) && plugin.getConfig().getRegenerateTerritory().isStaff() : plugin.getConfig().getRegenerateTerritory().isAllPlayers());
-		if(regen) src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_DELETE_REGEN));
-		src.sendMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(messageCause -> {
+		if(regen) src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_REGEN));
+		src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(messageCause -> {
 			if(region.getParrent().isPresent()) {
 				Region parrent = region.getParrent().get();
 				RegionDeleteEvent event = new RegionDeleteEvent() {
@@ -82,7 +82,7 @@ public class Delete extends AbstractPlayerCommand {
 						return src;
 					}
 				};
-				event.setMessage(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_DELETE_CHILD_DELETED));
+				event.setMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_CHILD_DELETED));
 				Sponge.eventManager().post(event);
 				if(!event.isCancelled()) {
 					parrent.removeChild(region);
@@ -126,7 +126,7 @@ public class Delete extends AbstractPlayerCommand {
 						return src;
 					}
 				};
-				event.setMessage(region.containsChilds() ? plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_DELETE_DELETED_MAIN_AND_CHILDS) : plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_DELETE_DELETED));
+				event.setMessage(region.containsChilds() ? plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_DELETED_MAIN_AND_CHILDS) : plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_DELETED));
 				Sponge.eventManager().post(event);
 				if(!event.isCancelled()) {
 					if(region.getType() != RegionTypes.UNSET) {

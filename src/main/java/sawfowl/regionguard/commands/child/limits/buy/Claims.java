@@ -24,7 +24,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.ReplaceUtil;
+import sawfowl.regionguard.utils.Placeholders;
 
 public class Claims extends AbstractPlayerCommand {
 
@@ -35,19 +35,19 @@ public class Claims extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		long toBuy = getLong(args, 0).get();
-		if(toBuy <= 0) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_ENTERED_ZERO));
+		if(toBuy <= 0) exception(locale, LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_ENTERED_ZERO);
 		if(plugin.getAPI().getLimitMaxClaims(src) < toBuy + plugin.getAPI().getLimitClaims(src)) {
 			long max = plugin.getAPI().getLimitMaxClaims(src) - plugin.getAPI().getLimitClaims(src);
 			if(max < 0) max = 0;
-			throw new CommandException(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.MAX), Arrays.asList(max)), LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_TO_MUCH_VOLUME));
+			exception(locale, LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_TO_MUCH_VOLUME, new String[]  {Placeholders.MAX}, max);
 		}
 		double needMoney = plugin.getAPI().getBuyClaimPrice(src) * toBuy;
 		Currency currency = plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(src));
-		if(!plugin.getEconomy().checkPlayerBalance(src.uniqueId(), currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_NOT_ENOUGH_MONEY));
-		if(!plugin.getEconomy().removeFromPlayerBalance(src, currency, BigDecimal.valueOf(needMoney))) throw new CommandException(plugin.getLocales().getText(src.locale(), LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_ECONOMY_EXCEPTION));
+		if(!plugin.getEconomy().checkPlayerBalance(src.uniqueId(), currency, BigDecimal.valueOf(needMoney))) exception(locale, LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_NOT_ENOUGH_MONEY);
+		if(!plugin.getEconomy().removeFromPlayerBalance(src, currency, BigDecimal.valueOf(needMoney))) exception(locale, LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_ECONOMY_EXCEPTION);
 		if(!plugin.getAPI().getPlayerData(src).isPresent()) plugin.getAPI().setPlayerData(src, PlayerData.zero());
 		plugin.getAPI().setLimitClaims(src, toBuy);
-		src.sendMessage(plugin.getLocales().getTextWithReplaced(src.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE, ReplaceUtil.Keys.VOLUME), Arrays.asList(toBuy, plugin.getAPI().getLimitClaims(src))), LocalesPaths.COMMAND_BUYCLAIMS_SUCCESS));
+		src.sendMessage(getText(locale, LocalesPaths.COMMAND_BUYCLAIMS_SUCCESS).replace(new String[] {Placeholders.SIZE, Placeholders.VOLUME}, toBuy, plugin.getAPI().getLimitClaims(src)).get());
 	}
 
 	@Override

@@ -19,9 +19,6 @@ package sawfowl.regionguard;
 
 import java.nio.file.Path;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
@@ -31,6 +28,7 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
@@ -50,6 +48,7 @@ import sawfowl.localeapi.api.LocaleService;
 import sawfowl.localeapi.api.event.LocaleServiseEvent;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.regionguard.api.RegionAPI;
+import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.ChunkNumber;
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.Cuboid;
@@ -61,25 +60,28 @@ import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.child.limits.Buy;
 import sawfowl.regionguard.commands.child.limits.Sell;
-import sawfowl.regionguard.configure.CuiConfig;
-import sawfowl.regionguard.configure.DefaultFlags;
 import sawfowl.regionguard.configure.Locales;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.configure.MainConfig;
 import sawfowl.regionguard.configure.MySQL;
 import sawfowl.regionguard.configure.WorkData;
+import sawfowl.regionguard.configure.configs.CuiConfig;
+import sawfowl.regionguard.configure.configs.DefaultFlags;
+import sawfowl.regionguard.configure.configs.MainConfig;
 import sawfowl.regionguard.configure.storage.FileStorage;
 import sawfowl.regionguard.configure.storage.H2Storage;
 import sawfowl.regionguard.configure.storage.MySqlStorage;
-import sawfowl.regionguard.data.ChunkNumberImpl;
-import sawfowl.regionguard.data.ClaimedByPlayerImpl;
-import sawfowl.regionguard.data.CuboidImpl;
-import sawfowl.regionguard.data.FlagConfigImpl;
-import sawfowl.regionguard.data.FlagValueImpl;
-import sawfowl.regionguard.data.MemberDataImpl;
-import sawfowl.regionguard.data.PlayerDataImpl;
-import sawfowl.regionguard.data.PlayerLimitsImpl;
-import sawfowl.regionguard.data.RegionImpl;
+import sawfowl.regionguard.implementsapi.Api;
+import sawfowl.regionguard.implementsapi.data.ChunkNumberImpl;
+import sawfowl.regionguard.implementsapi.data.ClaimedByPlayerImpl;
+import sawfowl.regionguard.implementsapi.data.CuboidImpl;
+import sawfowl.regionguard.implementsapi.data.FlagConfigImpl;
+import sawfowl.regionguard.implementsapi.data.FlagValueImpl;
+import sawfowl.regionguard.implementsapi.data.MemberDataImpl;
+import sawfowl.regionguard.implementsapi.data.PlayerDataImpl;
+import sawfowl.regionguard.implementsapi.data.PlayerLimitsImpl;
+import sawfowl.regionguard.implementsapi.data.RegionImpl;
+import sawfowl.regionguard.implementsapi.worldedit.WorldEditAPI;
+import sawfowl.regionguard.implementsapi.worldedit.cui.handle.SpongeCUIChannelHandler;
 import sawfowl.regionguard.listeners.BlockAndWorldChangeListener;
 import sawfowl.regionguard.listeners.ChunkListener;
 import sawfowl.regionguard.listeners.ClientConnectionListener;
@@ -95,9 +97,8 @@ import sawfowl.regionguard.listeners.ItemUseListener;
 import sawfowl.regionguard.listeners.SpawnEntityListener;
 import sawfowl.regionguard.listeners.forge.ForgeExplosionListener;
 import sawfowl.regionguard.utils.Economy;
+import sawfowl.regionguard.utils.Logger;
 import sawfowl.regionguard.utils.RegenUtil;
-import sawfowl.regionguard.utils.worldedit.WorldEditAPI;
-import sawfowl.regionguard.utils.worldedit.cuihandle.SpongeCUIChannelHandler;
 
 @Plugin("regionguard")
 public class RegionGuard {
@@ -192,7 +193,7 @@ public class RegionGuard {
 	@Inject
 	public RegionGuard(PluginContainer pluginContainer, @ConfigDir(sharedRoot = false) Path configDirectory) {
 		instance = this;
-		logger = LogManager.getLogger("RegionGuard");
+		logger = new Logger();
 		this.pluginContainer = pluginContainer;
 		configDir = configDirectory;
 		configDirectory.toFile();
@@ -201,9 +202,6 @@ public class RegionGuard {
 	@Listener
 	public void onConstruct(LocaleServiseEvent.Construct event) {
 		localeService = event.getLocaleService();
-		if(!getConfigDir().resolve("Worlds").toFile().exists()) {
-			getConfigDir().resolve("Worlds").toFile().mkdir();
-		}
 		try {
 			configurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("Config.conf")).build().loadToReference();
 			this.mainConfig = configurationReference.referenceTo(MainConfig.class);
@@ -225,13 +223,16 @@ public class RegionGuard {
 		if(localeService == null) return;
 		api = new Api(instance);
 		regenUtil = new RegenUtil(instance);
+		if(getConfig().getMySQLConfig().isEnable()) {
+			mySQL = new MySQL(instance, getConfig().getMySQLConfig());
+		}
 		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
 		Sponge.game().eventManager().registerListeners(
 				pluginContainer,
 				new SpongeCUIChannelHandler.RegistrationHandler(instance)
 		);
 		boolean h2 = Sponge.pluginManager().plugin("h2driver").isPresent();
-		boolean mysql = Sponge.pluginManager().plugin("mysqldriver").isPresent();
+		boolean mysql = Sponge.pluginManager().plugin("mysqldriver").isPresent() && mySQL != null && mySQL.checkConnection();
 		if(getConfig().getMySQLConfig().isEnable()) {
 			if(getConfig().getSplitStorage().isEnable()) {
 				switch (getConfig().getSplitStorage().getPlayers()) {
@@ -242,8 +243,9 @@ public class RegionGuard {
 					} else if(mysql && getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
 						regionsDataWork = new MySqlStorage(instance);
 					} else if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
-						regionsDataWork = new H2Storage(instance);;
+						regionsDataWork = new H2Storage(instance);
 					} else regionsDataWork = playersDataWork;
+					break;
 				}
 				case MYSQL: {
 					if(mysql) {
@@ -262,6 +264,7 @@ public class RegionGuard {
 							regionsDataWork = new H2Storage(instance);
 						} else regionsDataWork = playersDataWork;
 					} else regionsDataWork = playersDataWork = new FileStorage(instance);
+					break;
 				}
 				case H2: {
 					if(h2) {
@@ -281,9 +284,11 @@ public class RegionGuard {
 							regionsDataWork = new MySqlStorage(instance);
 						} else regionsDataWork = playersDataWork = new FileStorage(instance);
 					}
+					break;
 				}
 				default:
 					playersDataWork = regionsDataWork = new MySqlStorage(instance);
+					break;
 				}
 			} else playersDataWork = regionsDataWork = new MySqlStorage(instance);
 		} else {
@@ -292,23 +297,27 @@ public class RegionGuard {
 				case FILE: {
 					playersDataWork = new FileStorage(instance);
 					if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
-						regionsDataWork = new H2Storage(instance);;
+						regionsDataWork = new H2Storage(instance);
 					} else regionsDataWork = playersDataWork;
+					break;
 				}
 				case MYSQL: {
 					playersDataWork = new FileStorage(instance);
-					 if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
+					if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
 						regionsDataWork = new H2Storage(instance);
 					} else regionsDataWork = playersDataWork;
+					break;
 				}
 				case H2: {
 					playersDataWork = new H2Storage(instance);
 					if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
 						regionsDataWork = new FileStorage(instance);
 					} else regionsDataWork = playersDataWork;
+					break;
 				}
 				default:
-					playersDataWork = regionsDataWork = new MySqlStorage(instance);
+					playersDataWork = regionsDataWork = new FileStorage(instance);
+					break;
 				}
 			} else playersDataWork = regionsDataWork = new FileStorage(instance);
 		}
@@ -319,7 +328,7 @@ public class RegionGuard {
 			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("buy", new Buy(instance));
 			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("sell", new Sell(instance));
 		} else {
-			logger.warn(locales.getText(Sponge.server().locale(), LocalesPaths.ECONOMY_NOT_FOUND));
+			logger.warn(locales.getComponent(Sponge.server().locale(), LocalesPaths.ECONOMY_NOT_FOUND));
 		}
 		api.generateDefaultGlobalRegion();
 		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
@@ -358,6 +367,7 @@ public class RegionGuard {
 		mainCommand = new sawfowl.regionguard.commands.Region(instance);
 		mainCommand.register(event);
 		mainCommand.getChildExecutors().get("wand").register(event);
+		saveConfigs();
 	}
 
 	@Listener
@@ -371,12 +381,20 @@ public class RegionGuard {
 		event.register(PlayerLimits.Builder.class, () -> new PlayerLimitsImpl().builder());
 		event.register(Region.Builder.class, () -> new RegionImpl().builder());
 		event.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
-		saveConfigs();
+	}
+
+	@Listener
+	public void onRefresh(RefreshGameEvent event) {
+		if(playersDataWork instanceof MySqlStorage) {
+			((MySqlStorage) playersDataWork).updateSync();
+		} else if (regionsDataWork instanceof MySqlStorage) {
+			((MySqlStorage) regionsDataWork).updateSync();
+		}
 	}
 
 	private void saveConfigs() {
 		try {
-			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
+			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.register(FlagValue.class, RegionSerializerCollection.COLLETCTION.get(FlagValue.class)))).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
 			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
 			flagsConfigurationReference.save();
 			flagsConfig.get().setSaveConsumer(consumer -> flagsConfig.setAndSave(flagsConfig.get()));

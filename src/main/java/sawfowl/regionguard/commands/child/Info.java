@@ -34,7 +34,7 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionDeleteEvent;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.ReplaceUtil;
+import sawfowl.regionguard.utils.Placeholders;
 
 public class Info extends AbstractPlayerCommand {
 
@@ -47,7 +47,7 @@ public class Info extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		Calendar calendar = Calendar.getInstance(src.locale());
+		Calendar calendar = Calendar.getInstance(locale);
 		calendar.setTimeInMillis(region.getCreationTime());
 		generateMessage(src, region, calendar);
 	}
@@ -86,19 +86,19 @@ public class Info extends AbstractPlayerCommand {
 		if(region == null || calendar == null) return;
 		if(!region.isGlobal()) plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region, player, false, false);
 		List<Component> messages = new ArrayList<Component>();
-		Component padding = plugin.getLocales().getText(player.locale(), LocalesPaths.PADDING);
+		Component padding = plugin.getLocales().getComponent(player.locale(), LocalesPaths.PADDING);
 		Component headerPart = Component.empty();
 		for(Component component : Collections.nCopies(12, padding)) headerPart = headerPart.append(component);
-		messages.add(headerPart.append(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_INFO_HEADER).append(headerPart)));
+		messages.add(headerPart.append(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_INFO_HEADER).append(headerPart)));
 		if(!region.isGlobal() && (player.hasPermission(Permissions.STAFF_DELETE) || region.isCurrentTrustType(player, TrustTypes.OWNER))) {
 			Component claim = Component.empty();
 			Component arena = Component.empty();
 			Component admin = Component.empty();
 			Component flags = null;
 			boolean regen = plugin.getConfig().getRegenerateTerritory().isAllPlayers() && !region.getParrent().isPresent();
-			if(regen) player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_REGEN));
-			Component delete = plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_INFO_DELETE).clickEvent(SpongeComponents.executeCallback(cause -> {
-				player.sendMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(cause2 -> {
+			if(regen) player.sendMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_DELETE_REGEN));
+			Component delete = plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_INFO_DELETE).clickEvent(SpongeComponents.executeCallback(cause -> {
+				player.sendMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(cause2 -> {
 					if(region.getParrent().isPresent()) {
 						Region parrent = region.getParrent().get();
 						RegionDeleteEvent event = new RegionDeleteEvent() {
@@ -137,7 +137,7 @@ public class Info extends AbstractPlayerCommand {
 								return player;
 							}
 						};
-						event.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_CHILD_DELETED));
+						event.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_DELETE_CHILD_DELETED));
 						Sponge.eventManager().post(event);
 						if(!event.isCancelled()) {
 							parrent.removeChild(region);
@@ -181,7 +181,7 @@ public class Info extends AbstractPlayerCommand {
 								return player;
 							}
 						};
-						event.setMessage(region.containsChilds() ? plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_DELETED_MAIN_AND_CHILDS) : plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_DELETE_DELETED));
+						event.setMessage(region.containsChilds() ? plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_DELETE_DELETED_MAIN_AND_CHILDS) : plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_DELETE_DELETED));
 						Sponge.eventManager().post(event);
 						if(!event.isCancelled()) {
 							if(region.getType() != RegionTypes.UNSET) {
@@ -225,26 +225,26 @@ public class Info extends AbstractPlayerCommand {
 				}));
 				messages.add(Component.empty().append(delete).append(claim).append(arena).append(admin));
 			} else {
-				flags = plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_INFO_SEE_FLAGS).clickEvent(ClickEvent.runCommand("/rg flag"));
+				flags = plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_INFO_SEE_FLAGS).clickEvent(ClickEvent.runCommand("/rg flag"));
 				messages.add(Component.empty().append(delete).append(flags));
 			}
 		} else {
-			messages.add(plugin.getLocales().getText(player.locale(), LocalesPaths.COMMAND_INFO_SEE_FLAGS).clickEvent(ClickEvent.runCommand("/rg flag")));
+			messages.add(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_INFO_SEE_FLAGS).clickEvent(ClickEvent.runCommand("/rg flag")));
 		}
 		messages.add(Component.text(" "));
-		messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.UUID), Arrays.asList(region.getUniqueId())), LocalesPaths.COMMAND_INFO_REGION_UUID));
-		if(region.getPlainName(player.locale()).isPresent()) messages.add(plugin.getLocales().getTextReplaced(player.locale(), ReplaceUtil.replaceMapComponents(Arrays.asList(ReplaceUtil.Keys.NAME), Arrays.asList(region.getName(player.locale()))), LocalesPaths.COMMAND_INFO_REGION_NAME));
-		messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TYPE), Arrays.asList(region.getType())), LocalesPaths.COMMAND_INFO_REGION_TYPE));
-		messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.DATE), Arrays.asList(format.format(calendar.getTime()))), LocalesPaths.COMMAND_INFO_CREATED));
+		messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_REGION_UUID).replace(Placeholders.UUID, region.getUniqueId()).get());
+		if(region.getPlainName(player.locale()).isPresent()) messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_REGION_NAME).replace(Placeholders.NAME, region.getName(player.locale())).get());
+		messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_REGION_TYPE).replace(Placeholders.TYPE, region.getType()).get());
+		messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_CREATED).replace(Placeholders.DATE, format.format(calendar.getTime())).get());
 		messages.add(Component.text("  "));
-		messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.OWNER), Arrays.asList(region.getOwnerName())), LocalesPaths.COMMAND_INFO_OWNER));
-		messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.UUID), Arrays.asList(region.getOwnerUUID())), LocalesPaths.COMMAND_INFO_OWNER_UUID));
+		messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_OWNER).replace(Placeholders.OWNER, region.getOwnerName()).get());
+		messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_OWNER_UUID).replace(Placeholders.UUID, region.getOwnerUUID()).get());
 		if(!region.isGlobal()) {
-			messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.SIZE), Arrays.asList(region.getTotalMembers())), LocalesPaths.COMMAND_INFO_MEMBERS));
+			messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_MEMBERS).replace(Placeholders.SIZE, region.getTotalMembers()).get());
 			messages.add(Component.text("   "));
-			messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.POS), Arrays.asList(region.getCuboid().getMin())), LocalesPaths.COMMAND_INFO_MIN_POS));
-			messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.POS), Arrays.asList(region.getCuboid().getMax())), LocalesPaths.COMMAND_INFO_MAX_POS));
-			messages.add(plugin.getLocales().getTextWithReplaced(player.locale(), ReplaceUtil.replaceMap(Arrays.asList(ReplaceUtil.Keys.TYPE), Arrays.asList(region.getCuboid().getSelectorType())), LocalesPaths.COMMAND_INFO_SELECTION_TYPE));
+			messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_MIN_POS).replace(Placeholders.POS, region.getCuboid().getMin()).get());
+			messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_MAX_POS).replace(Placeholders.POS, region.getCuboid().getMax()).get());
+			messages.add(getText(player.locale(), LocalesPaths.COMMAND_INFO_SELECTION_TYPE).replace(Placeholders.TYPE, region.getCuboid().getSelectorType()).get());
 		}
 		Component footer = Component.empty();
 		for(Component component : Collections.nCopies(headerWithoutDecorLength(messages.get(0)) - 2, padding)) footer = footer.append(component);

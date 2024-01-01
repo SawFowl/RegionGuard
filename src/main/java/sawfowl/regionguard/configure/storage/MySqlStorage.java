@@ -15,8 +15,6 @@ import java.util.concurrent.TimeUnit;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -56,7 +54,6 @@ public class MySqlStorage extends AbstractSqlStorage {
 			createDataForWorlds();
 		}
 		sync = syncTask();
-		Sponge.eventManager().registerListeners(plugin.getPluginContainer(), this);
 	}
 
 	@Override
@@ -86,19 +83,16 @@ public class MySqlStorage extends AbstractSqlStorage {
 	public void saveRegion(Region region) {
 		String sql = null;
 		if(region.isGlobal()) {
-			sql = "REPLACE INTO " + prefix + "worlds(uuid, world, name, region_type, creation_time, join_message, exit_message, flags, members, additional_data) VALUES('"
+			sql = "REPLACE INTO " + prefix + "worlds(uuid, world, name, creation_time, join_message, exit_message, flags, members, additional_data) VALUES('"
 			+ region.getUniqueId().toString() + "', '"
 			+ region.getWorldKey().asString() + "', '"
 			+ getSerializedData(region.getNames(), mapComponentsToken) + "', '"
-			+ region.getType().toString() + "', '"
 			+ region.getCreationTime() + "', '"
 			+ getSerializedData(region.getJoinMessages(), mapComponentsToken) + "', '"
 			+ getSerializedData(region.getExitMessages(), mapComponentsToken) + "', '"
 			+ getSerializedData(region.getFlags(), flagsToken) + "', '"
-			+ getSerializedData(region.getMembers(), membersToken) + "', '"
-			+ getSerializedData(region.getAllAdditionalData(), dataMapToken) + "', '"
-			+ region.getWorldKey().asString()
-			+ "');";
+			+ getSerializedData(convertMembersToMap(region.getMembers()), membersToken) + "', '"
+			+ getSerializedData(region.getAllAdditionalData(), dataMapToken) + "');";
 		} else {
 			sql = "REPLACE INTO " + prefix + "world_" + region.getWorldKey().asString().replace(':', '_') + "(uuid, name, region_type, creation_time, join_message, exit_message, flags, members, min_x, min_y, min_z, max_x, max_y, max_z, selector_type, additional_data, parrent) VALUES('"
 			+ region.getUniqueId().toString() + "', '"
@@ -108,16 +102,16 @@ public class MySqlStorage extends AbstractSqlStorage {
 			+ getSerializedData(region.getJoinMessages(), mapComponentsToken) + "', '"
 			+ getSerializedData(region.getExitMessages(), mapComponentsToken) + "', '"
 			+ getSerializedData(region.getFlags(), flagsToken) + "', '"
-			+ getSerializedData(region.getMembers(), membersToken) + "', '"
+			+ getSerializedData(convertMembersToMap(region.getMembers()), membersToken) + "', '"
 			+ region.getCuboid().getMin().x() + "', '"
 			+ region.getCuboid().getMin().y() + "', '"
 			+ region.getCuboid().getMin().z() + "', '"
 			+ region.getCuboid().getMax().x() + "', '"
 			+ region.getCuboid().getMax().y() + "', '"
 			+ region.getCuboid().getMax().z() + "', '"
+			+ region.getCuboid().getSelectorType().toString() + "', '"
 			+ getSerializedData(region.getAllAdditionalData(), dataMapToken) + "', '"
-			+ region.getParrent().map(rg -> rg.getUniqueId().toString()).orElse(null)
-			+ "');";
+			+ region.getParrent().map(rg -> rg.getUniqueId().toString()).orElse(null) + "');";
 		}
 		executeSQL(sql);
 		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::saveRegion);
@@ -141,7 +135,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 					Region region = getRegionfromResultSet(results, world);
 					UUID uuid = region.getUniqueId();
 					String parrent = results.getString("parrent");
-					if(parrent != null) {
+					if(parrent != null && !parrent.equalsIgnoreCase("null")) {
 						if(plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().toString().equals(parrent)).findFirst().isPresent()) {
 							plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().toString().equals(parrent)).findFirst().get().addChild(region);
 						} else {
@@ -162,6 +156,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 
 	@Override
 	public void savePlayerData(UUID player, PlayerData playerData) {
+		if(player == null || playerData == null) return;
 		String sql = "REPLACE INTO " + prefix + "player_data(uuid, claimed_blocks, claimed_regions, limit_blocks, limit_regions, limit_subdivisions, limit_members) VALUES("
 				+ "'" + player.toString() + "', '"
 				+ playerData.getClaimed().getBlocks() + "', '"
@@ -197,9 +192,8 @@ public class MySqlStorage extends AbstractSqlStorage {
 		}
 	}
 
-	@Listener
-	public void onRefresh(RefreshGameEvent event) {
-		if(!sync.isCancelled()) sync.cancel();
+	public void updateSync() {
+		if(sync != null && !sync.isCancelled()) sync.cancel();
 		sync = syncTask();
 	}
 
@@ -208,17 +202,19 @@ public class MySqlStorage extends AbstractSqlStorage {
 	}
 
 	private void createWorldsTables() {
-		executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "worlds(uuid VARCHAR(128) UNIQUE, world VARCHAR(128) UNIQUE, name LONGTEXT, region_type TEXT, creation_time BIGINT, join_message LONGTEXT, exit_message LONGTEXT, flags LONGTEXT, members LONGTEXT, additional_data LONGTEXT, written DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY(world));");
+		executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "worlds(uuid VARCHAR(128) UNIQUE, world VARCHAR(128) UNIQUE, name LONGTEXT, creation_time BIGINT, join_message LONGTEXT, exit_message LONGTEXT, flags LONGTEXT, members LONGTEXT, additional_data LONGTEXT, written DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY(world));");
 		for(ResourceKey worldKey : Sponge.server().worldManager().worldKeys()) {
 			executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "world_" + worldKey.asString().replace(':', '_')  + "(uuid VARCHAR(128) UNIQUE, name LONGTEXT, region_type TEXT, creation_time BIGINT, join_message LONGTEXT, exit_message LONGTEXT, flags LONGTEXT, members LONGTEXT, min_x BIGINT, min_y BIGINT, min_z BIGINT, max_x BIGINT, max_y BIGINT, max_z BIGINT, selector_type TEXT, additional_data LONGTEXT, parrent VARCHAR(128), written DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY(uuid));");
 		}
 	}
 
 	private ScheduledTask syncTask() {
+		if(plugin.getConfig().getMySQLConfig().getSyncInterval() < 1) return null;
 		return Sponge.asyncScheduler().submit(Task.builder().plugin(plugin.getPluginContainer()).interval(plugin.getConfig().getMySQLConfig().getSyncInterval(), TimeUnit.SECONDS).execute(() -> {
 			for(ServerWorld world : Sponge.server().worldManager().worlds()) {
 				try {
-					syncRegions(world);
+					syncGlobals(world);
+					syncClaims(world);
 					syncPlayers();
 				} catch (SQLException | ConfigurateException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());
@@ -245,7 +241,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 		} else loadDataOfPlayers();
 	}
 
-	private void syncRegions(ServerWorld world) throws SQLException, ConfigurateException {
+	private void syncGlobals(ServerWorld world) throws SQLException, ConfigurateException {
 		if(this.lastGlobalSync != null) {
 			ResultSet globalSet = resultSet("SELECT * FROM " + prefix + "worlds WHERE written > '" + this.lastGlobalSync + "' ORDER BY written;");
 			boolean updateTimeGlobal = false;
@@ -260,30 +256,33 @@ public class MySqlStorage extends AbstractSqlStorage {
 				}
 			}
 		} else plugin.getAPI().updateGlobalRegionData(world, getWorldRegion(world));
-		if(this.lastRegionSync != null) {
-			ResultSet regionsSet = resultSet("SELECT * FROM " + prefix + "world_" + world.key().asString().replace(':', '_') + " WHERE written > '" + this.lastRegionSync + "' ORDER BY written;");
-			boolean updateTimeRegion = false;
-			while(!regionsSet.isClosed() && regionsSet.next()) {
-				if(!updateTimeRegion) {
-					lastRegionSync = regionsSet.getString("written");
-					updateTimeRegion = true;
-				}
-				Region region = getRegionfromResultSet(regionsSet, world);
-				UUID uuid = region.getUniqueId();
-				String parrent = regionsSet.getString("parrent");
-				if(parrent == null) {
-					Optional<Region> registered = plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().equals(uuid)).findFirst();
-					if(registered.isPresent()) plugin.getAPI().unregisterRegion(registered.get());
+	}
+
+	private void syncClaims(ServerWorld world) throws SQLException, ConfigurateException {
+		ResultSet regionsSet = resultSet("SELECT * FROM " + prefix + "world_" + world.key().asString().replace(':', '_') + (this.lastRegionSync != null ? " WHERE written > '" + this.lastRegionSync + "'" : "") + " ORDER BY written;");
+		boolean updateTimeRegion = false;
+		while(!regionsSet.isClosed() && regionsSet.next()) {
+			if(!updateTimeRegion) {
+				lastRegionSync = regionsSet.getString("written");
+				updateTimeRegion = true;
+			}
+			Region region = getRegionfromResultSet(regionsSet, world);
+			UUID uuid = region.getUniqueId();
+			String parrent = regionsSet.getString("parrent");
+			if(parrent == null || parrent.equalsIgnoreCase("null")) {
+				Optional<Region> registered = plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().equals(uuid)).findFirst();
+				if(registered.isPresent()) {
+					plugin.getAPI().unregisterRegion(registered.get());
 					plugin.getAPI().registerRegion(region);
-				} else {
-					Optional<Region> findParrent = plugin.getAPI().getRegions().stream().map(rg -> rg.getAllChilds()).flatMap(Collection::stream).filter(rg -> rg.getParrent().isPresent() && rg.getParrent().get().getUniqueId().toString().equals(parrent)).findFirst();
-					if(findParrent.isPresent()) {
-						findParrent.get().getChilds().removeIf(child -> child.getUniqueId().equals(uuid));
-						findParrent.get().addChild(region);
-					}
+				}
+			} else {
+				Optional<Region> findParrent = plugin.getAPI().getRegions().stream().map(rg -> rg.getAllChilds()).flatMap(Collection::stream).filter(rg -> rg.getParrent().isPresent() && rg.getParrent().get().getUniqueId().toString().equals(parrent)).findFirst();
+				if(findParrent.isPresent()) {
+					findParrent.get().getChilds().removeIf(child -> child.getUniqueId().equals(uuid));
+					findParrent.get().addChild(region);
 				}
 			}
-		} else loadRegions();
+		}
 	}
 
 	private ClaimedByPlayer getClaimedByPlayer(ResultSet results) throws SQLException {
@@ -300,7 +299,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 
 	private Region getRegionfromResultSet(ResultSet results, ServerWorld world) throws SQLException, ConfigurateException {
 		UUID uuid = UUID.fromString(results.getString("uuid"));
-		String mames = results.getString("names");
+		String mames = results.getString("name");
 		String joinMessage = results.getString("join_message");
 		String exitMessage = results.getString("exit_message");
 		String flags = results.getString("flags");
@@ -308,22 +307,21 @@ public class MySqlStorage extends AbstractSqlStorage {
 		String additionalData = results.getString("additional_data");
 		return Region.builder()
 				.setUniqueId(uuid)
-				.addNames(mames != null && !mames.isEmpty() ? createTempConfigReader(mames, mapComponentsToken).get() : null)
+				.addNames(mames != null && !mames.isEmpty() ? createTempConfigReader(mames, mapComponentsToken) : null)
 				.setType(RegionTypes.valueOfName(results.getString("region_type")))
 				.setCreationTime(results.getLong("creation_time"))
 				.setWorld(world)
-				.addJoinMessages(joinMessage != null && !joinMessage.isEmpty() ? createTempConfigReader(joinMessage, mapComponentsToken).get() : null)
-				.addExitMessages(exitMessage != null && !exitMessage.isEmpty() ? createTempConfigReader(exitMessage, mapComponentsToken).get() : null)
-				.setFlags(flags != null && !flags.isEmpty() ? createTempConfigReader(flags, flagsToken).get() : null)
-				.addMembers(members != null && !members.isEmpty() ? createTempConfigReader(members, membersToken).get() : null)
+				.addJoinMessages(joinMessage != null && !joinMessage.isEmpty() ? createTempConfigReader(joinMessage, mapComponentsToken) : null)
+				.addExitMessages(exitMessage != null && !exitMessage.isEmpty() ? createTempConfigReader(exitMessage, mapComponentsToken) : null)
+				.setFlags(flags != null && !flags.isEmpty() ? createTempConfigReader(flags, flagsToken) : null)
+				.addMembers(members != null && !members.isEmpty() ? convertMembersToList(createTempConfigReader(members, membersToken)) : null)
 				.setCuboid(Cuboid.of(SelectorTypes.checkType(results.getString("selector_type")), Vector3i.from(results.getInt("min_x"), results.getInt("min_y"), results.getInt("min_z")), Vector3i.from(results.getInt("max_x"), results.getInt("max_y"), results.getInt("max_z"))))
-				.addAdditionalData(additionalData != null && !additionalData.isEmpty() ? createTempConfigReader(additionalData, dataMapToken).get() : null)
-				.setServerOwner()
+				.addAdditionalData(additionalData != null && !additionalData.isEmpty() ? createTempConfigReader(additionalData, dataMapToken) : null)
 				.build();
 	}
 
 	private Region getGlobalRegionfromResultSet(ResultSet results, ServerWorld world) throws SQLException, ConfigurateException {
-		String mames = results.getString("names");
+		String mames = results.getString("name");
 		String joinMessage = results.getString("join_message");
 		String exitMessage = results.getString("exit_message");
 		String flags = results.getString("flags");
@@ -333,13 +331,12 @@ public class MySqlStorage extends AbstractSqlStorage {
 				.setUniqueId(UUID.fromString(results.getString("uuid")))
 				.setCreationTime(results.getLong("creation_time"))
 				.setWorld(world)
-				.addNames(mames != null && !mames.isEmpty() ? createTempConfigReader(mames, mapComponentsToken).get() : null)
-				.addJoinMessages(joinMessage != null && !joinMessage.isEmpty() ? createTempConfigReader(joinMessage, mapComponentsToken).get() : null)
-				.addExitMessages(exitMessage != null && !exitMessage.isEmpty() ? createTempConfigReader(exitMessage, mapComponentsToken).get() : null)
-				.setFlags(flags != null && !flags.isEmpty() ? createTempConfigReader(flags, flagsToken).get() : null)
-				.addMembers(members != null && !members.isEmpty() ? createTempConfigReader(members, membersToken).get() : null)
-				.addAdditionalData(additionalData != null && !additionalData.isEmpty() ? createTempConfigReader(additionalData, dataMapToken).get() : null)
-				.setServerOwner()
+				.addNames(mames != null && !mames.isEmpty() ? createTempConfigReader(mames, mapComponentsToken) : null)
+				.addJoinMessages(joinMessage != null && !joinMessage.isEmpty() ? createTempConfigReader(joinMessage, mapComponentsToken) : null)
+				.addExitMessages(exitMessage != null && !exitMessage.isEmpty() ? createTempConfigReader(exitMessage, mapComponentsToken) : null)
+				.setFlags(flags != null && !flags.isEmpty() ? createTempConfigReader(flags, flagsToken) : null)
+				.addMembers(members != null && !members.isEmpty() ? convertMembersToList(createTempConfigReader(members, membersToken)) : null)
+				.addAdditionalData(additionalData != null && !additionalData.isEmpty() ? createTempConfigReader(additionalData, dataMapToken) : null)
 				.setType(RegionTypes.GLOBAL)
 				.build();
 	}

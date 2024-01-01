@@ -106,7 +106,7 @@ public class ImpactListener{
 		}
 		RegionImpactEvent.Block rgEvent = new ImpactEvent();
 		rgEvent.setCancelled(!isAllow);
-		if(player != null) rgEvent.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.IMPACT_BLOCK));
+		if(player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.IMPACT_BLOCK));
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);
@@ -185,7 +185,7 @@ public class ImpactListener{
 		}
 		RegionImpactEvent.Entity rgEvent = new ImpactEvent();
 		rgEvent.setCancelled(!isAllow);
-		if(player != null) rgEvent.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.IMPACT_ENTITY));
+		if(player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.IMPACT_ENTITY));
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);

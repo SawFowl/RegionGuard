@@ -104,7 +104,7 @@ public class ItemUseListener {
 		}
 		RegionUseItemStackEvent rgEvent = new UseEvent();
 		rgEvent.setCancelled(!isAllow);
-		if(optPlayer.isPresent()) rgEvent.setMessage(plugin.getLocales().getText(optPlayer.get().locale(), LocalesPaths.ITEM_USE));
+		if(optPlayer.isPresent()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.ITEM_USE));
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);
