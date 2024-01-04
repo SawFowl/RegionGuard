@@ -2,7 +2,6 @@ package sawfowl.regionguard.listeners;
 
 import java.util.Optional;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.entity.Entity;
@@ -22,7 +21,7 @@ import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionUseItemStackEvent;
+import sawfowl.regionguard.api.events.world.RegionUseItemStackEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
@@ -38,11 +37,11 @@ public class ItemUseListener {
 	public void onUse(UseItemStackEvent.Start event, @Root Entity entity) {
 		DataContainer container = event.itemStackInUse().toContainer();
 		if(container.get(DataQuery.of("UnsafeData")).isPresent() && container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) return;
-		ResourceKey worldKey = ((ServerWorld) entity.world()).key();
-		Region region = plugin.getAPI().findRegion(worldKey, entity.blockPosition());
+		ServerWorld world = entity.serverLocation().world();
+		Region region = plugin.getAPI().findRegion(world, entity.blockPosition());
 		boolean isAllow = isAllowUse(region, entity, event.itemStackInUse().createStack());
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
-		class UseEvent implements RegionUseItemStackEvent {
+		RegionUseItemStackEvent rgEvent = new RegionUseItemStackEvent() {
 
 			boolean cancelled;
 			Component message;
@@ -66,6 +65,7 @@ public class ItemUseListener {
 				return isAllow;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return optPlayer;
@@ -96,13 +96,18 @@ public class ItemUseListener {
 				cancelled = cancel;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public UseItemStackEvent.Start spongeEvent() {
+			public UseItemStackEvent.Start getSpongeEvent() {
 				return event;
 			}
-			
-		}
-		RegionUseItemStackEvent rgEvent = new UseEvent();
+
+			@Override
+			public ServerWorld getWorld() {
+				return world;
+			}
+
+		};
 		rgEvent.setCancelled(!isAllow);
 		if(optPlayer.isPresent()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.ITEM_USE));
 		ListenerUtils.postEvent(rgEvent);

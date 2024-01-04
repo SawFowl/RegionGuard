@@ -1,22 +1,22 @@
-package sawfowl.regionguard.api.events;
+package sawfowl.regionguard.api.events.world;
 
 import java.util.Optional;
 
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionImpactEvent extends RegionMessageEvent, Cancellable {
+public interface RegionImpactEvent extends RegionWorldEvent, RegionMessageEvent {
 
 	interface Block extends RegionImpactEvent {
 
 		/**
 		 * Getting the {@link CollideBlockEvent.Impact}.
 		 */
-		public CollideBlockEvent.Impact spongeEvent();
+		@SuppressWarnings("unchecked")
+		public CollideBlockEvent.Impact getSpongeEvent();
 		
 	}
 
@@ -25,7 +25,8 @@ public interface RegionImpactEvent extends RegionMessageEvent, Cancellable {
 		/**
 		 * Getting the {@link CollideEntityEvent.Impact}.
 		 */
-		public CollideEntityEvent.Impact spongeEvent();
+		@SuppressWarnings("unchecked")
+		public CollideEntityEvent.Impact getSpongeEvent();
 		
 	}
 
@@ -34,7 +35,7 @@ public interface RegionImpactEvent extends RegionMessageEvent, Cancellable {
 	 * 
 	 * @return entity
 	 */
-	public org.spongepowered.api.entity.Entity getEntitySource();
+	public org.spongepowered.api.entity.Entity getSource();
 
 	/**
 	 * Get protect result.
@@ -44,6 +45,7 @@ public interface RegionImpactEvent extends RegionMessageEvent, Cancellable {
 	/**
 	 * Getting the {@link ServerPlayer} if he is the cause of the event.
 	 */
+	@SuppressWarnings("unchecked")
 	public Optional<ServerPlayer> getPlayer();
 
 	/**

@@ -56,7 +56,7 @@ public class Buy extends AbstractCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg buy &7[Limit] [Volume]&f - ").clickEvent(ClickEvent.runCommand("/rg buy")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy("&6/rg limits buy &7<Limit> <Volume>&f - ").clickEvent(ClickEvent.runCommand("/rg limits buy")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

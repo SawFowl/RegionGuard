@@ -2,7 +2,6 @@ package sawfowl.regionguard.listeners;
 
 import java.util.Optional;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -27,7 +26,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionInteractItemEvent;
+import sawfowl.regionguard.api.events.world.RegionInteractItemEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
@@ -43,7 +42,7 @@ public class InteractItemListener{
 	public void onInteract(InteractItemEvent.Secondary event, @Root Entity entity) {
 		DataContainer container = event.itemStack().toContainer();
 		if(container.get(DataQuery.of("UnsafeData")).isPresent() && container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) return;
-		ResourceKey worldKey = ((ServerWorld) entity.world()).key();
+		ServerWorld world = entity.serverLocation().world();
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		Optional<RayTraceResult<LocatableBlock>> blockRay = Optional.empty();
 		String itemid = ListenerUtils.itemId(event.itemStack().createStack());
@@ -57,9 +56,9 @@ public class InteractItemListener{
 					.execute();
 		}
 		boolean liquidInteract = isLiquidInteract(blockRay);
-		Region region = plugin.getAPI().findRegion(worldKey, liquidInteract ? blockRay.get().hitPosition().toInt() : entity.blockPosition());
+		Region region = plugin.getAPI().findRegion(world, liquidInteract ? blockRay.get().hitPosition().toInt() : entity.blockPosition());
 		boolean isAllow = !liquidInteract ? isAllowInteractItem(region, entity,  event.itemStack().createStack()) : isAllowInteractItem(region, entity, event.itemStack().createStack()) && isAllowInteractBlockSecondary(region, entity, blockRay.get().selectedObject().blockState(), true) && isAllowBreak(region, entity, blockRay.get().selectedObject().blockState(), true) ;
-		class InteractEvent implements RegionInteractItemEvent {
+		RegionInteractItemEvent rgEvent = new RegionInteractItemEvent() {
 
 			boolean cancelled;
 			Component message;
@@ -83,6 +82,7 @@ public class InteractItemListener{
 				return isAllow;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return optPlayer;
@@ -113,13 +113,18 @@ public class InteractItemListener{
 				cancelled = cancel;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public InteractItemEvent.Secondary spongeEvent() {
+			public InteractItemEvent.Secondary getSpongeEvent() {
 				return event;
 			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return world;
+			}
 			
-		}
-		RegionInteractItemEvent rgEvent = new InteractEvent();
+		};
 		rgEvent.setCancelled(!isAllow);
 		if(optPlayer.isPresent()) rgEvent.setMessage(liquidInteract ? plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.CANCEL_BREAK) : plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.INTERACT_ITEM));
 		ListenerUtils.postEvent(rgEvent);

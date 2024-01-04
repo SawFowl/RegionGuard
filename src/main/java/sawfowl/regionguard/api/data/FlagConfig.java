@@ -1,5 +1,6 @@
 package sawfowl.regionguard.api.data;
 
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
 
@@ -11,7 +12,10 @@ public interface FlagConfig extends DataSerializable {
 		return Sponge.game().builderProvider().provide(Builder.class);
 	}
 
-	static FlagConfig of(String name, FlagSettings settings) {
+	/**
+	 * Build a flag configuration with the specified name and parameters.
+	 */
+	static FlagConfig of(@NotNull String name, @NotNull FlagSettings settings) {
 		return builder().setName(name).setSettings(settings).build();
 	}
 
@@ -21,8 +25,14 @@ public interface FlagConfig extends DataSerializable {
 
 	interface Builder extends AbstractBuilder<FlagConfig>, org.spongepowered.api.util.Builder<FlagConfig, Builder> {
 
+		/**
+		 * Setting the name of the flag.
+		 */
 		Builder setName(String name);
 
+		/**
+		 * Setting the flag parameters.
+		 */
 		Builder setSettings(FlagSettings flagSettings);
 
 	}

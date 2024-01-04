@@ -1,20 +1,17 @@
-package sawfowl.regionguard.api.events;
+package sawfowl.regionguard.api.events.world;
 
 import java.util.Optional;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionMoveEntityEvent extends Event, Cancellable {
+public interface RegionMoveEntityEvent extends RegionWorldEvent {
 
 	public interface ChangeRegion extends RegionMoveEntityEvent, RegionMessageEvent {
 
@@ -32,12 +29,22 @@ public interface RegionMoveEntityEvent extends Event, Cancellable {
 		 * Get the {@link Region} where the event occurred.
 		 */
 		public Region toRegion();
+
+		/**
+		 * Get the {@link ServerPlayer} that is the target of the event.
+		 * 
+		 * @return entity
+		 */
+		@SuppressWarnings("unchecked")
+		public Optional<ServerPlayer> getPlayer();
+
 	}
 
 	/**
 	 * Get the {@link MoveEntityEvent}.
 	 */
-	public MoveEntityEvent spongeEvent();
+	@SuppressWarnings("unchecked")
+	public MoveEntityEvent getSpongeEvent();
 
 	/**
 	 * Get the {@link Entity} that is the target of the event.
@@ -52,12 +59,6 @@ public interface RegionMoveEntityEvent extends Event, Cancellable {
 	 * @return entity
 	 */
 	public Optional<ServerPlayer> getPlayer();
-
-
-	/**
-	 * Get event {@link ResourceKey} of {@link ServerWorld}
-	 */
-	public ResourceKey getWorldKey();
 
 	/**
 	 * Get fly protect result.
@@ -128,5 +129,9 @@ public interface RegionMoveEntityEvent extends Event, Cancellable {
 	 * Getting an entity with another entity riding on it.
 	 */
 	public Optional<Entity> getRidingEntity();
+
+	default Region getRegion() {
+		return fromRegion();
+	}
 
 }

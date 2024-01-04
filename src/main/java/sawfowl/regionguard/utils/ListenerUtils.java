@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -37,10 +36,6 @@ import net.minecraft.world.level.block.BedBlock;
 
 public class ListenerUtils {
 
-	public static ServerWorld getWorld(ResourceKey key) {
-		return Sponge.server().worldManager().world(key).get();
-	}
-
 	public static String entityId(Entity entity) {
 		return EntityTypes.registry().valueKey(entity.type()).asString();
 	}
@@ -62,6 +57,10 @@ public class ListenerUtils {
 	}
 
 	public static String itemId(ItemStack itemStack) {
+		return ItemTypes.registry().valueKey(itemStack.type()).asString();
+	}
+
+	public static String itemId(ItemStackSnapshot itemStack) {
 		return ItemTypes.registry().valueKey(itemStack.type()).asString();
 	}
 
@@ -91,15 +90,6 @@ public class ListenerUtils {
 		List<String> list = new ArrayList<String>();
 		snapshots.forEach(snapshot -> {
 			if(!list.contains(itemId(snapshot.createStack()))) list.add(itemId(snapshot.createStack()));
-		});
-		list.add("all");
-		return list;
-	}
-
-	public static List<String> flagItemsArgs(List<ItemStack> stacks) {
-		List<String> list = new ArrayList<String>();
-		stacks.forEach(snapshot -> {
-			if(!list.contains(itemId(snapshot))) list.add(itemId(snapshot));
 		});
 		list.add("all");
 		return list;

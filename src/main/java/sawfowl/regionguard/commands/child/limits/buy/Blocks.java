@@ -42,7 +42,7 @@ public class Blocks extends AbstractPlayerCommand {
 			exception(locale, LocalesPaths.COMMAND_BUYBLOCKS_EXCEPTION_TO_MUCH_VOLUME, new String[]  {Placeholders.MAX}, max);
 		}
 		double needMoney = plugin.getAPI().getBuyBlockPrice(src) * toBuy;
-		Currency currency = plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(src));
+		Currency currency = plugin.getAPI().getCurrency(src);
 		if(!plugin.getEconomy().checkPlayerBalance(src.uniqueId(), currency, BigDecimal.valueOf(needMoney))) exception(locale, LocalesPaths.COMMAND_BUYBLOCKS_EXCEPTION_NOT_ENOUGH_MONEY);
 		if(!plugin.getEconomy().removeFromPlayerBalance(src, currency, BigDecimal.valueOf(needMoney))) exception(locale, LocalesPaths.COMMAND_BUYBLOCKS_EXCEPTION_ECONOMY_EXCEPTION);
 		if(!plugin.getAPI().getPlayerData(src).isPresent()) plugin.getAPI().setPlayerData(src, PlayerData.zero());
@@ -67,7 +67,7 @@ public class Blocks extends AbstractPlayerCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg buylimit blocks &7[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg buylimit blocks ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy("&6/rg limits buy blocks &7<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg limits buy blocks ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

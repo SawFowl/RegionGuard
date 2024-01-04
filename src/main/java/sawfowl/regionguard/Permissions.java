@@ -52,6 +52,7 @@ public class Permissions {
 	public static final String STAFF_SET_REGION_TYPE = "regionguard.staff.setregiontype";
 	public static final String STAFF_FLAG = "regionguard.staff.flag";
 	public static final String STAFF_LIST = "regionguard.staff.list";
+	public static final String STAFF_LIMITS = "regionguard.staff.limits";
 	public static final String STAFF_SETLIMIT_BLOCKS = "regionguard.staff.setlimit.blocks";
 	public static final String STAFF_SETLIMIT_CLAIMS = "regionguard.staff.setlimit.claims";
 	public static final String STAFF_SETLIMIT_SUBDIVISIONS = "regionguard.staff.setlimit.subdivisions";

@@ -39,16 +39,18 @@ public class FileStorage implements WorkData {
 	public void createDataForWorlds() {
 		checkWorldsFolder();
 		Sponge.server().worldManager().worlds().forEach(world -> {
-			if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-")).toFile().exists()) plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-")).toFile().mkdir();
-			try {
-				ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
-				if(reference.node().virtual() || reference.node().empty()) reference.setAndSave(Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags()));
-				plugin.getAPI().updateGlobalRegionData(world, reference.get());
-			} catch (ConfigurateException e) {
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
-			if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().exists()) {
-				plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().mkdir();
+			if(!plugin.getAPI().isRegisteredGlobal(world)) {
+				if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-")).toFile().exists()) plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-")).toFile().mkdir();
+				try {
+					ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
+					if(reference.node().virtual() || reference.node().empty()) reference.setAndSave(Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags()));
+					plugin.getAPI().updateGlobalRegionData(world, reference.get());
+				} catch (ConfigurateException e) {
+					plugin.getLogger().error(e.getLocalizedMessage());
+				}
+				if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().exists()) {
+					plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().mkdir();
+				}
 			}
 		});
 	}

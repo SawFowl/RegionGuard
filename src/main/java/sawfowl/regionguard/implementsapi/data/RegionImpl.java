@@ -1,5 +1,7 @@
 package sawfowl.regionguard.implementsapi.data;
 
+import java.io.BufferedWriter;
+import java.io.StringWriter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,16 +39,23 @@ import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.StreamOptions.LoadingStyle;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
+import org.spongepowered.configurate.BasicConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.gson.GsonConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import sawfowl.localeapi.api.TextUtils;
+import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.AdditionalData;
-import sawfowl.regionguard.api.data.AdditionalDataMap;
 import sawfowl.regionguard.api.data.ChunkNumber;
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.FlagValue;
@@ -171,9 +180,9 @@ public class RegionImpl implements Region {
 			}
 
 			@Override
-			public <T extends AdditionalData> Builder addAdditionalData(Map<String, Map<String, T>> dataMap) {
+			public Builder addAdditionalData(Map<String, Map<String, JsonObject>> dataMap) {
 				if(dataMap == null) return this;
-				if(additionalData == null) additionalData = new AdditionalDataHashMap<T>().from(dataMap);
+				if(additionalDataMap == null) additionalDataMap = dataMap;
 				return this;
 			}
 
@@ -195,37 +204,28 @@ public class RegionImpl implements Region {
 	private Cuboid cuboid;
 	private Set<Region> childs = new HashSet<Region>();
 	private Map<String, Set<FlagValue>> flagValues = new HashMap<String, Set<FlagValue>>();
+	private Map<String, Set<FlagValue>> tempFlags = new HashMap<String, Set<FlagValue>>();
 	private Set<MemberData> members = new HashSet<MemberData>();
 	private RegionTypes regionType;
 	private long creationTime = 0;
 	private Map<String, Component> joinMessages = new HashMap<String, Component>();
 	private Map<String, Component> exitMessages = new HashMap<String, Component>();
-	private AdditionalDataMap<? extends AdditionalData> additionalData = null;
+	private Map<String, Map<String, JsonObject>> additionalDataMap = null;
 	private Region parrent;
 
-	/**
-	 * Getting the region name.
-	 *
-	 * @param locale - language to be checked
-	 */
+	@Override
 	public Optional<String> getPlainName(Locale locale) {
 		return names.isEmpty() ? Optional.empty() : names.containsKey(locale.toLanguageTag()) ? Optional.of(toPlain(names.get(locale.toLanguageTag()))) : names.containsKey(Locales.DEFAULT.toLanguageTag()) ? Optional.of(toPlain(names.get(Locales.DEFAULT.toLanguageTag()))) : names.values().stream().findFirst().map(this::toPlain);
 	}
 
-	/**
-	 * Getting the region name as kyori component.
-	 *
-	 * @param locale - language to be checked
-	 */
+	@Override
 	public Component getName(Locale locale) {
 		Optional<String> name = getPlainName(locale);
 		return name.isPresent() ? TextUtils.deserialize(name.get()) : Component.empty();
 	}
 
-	/**
-	 * Set region name.
-	 */
-	public RegionImpl setName(Component name, Locale locale) {
+	@Override
+	public Region setName(Component name, Locale locale) {
 		if(names.containsKey(locale.toLanguageTag())) names.remove(locale.toLanguageTag());
 		if(name != null) names.put(locale.toLanguageTag(), name);
 		return this;
@@ -236,64 +236,38 @@ public class RegionImpl implements Region {
 		return names;
 	}
 
-	/**
-	 * Getting the player-owner of the region, if the owner of the region is a player and he is online.
-	 */
+	@Override
 	public Optional<ServerPlayer> getOwner() {
 		return !getOwnerData().isPlayer() || getOwnerUUID().equals(new UUID(0, 0)) ? Optional.empty() : Sponge.server().player(getOwnerUUID());
 	}
 
-	/**
-	 * Getting the UUID of the region owner.
-	 */
+	@Override
 	public UUID getOwnerUUID() {
 		Optional<MemberData> optOwnerData = members.stream().filter(member -> member.getTrustType() == TrustTypes.OWNER).findFirst();
 		UUID uuid = optOwnerData.isPresent() ? optOwnerData.get().getUniqueId() : parrent != null ? parrent.getOwnerUUID() : new UUID(0, 0);
 		return uuid;
 	}
 
-	/**
-	 *
-	 */
+	@Override
 	public String getOwnerName() {
 		return getOwnerData().getName();
 	}
 
-	/**
-	 * Make the player the new owner of the region.
-	 *
-	 * @param owner - new owner
-	 */
+	@Override
 	public Region setOwner(ServerPlayer owner) {
 		return setTrustType(owner, TrustTypes.OWNER);
 	}
 
-	/**
-	 * Make the player the new owner of the region.
-	 *
-	 * @param owner - new owner
-	 */
 	@Override
 	public Region setOwner(GameProfile owner) {
 		return setTrustType(owner, TrustTypes.OWNER);
 	}
 
-	/**
-	 * Adding a player to a region.
-	 *
-	 * @param player - addable player
-	 * @param type - assignable trust type
-	 */
+	@Override
 	public Region setTrustType(ServerPlayer player, TrustTypes type) {
 		return setTrustType(player.profile(), type);
 	}
 
-	/**
-	 * Adding a player to a region.
-	 *
-	 * @param player - addable player
-	 * @param type - assignable trust type
-	 */
 	@Override
 	public Region setTrustType(GameProfile player, TrustTypes type) {
 		untrust(player.uniqueId());
@@ -311,9 +285,7 @@ public class RegionImpl implements Region {
 		return this;
 	}
 
-	/**
-	 * Getting the data of the region owner
-	 */
+	@Override
 	public MemberData getOwnerData() {
 		return (members.size() > 10000 ? members.parallelStream() : members.stream()).filter(member -> (member.getTrustType() == TrustTypes.OWNER)).findFirst().orElse(parrent != null ? parrent.getOwnerData() : MemberData.forServer());
 	}
@@ -323,127 +295,73 @@ public class RegionImpl implements Region {
 		return members.stream().collect(Collectors.toUnmodifiableList());
 	}
 
-	/**
-	 * Getting the data of the region member.
-	 *
-	 * @param player - checked player.
-	 */
+	@Override
 	public Optional<MemberData> getMemberData(ServerPlayer player) {
 		return getMemberData(player.uniqueId());
 	}
 
-	/**
-	 * Getting the data of the region member.
-	 *
-	 * @param uuid - checked player or entity.
-	 */
+	@Override
 	public Optional<MemberData> getMemberData(UUID uuid) {
 		return Optional.ofNullable(members.stream().filter(member -> member.getUniqueId().equals(uuid)).findFirst().orElse(parrent != null ? parrent.getMemberData(uuid).map(m -> m).orElse(null) : null));
 	}
 
-	/**
-	 * Total number of members of the region.
-	 */
+	@Override
 	public int getTotalMembers() {
 		return members.size();
 	}
 
-	/**
-	 * Checking the type of trust in the region.
-	 *
-	 * @param player - checked player
-	 * @param level - checked trust type
-	 * @return true - if the player has the trust type specified in the check <br>
-	 * false - if the player or entity does not have the type of trust specified in the check, or region is global, or region is admin
-	 */
+	@Override
 	public boolean isCurrentTrustType(ServerPlayer player, TrustTypes level) {
 		return isCurrentTrustType(player.uniqueId(), level);
 	}
 
-	/**
-	 * Checking the type of trust in the region.
-	 *
-	 * @param uuid - player uuid
-	 * @param level - checked trust type
-	 * @return true - if the player or entity has the trust type specified in the check <br>
-	 * false - if the player or entity does not have the type of trust specified in the check, or region is global, or region is admin
-	 */
+	@Override
 	public boolean isCurrentTrustType(UUID uuid, TrustTypes level) {
 		return !isAdmin() && !isGlobal() && (getTrustType(uuid) == level || getTrustType(uuid).equals(level));
 	}
 
-	/**
-	 * Getting a player's type of trust.
-	 *
-	 * @param player - checked player
-	 * @return the type without trust(TrustTypes.WITHOUT_TRUST) if the player is not a member of the region
-	 */
+	@Override
 	public TrustTypes getTrustType(ServerPlayer player) {
 		return getTrustType(player.uniqueId());
 	}
 
-
-	/**
-	 * Gaining the trust of a player or entity
-	 *
-	 * @param uuid - checked entity
-	 * @return the type without trust(TrustTypes.WITHOUT_TRUST) if the entity is not a member of the region
-	 */
+	@Override
 	public TrustTypes getTrustType(UUID uuid) {
 		return getMemberData(uuid).map(member -> member.getTrustType()).orElse(TrustTypes.WITHOUT_TRUST);
 	}
 
-	/**
-	 * Removing a player from a region.
-	 */
+	@Override
 	public void untrust(ServerPlayer player) {
 		untrust(player.uniqueId());
 	}
 
-
-	/**
-	 * Removing a player or entity from a region.
-	 */
+	@Override
 	public void untrust(UUID uuid) {
 		members.removeIf(member -> member.getUniqueId().equals(uuid));
 		if(parrent != null) parrent.untrust(uuid);
 	}
 
-	/**
-	 * Checking whether a player is a member of a region.
-	 *
-	 * @param player - checked player
-	 */
+	@Override
 	public boolean isTrusted(ServerPlayer player) {
 		return isTrusted(player.uniqueId());
 	}
 
-	/**
-	 * Checking whether a entity is a member of a region.
-	 *
-	 * @param uuid - checked entity
-	 */
+	@Override
 	public boolean isTrusted(UUID uuid) {
 		return members.stream().filter(member -> member.getUniqueId().equals(uuid)).findFirst().isPresent() || (parrent != null ? parrent.isTrusted(uuid) : false);
 	}
 
-	/**
-	 * Getting the UUID of a region.
-	 */
+	@Override
 	public UUID getUniqueId() {
 		return regionUUID;
 	}
 
-	/**
-	 * Getting the region world if it is loaded.
-	 */
+	@Override
 	public Optional<ServerWorld> getWorld() {
 		return Sponge.server().worldManager().world(ResourceKey.resolve(world));
 	}
 
-	/**
-	 * Getting the world key.
-	 */
+	@Override
 	public ResourceKey getWorldKey() {
 		try {
 			return ResourceKey.resolve(world);
@@ -453,9 +371,7 @@ public class RegionImpl implements Region {
 		return null;
 	}
 
-	/**
-	 * Getting the region cuboid.
-	 */
+	@Override
 	public Cuboid getCuboid() {
 		if(cuboid != null && cuboid.getSelectorType() == SelectorTypes.FLAT && getWorld().isPresent() && (getWorld().get().min().y() != cuboid.getMin().y() || getWorld().get().max().y() != cuboid.getMax().y())) {
 			cuboid.setPositions(cuboid.getMin(), cuboid.getMax(), cuboid.getSelectorType(), getWorld().orElse(null));
@@ -463,19 +379,12 @@ public class RegionImpl implements Region {
 		return cuboid;
 	}
 
-	/**
-	 * Getting the region type.
-	 */
+	@Override
 	public RegionTypes getType() {
 		return regionType;
 	}
 
-	/**
-	 * Changing the type of region. <br>
-	 * Depending on the specified type, some parameters may change.
-	 *
-	 * @param type - assignable type
-	 */
+	@Override
 	public boolean setRegionType(RegionTypes type) {
 		if(type == RegionTypes.UNSET) return false;
 		if(type == RegionTypes.ADMIN) {
@@ -486,49 +395,33 @@ public class RegionImpl implements Region {
 		return true;
 	}
 
-	/**
-	 * Check if the region is global.
-	 */
+	@Override
 	public boolean isGlobal() {
 		return regionType == null || regionType == RegionTypes.GLOBAL;
 	}
 
-	/**
-	 * Check whether the region is an admin region.
-	 */
+	@Override
 	public boolean isAdmin() {
 		return regionType == RegionTypes.ADMIN;
 	}
 
-	/**
-	 * Check if the region is an arena.
-	 */
+	@Override
 	public boolean isArena() {
 		return regionType == RegionTypes.ARENA;
 	}
 
-	/**
-	 * Check if the region is basic.
-	 */
+	@Override
 	public boolean isBasicClaim() {
 		return regionType == RegionTypes.CLAIM;
 	}
 
-	/**
-	 * Check if the region is subdivision.
-	 */
+	@Override
 	public boolean isSubdivision() {
 		return regionType == RegionTypes.SUBDIVISION;
 	}
 
-	/**
-	 * Setting new boundaries for the region.
-	 *
-	 * @param first - first position
-	 * @param second - second position
-	 * @param selectorType - type of area selection
-	 */
-	public RegionImpl setCuboid(Vector3i first, Vector3i second, SelectorTypes selectorType) {
+	@Override
+	public Region setCuboid(Vector3i first, Vector3i second, SelectorTypes selectorType) {
 		if(selectorType == null) return this;
 		cuboid = Cuboid.builder(selectorType).setFirstPosition(first).setSecondPosition(second).build();
 		if(selectorType.equals(SelectorTypes.FLAT)) {
@@ -539,70 +432,52 @@ public class RegionImpl implements Region {
 		return this;
 	}
 
-	public RegionImpl setCuboid(Cuboid cuboid) {
+	@Override
+	public Region setCuboid(Cuboid cuboid) {
 		this.cuboid = cuboid;
 		return this;
 	}
 
-	/**
-	 * Getting a parent region if it is available.
-	 */
+	@Override
 	public Optional<Region> getParrent() {
 		return Optional.ofNullable(parrent);
 	}
 
-	/**
-	 * Getting the primary parent region.
-	 *
-	 * @return the primary parent region if it exists, or the current region if the region has no parent
-	 */
+	@Override
 	public Region getPrimaryParent() {
 		return parrent == null ? this : parrent.getPrimaryParent();
 	}
 
-	/**
-	 * Specifying the parent region.
-	 */
+	@Override
 	public Region setParrent(Region region) {
 		regionType = RegionTypes.SUBDIVISION;
 		parrent = (RegionImpl) region;
 		return this;
 	}
 
-	/**
-	 * Checking if there are child regions in the region.
-	 */
+	@Override
 	public boolean containsChilds() {
 		return !childs.isEmpty();
 	}
 
-	/**
-	 * Searching for a child region.<br>
-	 * If no region is found, it will return the current region.
-	 */
+	@Override
 	public Region getChild(Vector3i position) {
 		return containsChilds() ? (childs.size() > 10000 ? childs.parallelStream() : childs.stream()).filter(child -> child.isIntersectsWith(position)).findFirst().orElse(this) : this;
 	}
 
-	/**
-	 * Adding a child region.
-	 */
+	@Override
 	public Region addChild(Region region) {
 		childs.add((RegionImpl) region);
 		return this;
 	}
 
-	/**
-	 * Removing a child region.
-	 */
+	@Override
 	public Region removeChild(Region region) {
 		if(childs.contains(region)) childs.remove(region);
 		return this;
 	}
 
-	/**
-	 * Recursive search and making a list of all child regions.
-	 */
+	@Override
 	public List<Region> getAllChilds() {
 		List<Region> childs = new ArrayList<Region>();
 		if(!this.childs.isEmpty()) {
@@ -615,16 +490,12 @@ public class RegionImpl implements Region {
 		return childs;
 	}
 
-	/**
-	 * Getting a list of child regions.
-	 */
+	@Override
 	public List<Region> getChilds() {
 		return childs.stream().map(child -> (Region) child).toList();
 	}
 
-	/**
-	 * Recursively search and list flagValues from the current region to the oldest parent.
-	 */
+	@Override
 	public Map<String, Set<FlagValue>> getFlags() {
 		if(!getParrent().isPresent()) return flagValues;
 		Map<String, Set<FlagValue>> flagValues = new HashMap<String, Set<FlagValue>>();
@@ -633,9 +504,7 @@ public class RegionImpl implements Region {
 		return flagValues;
 	}
 
-	/**
-	 * Recursive search and enumeration of flagValues with parameters from the current region to the oldest parent.
-	 */
+	@Override
 	public Map<String, Set<FlagValue>> getCustomFlags() {
 		Map<String, Set<FlagValue>> customFlags = new HashMap<String, Set<FlagValue>>();
 		FlagValue defaultValue = FlagValue.simple(true);
@@ -650,285 +519,260 @@ public class RegionImpl implements Region {
 		return customFlags;
 	}
 
-	/**
-	 * Getting the values of the flag in the region. <br>
-	 * If there is no flag, an attempt will be made to check it in the parent region.
-	 */
+	@Override
 	public Set<FlagValue> getFlagValues(Flags flagName) {
 		return getFlagValues(flagName.toString());
 	}
 
-	/**
-	 * Getting the values of the flag in the region. <br>
-	 * If there is no flag, an attempt will be made to check it in the parent region.
-	 */
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Set<FlagValue> getFlagValues(String flagName) {
 		return containsFlag(flagName) ? (Set) flagValues.get(flagName) : parrent != null ? parrent.getFlagValues(flagName) : new HashSet<>();
 	}
 
-	/**
-	 * Checking if a flag is set in the region.
-	 */
+	@Override
 	public boolean containsFlag(Flags flagName) {
 		return containsFlag(flagName.toString());
 	}
 
-	/**
-	 * Checking if a flag is set in the region.
-	 */
+	@Override
 	public boolean containsFlag(String flagName) {
 		return flagValues.keySet().parallelStream().filter(flag -> (flag.contains(flagName))).findFirst().isPresent();
 	}
 
-	/**
-	 * Getting the value of the flag in the region. <br>
-	 * If there is no flag, an attempt will be made to check it in the parent region.
-	 */
+	@Override
 	public Tristate getFlagResult(Flags flag, String source, String target) {
 		return getFlagResult(flag.toString(), source, target);
 	}
 
-	/**
-	 * Getting the value of the flag in the region. <br>
-	 * If there is no flag, an attempt will be made to check it in the parent region.
-	 */
+	@Override
 	public Tristate getFlagResult(String flag, String source, String target) {
 		Tristate result = getFlagResultWhithoutParrents(flag, source, target);
 		return result != Tristate.UNDEFINED ?  result : (parrent != null ? parrent.getFlagResult(flag, source, target) : Tristate.UNDEFINED);
 	}
 
-	/**
-	 * Getting the value of the flag if there is one. <br>
-	 */
+	@Override
 	public Tristate getFlagResultWhithoutParrents(Flags flag, String source, String target) {
 		return getFlagResult(flag.toString(), source, target);
 	}
 
-	/**
-	 * Getting the value of the flag if there is one. <br>
-	 */
+	@Override
 	public Tristate getFlagResultWhithoutParrents(String flag, String source, String target) {
-		return flagValues.containsKey(flag) ? flagValues.get(flag).stream().filter(value -> value.equalsTo(source, target)).findFirst().map(value -> value.asTristate()).orElse(Tristate.UNDEFINED) : Tristate.UNDEFINED;
+		return tempFlags.containsKey(flag) ?
+				tempFlags.get(flag).stream().filter(
+					value -> value.equalsTo(source, target)
+				).findFirst().map(
+					value -> value.asTristate()
+				).orElse(
+					flagValues.containsKey(flag) ?
+						flagValues.get(flag).stream().filter(value -> value.equalsTo(source, target)).findFirst().map(value -> value.asTristate()).orElse(Tristate.UNDEFINED) :
+						Tristate.UNDEFINED) :
+		flagValues.containsKey(flag) ?
+			flagValues.get(flag).stream().filter(value -> value.equalsTo(source, target)).findFirst().map(value -> value.asTristate()).orElse(Tristate.UNDEFINED) :
+			Tristate.UNDEFINED;
 	}
 
-	/**
-	 * Setting the value of the flag.
-	 */
-	public RegionImpl setFlag(Flags flagName, boolean value) {
+	@Override
+	public Region setFlag(Flags flagName, boolean value) {
 		setFlag(flagName.toString(), value);
 		return this;
 	}
 
-	/**
-	 * Setting the value of the flag.
-	 */
-	public RegionImpl setFlag(String flagName, boolean value) {
+	@Override
+	public Region setFlag(String flagName, boolean value) {
 		setFlag(flagName.toString(), value, null, null);
 		return this;
 	}
 
-	/**
-	 * Setting the value of the flag.
-	 */
-	public RegionImpl setFlag(Flags flagName, boolean value, String source, String target) {
+	@Override
+	public Region setFlag(Flags flagName, boolean value, String source, String target) {
 		setFlag(flagName.toString(), value, source, target);
 		return this;
 	}
 
-	/**
-	 * Setting the value of the flag.
-	 */
-	public RegionImpl setFlag(String flagName, boolean value, String source, String target) {
-		FlagValueImpl flagValue = (FlagValueImpl) FlagValue.of(value, source, target);
+	@Override
+	public Region setTempFlag(Flags flagName, boolean value, String source, String target) {
+		return setTempFlag(flagName.toString(), value, source, target);
+	}
+
+	@Override
+	public Region setTempFlag(String flagName, boolean value, String source, String target) {
+		FlagValue flagValue = FlagValue.of(value, source, target);
 		removeFlag(flagName, flagValue);
-		if(!flagValues.containsKey(flagName)) flagValues.put(flagName, new HashSet<>());
-		flagValues.get(flagName).add(flagValue);
+		if(!tempFlags.containsKey(flagName)) tempFlags.put(flagName, new HashSet<>());
+		tempFlags.get(flagName).add(flagValue);
 		return this;
 	}
 
-	/**
-	 * Set the values of a set of flags.
-	 *
-	 * @param flags - Map with flags and their values.
-	 */
+	@Override
+	public Region setFlag(String flagName, boolean value, String source, String target) {
+		removeFlag(flagName, source, target);
+		if(!flagValues.containsKey(flagName)) flagValues.put(flagName, new HashSet<>());
+		flagValues.get(flagName).add(FlagValue.of(value, source, target));
+		return this;
+	}
+
+	@Override
 	public RegionImpl setFlags(Map<String, Set<FlagValue>> flags) {
 		flagValues = flags;
 		return this;
 	}
 
-	/**
-	 * Removing the flag from the region.
-	 */
-	public RegionImpl removeFlag(Flags flagName) {
+	@Override
+	public Region removeFlag(Flags flagName) {
 		removeFlag(flagName.toString());
 		return this;
 	}
 
-	/**
-	 * Removing the flag from the region.
-	 */
-	public RegionImpl removeFlag(String flagName) {
+	@Override
+	public Region removeFlag(String flagName) {
 		if(flagValues.containsKey(flagName)) flagValues.remove(flagName);
 		return this;
 	}
 
-	/**
-	 * Removing the flag from the region.
-	 */
-	public RegionImpl removeFlag(Flags flagName, String source, String target) {
-		removeFlag(flagName.toString(), FlagValue.of(true, source, target));
+	@Override
+	public Region removeFlag(Flags flagName, String source, String target) {
+		removeFlag(flagName.toString(), source, target);
 		return this;
 	}
 
-	/**
-	 * Removing the flag from the region.
-	 */
-	public RegionImpl removeFlag(String flagName, String source, String target) {
-		removeFlag(flagName.toString(), FlagValue.of(true, source, target));
+	@Override
+	public Region removeFlag(String flagName, String source, String target) {
+		if(flagValues.containsKey(flagName)) {
+			flagValues.get(flagName).removeIf(value -> value.getSource().equals(source == null ? "all" : source) && value.getTarget().equals(target == null ? "all" : target));
+			if(flagValues.get(flagName).isEmpty()) flagValues.remove(flagName);
+		}
 		return this;
 	}
 
-	/**
-	 * Removing the flag from the region.
-	 */
-	public RegionImpl removeFlag(Flags flagName, FlagValue flagValue) {
+	@Override
+	public Region removeTempFlag(Flags flagName, String source, String target) {
+		return removeTempFlag(flagName.name(), source, target);
+	}
+
+	@Override
+	public Region removeTempFlag(String flagName, String source, String target) {
+		if(tempFlags.containsKey(flagName)) {
+			tempFlags.get(flagName).removeIf(value -> value.getSource().equals(source == null ? "all" : source) && value.getTarget().equals(target == null ? "all" : target));
+			if(tempFlags.get(flagName).isEmpty()) tempFlags.remove(flagName);
+		}
+		return this;
+	}
+
+	@Override
+	public Region removeFlag(Flags flagName, FlagValue flagValue) {
 		removeFlag(flagName.toString(), flagValue);
 		return this;
 	}
 
-	/**
-	 * Removing the flag from the region.
-	 */
-	public RegionImpl removeFlag(String flagName, FlagValue flagValue) {
-		while(flagValues.containsKey(flagName) && flagValues.get(flagName).contains(flagValue)) flagValues.get(flagName).remove(flagValue);
-		return this;
+	@Override
+	public Region removeFlag(String flagName, FlagValue flagValue) {
+		return removeFlag(flagName, flagValue.getSource(), flagValue.getTarget());
 	}
 
-	/**
-	 * Get the region creation time in unix format.
-	 */
+	@Override
 	public long getCreationTime() {
 		return creationTime;
 	}
 
-	/**
-	 * Getting region join message.<br>
-	 * If the specified localization is not found, the default localization will be checked.<br>
-	 * If no default localization is found, the first value found will be returned or an empty optional value if the list is empty.
-	 *
-	 * @param locale - checking locale
-	 */
+	@Override
 	public Optional<Component> getJoinMessage(Locale locale) {
 		return joinMessages.isEmpty() ? Optional.empty() : joinMessages.containsKey(locale.toLanguageTag()) ? Optional.of(joinMessages.get(locale.toLanguageTag())) : joinMessages.containsKey(Locales.DEFAULT.toLanguageTag()) ? Optional.of(joinMessages.get(Locales.DEFAULT.toLanguageTag())) : joinMessages.values().stream().findFirst();
 	}
 
-	/**
-	 * Setting region join message.<br>
-	 *
-	 * @param message - setting message
-	 * @param locale - setting locale
-	 */
+	@Override
 	public Region setJoinMessage(Component message, Locale locale) {
 		if(joinMessages.containsKey(locale.toLanguageTag())) joinMessages.remove(locale.toLanguageTag());
 		if(message != null) joinMessages.put(locale.toLanguageTag(), message);
 		return this;
 	}
 
+	@Override
 	public Map<String, Component> getJoinMessages() {
 		return joinMessages;
 	}
 
-	/**
-	 * Getting region exit message.<br>
-	 * If the specified localization is not found, the default localization will be checked.<br>
-	 * If no default localization is found, the first value found will be returned or an empty optional value if the list is empty.
-	 *
-	 * @param locale - checking locale
-	 */
+	@Override
 	public Optional<Component> getExitMessage(Locale locale) {
 		return exitMessages.isEmpty() ? Optional.empty() : exitMessages.containsKey(locale.toLanguageTag()) ? Optional.of(exitMessages.get(locale.toLanguageTag())) : exitMessages.containsKey(Locales.DEFAULT.toLanguageTag()) ? Optional.of(exitMessages.get(Locales.DEFAULT.toLanguageTag())) : exitMessages.values().stream().findFirst();
 	}
 
-	/**
-	 * Setting region exit message.<br>
-	 *
-	 * @param message - setting message
-	 * @param locale - setting locale
-	 */
-	public RegionImpl setExitMessage(Component message, Locale locale) {
+	@Override
+	public Region setExitMessage(Component message, Locale locale) {
 		if(exitMessages.containsKey(locale.toLanguageTag())) exitMessages.remove(locale.toLanguageTag());
 		if(message != null) exitMessages.put(locale.toLanguageTag(), message);
 		return this;
 	}
 
+	@Override
 	public Map<String, Component> getExitMessages() {
 		return exitMessages;
 	}
 
-	/**
-	 * Getting additional data that is created by other plugins.<br>
-	 * After getting the data, they must be converted to the desired type.<br>
-	 * Exemple: YourDataClass yourDataClass = (YourDataClass) additionalData;
-	 */
-	@SuppressWarnings("unchecked")
+	@Override
 	public <T extends AdditionalData> Optional<T> getAdditionalData(PluginContainer container, String dataName, Class<T> clazz) {
-		return additionalData.getData(container, dataName, clazz).map(data -> (T) data);
+		if(additionalDataMap.containsKey(container.metadata().id()) && additionalDataMap.get(container.metadata().id()).containsKey(dataName)) {
+			BasicConfigurationNode node = BasicConfigurationNode.root(options -> options.options().serializers(serializers -> serializers.registerAll(SerializeOptions.selectSerializersCollection(2))));
+			try {
+				node.set(JsonObject.class, additionalDataMap.get(container.metadata().id()).get(dataName));
+				return Optional.ofNullable(node.get(clazz));
+			} catch (SerializationException e) {
+				e.printStackTrace();
+			}
+		}
+		return Optional.empty();
 	}
 
-	/**
-	 * Write additional data created by another plugin.
-	 */
-	public void setAdditionalData(PluginContainer container, String dataName, AdditionalData additionalData) {
-		if(this.additionalData == null) this.additionalData = new AdditionalDataHashMap<>();
-		this.additionalData.put(container, dataName, additionalData);
+	@Override
+	public <T extends AdditionalData> Region setAdditionalData(PluginContainer container, String dataName, T additionalData) {
+		if(additionalData == null) return this;
+		if(this.additionalDataMap == null) this.additionalDataMap = new HashMap<>();
+		if(!additionalDataMap.containsKey(container.metadata().id())) additionalDataMap.put(container.metadata().id(), new HashMap<>());
+		if(additionalData.toJsonObject() == null) {
+			StringWriter sink = new StringWriter();
+			GsonConfigurationLoader loader = createWriter(sink);
+			BasicConfigurationNode tempNode = BasicConfigurationNode.root(options -> options.options().serializers(serializers -> serializers.registerAll(SerializeOptions.SERIALIZER_COLLECTION_VARIANT_2)));
+			try {
+				tempNode.set(additionalData.getClass(), additionalData);
+				loader.save(tempNode);
+				if(sink.toString() != null) additionalDataMap.get(container.metadata().id()).put(dataName, JsonParser.parseString(sink.toString()).getAsJsonObject());
+			} catch (ConfigurateException e) {
+				e.printStackTrace();
+			}
+			sink = null;
+			loader = null;
+			tempNode = null;
+		} else additionalDataMap.get(container.metadata().id()).put(dataName, additionalData.toJsonObject());
+		return this;
 	}
 
-	/**
-	 * Deleting additional data created by another plugin.
-	 */
-	public void removeAdditionalData(PluginContainer container, String dataName) {
-		if(this.additionalData.containsKey(container.metadata().id()) && this.additionalData.get(container.metadata().id()).containsKey(dataName)) this.additionalData.get(container.metadata().id()).remove(dataName);
+	@Override
+	public Region removeAdditionalData(PluginContainer container, String dataName) {
+		if(this.additionalDataMap.containsKey(container.metadata().id()) && this.additionalDataMap.get(container.metadata().id()).containsKey(dataName)) this.additionalDataMap.get(container.metadata().id()).remove(dataName);
+		return this;
 	}
 
-	public AdditionalDataMap<? extends AdditionalData> getAllAdditionalData() {
-		return additionalData;
+	@Override
+	public Map<String, Map<String, JsonObject>> getAllAdditionalData() {
+		return additionalDataMap == null ? null : new HashMap<>(additionalDataMap);
 	}
 
-	/**
-	 * Checking whether the position belongs to the region.
-	 *
-	 * @param serverWorld - checkable World
-	 * @param vector3i - checkable position
-	 */
+	@Override
 	public boolean isIntersectsWith(ServerWorld serverWorld, Vector3i vector3i) {
 		return isIntersectsWith(serverWorld.key(), vector3i);
 	}
 
-	/**
-	 * Checking whether the position belongs to the region.
-	 *
-	 * @param worldkey - checkable World
-	 * @param vector3i - checkable position
-	 */
+	@Override
 	public boolean isIntersectsWith(ResourceKey worldkey, Vector3i vector3i) {
 		return world.equals(worldkey.asString()) && getCuboid().containsIntersectsPosition(vector3i);
 	}
 
-	/**
-	 * Checking whether the position belongs to the region.
-	 * This method should only be applied to child regions, as it does not perform a world matching check.
-	 *
-	 * @param vector3i - checkable position
-	 */
+	@Override
 	public boolean isIntersectsWith(Vector3i vector3i) {
 		return getCuboid().containsIntersectsPosition(vector3i);
 	}
 
-	/**
-	 * Getting a list of loaded chunks.<br>
-	 * This operation can work overload the server. It is recommended to use in asynchronous mode.
-	 */
+	@Override
 	public List<WorldChunk> getLoadedChunks() {
 		if(!getWorld().isPresent()) return new ArrayList<>();
 		ServerWorld serverWorld = getWorld().get();
@@ -945,46 +789,31 @@ public class RegionImpl implements Region {
 		return chunks;
 	}
 
-	/**
-	 * Getting a list of blocks in the region.<br>
-	 * This operation can work overload the server. It is recommended to use in asynchronous mode.
-	 */
+	@Override
 	public List<BlockState> getBlocks() {
 		if(!getWorld().isPresent() || !getWorld().get().isLoaded()) return new ArrayList<>();
 		return getWorld().get().blockStateStream(cuboid.getMin().toInt(), cuboid.getMax().toInt(), StreamOptions.builder().setLoadingStyle(LoadingStyle.NONE).build()).toStream().map(VolumeElement::type).collect(Collectors.toList());
 	}
 
-	/**
-	 * Getting a list of block entities in the region.<br>
-	 * This operation can work overload the server. It is recommended to use in asynchronous mode.
-	 */
+	@Override
 	public List<BlockEntity> getBlockEntities() {
 		if(!getWorld().isPresent() || !getWorld().get().isLoaded()) return new ArrayList<>();
 		return getWorld().get().blockEntityStream(cuboid.getMin().toInt(), cuboid.getMax().toInt(), StreamOptions.builder().setLoadingStyle(LoadingStyle.NONE).build()).toStream().map(VolumeElement::type).collect(Collectors.toList());
 	}
 
-	/**
-	 * Getting a list of entities in the region.<br>
-	 * This list will not contain players.<br>
-	 * This operation can work overload the server. It is recommended to use in asynchronous mode.
-	 */
+	@Override
 	public List<Entity> getEntities() {
 		if(!getWorld().isPresent() || !getWorld().get().isLoaded()) return new ArrayList<>();
 		return getWorld().get().entities(cuboid.getAABB()).stream().filter(entity -> (!(entity instanceof ServerPlayer))).collect(Collectors.toList());
 	}
 
-	/**
-	 * Getting a list of players in the region.<br>
-	 * This operation can work overload the server. It is recommended to use in asynchronous mode.
-	 */
+	@Override
 	public List<ServerPlayer> getPlayers() {
 		if(!getWorld().isPresent() || !getWorld().get().isLoaded()) return new ArrayList<>();
 		return getWorld().get().players().parallelStream().filter(player -> cuboid.containsIntersectsPosition(player.position().toInt())).collect(Collectors.toList());
 	}
 
-	/**
-	 * Getting a list of the chunk numbers that the region occupies.
-	 */
+	@Override
 	public List<ChunkNumber> getChunkNumbers() {
 		List<ChunkNumber> chunkNumberImpls = new ArrayList<ChunkNumber>();
 		ChunkNumber min = ChunkNumber.of(cuboid.getMin());
@@ -998,10 +827,7 @@ public class RegionImpl implements Region {
 		return chunkNumberImpls;
 	}
 
-	/**
-	 * Create a Schematic from the region.<br>
-	 * This operation can work overload the server. It is recommended to use in asynchronous mode.
-	 */
+	@Override
 	public Optional<Schematic> getSchematic(String schematicName, String altAuthor) {
 		Schematic schematic = null;
 		if(getWorld().isPresent() && getWorld().get().isLoaded() && !isGlobal()) {
@@ -1030,13 +856,7 @@ public class RegionImpl implements Region {
 		return Optional.ofNullable(schematic);
 	}
 
-	/**
-	 * Insert Schematic into the region.<br><br>
-	 * This operation can work overload the server.
-	 *
-	 * @param schematic
-	 * @param heigt - the height at which the insertion will be made
-	 */
+	@Override
 	public boolean putSchematic(Schematic schematic, int heigt) {
 		if(getWorld().isPresent()) {
 			schematic.applyToWorld(getWorld().get(), Vector3i.from(cuboid.getAABB().center().floorX(), heigt, cuboid.getAABB().center().floorY()), SpawnTypes.PLUGIN);
@@ -1045,14 +865,7 @@ public class RegionImpl implements Region {
 		return false;
 	}
 
-
-	/**
-	 * Insert Schematic into the region.<br><br>
-	 * This operation can work overload the server.
-	 *
-	 * @param schematic
-	 * @param vector3i - central position
-	 */
+	@Override
 	public boolean putSchematic(Schematic schematic, Vector3i vector3i) {
 		if(getWorld().isPresent()) {
 			schematic.applyToWorld(getWorld().get(), vector3i, SpawnTypes.PLUGIN);
@@ -1061,13 +874,7 @@ public class RegionImpl implements Region {
 		return false;
 	}
 
-
-	/**
-	 * Territory regeneration in the region.
-	 *
-	 * @param async - regen in async mode
-	 * @param delay - delay before regeneration in async mode
-	 */
+	@Override
 	public boolean regen(boolean async, int delay) {
 		return async ? RegionGuard.getInstance().getRegenUtil().regenAsync(this, delay) : RegionGuard.getInstance().getRegenUtil().regenSync(this);
 	}
@@ -1080,16 +887,18 @@ public class RegionImpl implements Region {
 		return Objects.equals(regionUUID, ((RegionImpl) obj).regionUUID);
 	}
 
+	@Override
 	public boolean equalsOwners(Region region) {
 		return Objects.equals(getOwnerUUID(), region.getOwnerUUID());
 	}
 
+	@Override
 	public Region copy() {
 		RegionImpl region = new RegionImpl();
 		region.childs = childs;
 		region.creationTime = creationTime;
 		region.cuboid = cuboid;
-		region.additionalData = additionalData;
+		region.additionalDataMap = additionalDataMap;
 		region.exitMessages = exitMessages;
 		region.flagValues = flagValues;
 		region.joinMessages = joinMessages;
@@ -1129,4 +938,9 @@ public class RegionImpl implements Region {
 	private String toPlain(Component component) {
 		return PlainTextComponentSerializer.plainText().serialize(component);
 	}
+
+	private GsonConfigurationLoader createWriter(StringWriter sink) {
+		return GsonConfigurationLoader.builder().defaultOptions(SerializeOptions.selectOptions(2)).sink(() -> new BufferedWriter(sink)).build();
+	}
+
 }

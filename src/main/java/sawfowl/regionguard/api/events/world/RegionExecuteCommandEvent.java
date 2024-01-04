@@ -1,13 +1,11 @@
-package sawfowl.regionguard.api.events;
+package sawfowl.regionguard.api.events.world;
 
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.command.ExecuteCommandEvent;
 
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionExecuteCommandEvent extends Event, RegionMessageEvent, Cancellable {
+public interface RegionExecuteCommandEvent extends RegionWorldEvent, RegionMessageEvent {
 
 	/**
 	 * Get the {@link Region} where the event occurred.
@@ -17,6 +15,7 @@ public interface RegionExecuteCommandEvent extends Event, RegionMessageEvent, Ca
 	/**
 	 * Getting a {@link ServerPlayer}.
 	 */
+	@SuppressWarnings("unchecked")
 	public ServerPlayer getPlayer();
 
 	/**
@@ -29,9 +28,7 @@ public interface RegionExecuteCommandEvent extends Event, RegionMessageEvent, Ca
 	 */
 	public boolean isPvP();
 
-	/**
-	 * Getting a {@link ExecuteCommandEvent.Pre}.
-	 */
-	public ExecuteCommandEvent.Pre spongeEvent();
+	@SuppressWarnings("unchecked")
+	public ExecuteCommandEvent.Pre getSpongeEvent();
 
 }

@@ -39,7 +39,7 @@ public class Members extends AbstractPlayerCommand {
 		if(toSell <= 0) exception(locale, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_ENTERED_ZERO);
 		if(!plugin.getAPI().getPlayerData(src).isPresent()) plugin.getAPI().setPlayerData(src, PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(src), plugin.getAPI().getClaimedRegions(src))));
 		if(plugin.getAPI().getPlayerData(src).get().getLimits().getMembers() < toSell) exception(locale, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_TO_MUCH_VOLUME, new String[] {Placeholders.MAX}, plugin.getAPI().getPlayerData(src).get().getLimits().getMembers());
-		if(!plugin.getEconomy().addToPlayerBalance(src, plugin.getEconomy().checkCurrency(plugin.getAPI().getCurrency(src)), BigDecimal.valueOf(toSell * plugin.getAPI().getSellSubdivisionPrice(src)))) exception(locale, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_ECONOMY_EXCEPTION);
+		if(!plugin.getEconomy().addToPlayerBalance(src, plugin.getAPI().getCurrency(src), BigDecimal.valueOf(toSell * plugin.getAPI().getSellSubdivisionPrice(src)))) exception(locale, LocalesPaths.COMMAND_SELLMEMBERS_EXCEPTION_ECONOMY_EXCEPTION);
 		plugin.getAPI().setLimitMembers(src, plugin.getAPI().getPlayerData(src).get().getLimits().getMembers() - toSell);
 		src.sendMessage(getText(locale, LocalesPaths.COMMAND_SELLMEMBERS_SUCCESS).replace(new String[] {Placeholders.SIZE, Placeholders.VOLUME}, toSell, plugin.getAPI().getLimitMembers(src)).get());
 	}
@@ -61,7 +61,7 @@ public class Members extends AbstractPlayerCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg selllimit members &7[Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg selllimit members ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy("&6/rg limits sell members &7<Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg limits sell members ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

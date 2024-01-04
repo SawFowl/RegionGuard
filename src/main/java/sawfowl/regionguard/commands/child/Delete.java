@@ -69,6 +69,7 @@ public class Delete extends AbstractPlayerCommand {
 					public Region getRegion() {
 						return region;
 					}
+					@SuppressWarnings("unchecked")
 					@Override
 					public ServerPlayer getPlayer() {
 						return src;
@@ -113,6 +114,7 @@ public class Delete extends AbstractPlayerCommand {
 					public Region getRegion() {
 						return region;
 					}
+					@SuppressWarnings("unchecked")
 					@Override
 					public ServerPlayer getPlayer() {
 						return src;
@@ -171,7 +173,7 @@ public class Delete extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				String.class,
-				(cause, args) -> Stream.of("-regen", "-r"),
+				(cause, args) -> cause.hasPermission(Permissions.STAFF_DELETE) ? Stream.of("-regen", "-r") : Stream.empty(),
 				(cause, args) -> args.length > 0 && cause.hasPermission(Permissions.STAFF_DELETE) ? Stream.of("-regen", "-r").filter(string -> string.equals(args[0])).findFirst() : Optional.empty(),
 				true,
 				true,

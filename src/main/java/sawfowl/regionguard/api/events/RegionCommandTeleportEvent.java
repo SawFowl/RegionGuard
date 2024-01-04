@@ -4,7 +4,7 @@ import org.spongepowered.math.vector.Vector3d;
 
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionCommandTeleportEvent extends RegionEvent {
+public interface RegionCommandTeleportEvent extends RegionManagementEvent {
 
 	/**
 	 * Getting the region in which the command is executed.

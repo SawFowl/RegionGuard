@@ -21,6 +21,7 @@ import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 
@@ -30,8 +31,8 @@ import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionDamageEntityEvent;
-import sawfowl.regionguard.api.events.RegionExecuteCommandEvent;
+import sawfowl.regionguard.api.events.world.RegionDamageEntityEvent;
+import sawfowl.regionguard.api.events.world.RegionExecuteCommandEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
@@ -53,7 +54,7 @@ public class DamageEntityAndCommandListener {
 		boolean isPvP = lastDamage.containsKey(player.uniqueId()) && System.currentTimeMillis() - lastDamage.get(player.uniqueId()) < 20000;
 		boolean isAllow = isPvP ? isAllowPvPCommand(region, player, event.command()) : isAllowCommand(region, player, event.command());
 		Component message = isPvP ? plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_EXECUTE_PVP) : plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_EXECUTE);
-		class CommandEvent implements RegionExecuteCommandEvent {
+		RegionExecuteCommandEvent rgEvent = new RegionExecuteCommandEvent() {
 
 			boolean cencelled;
 			Component message;
@@ -77,6 +78,7 @@ public class DamageEntityAndCommandListener {
 				return region;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public ServerPlayer getPlayer() {
 				return player;
@@ -92,8 +94,9 @@ public class DamageEntityAndCommandListener {
 				return isPvP;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public Pre spongeEvent() {
+			public Pre getSpongeEvent() {
 				return event;
 			}
 
@@ -106,9 +109,13 @@ public class DamageEntityAndCommandListener {
 			public void setMessage(Component component) {
 				message = component;
 			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return player.world();
+			}
 			
-		}
-		RegionExecuteCommandEvent rgEvent = new CommandEvent();
+		};
 		rgEvent.setCancelled(!isAllow);
 		rgEvent.setMessage(message);
 		ListenerUtils.postEvent(rgEvent);
@@ -154,7 +161,7 @@ public class DamageEntityAndCommandListener {
 		} else if(optDamageSource.isPresent()) isAllow = isAllowDamage(region, event.entity(), optDamageSource.get());
 		boolean allowDamage = isAllow;
 		ServerPlayer finalPlayer = player;
-		class DamageEvent implements RegionDamageEntityEvent {
+		RegionDamageEntityEvent rgEvent = new RegionDamageEntityEvent() {
 
 			boolean cancelled;
 			Component message;
@@ -178,6 +185,7 @@ public class DamageEntityAndCommandListener {
 				return region;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return Optional.ofNullable(finalPlayer);
@@ -188,8 +196,9 @@ public class DamageEntityAndCommandListener {
 				return allowDamage;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public DamageEntityEvent spongeEvent() {
+			public DamageEntityEvent getSpongeEvent() {
 				return event;
 			}
 
@@ -202,9 +211,13 @@ public class DamageEntityAndCommandListener {
 			public void setMessage(Component component) {
 				message = component;
 			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return player.world();
+			}
 			
-		};
-		RegionDamageEntityEvent rgEvent = new DamageEvent();
+		};;
 		rgEvent.setCancelled(!allowDamage);
 		rgEvent.setMessage(message);
 		ListenerUtils.postEvent(rgEvent);
@@ -256,7 +269,7 @@ public class DamageEntityAndCommandListener {
 	private boolean isAllowPvPCommand(Region region, ServerPlayer player, String command) {
 		if(player.hasPermission(Permissions.bypassFlag(Flags.COMMAND_EXECUTE_PVP))) return true;
 		for(FlagValue flagValue : region.getFlagValues(Flags.COMMAND_EXECUTE_PVP)) {
-			if(!flagValue.isBasic() && flagValue.getTarget().contains(command)) return flagValue.getValue();
+			if(!flagValue.getSource().equals("all") && !flagValue.getTarget().equals("all") && flagValue.getTarget().contains(command)) return flagValue.getValue();
 		}
 		Tristate flagResult = region.getFlagResult(Flags.COMMAND_EXECUTE_PVP, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
@@ -266,7 +279,7 @@ public class DamageEntityAndCommandListener {
 	private boolean isAllowCommand(Region region, ServerPlayer player, String command) {
 		if(player.hasPermission(Permissions.bypassFlag(Flags.COMMAND_EXECUTE))) return true;
 		for(FlagValue flagValue : region.getFlagValues(Flags.COMMAND_EXECUTE)) {
-			if(!flagValue.isBasic() && flagValue.getTarget().contains(command)) return flagValue.getValue();
+			if(!flagValue.getSource().equals("all") && !flagValue.getTarget().equals("all") && flagValue.getTarget().contains(command)) return flagValue.getValue();
 		}
 		Tristate flagResult = region.getFlagResult(Flags.COMMAND_EXECUTE, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();

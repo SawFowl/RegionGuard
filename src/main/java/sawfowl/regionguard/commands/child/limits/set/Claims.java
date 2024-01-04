@@ -58,7 +58,7 @@ public class Claims extends AbstractCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg setlimit claims &7[Player] [Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimit claims ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy("&6/rg limits set claims &7<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg limits set claims ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

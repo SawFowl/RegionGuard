@@ -64,7 +64,7 @@ public class SetCreatingType extends AbstractPlayerCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg setcreatingtype &7[Type]&f - ").clickEvent(ClickEvent.suggestCommand("/rg setcreatingtype ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy("&6/rg setcreatingtype &7<Type>&f - ").clickEvent(ClickEvent.suggestCommand("/rg setcreatingtype ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

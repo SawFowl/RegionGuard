@@ -97,7 +97,7 @@ public class ListRegions extends AbstractCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg list &7[Player]&f - ").clickEvent(ClickEvent.runCommand("/rg list ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy(cause.first(ServerPlayer.class).isPresent() ? "&6/rg list &7[Player]&f - " : "&6/rg list &7<Player>&f - ").clickEvent(ClickEvent.runCommand("/rg list ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override
@@ -156,6 +156,7 @@ public class ListRegions extends AbstractCommand {
 				return cause;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public ServerPlayer getPlayer() {
 				return player;
@@ -264,6 +265,7 @@ public class ListRegions extends AbstractCommand {
 							public Region getRegion() {
 								return region;
 							}
+							@SuppressWarnings("unchecked")
 							@Override
 							public ServerPlayer getPlayer() {
 								return player;
@@ -308,6 +310,7 @@ public class ListRegions extends AbstractCommand {
 							public Region getRegion() {
 								return region;
 							}
+							@SuppressWarnings("unchecked")
 							@Override
 							public ServerPlayer getPlayer() {
 								return player;

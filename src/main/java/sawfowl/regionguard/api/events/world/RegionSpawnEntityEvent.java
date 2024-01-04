@@ -1,15 +1,14 @@
-package sawfowl.regionguard.api.events;
+package sawfowl.regionguard.api.events.world;
 
 import java.util.Optional;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionSpawnEntityEvent extends RegionMessageEvent, Cancellable {
+public interface RegionSpawnEntityEvent extends RegionMessageEvent, RegionWorldEvent {
 
 	/**
 	 * Get the {@link Entity} that is the source of the event.
@@ -23,6 +22,7 @@ public interface RegionSpawnEntityEvent extends RegionMessageEvent, Cancellable 
 	 * 
 	 * @return player
 	 */
+	@SuppressWarnings("unchecked")
 	public Optional<ServerPlayer> getPlayer();
 
 	/**
@@ -35,9 +35,7 @@ public interface RegionSpawnEntityEvent extends RegionMessageEvent, Cancellable 
 	 */
 	public boolean isAllow();
 
-	/**
-	 * Get the {@link SpawnEntityEvent.Pre}.
-	 */
-	public SpawnEntityEvent.Pre spongeEvent();
+	@SuppressWarnings("unchecked")
+	public SpawnEntityEvent.Pre getSpongeEvent();
 
 }

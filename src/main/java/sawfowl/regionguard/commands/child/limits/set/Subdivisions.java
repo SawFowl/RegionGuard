@@ -58,7 +58,7 @@ public class Subdivisions extends AbstractCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg setlimit subdivisions &7[Player] [Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimit subdivisions ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy("&6/rg limits set subdivisions &7<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg limits set subdivisions ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

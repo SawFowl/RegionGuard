@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.spongepowered.math.vector.Vector3i;
 
-public interface RegionResizeEvent extends RegionEvent {
+public interface RegionResizeEvent extends RegionManagementEvent {
 
 	/**
 	 * Getting a new corner position.

@@ -25,6 +25,8 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 
+import com.google.gson.JsonObject;
+
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 
@@ -88,7 +90,7 @@ public interface Region extends DataSerializable {
 	UUID getOwnerUUID();
 
 	/**
-	 *
+	 * Getting the name of the region owner.
 	 */
 	String getOwnerName();
 
@@ -416,6 +418,18 @@ public interface Region extends DataSerializable {
 	Region setFlag(String flagName, boolean value, String source, String target);
 
 	/**
+	 * Setting the value of the flag.<br>
+	 * The flag set via this method will not be saved to disk.
+	 */
+	Region setTempFlag(Flags flagName, boolean value, String source, String target);
+
+	/**
+	 * Setting the value of the flag.<br>
+	 * The flag set via this method will not be saved to disk.
+	 */
+	Region setTempFlag(String flagName, boolean value, String source, String target);
+
+	/**
 	 * Set the values of a set of flags.
 	 *
 	 * @param flags - Map with flags and their values.
@@ -441,6 +455,16 @@ public interface Region extends DataSerializable {
 	 * Removing the flag from the region.
 	 */
 	Region removeFlag(String flagName, String source, String target);
+
+	/**
+	 * Removing a temporary flag from a region.
+	 */
+	Region removeTempFlag(Flags flagName, String source, String target);
+
+	/**
+	 * Removing a temporary flag from a region.
+	 */
+	Region removeTempFlag(String flagName, String source, String target);
 
 	/**
 	 * Removing the flag from the region.
@@ -474,6 +498,10 @@ public interface Region extends DataSerializable {
 	 */
 	Region setJoinMessage(Component message, Locale locale);
 
+	/**
+	 * Getting a collection of localized messages reporting entry into a region..<br>
+	 * The key is the localization tag.
+	 */
 	Map<String, Component> getJoinMessages();
 
 	/**
@@ -493,6 +521,10 @@ public interface Region extends DataSerializable {
 	 */
 	Region setExitMessage(Component message, Locale locale);
 
+	/**
+	 * Getting a collection of localized messages reporting region exits.<br>
+	 * The key is the localization tag.
+	 */
 	Map<String, Component> getExitMessages();
 
 	/**
@@ -505,14 +537,17 @@ public interface Region extends DataSerializable {
 	/**
 	 * Write additional data created by another plugin.
 	 */
-	void setAdditionalData(PluginContainer container, String dataName, AdditionalData additionalData);
+	public <T extends AdditionalData> Region setAdditionalData(PluginContainer container, String dataName, T additionalData);
 
 	/**
 	 * Deleting additional data created by another plugin.
 	 */
-	void removeAdditionalData(PluginContainer container, String dataName);
+	Region removeAdditionalData(PluginContainer container, String dataName);
 
-	AdditionalDataMap<? extends AdditionalData> getAllAdditionalData();
+	/**
+	 * Getting a copy of the entire collection of the region's supplementary data.
+	 */
+	Map<String, Map<String, JsonObject>> getAllAdditionalData();
 
 	/**
 	 * Checking whether the position belongs to the region.
@@ -608,8 +643,14 @@ public interface Region extends DataSerializable {
 	 */
 	boolean regen(boolean async, int delay);
 
+	/**
+	 * Checking for matching region owners.
+	 */
 	boolean equalsOwners(Region region);
 
+	/**
+	 * Create a copy of the current region.
+	 */
 	Region copy();
 
 	interface Builder extends AbstractBuilder<Region>, org.spongepowered.api.util.Builder<Region, Builder> {
@@ -644,7 +685,7 @@ public interface Region extends DataSerializable {
 
 		Builder addNames(Map<String, Component> names);
 
-		<T extends AdditionalData> Builder addAdditionalData(Map<String, Map<String, T>> dataMap);
+		Builder addAdditionalData(Map<String, Map<String, JsonObject>> dataMap);
 
 		Builder addChilds(Collection<Region> regions);
 

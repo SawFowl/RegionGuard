@@ -37,6 +37,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	private Map<UUID, CUIUser> worldEditPlayers = Maps.newHashMap();
 	private Map<String, String[]> cuiColors = new HashMap<String, String[]>();
 	private Map<String, Integer> cuiSpaces = new HashMap<String, Integer>();
+	private String sendMethodName;
 	public WorldEditAPI(RegionGuard plugin) {
 		this.plugin = plugin;
 		Sponge.asyncScheduler().submit(Task.builder().interval(10, TimeUnit.SECONDS).plugin(plugin.getPluginContainer()).execute(() -> {
@@ -63,7 +64,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public CUIUser getOrCreateUser(ServerPlayer player) {
 		if (worldEditPlayers.containsKey(player.uniqueId())) return worldEditPlayers.get(player.uniqueId());
-		final CUIUser user = new CUIUserImpl(player);
+		final CUIUser user = new CUIUserImpl(player, this);
 		worldEditPlayers.put(player.uniqueId(), user);
 		return getOrCreateUser(player.uniqueId());
 	}
@@ -71,7 +72,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public CUIUser getOrCreateUser(UUID uuid) {
 		if (worldEditPlayers.containsKey(uuid)) return worldEditPlayers.get(uuid);
-		final CUIUser user = new CUIUserImpl(uuid);
+		final CUIUser user = new CUIUserImpl(uuid, this);
 		worldEditPlayers.put(uuid, user);
 		return user;
 	}
@@ -175,6 +176,14 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	private int getSpaces(String type) {
 		if(cuiSpaces.containsKey(type)) return cuiSpaces.get(type);
 		return 5;
+	}
+
+	String getSendMethodName() {
+		return sendMethodName;
+	}
+
+	void setSendMethodName(String sendMethodName) {
+		this.sendMethodName = sendMethodName;
 	}
 
 }

@@ -1,20 +1,15 @@
-package sawfowl.regionguard.api.events;
+package sawfowl.regionguard.api.events.world;
 
 import java.util.Optional;
 
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionChangeEntityWorldEvent extends RegionMessageEvent, Cancellable {
-
-	/**
-	 * Get the {@link ChangeEntityWorldEvent.Reposition}.
-	 */
-	public ChangeEntityWorldEvent.Reposition spongeEvent();
+public interface RegionEntityChangeWorldEvent extends RegionWorldEvent, RegionMessageEvent {
 
 	/**
 	 * Get protect result.
@@ -41,6 +36,7 @@ public interface RegionChangeEntityWorldEvent extends RegionMessageEvent, Cancel
 	 * 
 	 * @return entity
 	 */
+	@SuppressWarnings("unchecked")
 	public Optional<ServerPlayer> getPlayer();
 
 	/**
@@ -62,5 +58,14 @@ public interface RegionChangeEntityWorldEvent extends RegionMessageEvent, Cancel
 	 * Set the message that will be sent to the player if the region is forbidden to fly.
 	 */
 	public void setStopFlyingMessage(Component component);
+
+	@SuppressWarnings("unchecked")
+	ChangeEntityWorldEvent.Reposition getSpongeEvent();
+
+	default Region getRegion() {
+		return fromRegion();
+	}
+
+	ServerWorld getTargetWorld();
 
 }

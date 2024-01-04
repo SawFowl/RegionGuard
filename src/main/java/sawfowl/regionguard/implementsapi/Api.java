@@ -19,6 +19,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -431,8 +432,8 @@ public class Api implements RegionAPI {
 	}
 
 	@Override
-	public String getCurrency(ServerPlayer player) {
-		return optionIsPresent(player, Permissions.TRANSACRION_CURRENCY) ? player.option(Permissions.TRANSACRION_CURRENCY).get() : null;
+	public Currency getCurrency(ServerPlayer player) {
+		return plugin.getEconomy() != null && optionIsPresent(player, Permissions.TRANSACRION_CURRENCY) ? plugin.getEconomy().checkCurrency(player.option(Permissions.TRANSACRION_CURRENCY).get()) : null;
 	}
 
 	@Override
@@ -504,6 +505,10 @@ public class Api implements RegionAPI {
 
 	private boolean containsLimits(UUID player) {
 		return dataPlayers.containsKey(player) && dataPlayers.get(player).getLimits() != null;
+	}
+
+	public boolean isRegisteredGlobal(ServerWorld world) {
+		return globalRegionsPerWorlds.containsKey(world.key());
 	}
 
 }

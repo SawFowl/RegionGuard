@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -15,6 +14,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent.Pickup.Pre;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.Tristate;
@@ -27,7 +27,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionChangeInventoryEvent;
+import sawfowl.regionguard.api.events.world.RegionChangeInventoryEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
@@ -43,8 +43,8 @@ public class PickupDropItemListener {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onPickup(ChangeInventoryEvent.Pickup.Pre event, @First Entity entity) {
 		if(entity.get(Keys.HEALTH).isPresent() && entity.get(Keys.HEALTH).get() <= 0) return;
-		ResourceKey worldKey = ((ServerWorld) entity.world()).key();
-		Region region = plugin.getAPI().findRegion(worldKey, entity.blockPosition());
+		ServerWorld world = entity.serverLocation().world();
+		Region region = plugin.getAPI().findRegion(world, entity.blockPosition());
 		List<ItemStackSnapshot> items = event.finalStacks();
 		boolean allowPickup = isAllowItemPickup(region, entity, items);
 		Optional<ServerPlayer> optPlayer = entity instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) entity) : Optional.empty();
@@ -82,6 +82,7 @@ public class PickupDropItemListener {
 				return allowPickup;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return optPlayer;
@@ -101,7 +102,23 @@ public class PickupDropItemListener {
 			public ChangeInventoryEvent.Pickup.Pre spongeEvent() {
 				return event;
 			}
-			
+
+			@Override
+			public Object source() {
+				return entity;
+			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return world;
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public Pre getSpongeEvent() {
+				return event;
+			}
+
 		}
 		RegionChangeInventoryEvent rgEvent = new DropEvent();
 		rgEvent.setCancelled(!allowPickup);
@@ -116,12 +133,10 @@ public class PickupDropItemListener {
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
-	public void onDrop(ChangeInventoryEvent.Drop event) {
-		if(!event.cause().first(Entity.class).isPresent()) return;
-		Entity entity = event.cause().first(Entity.class).get();
+	public void onDrop(ChangeInventoryEvent.Drop event, @First Entity entity) {
 		if(entity.get(Keys.HEALTH).isPresent() && entity.get(Keys.HEALTH).get() <= 0) return;
-		ResourceKey worldKey = ((ServerWorld) entity.world()).key();
-		Region region = plugin.getAPI().findRegion(worldKey, entity.blockPosition());
+		ServerWorld world = entity.serverLocation().world();
+		Region region = plugin.getAPI().findRegion(world, entity.blockPosition());
 		List<ItemStackSnapshot> items = new ArrayList<ItemStackSnapshot>();
 		for(SlotTransaction slotTransaction : event.transactions()) {
 			items.add(slotTransaction.original());
@@ -162,6 +177,7 @@ public class PickupDropItemListener {
 				return allowDrop;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return optPlayer;
@@ -179,6 +195,22 @@ public class PickupDropItemListener {
 
 			@Override
 			public ChangeInventoryEvent.Drop spongeEvent() {
+				return event;
+			}
+
+			@Override
+			public Object source() {
+				return null;
+			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return world;
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public ChangeInventoryEvent.Drop getSpongeEvent() {
 				return event;
 			}
 			

@@ -56,7 +56,7 @@ public class Set extends AbstractCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg limits set &7[Limit] [Player] [Volume]&f - ").clickEvent(ClickEvent.runCommand("/rg limits set ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy("&6/rg limits set &7<Limit> <Player> <Volume>&f - ").clickEvent(ClickEvent.runCommand("/rg limits set ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

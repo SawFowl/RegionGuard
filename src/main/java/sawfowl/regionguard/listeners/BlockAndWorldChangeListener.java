@@ -29,6 +29,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.ChangeBlockEvent.All;
 import org.spongepowered.api.event.block.ChangeBlockEvent.Pre;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
@@ -53,15 +54,16 @@ import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionCreateEvent;
-import sawfowl.regionguard.api.events.RegionInteractBlockEvent;
-import sawfowl.regionguard.api.events.RegionPistonEvent;
-import sawfowl.regionguard.api.events.RegionChangeBlockEvent;
 import sawfowl.regionguard.api.events.RegionResizeEvent;
+import sawfowl.regionguard.api.events.world.RegionChangeBlockEvent;
+import sawfowl.regionguard.api.events.world.RegionExplosionEvent;
+import sawfowl.regionguard.api.events.world.RegionInteractBlockEvent;
+import sawfowl.regionguard.api.events.world.RegionPistonEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 import sawfowl.regionguard.utils.Placeholders;
 
-public class BlockAndWorldChangeListener extends CustomRegionEvents {
+public class BlockAndWorldChangeListener extends ManagementEvents {
 
 	private final RegionGuard plugin;
 	private Cause cause;
@@ -76,13 +78,13 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onPrimary(InteractBlockEvent.Primary.Start event, @Root Entity entity) {
 		ServerPlayer player = event.source() instanceof ServerPlayer ? (ServerPlayer) event.source() : null;
-		Region region = plugin.getAPI().findRegion(ListenerUtils.getWorld(event.block().world()), event.block().position());
+		Region region = plugin.getAPI().findRegion(entity.serverLocation().world(), event.block().position());
 		if(player != null && resizeOrCreateRegion(player, event.block().position(), region)) {
 			event.setCancelled(true);
 			return;
 		}
 		boolean allow = isAllowInteractBlockPrimary(entity, region, event.block(), true);
-		class InteractBlockRegionEventPrimary implements RegionInteractBlockEvent {
+		RegionInteractBlockEvent rgEvent = new RegionInteractBlockEvent() {
 
 			Component message;
 			boolean cancelled;
@@ -91,8 +93,9 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				return cause;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public InteractBlockEvent spongeEvent() {
+			public InteractBlockEvent getSpongeEvent() {
 				return event;
 			}
 
@@ -101,6 +104,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				return entity;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return Optional.ofNullable(player);
@@ -141,9 +145,13 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			public void setMessage(Component component) {
 				message = component;
 			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return entity.serverLocation().world();
+			}
 			
-		}
-		RegionInteractBlockEvent rgEvent = new InteractBlockRegionEventPrimary();
+		};
 		rgEvent.setCancelled(!allow);
 		if(player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.INTERACT_BLOCK_CANCEL_PRIMARY));
 		ListenerUtils.postEvent(rgEvent);
@@ -156,13 +164,13 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onSecondary(InteractBlockEvent.Secondary event, @Root Entity entity) {
 		ServerPlayer player = event.source() instanceof ServerPlayer ? (ServerPlayer) event.source() : null;
-		Region region = plugin.getAPI().findRegion(ListenerUtils.getWorld(event.block().world()), event.block().position());
+		Region region = plugin.getAPI().findRegion(entity.serverLocation().world(), event.block().position());
 		if(player != null && getRegionInfo(player, region)) {
 			event.setCancelled(true);
 			return;
 		}
 		boolean allow = isAllowInteractBlockSecondary(entity, region, event.block(), true);
-		class InteractBlockRegionEventSecondary implements RegionInteractBlockEvent {
+		RegionInteractBlockEvent rgEvent = new RegionInteractBlockEvent() {
 
 			Component message;
 			boolean cancelled;
@@ -171,8 +179,9 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				return cause;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public InteractBlockEvent spongeEvent() {
+			public InteractBlockEvent getSpongeEvent() {
 				return event;
 			}
 
@@ -181,6 +190,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				return entity;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return Optional.ofNullable(player);
@@ -221,9 +231,13 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			public void setMessage(Component component) {
 				message = component;
 			}
-			
-		}
-		RegionInteractBlockEvent rgEvent = new InteractBlockRegionEventSecondary();
+
+			@Override
+			public ServerWorld getWorld() {
+				return entity.serverLocation().world();
+			}
+
+		};
 		rgEvent.setCancelled(!allow);
 		if(player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.INTERACT_BLOCK_CANCEL_SECONDARY));
 		ListenerUtils.postEvent(rgEvent);
@@ -277,18 +291,13 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				if(!isAllowExplosion(plugin.getAPI().findRegion(event.world(), transaction.original().position()), explosion, transaction)) transaction.setValid(false);
 			});
 			boolean allow = isAllowExplosion(region, explosion, event.world().block(explosion.blockPosition()));
-			class ExplodeEvent implements RegionChangeBlockEvent.Explode.Surface {
+			RegionExplosionEvent.Surface rgEvent = new RegionExplosionEvent.Surface() {
 
 				Explosion explosion;
 				boolean cancellded;
 				@Override
 				public Cause cause() {
 					return cause;
-				}
-
-				@Override
-				public Cause spongeCause() {
-					return event.cause();
 				}
 
 				@Override
@@ -356,9 +365,14 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				public BlockSnapshot beforeTransaction() {
 					return getDefaultTransaction().original();
 				}
-				
-			}
-			RegionChangeBlockEvent.Explode.Surface rgEvent = new ExplodeEvent();
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public ChangeBlockEvent.All getSpongeEvent() {
+					return event;
+				}
+
+			};
 			rgEvent.setCancelled(!allow);
 			rgEvent.setExplosion(explosion);
 			ListenerUtils.postEvent(rgEvent);
@@ -369,17 +383,12 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.LIQUID_SPREAD.get());
 			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
 			boolean allow = isAllowLiquidFlow(region, blockTransaction);
-			class LiquidFlowEvent implements RegionChangeBlockEvent.LiquidFlow {
+			RegionChangeBlockEvent.LiquidFlow rgEvent = new RegionChangeBlockEvent.LiquidFlow() {
 
 				boolean cancelled;
 				@Override
 				public Cause cause() {
 					return cause;
-				}
-
-				@Override
-				public Cause spongeCause() {
-					return event.cause();
 				}
 
 				@Override
@@ -436,9 +445,14 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				public int getFlowLevel() {
 					return ListenerUtils.getLiquidFlowLevel(blockTransaction);
 				}
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public All getSpongeEvent() {
+					return event;
+				}
 				
-			}
-			RegionChangeBlockEvent.LiquidFlow rgEvent = new LiquidFlowEvent();
+			};
 			rgEvent.setCancelled(!allow);
 			ListenerUtils.postEvent(rgEvent);
 			event.setCancelled(rgEvent.isCancelled());
@@ -455,18 +469,13 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
 			Entity entity = (Entity) event.source();
 			boolean allow = isAllowPlace(region, blockTransaction, entity, true);
-			class PlaceEvent implements RegionChangeBlockEvent.Place {
+			RegionChangeBlockEvent.Place rgEvent = new RegionChangeBlockEvent.Place() {
 
 				Component component;
 				boolean cancelled;
 				@Override
 				public Cause cause() {
 					return cause;
-				}
-
-				@Override
-				public Cause spongeCause() {
-					return event.cause();
 				}
 
 				@Override
@@ -524,6 +533,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 					return entity;
 				}
 
+				@SuppressWarnings("unchecked")
 				@Override
 				public Optional<ServerPlayer> getPlayer() {
 					return Optional.ofNullable(player);
@@ -538,9 +548,14 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				public Optional<Component> getMessage() {
 					return Optional.ofNullable(component);
 				}
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public All getSpongeEvent() {
+					return event;
+				}
 				
-			}
-			RegionChangeBlockEvent.Place rgEvent = new PlaceEvent();
+			};
 			rgEvent.setCancelled(!allow);
 			if(isPlayer) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.CANCEL_PLACE));
 			ListenerUtils.postEvent(rgEvent);
@@ -553,18 +568,13 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
 			Entity entity = event.source() instanceof Entity ? (Entity) event.source() : null;
 			boolean allow = isAllowBreak(region, blockTransaction, entity, true);
-			class BreakEvent implements RegionChangeBlockEvent.Break {
+			RegionChangeBlockEvent.Break rgEvent = new RegionChangeBlockEvent.Break() {
 
 				Component component;
 				boolean cancelled;
 				@Override
 				public Cause cause() {
 					return cause;
-				}
-
-				@Override
-				public Cause spongeCause() {
-					return event.cause();
 				}
 
 				@Override
@@ -617,6 +627,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 					return entity;
 				}
 
+				@SuppressWarnings("unchecked")
 				@Override
 				public Optional<ServerPlayer> getPlayer() {
 					return Optional.ofNullable(player);
@@ -636,9 +647,14 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				public boolean isAllowBreak() {
 					return allow;
 				}
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public All getSpongeEvent() {
+					return event;
+				}
 				
-			}
-			RegionChangeBlockEvent.Break rgEvent = new BreakEvent();
+			};
 			rgEvent.setCancelled(!allow);
 			if(isPlayer) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.CANCEL_BREAK));
 			ListenerUtils.postEvent(rgEvent);
@@ -663,10 +679,11 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 		HashSet<Region> affectedRegions = getOtherRegions(event.world(), event.locations().stream().map(ServerLocation::blockPosition).collect(Collectors.toList()), direction, region, sources, targets);
 		if(affectedRegions.isEmpty()) {
 			boolean isAllow = isAllowPistonMove(region, sources, targets);
-			class MoveEvent implements RegionPistonEvent.OneRegion {
+			RegionPistonEvent.OneRegion rgEvent = new RegionPistonEvent.OneRegion() {
 
 				Component text;
 				boolean cancelled;
+				@SuppressWarnings("unchecked")
 				@Override
 				public Pre getSpongeEvent() {
 					return event;
@@ -707,6 +724,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 					return direction;
 				}
 
+				@SuppressWarnings("unchecked")
 				@Override
 				public Optional<ServerPlayer> getPlayer() {
 					return optEntity.isPresent() && optEntity.get() instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) optEntity.get()) : Optional.empty();
@@ -726,9 +744,13 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				public Optional<Component> getMessage() {
 					return Optional.ofNullable(text);
 				}
+
+				@Override
+				public ServerWorld getWorld() {
+					return event.world();
+				}
 				
-			}
-			RegionPistonEvent.OneRegion rgEvent = new MoveEvent();
+			};
 			rgEvent.setCancelled(!isAllow);
 			if(!isAllow && rgEvent.getPlayer().isPresent()) rgEvent.setMessage(plugin.getLocales().getComponent(rgEvent.getPlayer().get().locale(), LocalesPaths.DENY_PISTON));
 			ListenerUtils.postEvent(rgEvent);
@@ -738,10 +760,11 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 			if(rgEvent.getMessage().isPresent() && rgEvent.getPlayer().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
 		} else {
 			boolean isAllow = isAllowPistonGrief(region, affectedRegions, sources, targets) && isAllowPistonMove(affectedRegions, sources, targets);
-			class GriefEvent implements RegionPistonEvent.Grief {
+			RegionPistonEvent.Grief rgEvent = new RegionPistonEvent.Grief() {
 
 				Component text;
 				boolean cancelled;
+				@SuppressWarnings("unchecked")
 				@Override
 				public Pre getSpongeEvent() {
 					return event;
@@ -787,6 +810,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 					return direction;
 				}
 
+				@SuppressWarnings("unchecked")
 				@Override
 				public Optional<ServerPlayer> getPlayer() {
 					return optEntity.isPresent() && optEntity.get() instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) optEntity.get()) : Optional.empty();
@@ -806,9 +830,13 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 				public Optional<Component> getMessage() {
 					return Optional.ofNullable(text);
 				}
+
+				@Override
+				public ServerWorld getWorld() {
+					return event.world();
+				}
 				
-			}
-			RegionPistonEvent.Grief rgEvent = new GriefEvent();
+			};
 			rgEvent.setCancelled(!isAllow);
 			if(!isAllow && rgEvent.getPlayer().isPresent()) rgEvent.setMessage(plugin.getLocales().getComponent(rgEvent.getPlayer().get().locale(), LocalesPaths.DENY_PISTON_GRIEF));
 			ListenerUtils.postEvent(rgEvent);
@@ -1037,7 +1065,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 
 	private RegionCreateEvent createRegion(ServerPlayer player, Region region) {
 		region.setRegionType(plugin.getAPI().getSelectRegionType(player));
-		RegionCreateEvent createMainEvent = new RegionCreate(cause, player, region);
+		RegionCreateEvent createMainEvent = new Create(cause, player, region);
 		createMainEvent.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_CREATE_CREATE_BASIC).replace(Placeholders.VOLUME, region.getCuboid().getSize()).get());
 		ListenerUtils.postEvent(createMainEvent);
 		positions.get(player.uniqueId()).clear();
@@ -1045,7 +1073,7 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	}
 
 	private RegionCreateEvent createSubdivision(ServerPlayer player, Region subdivision, Region parrent) {
-		RegionCreateEvent createSubdivisionEvent = new RegionCreate(cause, player, subdivision);
+		RegionCreateEvent createSubdivisionEvent = new Create(cause, player, subdivision);
 		if(parrent.getCuboid().getAABB().intersects(subdivision.getCuboid().getAABB())) {
 			createSubdivisionEvent.setMessage(plugin.getLocales().getText(player.locale(), LocalesPaths.REGION_CREATE_SUBDIVISION).replace(Placeholders.VOLUME, subdivision.getCuboid().getSize()).get());
 			subdivision.setParrent(parrent);
@@ -1061,9 +1089,9 @@ public class BlockAndWorldChangeListener extends CustomRegionEvents {
 	private RegionResizeEvent tryResizeRegion(ServerPlayer player, Region region, Vector3i newCorner, Vector3i oppositeCorner) {
 		RegionResizeEvent resizeEvent;
 		if(newCorner == null) {
-			resizeEvent = new RegionResizeEventClass(cause, player, region, newCorner, oppositeCorner, plugin.getLocales().getComponent(player.locale(), LocalesPaths.REGION_RESIZE_START));
+			resizeEvent = new Resize(cause, player, region, newCorner, oppositeCorner, plugin.getLocales().getComponent(player.locale(), LocalesPaths.REGION_RESIZE_START));
 		} else {
-			resizeEvent = new RegionResizeEventClass(cause, player, region, newCorner, oppositeCorner, plugin.getLocales().getComponent(player.locale(), LocalesPaths.REGION_RESIZE_FINISH));
+			resizeEvent = new Resize(cause, player, region, newCorner, oppositeCorner, plugin.getLocales().getComponent(player.locale(), LocalesPaths.REGION_RESIZE_FINISH));
 		}
 		ListenerUtils.postEvent(resizeEvent);
 		return resizeEvent;

@@ -15,6 +15,7 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 
@@ -22,7 +23,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionInteractEntityEvent;
+import sawfowl.regionguard.api.events.world.RegionInteractEntityEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
@@ -41,7 +42,7 @@ public class InteractEntityListener {
 	public void onPrimary(InteractEntityEvent.Primary event, @Root ServerPlayer player) {
 		Region region = plugin.getAPI().findRegion(player.world(), event.entity().blockPosition());
 		boolean isAllow = isAllowPrimary(region, player, event.entity());
-		class InteractEvent implements RegionInteractEntityEvent {
+		RegionInteractEntityEvent.Primary rgEvent = new RegionInteractEntityEvent.Primary() {
 
 			boolean canceled;
 			Component message;
@@ -80,27 +81,28 @@ public class InteractEntityListener {
 				return event.entity();
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public ServerPlayer getPlayer() {
 				return player;
 			}
 
 			@Override
-			public InteractEntityEvent getSpongeInteractEntityEvent() {
-				return event;
-			}
-
-			@Override
-			public boolean isPrimary() {
-				return false;
-			}
-
-			@Override
 			public boolean isAllowInteract() {
 				return isAllow;
 			}
-		}
-		RegionInteractEntityEvent rgEvent = new InteractEvent();
+
+			@Override
+			public ServerWorld getWorld() {
+				return player.world();
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public InteractEntityEvent.Primary getSpongeEvent() {
+				return event;
+			}
+		};
 		rgEvent.setCancelled(!isAllow);
 		rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_PRIMARY));
 		ListenerUtils.postEvent(rgEvent);
@@ -117,7 +119,7 @@ public class InteractEntityListener {
 		lastTime.put(player.uniqueId(), time);
 		Region region = plugin.getAPI().findRegion(player.world(), event.entity().blockPosition());
 		boolean isAllow = isAllowSecondary(region, player, event.entity());
-		class InteractEvent implements RegionInteractEntityEvent {
+		RegionInteractEntityEvent rgEvent = new RegionInteractEntityEvent.Secondary() {
 
 			boolean canceled;
 			Component message;
@@ -156,27 +158,28 @@ public class InteractEntityListener {
 				return event.entity();
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public ServerPlayer getPlayer() {
 				return player;
 			}
 
 			@Override
-			public InteractEntityEvent getSpongeInteractEntityEvent() {
-				return event;
-			}
-
-			@Override
-			public boolean isPrimary() {
-				return true;
-			}
-
-			@Override
 			public boolean isAllowInteract() {
 				return isAllow;
 			}
-		}
-		RegionInteractEntityEvent rgEvent = new InteractEvent();
+
+			@Override
+			public ServerWorld getWorld() {
+				return player.world();
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public InteractEntityEvent.Secondary getSpongeEvent() {
+				return event;
+			}
+		};
 		rgEvent.setCancelled(!isAllow);
 		rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_SECONDARY));
 		ListenerUtils.postEvent(rgEvent);

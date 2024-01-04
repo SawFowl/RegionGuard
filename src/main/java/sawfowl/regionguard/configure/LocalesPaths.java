@@ -167,9 +167,10 @@ public class LocalesPaths {
 	public static final Object[] COMMAND_INFO_SELECTION_TYPE = {PATH_COMMANDS, PATH_COMMAND_INFO, "SelectionType"};
 
 	public static final Object[] COMMAND_LIMITS_HEADER = {PATH_COMMANDS, PATH_COMMAND_LIMITS, "Header"};
+	public static final Object[] COMMAND_LIMITS_BLOCKS = {PATH_COMMANDS, PATH_COMMAND_LIMITS, "Blocks"};
 	public static final Object[] COMMAND_LIMITS_CLAIMS = {PATH_COMMANDS, PATH_COMMAND_LIMITS, "Claims"};
 	public static final Object[] COMMAND_LIMITS_SUBDIVISIONS = {PATH_COMMANDS, PATH_COMMAND_LIMITS, "Subdivisions"};
-	public static final Object[] COMMAND_LIMITS_BLOCKS = {PATH_COMMANDS, PATH_COMMAND_LIMITS, "Blocks"};
+	public static final Object[] COMMAND_LIMITS_MEMBERS = {PATH_COMMANDS, PATH_COMMAND_LIMITS, "Members"};
 
 	public static final Object[] COMMAND_SET_MESSAGE_NOT_TRUSTED = {PATH_COMMANDS, PATH_COMMAND_SET_MESSAGE, PATH_EXCEPTIONS, "NotTrusted"};
 	public static final Object[] COMMAND_SET_MESSAGE_LOW_TRUST = {PATH_COMMANDS, PATH_COMMAND_SET_MESSAGE, PATH_EXCEPTIONS, "LowTrust"};

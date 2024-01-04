@@ -13,6 +13,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -410,7 +411,7 @@ public interface RegionAPI {
 	 * Getting the currency in which the player will perform the transaction.
 	 * Depending on how the permissions plugin is set up, different players may have different currencies.
 	 */
-	String getCurrency(ServerPlayer player);
+	Currency getCurrency(ServerPlayer player);
 
 	/**
 	 * Change the limit of blocks a player can claim.

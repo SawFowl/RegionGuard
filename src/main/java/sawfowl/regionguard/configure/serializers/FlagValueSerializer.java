@@ -13,7 +13,7 @@ public class FlagValueSerializer implements TypeSerializer<FlagValue> {
 
 	@Override
 	public FlagValue deserialize(Type type, ConfigurationNode node) throws SerializationException {
-		return node.virtual() || node.empty() ? null : FlagValue.of(node.node("Value").getBoolean(), node.node("Source").getString(), node.node("Target").getString());
+		return node.virtual() || node.empty() ? null : FlagValue.of(node.node("Value").getBoolean(), node.node("Source").getString("all"), node.node("Target").getString("all"));
 	}
 
 	@Override

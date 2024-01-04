@@ -21,15 +21,19 @@ public interface PlayerData extends DataSerializable {
 		return builder().setLimits(PlayerLimits.zero()).setClaimed(ClaimedByPlayer.zero()).build();
 	}
 
+	/**
+	 * Getting additional limits available to the player.
+	 */
 	PlayerLimits getLimits();
 
 	PlayerData setLimits(PlayerLimits limits);
 
+	/**
+	 * Getting the volume of blocks claimed by the player and the number of regions created.
+	 */
 	ClaimedByPlayer getClaimed();
 
 	PlayerData setClaimed(ClaimedByPlayer claimed);
-
-	boolean isEmpty();
 
 	interface Builder extends AbstractBuilder<PlayerData>, org.spongepowered.api.util.Builder<PlayerData, Builder> {
 

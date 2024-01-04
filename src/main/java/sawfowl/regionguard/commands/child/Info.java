@@ -2,7 +2,6 @@ package sawfowl.regionguard.commands.child;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -124,6 +123,7 @@ public class Info extends AbstractPlayerCommand {
 							public Region getRegion() {
 								return region;
 							}
+							@SuppressWarnings("unchecked")
 							@Override
 							public ServerPlayer getPlayer() {
 								return player;
@@ -168,6 +168,7 @@ public class Info extends AbstractPlayerCommand {
 							public Region getRegion() {
 								return region;
 							}
+							@SuppressWarnings("unchecked")
 							@Override
 							public ServerPlayer getPlayer() {
 								return player;

@@ -13,11 +13,11 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionCreateEvent;
 import sawfowl.regionguard.api.events.RegionResizeEvent;
 
-class CustomRegionEvents {
+class ManagementEvents {
 
-	class RegionCreate extends AbstractEvent implements RegionCreateEvent {
+	class Create extends AbstractEvent implements RegionCreateEvent {
 
-		RegionCreate(Cause cause, ServerPlayer serverPlayer, Region region) {
+		Create(Cause cause, ServerPlayer serverPlayer, Region region) {
 			this.cause = cause;
 			this.serverPlayer = serverPlayer;
 			this.region = region;
@@ -44,6 +44,7 @@ class CustomRegionEvents {
 			this.cancel = cancel;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public ServerPlayer getPlayer() {
 			return serverPlayer;
@@ -76,9 +77,9 @@ class CustomRegionEvents {
 		}
 	}
 
-	class RegionResizeEventClass extends AbstractEvent implements RegionResizeEvent {
+	class Resize extends AbstractEvent implements RegionResizeEvent {
 
-		RegionResizeEventClass(Cause cause, ServerPlayer serverPlayer, Region region, Vector3i newCorner, Vector3i oppositeCorner, Component message) {
+		Resize(Cause cause, ServerPlayer serverPlayer, Region region, Vector3i newCorner, Vector3i oppositeCorner, Component message) {
 			this.cause = cause;
 			this.serverPlayer = serverPlayer;
 			this.region = region;
@@ -110,6 +111,7 @@ class CustomRegionEvents {
 			this.cancel = cancel;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public ServerPlayer getPlayer() {
 			return serverPlayer;

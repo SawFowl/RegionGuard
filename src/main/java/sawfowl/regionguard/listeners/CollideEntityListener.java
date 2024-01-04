@@ -1,6 +1,5 @@
 package sawfowl.regionguard.listeners;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -17,7 +16,7 @@ import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionCollideEntityEvent;
+import sawfowl.regionguard.api.events.world.RegionCollideEntityEvent;
 import sawfowl.regionguard.utils.ListenerUtils;
 
 public class CollideEntityListener {
@@ -31,8 +30,8 @@ public class CollideEntityListener {
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onCollide(CollideEntityEvent event, @First Entity entitySource) {
-		ResourceKey worldKey = ((ServerWorld) entitySource.world()).key();
-		Region region = plugin.getAPI().findRegion(worldKey, entitySource.blockPosition());
+		ServerWorld world = entitySource.serverLocation().world();
+		Region region = plugin.getAPI().findRegion(world, entitySource.blockPosition());
 		boolean isAllow = true;
 		Entity entityTarget = null;
 		for(Entity target : event.entities()) {
@@ -44,7 +43,7 @@ public class CollideEntityListener {
 		}
 		Entity finalTarget = entityTarget;
 		boolean finalAllow = isAllow;
-		class CollideEvent implements RegionCollideEntityEvent {
+		RegionCollideEntityEvent rgEvent = new RegionCollideEntityEvent() {
 
 			boolean cencelled;
 			@Override
@@ -67,8 +66,9 @@ public class CollideEntityListener {
 				return region;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public CollideEntityEvent spongeEvent() {
+			public CollideEntityEvent getSpongeEvent() {
 				return event;
 			}
 
@@ -86,9 +86,13 @@ public class CollideEntityListener {
 			public Entity getTarget() {
 				return finalTarget;
 			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return world;
+			}
 			
-		}
-		RegionCollideEntityEvent rgEvent = new CollideEvent();
+		};
 		rgEvent.setCancelled(!finalAllow);
 		ListenerUtils.postEvent(rgEvent);
 		event.setCancelled(rgEvent.isCancelled());

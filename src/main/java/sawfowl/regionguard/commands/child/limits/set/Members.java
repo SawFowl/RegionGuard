@@ -58,7 +58,7 @@ public class Members extends AbstractCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg setlimit members &7[Player] [Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimit members ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy("&6/rg limits set members &7<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg limits set members ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

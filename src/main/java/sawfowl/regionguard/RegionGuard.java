@@ -146,7 +146,7 @@ public class RegionGuard {
 		return pluginContainer;
 	}
 
-	public RegionAPI getAPI() {
+	public Api getAPI() {
 		return api;
 	}
 

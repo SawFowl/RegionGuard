@@ -1,21 +1,19 @@
-package sawfowl.regionguard.api.events;
+package sawfowl.regionguard.api.events.world;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.server.ServerLocation;
 
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionPistonEvent {
+public interface RegionPistonEvent extends RegionWorldEvent, RegionMessageEvent  {
 
-	public interface OneRegion extends RegionPistonEvent, RegionMessageEvent, Event, Cancellable {
+	public interface OneRegion extends RegionPistonEvent {
 
 		/**
 		 * Get protect result.
@@ -24,16 +22,7 @@ public interface RegionPistonEvent {
 
 	}
 
-	public interface Grief extends RegionPistonEvent, RegionMessageEvent, Event, Cancellable {
-
-		/**
-		 * Getting the region to which the block is attempted to move or vice versa.<br>
-		 * Deprecated. See {@link #getAffectedRegions()}
-		 */
-		@Deprecated
-		public default Region getGriefedRegion() {
-			return getAffectedRegions().get(0);
-		}
+	public interface Grief extends RegionPistonEvent {
 
 		/**
 		 * Getting all regions with which the piston interacts.<br>
@@ -49,15 +38,13 @@ public interface RegionPistonEvent {
 
 	}
 
+	@SuppressWarnings("unchecked")
+	public ChangeBlockEvent.Pre getSpongeEvent();
+
 	/**
 	 * Getting piston direction.
 	 */
 	public Direction getDirection();
-
-	/**
-	 * Get {@link ChangeBlockEvent.Pre} event.
-	 */
-	public ChangeBlockEvent.Pre getSpongeEvent();
 
 	/**
 	 * Getting the region in which the piston is located.
@@ -72,6 +59,7 @@ public interface RegionPistonEvent {
 	/**
 	 * Getting the {@link ServerPlayer} who activated the piston.
 	 */
+	@SuppressWarnings("unchecked")
 	Optional<ServerPlayer> getPlayer();
 
 	/**

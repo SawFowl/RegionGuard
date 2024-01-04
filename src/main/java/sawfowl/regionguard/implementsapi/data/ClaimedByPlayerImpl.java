@@ -34,20 +34,24 @@ public class ClaimedByPlayerImpl implements ClaimedByPlayer {
 	private Long blocks = 0l;
 	private Long regions = 0l;
 
+	@Override
 	public Long getBlocks() {
 		return blocks;
 	}
 
+	@Override
 	public Long getRegions() {
 		return regions;
 	}
 
+	@Override
 	public ClaimedByPlayer setBlocks(long limit) {
 		blocks = limit;
 		if(blocks < 0) blocks = 0l;
 		return this;
 	}
 
+	@Override
 	public ClaimedByPlayer setRegions(long limit) {
 		regions = limit;
 		if(regions < 0) regions = 0l;

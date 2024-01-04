@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -29,14 +30,14 @@ public class Economy {
 	}
 
 	public BigDecimal getPlayerBalance(UUID uuid, Currency currency) {
-        try {
-            Optional<UniqueAccount> uOpt = plugin.getEconomyService().findOrCreateAccount(uuid);
-            if (uOpt.isPresent()) {
-                return uOpt.get().balance(currency);
-            }
-        } catch (Exception ignored) {
-        }
-        return BigDecimal.ZERO;
+		try {
+			Optional<UniqueAccount> uOpt = plugin.getEconomyService().findOrCreateAccount(uuid);
+			if (uOpt.isPresent()) {
+				return uOpt.get().balance(currency);
+			}
+		} catch (Exception ignored) {
+		}
+		return BigDecimal.ZERO;
 	}
 
 	public boolean checkPlayerBalance(UUID uuid, Currency currency, BigDecimal money) {
@@ -44,46 +45,46 @@ public class Economy {
 	}
 
 	public boolean addToPlayerBalance(ServerPlayer player, Currency currency, BigDecimal money) {
-        try {
-            Optional<UniqueAccount> uOpt = plugin.getEconomyService().findOrCreateAccount(player.uniqueId());
-            if (uOpt.isPresent()) {
-                TransactionResult result = uOpt.get().deposit(currency, money);
-                if (result.result() == ResultType.SUCCESS) {
-                	return true;
-                } else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
-                	plugin.getLogger().error(plugin.getLocales().getComponent(player.locale(), LocalesPaths.ECONOMY_ERROR_GIVE_MONEY)
-                				.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build()));
-                } else {
-                }
-            	}
-        	} catch (Exception ignored) {
-        		ignored.printStackTrace();
-        }
+		try {
+			Optional<UniqueAccount> uOpt = plugin.getEconomyService().findOrCreateAccount(player.uniqueId());
+			if (uOpt.isPresent()) {
+				TransactionResult result = uOpt.get().deposit(currency, money);
+				if (result.result() == ResultType.SUCCESS) {
+					return true;
+				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
+					plugin.getLogger().error(plugin.getLocales().getComponent(player.locale(), LocalesPaths.ECONOMY_ERROR_GIVE_MONEY)
+								.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build()));
+				} else {
+				}
+				}
+			} catch (Exception ignored) {
+				ignored.printStackTrace();
+		}
 		return false;
 	}
 
 	public boolean removeFromPlayerBalance(ServerPlayer player, Currency currency, BigDecimal money) {
-        try {
-            Optional<UniqueAccount> uOpt = plugin.getEconomyService().findOrCreateAccount(player.uniqueId());
-            if (uOpt.isPresent()) {
-                TransactionResult result = uOpt.get().withdraw(currency, money);
-                if (result.result() == ResultType.SUCCESS) {
-                	return true;
-                } else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
-                	plugin.getLogger().error(plugin.getLocales().getComponent(player.locale(), LocalesPaths.ECONOMY_ERROR_TAKE_MONEY)
-            				.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build()));
-                } else {
-                }
-            	}
-        	} catch (Exception ignored) {
-        		ignored.printStackTrace();
-        }
+		try {
+			Optional<UniqueAccount> uOpt = plugin.getEconomyService().findOrCreateAccount(player.uniqueId());
+			if (uOpt.isPresent()) {
+				TransactionResult result = uOpt.get().withdraw(currency, money);
+				if (result.result() == ResultType.SUCCESS) {
+					return true;
+				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
+					plugin.getLogger().error(plugin.getLocales().getComponent(player.locale(), LocalesPaths.ECONOMY_ERROR_TAKE_MONEY)
+							.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build()));
+				} else {
+				}
+				}
+			} catch (Exception ignored) {
+				ignored.printStackTrace();
+		}
 		return false;
 	}
 
 	public Currency checkCurrency(String check) {
 		if(check == null) return plugin.getEconomyService().defaultCurrency();
-		Optional<Currency> optCurrency = getCurrencies().stream().filter(currency -> (TextUtils.clearDecorations(currency.displayName()).equalsIgnoreCase(check) || TextUtils.clearDecorations(currency.symbol()).equalsIgnoreCase(check))).findFirst();
+		Optional<Currency> optCurrency = getCurrencies().stream().filter(currency -> ((check.contains(":") && RegistryTypes.CURRENCY.get().findValue(ResourceKey.resolve(check)).isPresent()) || TextUtils.clearDecorations(currency.displayName()).equalsIgnoreCase(check) || TextUtils.clearDecorations(currency.symbol()).equalsIgnoreCase(check))).findFirst();
 		return optCurrency.isPresent() ? optCurrency.get() : plugin.getEconomyService().defaultCurrency();
 	}
 

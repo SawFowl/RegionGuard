@@ -20,6 +20,8 @@ import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
+import com.google.gson.JsonObject;
+
 import io.leangen.geantyref.TypeToken;
 
 import net.kyori.adventure.text.Component;
@@ -27,8 +29,6 @@ import net.kyori.adventure.text.Component;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionSerializerCollection;
-import sawfowl.regionguard.api.data.AdditionalData;
-import sawfowl.regionguard.api.data.AdditionalDataMap;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.MemberData;
 import sawfowl.regionguard.api.data.PlayerData;
@@ -42,7 +42,7 @@ public abstract class AbstractSqlStorage extends Thread implements WorkData {
 	final TypeToken<Map<String, Component>> mapComponentsToken = new TypeToken<Map<String, Component>>(){};
 	final TypeToken<Map<String, Set<FlagValue>>> flagsToken = new TypeToken<Map<String, Set<FlagValue>>>(){};
 	final TypeToken<Map<UUID, MemberData>> membersToken = new TypeToken<Map<UUID, MemberData>>(){};
-	final TypeToken<AdditionalDataMap<? extends AdditionalData>> dataMapToken = new TypeToken<AdditionalDataMap<?>>(){};
+	final TypeToken<Map<String, Map<String, JsonObject>>> dataMapToken = new TypeToken<Map<String, Map<String, JsonObject>>>(){};
 	public AbstractSqlStorage(RegionGuard plugin) {
 		this.plugin = plugin;
 		prefix = plugin.getConfig().getMySQLConfig().getPrefix();

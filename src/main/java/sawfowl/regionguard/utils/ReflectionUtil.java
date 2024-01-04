@@ -2,6 +2,8 @@ package sawfowl.regionguard.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ReflectionUtil {
 
@@ -21,6 +23,11 @@ public class ReflectionUtil {
 					e.printStackTrace();
 				}
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Optional<T> findField(Object source, Class<T> clazz) {
+		return Stream.of(source.getClass().getFields()).filter(field -> field.getType().equals(clazz)).findFirst().map(field -> (T) org.apache.logging.log4j.core.util.ReflectionUtil.getFieldValue(field, source));
 	}
 
 }

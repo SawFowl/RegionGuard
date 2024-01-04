@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionCreateEvent extends RegionEvent {
+public interface RegionCreateEvent extends RegionManagementEvent {
 
 	/**
 	 * Getting a parent {@link Region} if it exists.

@@ -5,7 +5,6 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.util.Tristate;
 
 import sawfowl.regionguard.api.data.FlagValue;
 
@@ -45,34 +44,25 @@ public class FlagValueImpl implements FlagValue {
 	private String source = "all";
 	private String target = "all";
 
+	@Override
 	public String getSource() {
 		return source;
 	}
 
+	@Override
 	public String getTarget() {
 		return target;
 	}
 
+	@Override
 	public boolean getValue() {
 		return value;
 	}
 
-	public boolean isBasic() {
-		return source.equals("all") && target.equals("all");
-	}
-
-	public Tristate asTristate() {
-		return Tristate.fromBoolean(value);
-	}
-
-	public boolean equalsTo(String source, String target) {
-		return (source == null ? this.source.equals("all") : source.equals(this.source)) && (target == null ? this.target.equals("all") : target.equals(this.target));
-	}
-
 	@Override
 	public boolean equals(Object obj) {
-		if(this == obj) return true;
 		if(obj == null) return false;
+		if(this == obj) return true;
 		if(getClass() != obj.getClass()) return false;
 		FlagValueImpl other = (FlagValueImpl) obj;
 		return Objects.equals(source, other.source) && Objects.equals(target, other.target);

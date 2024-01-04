@@ -15,6 +15,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.block.ChangeBlockEvent.All;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.explosion.Explosion.Builder;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -29,7 +30,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionChangeBlockEvent;
+import sawfowl.regionguard.api.events.world.RegionExplosionEvent;
 import sawfowl.regionguard.utils.ListenerUtils;
 
 public class ForgeExplosionListener extends ForgeListener {
@@ -50,18 +51,13 @@ public class ForgeExplosionListener extends ForgeListener {
 		if(explosion.getExploder() != null) sources.addAll(flagEntityArgs(explosion.getExploder()));
 		boolean allow = isAllowExplosion(region, sources, region.getWorld().get().block(position));
 		List<BlockTransaction> transactions = new ArrayList<BlockTransaction>();
-		RegionChangeBlockEvent.Explode.Surface rgEvent = new RegionChangeBlockEvent.Explode.Surface() {
+		RegionExplosionEvent.Surface rgEvent = new RegionExplosionEvent.Surface() {
 
 			org.spongepowered.api.world.explosion.Explosion explosion;
 			boolean cancellded;
 			@Override
 			public Cause cause() {
 				return Cause.builder().insert(0, explosion).build();
-			}
-
-			@Override
-			public Cause spongeCause() {
-				return null;
 			}
 
 			@Override
@@ -128,6 +124,12 @@ public class ForgeExplosionListener extends ForgeListener {
 			@Override
 			public BlockSnapshot beforeTransaction() {
 				return getDefaultTransaction().original();
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public All getSpongeEvent() {
+				return null;
 			}
 			
 		};

@@ -85,67 +85,52 @@ public class MemberDataImpl implements MemberData {
 	private TrustTypes trustLevel;
 	private boolean replaceNameInTitle = false;
 
-	/**
-	 * Getting member name
-	 */
+	@Override
 	public String getName() {
 		return memberName;
 	}
 
+	@Override
 	public UUID getUniqueId() {
 		return uuid;
 	}
 
-	/**
-	 * Getting member name as kyori component
-	 */
+	@Override
 	public Component asComponent() {
 		return Component.text(memberName);
 	}
 
-	/**
-	 * Getting member name as kyori component
-	 */
+	@Override
 	public Component asComponent(ServerPlayer joiner) {
 		return replaceNameInTitle ? Component.text(joiner.name()) : asComponent();
 	}
 
-	/**
-	 * Checking if the owner is a player <br>
-	 * The check is performed by the name of the owner.
-	 */
+	@Override
 	public boolean isPlayer() {
 		return !memberName.equals("Server");
 	}
 
-	/**
-	 * Getting a player object
-	 * 
-	 * @return - player if a player is found <br>
-	 * - empty if a player is not found
-	 */
+	@Override
 	public Optional<ServerPlayer> getPlayer() {
-		return isPlayer() ? Sponge.server().player(memberName) : Optional.empty();
+		return isPlayer() ? Sponge.server().player(uuid) : Optional.empty();
 	}
 
-	/**
-	 * Obtaining a region member's trust type
-	 */
+	@Override
 	public TrustTypes getTrustType() {
 		return trustLevel;
 	}
 
-	/**
-	 * Setting the type of trust for a region member
-	 */
+	@Override
 	public void setTrustType(TrustTypes level) {
 		trustLevel = level;
 	}
 
+	@Override
 	public boolean isReplaceNameInTitle() {
 		return replaceNameInTitle;
 	}
 
+	@Override
 	public void setReplaceNameInTitle(boolean replaceNameInTitle) {
 		this.replaceNameInTitle = replaceNameInTitle;
 	}

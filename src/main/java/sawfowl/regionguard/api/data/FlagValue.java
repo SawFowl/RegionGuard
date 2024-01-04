@@ -25,17 +25,28 @@ public interface FlagValue extends DataSerializable {
 		return builder().setValue(value).setSource(source).setTarget(target).build();
 	}
 
+	/**
+	 * Initiator of the event.
+	 */
 	String getSource();
 
+	/**
+	 * Event target.
+	 */
 	String getTarget();
 
+	/**
+	 * Value of the flag.
+	 */
 	boolean getValue();
 
-	boolean isBasic();
+	default Tristate asTristate() {
+		return Tristate.fromBoolean(getValue());
+	}
 
-	Tristate asTristate();
-
-	boolean equalsTo(String source, String target);
+	default boolean equalsTo(String source, String target) {
+		return (source == null ? getSource().equals("all") : source.equals(getSource())) && (target == null ? getTarget().equals("all") : target.equals(getTarget()));
+	}
 
 	interface Builder extends AbstractBuilder<FlagValue>, org.spongepowered.api.util.Builder<FlagValue, Builder> {
 

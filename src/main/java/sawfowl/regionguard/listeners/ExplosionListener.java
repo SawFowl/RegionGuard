@@ -9,6 +9,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.event.world.ExplosionEvent.Pre;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -16,7 +17,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionChangeBlockEvent;
+import sawfowl.regionguard.api.events.world.RegionExplosionEvent;
 import sawfowl.regionguard.utils.ListenerUtils;
 
 public class ExplosionListener {
@@ -33,18 +34,13 @@ public class ExplosionListener {
 		Explosion explosion = event.explosion();
 		Region region = plugin.getAPI().findRegion(event.world(), explosion.blockPosition());
 		boolean allow = isAllowExplosion(region, explosion);
-		class RegionExplosionEvent implements RegionChangeBlockEvent.Explode {
+		RegionExplosionEvent.EntityDamage rgEvent = new RegionExplosionEvent.EntityDamage() {
 			
 			Explosion explosion;
 			boolean cencelled;
 			@Override
 			public Cause cause() {
 				return cause;
-			}
-
-			@Override
-			public Cause spongeCause() {
-				return event.cause();
 			}
 
 			@Override
@@ -91,9 +87,14 @@ public class ExplosionListener {
 			public boolean isAllowExplosion() {
 				return allow;
 			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public Pre getSpongeEvent() {
+				return event;
+			}
 			
-		}
-		RegionChangeBlockEvent.Explode rgEvent = new RegionExplosionEvent();
+		};
 		rgEvent.setExplosion(explosion);
 		rgEvent.setCancelled(!allow);
 		ListenerUtils.postEvent(rgEvent);

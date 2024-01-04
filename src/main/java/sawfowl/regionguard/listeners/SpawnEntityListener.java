@@ -1,11 +1,12 @@
 package sawfowl.regionguard.listeners;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.List;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -20,9 +21,10 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent.Pre;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.common.mixin.core.world.entity.item.ItemEntityMixin;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
+
 import net.minecraft.world.entity.item.ItemEntity;
 
 import sawfowl.regionguard.Permissions;
@@ -30,7 +32,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionSpawnEntityEvent;
+import sawfowl.regionguard.api.events.world.RegionSpawnEntityEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 import sawfowl.regionguard.utils.ReflectionUtil;
@@ -49,8 +51,8 @@ public class SpawnEntityListener {
 		if(!event.context().get(EventContextKeys.SPAWN_TYPE).isPresent() || event.entities().isEmpty()) return;
 		Optional<Entity> optSource = event.cause().first(Entity.class);
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
-		ResourceKey worldKey = event.entities().get(0).serverLocation().world().key();
-		Region region = plugin.getAPI().findRegion(worldKey, event.entities().get(0).blockPosition());
+		ServerWorld world = event.entities().get(0).serverLocation().world();
+		Region region = plugin.getAPI().findRegion(world, event.entities().get(0).blockPosition());
 		SpawnType spawnType = event.context().get(EventContextKeys.SPAWN_TYPE).get();
 		String spawnKey = Sponge.game().registry(RegistryTypes.SPAWN_TYPE).valueKey(spawnType).asString();
 		boolean spawnExp = spawnType.equals(SpawnTypes.EXPERIENCE.get());
@@ -60,12 +62,12 @@ public class SpawnEntityListener {
 		boolean allowSpawnExp = spawnExp && (optSource.isPresent() ? isAllowExpSpawn(region, optSource.get()) : isAllowExpSpawn(region, null));
 		boolean allowSpawnItem = true;
 		if(spawnItem) {
-			List<ItemStack> items = event.entities().stream().map(entity -> ReflectionUtil.getValueFromMethodWhithTypeNoArgs(net.minecraft.world.item.ItemStack.class, ItemStack.class, ((ItemEntity) entity))).toList();
+			Set<String> items = event.entities().stream().map(entity -> entity.get(Keys.ITEM_STACK_SNAPSHOT).map(snapshot -> ListenerUtils.itemId(snapshot)).orElse(ListenerUtils.itemId(ReflectionUtil.getValueFromMethodWhithTypeNoArgs(net.minecraft.world.item.ItemStack.class, ItemStack.class, ((ItemEntity) entity))))).collect(Collectors.toSet());
 			allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
 		} else allowSpawnItem = false;
 		boolean allowSpawnEntity = spawnEntity && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
 		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowSpawnEntity;
-		class SpawnEvent implements RegionSpawnEntityEvent {
+		RegionSpawnEntityEvent rgEvent = new RegionSpawnEntityEvent() {
 
 			boolean cancelled;
 			Component message;
@@ -89,6 +91,7 @@ public class SpawnEntityListener {
 				return optSource;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return optPlayer;
@@ -114,13 +117,18 @@ public class SpawnEntityListener {
 				message = component;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public Pre spongeEvent() {
+			public Pre getSpongeEvent() {
 				return event;
 			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return world;
+			}
 			
-		}
-		RegionSpawnEntityEvent rgEvent = new SpawnEvent();
+		};
 		rgEvent.setCancelled(!allowSpawn);
 		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.SPAWN));
 		ListenerUtils.postEvent(rgEvent);
@@ -142,17 +150,18 @@ public class SpawnEntityListener {
 		return region.isGlobal() ? true : isAllowExpSpawn(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source);
 	}
 
-	private boolean isAllowItemSpawn(Region region, Entity source, List<ItemStack> stacks) {
+	private boolean isAllowItemSpawn(Region region, Entity source, Set<String> items) {
 		if(source != null && source instanceof ServerPlayer) return true;
+		items.add("all");
 		for(String sourceId : ListenerUtils.flagEntityArgs(source)) {
-			for(String targetid : ListenerUtils.flagItemsArgs(stacks)) {
+			for(String targetid : items) {
 				Tristate flagResult = region.getFlagResult(Flags.ITEM_SPAWN, 
 						sourceId, 
 						targetid);
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowItemSpawn(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, stacks);
+		return region.isGlobal() ? true : isAllowItemSpawn(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, items);
 	}
 
 	private boolean isAllowEntitySpawn(Region region, Entity source, List<Entity> entities, String spawnType) {

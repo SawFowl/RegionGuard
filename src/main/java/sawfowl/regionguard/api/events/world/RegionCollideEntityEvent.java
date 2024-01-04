@@ -1,13 +1,11 @@
-package sawfowl.regionguard.api.events;
+package sawfowl.regionguard.api.events.world;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionCollideEntityEvent extends Event, Cancellable {
+public interface RegionCollideEntityEvent extends RegionWorldEvent {
 
 	/**
 	 * Get the {@link Region} where the event occurred.
@@ -19,7 +17,8 @@ public interface RegionCollideEntityEvent extends Event, Cancellable {
 	/**
 	 * Get the sponge {@link CollideEntityEvent}
 	 */
-	public CollideEntityEvent spongeEvent();
+	@SuppressWarnings("unchecked")
+	public CollideEntityEvent getSpongeEvent();
 
 	/**
 	 * Get protect result.

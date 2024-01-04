@@ -157,7 +157,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 	@Override
 	public void savePlayerData(UUID player, PlayerData playerData) {
 		if(player == null || playerData == null) return;
-		String sql = "REPLACE INTO " + prefix + "player_data(uuid, claimed_blocks, claimed_regions, limit_blocks, limit_regions, limit_subdivisions, limit_members) VALUES("
+		String sql = "REPLACE INTO " + prefix + "player_data(uuid, claimed_blocks, claimed_regions, limit_blocks, limit_claims, limit_subdivisions, limit_members) VALUES("
 				+ "'" + player.toString() + "', '"
 				+ playerData.getClaimed().getBlocks() + "', '"
 				+ playerData.getClaimed().getRegions() + "', '"
@@ -198,7 +198,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 	}
 
 	private void createTableForPlayers() {
-		executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "player_data(uuid VARCHAR(128) UNIQUE, claimed_blocks BIGINT, claimed_regions BIGINT, limit_blocks BIGINT, limit_regions BIGINT, limit_subdivisions BIGINT, limit_members BIGINT, written DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY(uuid));");
+		executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "player_data(uuid VARCHAR(128) UNIQUE, claimed_blocks BIGINT, claimed_regions BIGINT, limit_blocks BIGINT, limit_claims BIGINT, limit_subdivisions BIGINT, limit_members BIGINT, written DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY(uuid));");
 	}
 
 	private void createWorldsTables() {
@@ -290,7 +290,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 	}
 
 	private PlayerLimits getPlayerLimits(ResultSet results) throws SQLException {
-		return PlayerLimits.of(results.getLong("limit_blocks"), results.getLong("limit_regions"), results.getLong("limit_subdivisions"), results.getLong("limit_members"));
+		return PlayerLimits.of(results.getLong("limit_blocks"), results.getLong("limit_claims"), results.getLong("limit_subdivisions"), results.getLong("limit_members"));
 	}
 
 	private PlayerData getPlayerDataFromResultSet(ResultSet results) throws SQLException {

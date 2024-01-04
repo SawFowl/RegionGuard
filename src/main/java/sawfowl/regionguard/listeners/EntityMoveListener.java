@@ -2,7 +2,6 @@ package sawfowl.regionguard.listeners;
 
 import java.util.Optional;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -16,7 +15,6 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
-import org.spongepowered.api.event.entity.ChangeEntityWorldEvent.Reposition;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -32,8 +30,8 @@ import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionChangeEntityWorldEvent;
-import sawfowl.regionguard.api.events.RegionMoveEntityEvent;
+import sawfowl.regionguard.api.events.world.RegionEntityChangeWorldEvent;
+import sawfowl.regionguard.api.events.world.RegionMoveEntityEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
@@ -59,12 +57,12 @@ public class EntityMoveListener {
 		boolean enderPeal = movementType.isPresent() && movementType.get() == MovementTypes.ENDER_PEARL.get();
 		boolean portal = movementType.isPresent() && movementType.get() == MovementTypes.PORTAL.get();
 		boolean teleport = command || portal || enderPeal || movementType.isPresent() && (movementType.get() == MovementTypes.ENTITY_TELEPORT.get() || movementType.get() == MovementTypes.END_GATEWAY.get() || movementType.get() == MovementTypes.PORTAL.get());
-		ResourceKey worldKey = ((ServerWorld) event.entity().world()).key();
-		Region from = plugin.getAPI().findRegion(worldKey, event.originalPosition().toInt());
-		Region destination = plugin.getAPI().findRegion(worldKey, event.destinationPosition().toInt());
-		boolean isAllowRiding = isRiding ? isAllowRidingEntity(from, event.entity(), ridingEntity) : true;
+		ServerWorld world = event.entity().serverLocation().world();
+		Region from = plugin.getAPI().findRegion(world, event.originalPosition().toInt());
+		Region destination = plugin.getAPI().findRegion(world, event.destinationPosition().toInt());
+		boolean isAllowRiding = isRiding ? isAllowRidingEntity(from, event.entity(), ridingEntity) && (from.getUniqueId().equals(destination.getUniqueId()) ? true : isAllowRidingEntity(destination, event.entity(), ridingEntity)) : true;
 		boolean isAllowPortalUse = portal ? isAllowPortalUse(event.entity(), from) : true;
-		class MoveEvent implements RegionMoveEntityEvent {
+		RegionMoveEntityEvent moveEvent = new RegionMoveEntityEvent() {
 
 			boolean cancelled = false;
 			boolean allowFly = true;
@@ -76,8 +74,9 @@ public class EntityMoveListener {
 				return cause;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public MoveEntityEvent spongeEvent() {
+			public MoveEntityEvent getSpongeEvent() {
 				return event;
 			}
 
@@ -99,11 +98,6 @@ public class EntityMoveListener {
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return Optional.ofNullable(player);
-			}
-
-			@Override
-			public ResourceKey getWorldKey() {
-				return worldKey;
 			}
 
 			@Override
@@ -175,9 +169,13 @@ public class EntityMoveListener {
 			public boolean isPortal() {
 				return portal;
 			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return world;
+			}
 			
-		}
-		RegionMoveEntityEvent moveEvent = new MoveEvent();
+		};
 		moveEvent.setAllowRiding(isAllowRiding);
 		if(isRiding && !isAllowRiding && player != null) moveEvent.setStopRidingMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.RIDING));
 		if(player != null && !isAllowPlayerFly(player, from) && player.get(Keys.CAN_FLY).isPresent() && player.get(Keys.CAN_FLY).get()) {
@@ -185,14 +183,14 @@ public class EntityMoveListener {
 			moveEvent.setStopFlyingMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.DISABLE_FLY));
 		}
 		ListenerUtils.postEvent(moveEvent);
-		if(!moveEvent.isAllowRiding() && moveEvent.isRiding() && moveEvent.getRidingEntity().isPresent() && Sponge.server().worldManager().world(worldKey).isPresent()) {
+		if(!moveEvent.isAllowRiding() && moveEvent.isRiding() && moveEvent.getRidingEntity().isPresent()) {
 			event.setCancelled(true);
 			Entity toRespawn = moveEvent.getRidingEntity().get().copy();
 			moveEvent.getRidingEntity().get().remove();
 			if(toRespawn != null && !ListenerUtils.entityId(toRespawn).equals("") && !ListenerUtils.entityId(toRespawn).contains(" ")) {
-				moveEvent.fromRegion().setFlag(Flags.ENTITY_SPAWN, true, null, ListenerUtils.entityId(toRespawn));
-				Sponge.server().worldManager().world(worldKey).get().spawnEntity(toRespawn);
-				moveEvent.fromRegion().removeFlag(Flags.ENTITY_SPAWN, null, ListenerUtils.entityId(toRespawn));
+				moveEvent.fromRegion().setTempFlag(Flags.ENTITY_SPAWN, true, null, ListenerUtils.entityId(toRespawn));
+				world.spawnEntity(toRespawn);
+				moveEvent.fromRegion().removeTempFlag(Flags.ENTITY_SPAWN, null, ListenerUtils.entityId(toRespawn));
 			}
 			if(moveEvent.getPlayer().isPresent() && moveEvent.getStopRidingMessage().isPresent()) moveEvent.getPlayer().get().sendMessage(moveEvent.getStopRidingMessage().get());
 		}
@@ -238,20 +236,22 @@ public class EntityMoveListener {
 		}
 		boolean finalAllowTo = allowTo;
 		boolean finalAllowFrom = allowFrom;
-		class RegionMoveEvent implements RegionMoveEntityEvent.ChangeRegion {
+		RegionMoveEntityEvent.ChangeRegion rgEvent = new RegionMoveEntityEvent.ChangeRegion() {
 
 			boolean fly;
 			boolean cancelled;
 			boolean allowRiding = true;
 			Component message;
 			Component stopFlyingMessage;
+			Component stopStopRidingMessage;
 			@Override
 			public Cause cause() {
 				return cause;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public MoveEntityEvent spongeEvent() {
+			public MoveEntityEvent getSpongeEvent() {
 				return event;
 			}
 
@@ -270,14 +270,10 @@ public class EntityMoveListener {
 				return event.entity();
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return Optional.ofNullable(player);
-			}
-
-			@Override
-			public ResourceKey getWorldKey() {
-				return worldKey;
 			}
 
 			@Override
@@ -362,20 +358,24 @@ public class EntityMoveListener {
 
 			@Override
 			public Optional<Component> getStopRidingMessage() {
-				return null;
+				return Optional.ofNullable(stopStopRidingMessage);
 			}
 
 			@Override
 			public void setStopRidingMessage(Component component) {
-				
+				stopStopRidingMessage = component;
 			}
 
 			@Override
 			public boolean isPortal() {
 				return portal;
 			}
-		}
-		RegionMoveEntityEvent.ChangeRegion rgEvent = new RegionMoveEvent();
+
+			@Override
+			public ServerWorld getWorld() {
+				return world;
+			}
+		};
 		rgEvent.setMessage(message);
 		if(!allowTo || !allowFrom || !isAllowPortalUse) {
 			rgEvent.setCancelled(true);
@@ -383,11 +383,12 @@ public class EntityMoveListener {
 				if(!allowTo && player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.CANCEL_JOIN));
 				if(!allowFrom && player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.CANCEL_EXIT));
 			}
-			
 		}
 		if(!allowFly && player != null) rgEvent.setStopFlyingMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.DISABLE_FLY_ON_JOIN));
+		if(isRiding && !isAllowRiding && player != null) rgEvent.setStopRidingMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.RIDING));
 		rgEvent.setDestinationPosition(event.destinationPosition());
 		rgEvent.setAllowFly(allowFly);
+		rgEvent.setAllowRiding(isAllowRiding);
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);
@@ -405,6 +406,19 @@ public class EntityMoveListener {
 			rgEvent.getPlayer().get().offer(Keys.CAN_FLY, false);
 			rgEvent.getPlayer().get().offer(Keys.IS_FLYING, false);
 			if(rgEvent.getStopFlyingMessage().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getStopFlyingMessage().get());
+		}
+		if(!rgEvent.isAllowRiding() && rgEvent.isRiding() && rgEvent.getRidingEntity().isPresent()) {
+			event.setCancelled(true);
+			Entity toRespawn = rgEvent.getRidingEntity().get().copy();
+			rgEvent.getRidingEntity().get().remove();
+			if(toRespawn != null && !ListenerUtils.entityId(toRespawn).equals("") && !ListenerUtils.entityId(toRespawn).contains(" ")) {
+				rgEvent.fromRegion().setTempFlag(Flags.ENTITY_SPAWN, true, null, ListenerUtils.entityId(toRespawn));
+				rgEvent.toRegion().setTempFlag(Flags.ENTITY_SPAWN, true, null, ListenerUtils.entityId(toRespawn));
+				world.spawnEntity(toRespawn);
+				rgEvent.fromRegion().removeTempFlag(Flags.ENTITY_SPAWN, null, ListenerUtils.entityId(toRespawn));
+				rgEvent.toRegion().removeTempFlag(Flags.ENTITY_SPAWN, null, ListenerUtils.entityId(toRespawn));
+			}
+			if(rgEvent.getPlayer().isPresent() && rgEvent.getStopRidingMessage().isPresent()) rgEvent.getPlayer().get().sendMessage(rgEvent.getStopRidingMessage().get());
 		}
 	}
 
@@ -430,7 +444,7 @@ public class EntityMoveListener {
 				return;
 			}
 		}
-		class RegionEvent implements RegionChangeEntityWorldEvent {
+		RegionEntityChangeWorldEvent rgEvent = new RegionEntityChangeWorldEvent() {
 			Component message;
 			Component stopFly;
 			boolean canceled;
@@ -448,11 +462,6 @@ public class EntityMoveListener {
 			@Override
 			public Cause cause() {
 				return cause;
-			}
-
-			@Override
-			public Reposition spongeEvent() {
-				return event;
 			}
 
 			@Override
@@ -475,6 +484,7 @@ public class EntityMoveListener {
 				return to;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return optPlayer;
@@ -509,9 +519,29 @@ public class EntityMoveListener {
 			public void setCancelled(boolean cancel) {
 				canceled = cancel;
 			}
+
+			@Override
+			public Object source() {
+				return null;
+			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return event.originalWorld();
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public ChangeEntityWorldEvent.Reposition getSpongeEvent() {
+				return event;
+			}
+
+			@Override
+			public ServerWorld getTargetWorld() {
+				return event.destinationWorld();
+			}
 			
-		}
-		RegionChangeEntityWorldEvent rgEvent = new RegionEvent();
+		};
 		rgEvent.setCancelled(!isAllowFrom || !isAllowTo);
 		rgEvent.setAllowFly(isAllowFly);
 		if(optPlayer.isPresent() && !isAllowFly) rgEvent.setStopFlyingMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.DISABLE_FLY_ON_JOIN));

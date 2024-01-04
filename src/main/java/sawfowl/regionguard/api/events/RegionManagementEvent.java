@@ -6,8 +6,9 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Event;
 
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.events.world.RegionMessageEvent;
 
-public interface RegionEvent extends Event, RegionMessageEvent, Cancellable {
+public interface RegionManagementEvent extends Event, RegionMessageEvent, Cancellable {
 
 	/**
 	 * Get plugin {@link Cause}.
@@ -17,6 +18,7 @@ public interface RegionEvent extends Event, RegionMessageEvent, Cancellable {
 	/**
 	 * Getting a {@link ServerPlayer}.
 	 */
+	@SuppressWarnings("unchecked")
 	public ServerPlayer getPlayer();
 
 	/**

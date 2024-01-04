@@ -128,7 +128,7 @@ public class H2Storage extends AbstractSqlStorage {
 
 	@Override
 	public void savePlayerData(UUID player, PlayerData playerData) {
-		String sql = "MERGE INTO " + prefix + "player_data(UUID, CLAIMED_BLOCKS, CLAIMED_REGIONS, LIMIT_BLOCKS, LIMIT_REGIONS, LIMIT_SUBDIVISIONS, LIMIT_MEMBERS) VALUES("
+		String sql = "MERGE INTO " + prefix + "player_data(UUID, CLAIMED_BLOCKS, CLAIMED_REGIONS, LIMIT_BLOCKS, LIMIT_CLAIMS, LIMIT_SUBDIVISIONS, LIMIT_MEMBERS) VALUES("
 				+ "'" + player.toString() + "', '"
 				+ playerData.getClaimed().getBlocks() + "', '"
 				+ playerData.getClaimed().getRegions() + "', '"
@@ -172,7 +172,7 @@ public class H2Storage extends AbstractSqlStorage {
 	}
 
 	private void createTableForPlayers() {
-		executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "player_data(UUID VARCHAR(128) UNIQUE, CLAIMED_BLOCKS BIGINT, CLAIMED_REGIONS BIGINT, LIMIT_BLOCKS BIGINT, LIMIT_REGIONS BIGINT, LIMIT_SUBDIVISIONS BIGINT, LIMIT_MEMBERS BIGINT, PRIMARY KEY(UUID));");
+		executeSQL("CREATE TABLE IF NOT EXISTS " + prefix + "player_data(UUID VARCHAR(128) UNIQUE, CLAIMED_BLOCKS BIGINT, CLAIMED_REGIONS BIGINT, LIMIT_BLOCKS BIGINT, LIMIT_CLAIMS BIGINT, LIMIT_SUBDIVISIONS BIGINT, LIMIT_MEMBERS BIGINT, PRIMARY KEY(UUID));");
 	}
 
 	private void createWorldsTables() {
@@ -187,7 +187,7 @@ public class H2Storage extends AbstractSqlStorage {
 	}
 
 	private PlayerLimits getPlayerLimits(ResultSet results) throws SQLException {
-		return PlayerLimits.of(results.getLong("LIMIT_BLOCKS"), results.getLong("LIMIT_REGIONS"), results.getLong("LIMIT_SUBDIVISIONS"), results.getLong("LIMIT_MEMBERS"));
+		return PlayerLimits.of(results.getLong("LIMIT_BLOCKS"), results.getLong("LIMIT_CLAIMS"), results.getLong("LIMIT_SUBDIVISIONS"), results.getLong("LIMIT_MEMBERS"));
 	}
 
 	private PlayerData getPlayerDataFromResultSet(ResultSet results) throws SQLException {

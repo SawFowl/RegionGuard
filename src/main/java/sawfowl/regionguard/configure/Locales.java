@@ -112,10 +112,11 @@ public class Locales {
 		save = check(locale, toText("&eMaximal position&f: &2%pos%"), null, LocalesPaths.COMMAND_INFO_MAX_POS) || save;
 		save = check(locale, toText("&eSelection type&f: &2%type%"), null, LocalesPaths.COMMAND_INFO_SELECTION_TYPE) || save;
 
-		save = check(locale, toText(" &bYour limits "), null, LocalesPaths.COMMAND_LIMITS_HEADER) || save;
-		save = check(locale, toText("&eClaimss&f: &2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_CLAIMS) || save;
-		save = check(locale, toText("&eSubdivisions&f: &2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS) || save;
-		save = check(locale, toText("&eBlocks&f: &2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_BLOCKS) || save;
+		save = check(locale, toText(" &b%player% limits "), null, LocalesPaths.COMMAND_LIMITS_HEADER) || save;
+		save = check(locale, toText("&eBlocks&f: &2%current%&f/&2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_BLOCKS) || save;
+		save = check(locale, toText("&eClaimss&f: &2%current%&f/&2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_CLAIMS) || save;
+		save = check(locale, toText("&eSubdivisions&f: &2%current%&f/&2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS) || save;
+		save = check(locale, toText("&eMembers&f: &2%current%&f/&2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_MEMBERS) || save;
 
 		save = check(locale, toText("&cYou are not a member of the current region and cannot change join/exit messages."), null, LocalesPaths.COMMAND_SET_MESSAGE_NOT_TRUSTED) || save;
 		save = check(locale, toText("&cYou have a low trust level in the current region and cannot change join/exit messages."), null, LocalesPaths.COMMAND_SET_MESSAGE_LOW_TRUST) || save;
@@ -433,10 +434,11 @@ public class Locales {
 		save = check(locale, toText("&eМаксимальная позиция&f: &2%pos%"), null, LocalesPaths.COMMAND_INFO_MAX_POS) || save;
 		save = check(locale, toText("&eТип выделения&f: &2%type%"), null, LocalesPaths.COMMAND_INFO_SELECTION_TYPE) || save;
 
-		save = check(locale, toText(" &bВаши лимиты "), null, LocalesPaths.COMMAND_LIMITS_HEADER) || save;
-		save = check(locale, toText("&eПриваты&f: &2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_CLAIMS) || save;
-		save = check(locale, toText("&eДочерние регионы&f: &2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS) || save;
-		save = check(locale, toText("&eБлоки&f: &2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_BLOCKS) || save;
+		save = check(locale, toText(" &bЛимиты %player% "), null, LocalesPaths.COMMAND_LIMITS_HEADER) || save;
+		save = check(locale, toText("&eБлоки&f: &2%current%&f/&2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_BLOCKS) || save;
+		save = check(locale, toText("&eПриваты&f: &2%current%&f/&2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_CLAIMS) || save;
+		save = check(locale, toText("&eДочерние регионы&f: &2%current%&f/&2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS) || save;
+		save = check(locale, toText("&eУчастники&f: &2%current%&f/&2%size%&f/&2%max%"), null, LocalesPaths.COMMAND_LIMITS_MEMBERS) || save;
 
 		save = check(locale, toText("&cВы не состоите в текущем регионе и не можете изменять сообщения входа/выхода."), null, LocalesPaths.COMMAND_SET_MESSAGE_NOT_TRUSTED) || save;
 		save = check(locale, toText("&cУ вас низкий уровень доверия в текущем регионе и вы не можете изменять сообщения входа/выхода."), null, LocalesPaths.COMMAND_SET_MESSAGE_LOW_TRUST) || save;

@@ -43,10 +43,12 @@ public interface CUIUser {
 	public void setDrag(boolean isDrag);
 
 	/**
+	 * Getting a cuboid of dynamic selection.
 	 */
 	public Cuboid getDragCuboid();
 
 	/**
+	 * Setting cuboid for dynamic selection.
 	 */
 	public void setDragCuboid(Cuboid dragCuboid);
 

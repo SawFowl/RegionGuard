@@ -32,29 +32,31 @@ public class PlayerDataImpl implements PlayerData {
 		};
 	}
 
-	private PlayerLimitsImpl limits;
-	private ClaimedByPlayerImpl claimed;
+	private PlayerLimits limits;
+	private ClaimedByPlayer claimed;
 
+	@Override
 	public PlayerLimits getLimits() {
+		if(limits == null) limits = new PlayerLimitsImpl();
 		return limits;
 	}
 
-	public PlayerDataImpl setLimits(PlayerLimits limits) {
-		this.limits = (PlayerLimitsImpl) limits;
+	@Override
+	public PlayerData setLimits(PlayerLimits limits) {
+		this.limits = limits;
 		return this;
 	}
 
-	public ClaimedByPlayerImpl getClaimed() {
+	@Override
+	public ClaimedByPlayer getClaimed() {
+		if(claimed == null) claimed = new ClaimedByPlayerImpl();
 		return claimed;
 	}
 
-	public PlayerDataImpl setClaimed(ClaimedByPlayer claimed) {
-		this.claimed = (ClaimedByPlayerImpl) claimed;
+	@Override
+	public PlayerData setClaimed(ClaimedByPlayer claimed) {
+		this.claimed = claimed;
 		return this;
-	}
-
-	public boolean isEmpty() {
-		return limits == null && claimed == null;
 	}
 
 	@Override

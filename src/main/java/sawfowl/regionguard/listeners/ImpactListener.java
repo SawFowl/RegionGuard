@@ -16,6 +16,7 @@ import org.spongepowered.api.event.block.CollideBlockEvent.Impact;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 
@@ -24,7 +25,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.api.events.RegionImpactEvent;
+import sawfowl.regionguard.api.events.world.RegionImpactEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
@@ -49,7 +50,7 @@ public class ImpactListener{
 		BlockState blockState = event.targetBlock();
 		Region region = plugin.getAPI().findRegion(event.impactPoint().world(), event.impactPoint().blockPosition());
 		boolean isAllow = isAllowImpactBlock(region, entity, blockState);
-		class ImpactEvent implements RegionImpactEvent.Block {
+		RegionImpactEvent.Block rgEvent = new RegionImpactEvent.Block() {
 
 			boolean cancelled;
 			Component message;
@@ -58,8 +59,9 @@ public class ImpactListener{
 				return cause;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public Impact spongeEvent() {
+			public Impact getSpongeEvent() {
 				return event;
 			}
 
@@ -74,7 +76,7 @@ public class ImpactListener{
 			}
 
 			@Override
-			public org.spongepowered.api.entity.Entity getEntitySource() {
+			public org.spongepowered.api.entity.Entity getSource() {
 				return entity;
 			}
 
@@ -83,6 +85,7 @@ public class ImpactListener{
 				return isAllow;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return Optional.ofNullable(player);
@@ -102,9 +105,13 @@ public class ImpactListener{
 			public Region getRegion() {
 				return region;
 			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return event.impactPoint().world();
+			}
 			
-		}
-		RegionImpactEvent.Block rgEvent = new ImpactEvent();
+		};
 		rgEvent.setCancelled(!isAllow);
 		if(player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.IMPACT_BLOCK));
 		ListenerUtils.postEvent(rgEvent);
@@ -128,7 +135,7 @@ public class ImpactListener{
 		ServerPlayer player = entity instanceof ServerPlayer ? (ServerPlayer) entity : null;
 		Region region = plugin.getAPI().findRegion(event.impactPoint().world(), event.impactPoint().blockPosition());
 		boolean isAllow = isAllowImpactEntity(region, entity, targetEntity);
-		class ImpactEvent implements RegionImpactEvent.Entity {
+		RegionImpactEvent.Entity rgEvent = new RegionImpactEvent.Entity() {
 
 			boolean cancelled;
 			Component message;
@@ -137,13 +144,14 @@ public class ImpactListener{
 				return cause;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public org.spongepowered.api.event.entity.CollideEntityEvent.Impact spongeEvent() {
+			public CollideEntityEvent.Impact getSpongeEvent() {
 				return event;
 			}
 
 			@Override
-			public org.spongepowered.api.entity.Entity getEntitySource() {
+			public org.spongepowered.api.entity.Entity getSource() {
 				return entity;
 			}
 
@@ -152,6 +160,7 @@ public class ImpactListener{
 				return isAllow;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Optional<ServerPlayer> getPlayer() {
 				return Optional.ofNullable(player);
@@ -181,9 +190,13 @@ public class ImpactListener{
 			public Region getRegion() {
 				return region;
 			}
+
+			@Override
+			public ServerWorld getWorld() {
+				return event.impactPoint().world();
+			}
 			
-		}
-		RegionImpactEvent.Entity rgEvent = new ImpactEvent();
+		};
 		rgEvent.setCancelled(!isAllow);
 		if(player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.IMPACT_ENTITY));
 		ListenerUtils.postEvent(rgEvent);

@@ -58,7 +58,7 @@ public class Blocks extends AbstractCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg setlimit blocks &7[Player] [Volume]&f - ").clickEvent(ClickEvent.suggestCommand("/rg setlimit blocks ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy("&6/rg limits set blocks &7<Player> <Volume>&f - ").clickEvent(ClickEvent.suggestCommand("/rg limits set blocks ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

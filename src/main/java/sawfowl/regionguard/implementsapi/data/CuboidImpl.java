@@ -57,9 +57,7 @@ public class CuboidImpl implements Cuboid {
 	private SelectorTypes selectorType;
 	private AABB aabb;
 
-	/**
-	 * Getting all positions in the cuboid.
-	 */
+	@Override
 	public List<Vector3i> getAllPositions() {
 		List<Vector3i> allPositions = new ArrayList<Vector3i>();
 		boolean cuboid = selectorType == SelectorTypes.CUBOID;
@@ -73,9 +71,7 @@ public class CuboidImpl implements Cuboid {
 		return allPositions;
 	}
 
-	/**
-	 * Getting all positions in the cuboid. Excludes the Y-axis.
-	 */
+	@Override
 	public List<Vector2i> getPositionsXZ() {
 		List<Vector2i> allPositions = new ArrayList<Vector2i>();
 		for(int x = (int) getAABB().min().x(); x <= (int) getAABB().max().x(); x++) {
@@ -86,13 +82,7 @@ public class CuboidImpl implements Cuboid {
 		return allPositions;
 	}
 
-	/**
-	 * Setting positions at the cuboid.
-	 * 
-	 * @param position1 - first position
-	 * @param position2 - second position
-	 * @param selectorType - flat or cuboid
-	 */
+	@Override
 	public Cuboid setPositions(Vector3i position1, Vector3i position2, SelectorTypes selectorType, ServerWorld world) {
 		this.selectorType = selectorType;
 		if(position1.x() == position2.x()) position1 = Vector3i.from(position1.x() + 1, position1.y(), position1.z());
@@ -112,45 +102,33 @@ public class CuboidImpl implements Cuboid {
 		return this;
 	}
 
-	/**
-	 * Get the type of area selection.
-	 */
+	@Override
 	public SelectorTypes getSelectorType() {
 		return selectorType;
 	}
 
-	/**
-	 * Set the type of area selection.
-	 */
+	@Override
 	public void setSelectorType(SelectorTypes selectorType) {
 		this.selectorType = selectorType;
 	}
 
-	/**
-	 * Get AABB
-	 */
+	@Override
 	public AABB getAABB() {
 		if(aabb == null) aabb = AABB.of(min.toInt(), max.toInt());
 		return aabb;
 	}
 
-	/**
-	 * Get the center position of the selection.
-	 */
+	@Override
 	public Vector3d getCenter() {
 		return getAABB().center();
 	}
 
-	/**
-	 * Get the sizes of the area by three coordinates
-	 */
+	@Override
 	public Vector3d getSizeXYZ() {
 		return getAABB().size();
 	}
 
-	/**
-	 * Get the sizes of the area by two coordinates
-	 */
+	@Override
 	public int[] getSizeXZ() {
 		int x = 0;
 		int z = 0;
@@ -166,82 +144,51 @@ public class CuboidImpl implements Cuboid {
 		return size;
 	}
 
-	/**
-	 * Obtaining the volume of the area, taking into account all three coordinate axes.
-	 */
+	@Override
 	public long getSize3D() {
 		return (max.toInt().x() - min.toInt().x() + 1L) * (max.toInt().y() - min.toInt().y() + 1L) * (max.toInt().z() - min.toInt().z() + 1L);
 	}
 
-
-	/**
-	 * Obtaining the volume of the area with only XY coordinates.
-	 */
+	@Override
 	public long getSize2D() {
 		return (max.toInt().x() - min.toInt().x() + 1L) * (max.toInt().z() - min.toInt().z() + 1L);
 	}
 
-
-	/**
-	 * Obtaining the volume of an area depending on its type.
-	 */
+	@Override
 	public long getSize() {
 		return selectorType == SelectorTypes.FLAT ? getSize2D() : getSize3D();
 	}
 
-	/**
-	 * Expanding area
-	 */
+	@Override
 	public void expand(int x, int y, int z) {
 		aabb = getAABB().expand(x, y, z);
 		min = getAABB().min().toInt();
 		max = getAABB().max().toInt();
 	}
 
-	/**
-	 * Decreasing area
-	 */
+	@Override
 	public void contract(int x, int y, int z) {
 		aabb = getAABB().offset(x, y, z);
 		min = getAABB().min().toInt();
 		max = getAABB().max().toInt();
 	}
 
-
-	/**
-	 * Checking for a position in the area
-	 * 
-	 * @param vector3i - Checkable position.
-	 * @return - true if contains <br>
-	 * - false if not contains
-	 */
+	@Override
 	public boolean containsIntersectsPosition(Vector3i vector3i) {
 		return getAABB().contains(vector3i);
 	}
 
-
-	/**
-	 * Getting the minimum position
-	 */
+	@Override
 	public Vector3i getMin() {
 		return min;
 	}
 
-
-	/**
-	 * Getting the maximum position
-	 */
+	@Override
 	public Vector3i getMax() {
 		return max;
 	}
 
-	/**
-	 * Obtaining the opposite corner of area.
-	 * 
-	 * @param vector3i - Position for the search
-	 * @return - position for the search if position is not corner <br>
-	 * - position in the opposite corner according to the type of area
-	 */
+	@Override
 	public Vector3i getOppositeCorner(Vector3i vector3i) {
 		if(!isCorner(vector3i)) return vector3i;
 		Vector3i max = getMax().toInt();
@@ -257,10 +204,7 @@ public class CuboidImpl implements Cuboid {
 		return Vector3i.from(minX == x ? max.x() : minX, selectorType == SelectorTypes.CUBOID && minY == y ? max.y() : minY, minZ == z ? max.z() : minZ);
 	}
 
-
-	/**
-	 * Getting all corner positions of the area
-	 */
+	@Override
 	public List<Vector3i> getAllCorners() {
 		List<Vector3i> corners = new ArrayList<Vector3i>();
 		corners.add(min.toInt());
@@ -277,13 +221,7 @@ public class CuboidImpl implements Cuboid {
 		return corners;
 	}
 
-	/**
-	 * Checking if the position is a corner position
-	 * 
-	 * @param vector3i - checked position
-	 * @return - true if position is corner <br>
-	 * - false if position isn't corner
-	 */
+	@Override
 	public boolean isCorner(Vector3i vector3i) {
 		if(min == null && max == null) return false;
 		if(selectorType == SelectorTypes.FLAT) {

@@ -12,11 +12,13 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import com.google.gson.JsonObject;
+
 import io.leangen.geantyref.TypeToken;
+
 import net.kyori.adventure.text.Component;
+
 import sawfowl.regionguard.api.RegionTypes;
-import sawfowl.regionguard.api.data.AdditionalData;
-import sawfowl.regionguard.api.data.AdditionalDataMap;
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.MemberData;
@@ -26,7 +28,7 @@ public class RegionSerializer implements TypeSerializer<Region> {
 
 	private final TypeToken<Map<String, Component>> mapComponentsToken = new TypeToken<Map<String, Component>>(){};
 	private final TypeToken<Map<String, Set<FlagValue>>> flagsToken = new TypeToken<Map<String, Set<FlagValue>>>(){};
-	private final TypeToken<AdditionalDataMap<? extends AdditionalData>> dataMapToken = new TypeToken<AdditionalDataMap<?>>(){};
+	private final TypeToken<Map<String, Map<String, JsonObject>>> dataMapToken = new TypeToken<Map<String, Map<String, JsonObject>>>(){};
 
 	@Override
 	public Region deserialize(Type type, ConfigurationNode node) throws SerializationException {

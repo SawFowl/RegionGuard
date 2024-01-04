@@ -47,37 +47,45 @@ public class PlayerLimitsImpl implements PlayerLimits {
 	private long subdivisions;
 	private long membersPerRegion;
 
+	@Override
 	public long getBlocks() {
 		return blocks;
 	}
 
+	@Override
 	public long getRegions() {
 		return claims;
 	}
 
+	@Override
 	public long getSubdivisions() {
 		return subdivisions;
 	}
 
+	@Override
 	public long getMembers() {
 		return membersPerRegion;
 	}
 
+	@Override
 	public PlayerLimits setBlocks(long limit) {
 		blocks = limit;
 		return this;
 	}
 
+	@Override
 	public PlayerLimits setClaims(long limit) {
 		claims = limit;
 		return this;
 	}
 
+	@Override
 	public PlayerLimits setSubdivisions(long limit) {
 		subdivisions = limit;
 		return this;
 	}
 
+	@Override
 	public PlayerLimits setMembersPerRegion(long limit) {
 		membersPerRegion = limit;
 		return this;

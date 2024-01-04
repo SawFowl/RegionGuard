@@ -1,17 +1,14 @@
-package sawfowl.regionguard.api.events;
+package sawfowl.regionguard.api.events.world;
 
 import java.util.Optional;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 
-import net.kyori.adventure.text.Component;
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionChangeInventoryEvent extends Event, Cancellable {
+public interface RegionChangeInventoryEvent extends RegionWorldEvent, RegionMessageEvent {
 
 	interface Pickup extends RegionChangeInventoryEvent {
 
@@ -19,6 +16,9 @@ public interface RegionChangeInventoryEvent extends Event, Cancellable {
 		 * Get {@link ChangeInventoryEvent.Pickup}
 		 */
 		public ChangeInventoryEvent.Pickup.Pre spongeEvent();
+
+		@SuppressWarnings("unchecked")
+		ChangeInventoryEvent.Pickup.Pre getSpongeEvent();
 
 	}
 
@@ -28,6 +28,9 @@ public interface RegionChangeInventoryEvent extends Event, Cancellable {
 		 * Get {@link ChangeInventoryEvent.Drop}
 		 */
 		public ChangeInventoryEvent.Drop spongeEvent();
+
+		@SuppressWarnings("unchecked")
+		ChangeInventoryEvent.Drop getSpongeEvent();
 
 	}
 
@@ -51,18 +54,9 @@ public interface RegionChangeInventoryEvent extends Event, Cancellable {
 	public boolean isAllow();
 
 	/**
-	 * Getting the player if he is the cause of the event.
+	 * Getting a {@link ServerPlayer}.
 	 */
+	@SuppressWarnings("unchecked")
 	public Optional<ServerPlayer> getPlayer();
-
-	/**
-	 * Set the message that will be shown to the player if the event is canceled.
-	 */
-	public void setMessage(Component message);
-
-	/**
-	 * Getting a message that will be shown to the player when the message is canceled.
-	 */
-	public Optional<Component> getMessage();
 
 }

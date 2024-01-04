@@ -1,16 +1,15 @@
-package sawfowl.regionguard.api.events;
+package sawfowl.regionguard.api.events.world;
 
 import java.util.Optional;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import sawfowl.regionguard.api.data.Region;
 
-public interface RegionInteractItemEvent extends RegionMessageEvent, Cancellable {
+public interface RegionInteractItemEvent extends RegionWorldEvent, RegionMessageEvent {
 
 	/**
 	 * Get the entity that is the target of the event.
@@ -37,11 +36,13 @@ public interface RegionInteractItemEvent extends RegionMessageEvent, Cancellable
 	/**
 	 * Get the {@link ServerPlayer} that is the source of the event.
 	 */
+	@SuppressWarnings("unchecked")
 	public Optional<ServerPlayer> getPlayer();
 
 	/**
 	 * Get the {@link InteractItemEvent.Secondary}.
 	 */
-	public InteractItemEvent.Secondary spongeEvent();
+	@SuppressWarnings("unchecked")
+	public InteractItemEvent.Secondary getSpongeEvent();
 
 }

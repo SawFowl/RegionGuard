@@ -16,7 +16,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
-
+import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -40,34 +40,47 @@ public class Limits extends AbstractCommand {
 
 	@Override
 	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
-		if(!isPlayer || args.length > 0) {
+		ServerPlayer player = getPlayer(args, 0).filter(p -> cause.hasPermission(Permissions.STAFF_LIMITS)).orElse(isPlayer ? (ServerPlayer) audience : null);
+		if(!isPlayer && player == null) {
 			sendPaginationList(audience, getComponent(locale, LocalesPaths.COMMANDS_TITLE), getComponent(locale, LocalesPaths.PADDING), 10, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList());
 			return;
 		}
-		ServerPlayer player = (ServerPlayer) audience;
-		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
-		List<Component> messages = new ArrayList<Component>();
-		String limitBlocks = player.hasPermission(Permissions.UNLIMIT_BLOCKS) ? "∞" : toString(plugin.getAPI().getLimitBlocks(player) < 0 ? 0 : plugin.getAPI().getLimitBlocks(player));
-		String limitClaims = player.hasPermission(Permissions.UNLIMIT_CLAIMS) ? "∞" : toString(plugin.getAPI().getLimitClaims(player) < 0 ? 0 : plugin.getAPI().getLimitClaims(player));
-		String limitSubdivisions = player.hasPermission(Permissions.UNLIMIT_SUBDIVISIONS) ? "∞" : toString(plugin.getAPI().getLimitSubdivisions(player) < 0 ? 0 : plugin.getAPI().getLimitSubdivisions(player));
-		long claimedBlocks = 0;
-		for(Region playerRegion : plugin.getAPI().getPlayerRegions(player)) {
-			claimedBlocks += playerRegion.getCuboid().getSize();
+		List<Component> messages = generateMessages(locale, player);
+		if(isPlayer) {
+			messages  = visualize((ServerPlayer) audience, player, locale, messages);
+		} else {
+			messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS).replace(new String[] {Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX}, "?", player.hasPermission(Permissions.UNLIMIT_SUBDIVISIONS) ? "∞" : toString(plugin.getAPI().getLimitSubdivisions(player) < 0 ? 0 : plugin.getAPI().getLimitSubdivisions(player)), player.hasPermission(Permissions.UNLIMIT_SUBDIVISIONS) ? "∞" : plugin.getAPI().getLimitMaxSubdivisions(player)).get());
+			messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_MEMBERS).replace(new String[] {Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX}, "?", player.hasPermission(Permissions.UNLIMIT_MEMBERS) ? "∞" : toString(plugin.getAPI().getLimitMembers(player) < 0 ? 0 : plugin.getAPI().getLimitMembers(player)), player.hasPermission(Permissions.UNLIMIT_MEMBERS) ? "∞" : plugin.getAPI().getLimitMaxMembers(player)).get());
 		}
-		messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_BLOCKS).replace(new String[] {Placeholders.SIZE, Placeholders.MAX}, claimedBlocks, limitBlocks).get());
-		messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_CLAIMS).replace(new String[] {Placeholders.SIZE, Placeholders.MAX}, plugin.getAPI().getPlayerRegions(player).size(), limitClaims).get());
-		if(region.isCurrentTrustType(player, TrustTypes.OWNER)) {
+		sendPaginationList(audience, getText(locale, LocalesPaths.COMMAND_LIMITS_HEADER).replace(Placeholders.PLAYER, player.name()).get(), getComponent(locale, LocalesPaths.PADDING), 10, messages);
+	}
+
+	private List<Component> generateMessages(Locale locale, ServerPlayer player) {
+		List<Component> messages = new ArrayList<Component>();
+		long claimedBlocks = 0;
+		for(Region playerRegion : plugin.getAPI().getPlayerRegions(player)) claimedBlocks += playerRegion.getCuboid().getSize();
+		messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_BLOCKS).replace(new String[] {Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX}, claimedBlocks, player.hasPermission(Permissions.UNLIMIT_BLOCKS) ? "∞" : plugin.getAPI().getLimitBlocks(player) < 0 ? 0 : plugin.getAPI().getLimitBlocks(player), player.hasPermission(Permissions.UNLIMIT_BLOCKS) ? "∞" : plugin.getAPI().getLimitMaxBlocks(player)).get());
+		messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_CLAIMS).replace(new String[] {Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX}, plugin.getAPI().getPlayerRegions(player).size(), player.hasPermission(Permissions.UNLIMIT_CLAIMS) ? "∞" : plugin.getAPI().getLimitClaims(player) < 0 ? 0 : plugin.getAPI().getLimitClaims(player), player.hasPermission(Permissions.UNLIMIT_CLAIMS) ? "∞" : plugin.getAPI().getLimitMaxClaims(player)).get());
+		return messages;
+	}
+
+	private List<Component> visualize(ServerPlayer player, ServerPlayer target, Locale locale, List<Component> messages) {
+		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
+		if(region.isCurrentTrustType(target, TrustTypes.OWNER)) {
 			if(region.containsChilds()) {
-				List<Region> list = new ArrayList<>();
+				List<Region> list = new ArrayList<>(region.getAllChilds());
 				list.add(region);
-				list.addAll(region.getAllChilds());
 				plugin.getAPI().getWorldEditCUIAPI().visualizeRegions(list, player, true);
 			} else {
 				plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region, player, true, false);
 			}
-			messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS).replace(new String[] {Placeholders.SIZE, Placeholders.MAX}, region.getAllChilds().size(), limitSubdivisions).get());	
+			messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS).replace(new String[] {Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX}, region.getAllChilds().size(), target.hasPermission(Permissions.UNLIMIT_SUBDIVISIONS) ? "∞" : toString(plugin.getAPI().getLimitSubdivisions(target) < 0 ? 0 : plugin.getAPI().getLimitSubdivisions(target)), target.hasPermission(Permissions.UNLIMIT_SUBDIVISIONS) ? "∞" : plugin.getAPI().getLimitMaxSubdivisions(target)).get());
+			messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_MEMBERS).replace(new String[] {Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX}, region.getTotalMembers(), target.hasPermission(Permissions.UNLIMIT_MEMBERS) ? "∞" : toString(plugin.getAPI().getLimitMembers(target) < 0 ? 0 : plugin.getAPI().getLimitMembers(target)), target.hasPermission(Permissions.UNLIMIT_MEMBERS) ? "∞" : plugin.getAPI().getLimitMaxMembers(target)).get());
+		} else {
+			messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_SUBDIVISIONS).replace(new String[] {Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX}, "?", target.hasPermission(Permissions.UNLIMIT_SUBDIVISIONS) ? "∞" : toString(plugin.getAPI().getLimitSubdivisions(target) < 0 ? 0 : plugin.getAPI().getLimitSubdivisions(target)), target.hasPermission(Permissions.UNLIMIT_SUBDIVISIONS) ? "∞" : plugin.getAPI().getLimitMaxSubdivisions(target)).get());
+			messages.add(getText(locale, LocalesPaths.COMMAND_LIMITS_MEMBERS).replace(new String[] {Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX}, "?", target.hasPermission(Permissions.UNLIMIT_MEMBERS) ? "∞" : toString(plugin.getAPI().getLimitMembers(target) < 0 ? 0 : plugin.getAPI().getLimitMembers(target)), target.hasPermission(Permissions.UNLIMIT_MEMBERS) ? "∞" : plugin.getAPI().getLimitMaxMembers(target)).get());
 		}
-		sendPaginationList(player, getComponent(locale, LocalesPaths.COMMAND_LIMITS_HEADER), getComponent(locale, LocalesPaths.PADDING), 10, messages);
+		return messages;
 	}
 
 	@Override
@@ -87,7 +100,7 @@ public class Limits extends AbstractCommand {
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg limits &7[Action]&f - ").clickEvent(ClickEvent.suggestCommand("/rg limits ")).append(extendedDescription(getLocale(cause)));
+		return TextUtils.deserializeLegacy(cause.hasPermission(Permissions.STAFF_LIMITS) ? "&6/rg limits &7[Player|Action]&f - " : "&6/rg limits &7[Action]&f - ").clickEvent(ClickEvent.suggestCommand("/rg limits ")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override
@@ -97,7 +110,7 @@ public class Limits extends AbstractCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
-		return null;
+		return Arrays.asList(RawArguments.createPlayerArgument(true, true, 0, LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT));
 	}
 
 	private String toString(Object object) {
