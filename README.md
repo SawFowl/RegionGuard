@@ -11,7 +11,8 @@
 - Player limits are set via metadata in the permissions plugin.
 - Developers can use the plugin API to extend its functionality and use its functions in their plugins.
 - Optional Sponge economy support.
-- MySQL support. The MySQL driver is provided with the plugin since version 1.3.
+- Supports working with MySQL and H2 databases.
+- Automatically load new and updated data from the MySql database.
 - Ability to regenerate territory when a region is removed.
 
 #### Commands:
@@ -21,29 +22,29 @@
 /rg delete - Delete the region.
 /rg info - Information about the region.
 /rg limits - Information about your limits.
-/rg setname <ClearFlag> <OptionalLocale> [Name] - Set the name of the region.
-/rg setmessage <CommandFlags> <Locale> [Message] - Set/remove the join/exit message in the region.
-/rg flag [FlagName] [Value] <Source> <Target> - Set the flag parameters.
+/rg setname [ClearFlag] [Locale] <Name> - Set the name of the region.
+/rg setmessage [CommandFlags] [Locale] <Message> - Set/remove the join/exit message in the region.
+/rg flag [FlagName] [Value] [Source] [Target] - Set the flag parameters.
 /rg leave - Leave from region.
-/rg setowner [Player] - Set the owner of the region.
-/rg trust [Player] [TrustType] - Add a player to the region and specify his rights in the region.
-/rg untrust [Player] - Remove a player from the region.
-/rg setselector [Type] - Select the type of area selection.
-/rg setcreatingtype [Type] - Select the type of region to be created.
+/rg setowner <Player> - Set the owner of the region.
+/rg trust <Player> <TrustType> - Add a player to the region and specify his rights in the region.
+/rg untrust <Player> - Remove a player from the region.
+/rg setselector <Type> - Select the type of area selection.
+/rg setcreatingtype <Type> - Select the type of region to be created.
 /rg wecui - Switch the sending status of WECui packets.
 /rg list - Show list of regions.
-/rg buylimit blocks [Volume] - Payment in game currency to increase the limit of blocks.
-/rg buylimit claims [Volume] - Payment in game currency to increase the limit of claims.
-/rg buylimit subdivisions [Volume] - Payment in game currency to increase the limit of subdivisions.
-/rg buylimit members [Volume] - Payment in game currency to increase the limit of region members.
-/rg selllimit blocks [Volume] - Selling the limit of blocks for game currency.
-/rg selllimit claims [Volume] - Selling the limit of claims for game currency.
-/rg selllimit subdivisions [Volume] - Selling the limit of subdivisions for game currency.
-/rg selllimit members [Volume] - Selling the limit of region members for game currency.
-/rg setlimit blocks [Player] [Size] - Change the blocks limit of the player.
-/rg setlimit claims [Player] [Size] - Change the claims limit of the player.
-/rg setlimit subdivisions [Player] [Size] - Change the subdivisions limit of the player.
-/rg setlimit members [Player] [Size] - Changing the limit of members in the player regions.
+/rg limits buy blocks <Volume> - Payment in game currency to increase the limit of blocks.
+/rg limits buy claims <Volume> - Payment in game currency to increase the limit of claims.
+/rg limits buy subdivisions <Volume> - Payment in game currency to increase the limit of subdivisions.
+/rg limits buy members <Volume> - Payment in game currency to increase the limit of region members.
+/rg limits sell blocks <Volume> - Selling the limit of blocks for game currency.
+/rg limits sell claims <Volume> - Selling the limit of claims for game currency.
+/rg limits sell subdivisions <Volume> - Selling the limit of subdivisions for game currency.
+/rg limits sell members <Volume> - Selling the limit of region members for game currency.
+/rg limits set blocks <Player> <Volume> - Change the blocks limit of the player.
+/rg limits set claims <Player> <Volume> - Change the claims limit of the player.
+/rg limits set subdivisions <Player> <Volume> - Change the subdivisions limit of the player.
+/rg limits set members <Player> <Volume> - Changing the limit of members in the player regions.
 /rg updatedefaultflags - Setting default flags based on those available in the region at the player location.
 ```
 
@@ -95,6 +96,7 @@ regionguard.staff.setname - Set a name for any region.
 regionguard.staff.setregiontype - Change the type of region and select the type of regions to be created.
 regionguard.staff.flag - Changing flags in any region.
 regionguard.staff.list - Getting a list of regions of any player. The ability to teleport is available by default.
+regionguard.staff.limits - View the available limits of another player.
 regionguard.staff.setlimit.blocks - Change the blocks limit of the player.
 regionguard.staff.setlimit.claims - Change the claims limit of the player.
 regionguard.staff.setlimit.subdivisions - Change the subdivisions limit of the player.
@@ -153,17 +155,8 @@ public class Main {
 
 	// Get API. This happens in event `ConstructPluginEvent`.
 	@Listener
-	public void onRegionAPIPostEvent(RegionAPIPostEvent.PostAPI event) {
-		instance = this;
-		logger = LogManager.getLogger("PluginName");
+	public void onRegionAPIPostEvent(RegionAPI.PostAPI event) {
 		regionAPI = event.getAPI();
-	}
-
-	// At this stage, you can access the regions.
-	@Listener
-	public void onCompleteLoadRegionsEvent(RegionAPIPostEvent.CompleteLoadRegions event) {
-		logger.info(event.getTotalLoaded());
-		//TODO
 	}
 
 }
@@ -179,6 +172,6 @@ repositories {
 }
 dependencies {
 	...
-	implementation 'com.github.SawFowl:RegionGuard:1.10.0'
+	implementation 'com.github.SawFowl:RegionGuard:2.0'
 }
 ```
