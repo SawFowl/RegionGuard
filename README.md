@@ -21,7 +21,7 @@
 /rg claim - Claim the allocated region.
 /rg delete - Delete the region.
 /rg info - Information about the region.
-/rg limits - Information about your limits.
+/rg limits [Player] - Information about player limits.
 /rg setname [ClearFlag] [Locale] <Name> - Set the name of the region.
 /rg setmessage [CommandFlags] [Locale] <Message> - Set/remove the join/exit message in the region.
 /rg flag [FlagName] [Value] [Source] [Target] - Set the flag parameters.
