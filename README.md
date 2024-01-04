@@ -12,7 +12,7 @@
 - Developers can use the plugin API to extend its functionality and use its functions in their plugins.
 - Optional Sponge economy support.
 - MySQL support. The MySQL driver is provided with the plugin since version 1.3.
-- H2 support. The MySQL driver is provided with the plugin since version 2.0.
+- H2 support. The H2 driver is provided with the plugin since version 2.0.
 - Ability to regenerate territory when a region is removed.
 
 #### Commands:
