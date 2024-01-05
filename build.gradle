@@ -55,7 +55,7 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-	implementation "org.spongepowered:spongeapi:10.0.0"
+	implementation "org.spongepowered:spongeapi:${api}"
 	implementation 'org.spongepowered:spongevanilla:1.19.4-10.0.0-RC1397:universal'
 	implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
 	implementation "com.github.SawFowl:CommandPack:${commandpack}"
@@ -86,7 +86,7 @@ sponge {
 		dependency("spongeapi") {
 			optional(false)
 			loadOrder("after")
-			version("8.0.0")
+			version("${api}")
 		}
 		dependency("localeapi") {
 			optional(false)
