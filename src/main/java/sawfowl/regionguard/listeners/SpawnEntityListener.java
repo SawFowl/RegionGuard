@@ -22,6 +22,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Tristate;
 
 import net.kyori.adventure.text.Component;
+
 import net.minecraft.world.entity.item.ItemEntity;
 
 import sawfowl.regionguard.Permissions;
@@ -69,7 +70,7 @@ public class SpawnEntityListener {
 			}
 		} else allowSpawnItem = false;
 		boolean allowSpawnEntity = spawnEntity && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
-		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowSpawnEntity;
+		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowSpawnEntity || spawnType.equals(SpawnTypes.BLOCK_SPAWNING.get());
 		class SpawnEvent implements RegionSpawnEntityEvent {
 
 			boolean cancelled;
