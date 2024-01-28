@@ -18,15 +18,13 @@ import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent.Pre;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 
-import net.minecraft.world.entity.item.ItemEntity;
-
+import sawfowl.commandpack.api.mixin.game.EntityItem;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -35,7 +33,6 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.world.RegionSpawnEntityEvent;
 import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
-import sawfowl.regionguard.utils.ReflectionUtil;
 
 public class SpawnEntityListener {
 
@@ -62,7 +59,7 @@ public class SpawnEntityListener {
 		boolean allowSpawnExp = spawnExp && (optSource.isPresent() ? isAllowExpSpawn(region, optSource.get()) : isAllowExpSpawn(region, null));
 		boolean allowSpawnItem = true;
 		if(spawnItem) {
-			Set<String> items = event.entities().stream().map(entity -> entity.get(Keys.ITEM_STACK_SNAPSHOT).map(snapshot -> ListenerUtils.itemId(snapshot)).orElse(ListenerUtils.itemId(ReflectionUtil.getValueFromMethodWhithTypeNoArgs(net.minecraft.world.item.ItemStack.class, ItemStack.class, ((ItemEntity) entity))))).collect(Collectors.toSet());
+			Set<String> items = event.entities().stream().map(entity -> entity.get(Keys.ITEM_STACK_SNAPSHOT).map(snapshot -> ListenerUtils.itemId(snapshot)).orElse(EntityItem.tryCast(entity).map(EntityItem::getId).map(key -> key.asString()).orElse("minecraft:air"))).collect(Collectors.toSet());
 			allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
 		} else allowSpawnItem = false;
 		boolean allowSpawnEntity = spawnEntity && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));

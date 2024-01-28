@@ -64,7 +64,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public CUIUser getOrCreateUser(ServerPlayer player) {
 		if (worldEditPlayers.containsKey(player.uniqueId())) return worldEditPlayers.get(player.uniqueId());
-		final CUIUser user = new CUIUserImpl(player, this);
+		final CUIUser user = new CUIUserImpl(player);
 		worldEditPlayers.put(player.uniqueId(), user);
 		return getOrCreateUser(player.uniqueId());
 	}
@@ -72,7 +72,7 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public CUIUser getOrCreateUser(UUID uuid) {
 		if (worldEditPlayers.containsKey(uuid)) return worldEditPlayers.get(uuid);
-		final CUIUser user = new CUIUserImpl(uuid, this);
+		final CUIUser user = new CUIUserImpl(uuid);
 		worldEditPlayers.put(uuid, user);
 		return user;
 	}

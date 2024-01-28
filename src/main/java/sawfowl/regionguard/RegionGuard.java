@@ -82,6 +82,7 @@ import sawfowl.regionguard.implementsapi.data.PlayerLimitsImpl;
 import sawfowl.regionguard.implementsapi.data.RegionImpl;
 import sawfowl.regionguard.implementsapi.worldedit.WorldEditAPI;
 import sawfowl.regionguard.implementsapi.worldedit.cui.handle.SpongeCUIChannelHandler;
+import sawfowl.regionguard.implementsapi.worldedit.cui.handle.SpongeCUIChannelHandler.RegistrationHandler;
 import sawfowl.regionguard.listeners.BlockAndWorldChangeListener;
 import sawfowl.regionguard.listeners.ChunkListener;
 import sawfowl.regionguard.listeners.ClientConnectionListener;
@@ -125,6 +126,7 @@ public class RegionGuard {
 	private RegenUtil regenUtil;
 	private Economy economy;
 	private CommandPack commandPack;
+	private RegistrationHandler handler;
 
 	public static RegionGuard getInstance() {
 		return instance;
@@ -210,12 +212,25 @@ public class RegionGuard {
 		} catch (ConfigurateException e) {
 			e.printStackTrace();
 		}
-		
+		Sponge.game().eventManager().registerListeners(
+			pluginContainer,
+			handler = new SpongeCUIChannelHandler.RegistrationHandler(instance)
+		);
 	}
 
 	@Listener
 	public void getCommandPackAPI(CommandPack.PostAPI event) {
 		commandPack = event.getAPI();
+		if(commandPack.isForgeServer()) {
+			if(handler != null) {
+				Sponge.eventManager().unregisterListeners(handler);
+				handler = null;
+			}
+			Sponge.game().eventManager().registerListeners(
+				pluginContainer,
+				new SpongeCUIChannelHandler.ForgeCuiListener(instance)
+			);
+		}
 	}
 
 	@Listener(order = Order.LAST)
@@ -227,10 +242,6 @@ public class RegionGuard {
 			mySQL = new MySQL(instance, getConfig().getMySQLConfig());
 		}
 		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
-		Sponge.game().eventManager().registerListeners(
-				pluginContainer,
-				new SpongeCUIChannelHandler.RegistrationHandler(instance)
-		);
 		boolean h2 = Sponge.pluginManager().plugin("h2driver").isPresent();
 		boolean mysql = Sponge.pluginManager().plugin("mysqldriver").isPresent() && mySQL != null && mySQL.checkConnection();
 		if(getConfig().getMySQLConfig().isEnable()) {

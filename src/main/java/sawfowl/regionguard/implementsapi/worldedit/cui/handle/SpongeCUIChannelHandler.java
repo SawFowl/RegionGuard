@@ -15,6 +15,7 @@ import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.network.channel.raw.play.RawPlayDataHandler;
 
+import sawfowl.commandpack.api.events.RecievePacketEvent;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.worldedit.CUIUser;
@@ -39,6 +40,22 @@ public class SpongeCUIChannelHandler implements RawPlayDataHandler<ServerPlayerC
 			channel.play().addHandler(ServerPlayerConnection.class, new SpongeCUIChannelHandler());
 			CHANNEL.newValue(channel);
 		}
+
+	}
+
+	public static class ForgeCuiListener {
+
+		public ForgeCuiListener(RegionGuard regionGuard) {
+			plugin = regionGuard;
+		}
+
+		@Listener
+		public void onRecievePacket(RecievePacketEvent event) {
+			if(event.getPacketName().equals(CUI_PLUGIN_CHANNEL.asString())) {
+				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(event.getMixinPlayer()).handleCUIInitializationMessage(event.getDataAsString());
+			}
+		}
+
 	}
 
 	public static RawDataChannel channel() {
