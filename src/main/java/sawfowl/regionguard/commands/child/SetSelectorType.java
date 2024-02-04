@@ -31,7 +31,7 @@ public class SetSelectorType extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		switch (getArgument(SelectorTypes.class, args, 0).get()) {
+		switch (getArgument(SelectorTypes.class, cause, args, 0).get()) {
 		case CUBOID: {
 			plugin.getAPI().setSelectorType(src, SelectorTypes.CUBOID);
 			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_SELECTOR_CUBOID));
@@ -73,11 +73,15 @@ public class SetSelectorType extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				SelectorTypes.class,
+				null,
 				(cause, args) -> Stream.of(SelectorTypes.values()).map(type -> type.toString()),
+				null,
 				(cause, args) -> args.length > 0 ? Optional.ofNullable(SelectorTypes.checkType(args[0])) : Optional.empty(),
+				null,
 				false,
 				false,
 				0,
+				null,
 				LocalesPaths.COMMAND_REGION_TYPE_EXCEPTION_NOT_PRESENT
 			)
 		);

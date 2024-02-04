@@ -16,6 +16,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -110,11 +111,15 @@ public class ListRegions extends AbstractCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				GameProfile.class,
+				CommandTreeNodeTypes.GAME_PROFILE.get().createNode(),
 				(cause, args) -> cause.hasPermission(Permissions.STAFF_LIST) ? Sponge.server().userManager().streamAll().map(profile -> profile.name().orElse(profile.examinableName())) : Stream.empty(),
+				null,
 				(cause, args) -> args.length > 0 && cause.hasPermission(Permissions.STAFF_LIST) ? Sponge.server().userManager().streamAll().filter(profile -> profile.name().orElse(profile.examinableName()).equals(args[0])).findFirst() : Optional.empty(),
+				null,
 				true,
 				false,
 				0,
+				null,
 				LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT
 			)
 		);

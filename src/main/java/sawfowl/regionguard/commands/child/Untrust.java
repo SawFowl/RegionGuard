@@ -10,6 +10,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 
@@ -39,7 +40,7 @@ public class Untrust extends AbstractPlayerCommand {
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
 		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
-		GameProfile profile = getArgument(GameProfile.class, args, 0).get();
+		GameProfile profile = getArgument(GameProfile.class, cause, args, 0).get();
 		if(src.hasPermission(Permissions.STAFF_TRUST)) {
 			if(!region.isCurrentTrustType(profile.uniqueId(), TrustTypes.OWNER)) {
 				untrust(region, src, profile);
@@ -83,11 +84,15 @@ public class Untrust extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				GameProfile.class,
+				CommandTreeNodeTypes.GAME_PROFILE.get().createNode(),
 				(cause, args) -> cause.first(ServerPlayer.class).isPresent() ? findRegion(cause.first(ServerPlayer.class).get()).map(region -> region.getMembers().stream().filter(member -> member.getTrustType() != TrustTypes.OWNER).map(MemberData::getName)).orElse(Stream.empty()) : Stream.empty(),
+				null,
 				(cause, args) -> args.length > 0 && cause.first(ServerPlayer.class).isPresent() ? findRegion(cause.first(ServerPlayer.class).get()).map(region -> region.getMembers().stream().filter(member -> member.getTrustType() != TrustTypes.OWNER).filter(member -> member.getName().equals(args[0])).findFirst().orElse(null)).map(member -> Sponge.server().userManager().streamAll().filter(profile -> member.getUniqueId().equals(profile.uniqueId())).findFirst().orElse(null)) : Optional.empty(),
+				null,
 				false,
 				false,
 				0,
+				null,
 				LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT
 			)
 		);

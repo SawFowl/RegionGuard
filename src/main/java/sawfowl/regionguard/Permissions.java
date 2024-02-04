@@ -26,6 +26,7 @@ public class Permissions {
 	public static final String SELL_MEMBERS = "regionguard.user.sell.members";
 	public static final String LIST = "regionguard.user.list";
 	public static final String TELEPORT = "regionguard.user.teleport";
+	public static final String CLEAR = "regionguard.user.clear";
 
 
 

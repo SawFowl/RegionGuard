@@ -33,6 +33,7 @@ import sawfowl.regionguard.utils.Placeholders;
 
 public class Flag extends AbstractPlayerCommand {
 
+	private List<String> values;
 	public Flag(RegionGuard plugin) {
 		super(plugin);
 	}
@@ -81,40 +82,56 @@ public class Flag extends AbstractPlayerCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
+		if(values == null) values = Arrays.asList("true", "false");
 		return Arrays.asList(
 			RawArgument.of(
 				FlagConfig.class,
+				null,
 				(cause, args) -> plugin.getAPI().getRegisteredFlags().keySet().stream().filter(flag -> cause.hasPermission(Permissions.setFlag(flag))),
+				null,
 				(cause, args) -> args.length == 0 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().values().stream().filter(flag -> flag.getName().equalsIgnoreCase(args[0]) && cause.hasPermission(Permissions.setFlag(flag.getName()))).findFirst(),
+				null,
 				true,
 				true,
 				0,
 				null
 			),
-			RawArgument.of(Boolean.class,
-				(cause, args) -> Stream.of("true", "false"),
+			RawArgument.of(
+				Boolean.class,
+				null,
+				(cause, args) -> values.stream(),
+				() -> values.stream(),
 				(cause, args) -> args.length < 2 || !getArgument(FlagConfig.class, cause, args, 0).isPresent() ? Optional.empty() : Optional.ofNullable(BooleanUtils.toBooleanObject(args[1])),
+				null,
 				true,
 				true,
 				1,
-				LocalesPaths.COMMAND_FLAG_VALUE_NOT_PRESENT
+				null
 			),
 			RawArgument.of(
 				String.class,
+				null,
 				(cause, args) -> getArgument(FlagConfig.class, cause, args, 0).map(config -> config.getSettings().getSources()).orElse(Stream.of("all")),
+				null,
 				(cause, args) -> args.length < 3 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, cause, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
+				null,
 				true,
 				true,
 				2,
+				null,
 				LocalesPaths.COMMAND_FLAG_WRONG_SOURCE
 			),
 			RawArgument.of(
 				String.class,
+				null,
 				(cause, args) -> getArgument(FlagConfig.class, cause, args, 0).map(config -> config.getSettings().getTargets()).orElse(Stream.of("all")),
+				null,
 				(cause, args) -> args.length < 4 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, cause, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
+				null,
 				true,
 				true,
 				3,
+				null,
 				LocalesPaths.COMMAND_FLAG_WRONG_TARGET
 			)
 		);

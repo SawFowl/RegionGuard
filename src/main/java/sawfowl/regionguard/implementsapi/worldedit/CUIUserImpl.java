@@ -35,12 +35,10 @@ public class CUIUserImpl implements CUIUser {
 	}
 
 	public void dispatchCUIEvent(CUIEvent event) {
-		if(!getPlayer().isPresent()) return;
-		getPlayer().get().connection();
-		String[] params = event.getParameters();
-		String send = event.getTypeId();
-		if(params.length > 0) send = send + "|" + StringUtil.joinString(params, "|");
-		CustomPacket.of(CUI_PLUGIN_CHANNEL, send).sendTo(getPlayer().get());
+		if(!isSupportCUI()) return;
+		getPlayer().ifPresent(player -> {
+			if(event.getParameters().length > 0) CustomPacket.of(CUI_PLUGIN_CHANNEL, event.getTypeId() + "|" + StringUtil.joinString(event.getParameters(), "|")).sendTo(player);
+		});
 	}
 
 	public Optional<ServerPlayer> getPlayer() {

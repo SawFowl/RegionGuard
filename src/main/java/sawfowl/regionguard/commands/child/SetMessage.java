@@ -31,7 +31,7 @@ import sawfowl.regionguard.configure.LocalesPaths;
 public class SetMessage extends AbstractPlayerCommand {
 
 	private Map<String, Locale> locales;
-	private final List<String> flags = Arrays.asList("-j", "-join", "-e", "-exit");
+	private List<String> flags;
 	public SetMessage(RegionGuard plugin) {
 		super(plugin);
 	}
@@ -62,7 +62,7 @@ public class SetMessage extends AbstractPlayerCommand {
 				exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT);
 			}
 		} else {
-			Component message = getArgument(Component.class, args, 3).get();
+			Component message = getArgument(Component.class, cause, args, 3).get();
 			if(TextUtils.clearDecorations(message).length() > 50) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TOO_LONG);
 			if(join) {
 				region.setJoinMessage(message, locale);
@@ -106,17 +106,22 @@ public class SetMessage extends AbstractPlayerCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		if(locales == null) locales = plugin.getLocales().getLocaleService().getLocalesList().stream().collect(Collectors.toMap(locale -> locale.toLanguageTag(), locale -> locale));
+		if(flags == null) flags = Arrays.asList("-j", "-join", "-e", "-exit");
 		return Arrays.asList(
 			RawArguments.createStringArgument(locales.keySet(), true, true, 0, null, null),
 			RawArguments.createStringArgument(flags, true, true, 1, null, null),
 			RawArguments.createStringArgument(Arrays.asList("-c", "-clear"), true, true, 2, null, null),
 			RawArgument.of(
 				Component.class,
+				null,
 				(cause, args) -> Stream.empty(),
+				null,
 				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, getString(args, 0).orElse(""), getString(args, 1).orElse("")))) : null),
+				null,
 				false,
 				false,
 				3,
+				null,
 				LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT
 			)
 		);

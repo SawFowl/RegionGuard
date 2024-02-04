@@ -14,11 +14,13 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.data.command.RawSettings;
 import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.commands.abstractcommands.AbstractCommand;
 import sawfowl.regionguard.commands.child.Claim;
+import sawfowl.regionguard.commands.child.Clear;
 import sawfowl.regionguard.commands.child.Delete;
 import sawfowl.regionguard.commands.child.Flag;
 import sawfowl.regionguard.commands.child.Info;
@@ -39,6 +41,7 @@ import sawfowl.regionguard.configure.LocalesPaths;
 
 public class Region extends AbstractCommand {
 
+	private List<RawCommand> childs;
 	public Region(RegionGuard plugin) {
 		super(plugin);
 	}
@@ -70,7 +73,7 @@ public class Region extends AbstractCommand {
 
 	@Override
 	public List<RawCommand> getChilds() {
-		return Arrays.asList(
+		return childs != null ? childs : (childs = Arrays.asList(
 			new Claim(plugin),
 			new Delete(plugin),
 			new Limits(plugin),
@@ -87,8 +90,9 @@ public class Region extends AbstractCommand {
 			new Untrust(plugin),
 			new UpdateDefaultFlags(plugin),
 			new Wand(plugin),
-			new WeCUI(plugin)
-		);
+			new WeCUI(plugin),
+			new Clear(plugin)
+		));
 	}
 
 	@Override
@@ -113,7 +117,7 @@ public class Region extends AbstractCommand {
 
 	@Override
 	public Settings getCommandSettings() {
-		return Settings.builder().setEnable(true).setAliases(new String[] {"region", "rg"}).build();
+		return Settings.unregisteredBuilder().setEnable(true).setAliases(new String[] {"region", "rg"}).setRawSettings(RawSettings.unregisteredBuilder().setAutoComplete(true).setGenerateRawTree(false).build()).build();
 	}
 
 }

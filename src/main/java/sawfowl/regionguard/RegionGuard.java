@@ -18,11 +18,16 @@
 package sawfowl.regionguard;
 
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
@@ -96,6 +101,7 @@ import sawfowl.regionguard.listeners.InteractEntityListener;
 import sawfowl.regionguard.listeners.InteractItemListener;
 import sawfowl.regionguard.listeners.ItemUseListener;
 import sawfowl.regionguard.listeners.SpawnEntityListener;
+import sawfowl.regionguard.listeners.BlockAndWorldChangeListener.PlayerPositions;
 import sawfowl.regionguard.listeners.forge.ForgeExplosionListener;
 import sawfowl.regionguard.utils.Economy;
 import sawfowl.regionguard.utils.Logger;
@@ -127,6 +133,7 @@ public class RegionGuard {
 	private Economy economy;
 	private CommandPack commandPack;
 	private RegistrationHandler handler;
+	private Map<UUID, PlayerPositions> selectedPositions = new HashMap<>();
 
 	public static RegionGuard getInstance() {
 		return instance;
@@ -173,10 +180,12 @@ public class RegionGuard {
 	}
 
 	public DefaultFlags getDefaultFlagsConfig() {
+		if(flagsConfig == null) saveConfigs();
 		return flagsConfig.get();
 	}
 
 	public CuiConfig getCuiConfig() {
+		if(cuiConfig == null) saveConfigs();
 		return cuiConfig.get();
 	}
 
@@ -190,6 +199,23 @@ public class RegionGuard {
 
 	public CommandPack getCommandPack() {
 		return commandPack;
+	}
+
+	public void addPlayerPositions(ServerPlayer player, PlayerPositions positions) {
+		if(playerPositionsExist(player)) selectedPositions.remove(player.uniqueId());
+		selectedPositions.put(player.uniqueId(), positions);
+	}
+
+	public void removePlayerPositions(ServerPlayer player) {
+		if(playerPositionsExist(player)) selectedPositions.remove(player.uniqueId());
+	}
+
+	public Optional<PlayerPositions> getPlayerPositions(ServerPlayer player) {
+		return Optional.ofNullable(playerPositionsExist(player) ? selectedPositions.get(player.uniqueId()) : null);
+	}
+
+	public boolean playerPositionsExist(ServerPlayer player) {
+		return selectedPositions.containsKey(player.uniqueId());
 	}
 
 	@Inject

@@ -4,12 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -20,6 +18,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -31,7 +30,7 @@ import sawfowl.regionguard.configure.LocalesPaths;
 
 public class Delete extends AbstractPlayerCommand {
 
-	List<CommandCompletion> regen = Arrays.asList(CommandCompletion.of("-r"), CommandCompletion.of("-regen"));
+	private List<String> regen;
 	public Delete(RegionGuard plugin) {
 		super(plugin);
 	}
@@ -170,17 +169,8 @@ public class Delete extends AbstractPlayerCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
-		return Arrays.asList(
-			RawArgument.of(
-				String.class,
-				(cause, args) -> cause.hasPermission(Permissions.STAFF_DELETE) ? Stream.of("-regen", "-r") : Stream.empty(),
-				(cause, args) -> args.length > 0 && cause.hasPermission(Permissions.STAFF_DELETE) ? Stream.of("-regen", "-r").filter(string -> string.equals(args[0])).findFirst() : Optional.empty(),
-				true,
-				true,
-				0,
-				null
-			)
-		);
+		if(regen == null) regen = Arrays.asList("-regen", "-r");
+		return Arrays.asList(RawArguments.createStringArgument(regen, true, true, 0, null, Permissions.STAFF_DELETE, null));
 	}
 
 }

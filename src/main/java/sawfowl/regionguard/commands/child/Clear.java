@@ -10,53 +10,49 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
-import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
 import sawfowl.regionguard.configure.LocalesPaths;
 
-public class Wand extends AbstractPlayerCommand {
+public class Clear extends AbstractPlayerCommand {
 
-	public Wand(RegionGuard plugin) {
-		super(plugin);
+	public Clear(RegionGuard regionGuard) {
+		super(regionGuard);
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		if(src.inventory().contains(plugin.getAPI().getWandItem())) exception(locale, LocalesPaths.COMMAND_WAND_EXCEPTION_ITEM_EXIST);
-		if(src.inventory().freeCapacity() == 0) exception(locale, LocalesPaths.COMMAND_WAND_EXCEPTION_INVENTORY_IS_FULL);
-		src.inventory().offer(plugin.getAPI().getWandItem());
-		src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_WAND_SUCCESS));
+	public void process(CommandCause cause, ServerPlayer player, Locale locale, String[] args, Mutable mutable) throws CommandException {
+		plugin.removePlayerPositions(player);
+		plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
+		plugin.getAPI().getTempRegion(player.uniqueId()).ifPresent(temp -> {
+			plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, temp.getUniqueId());
+			plugin.getAPI().removeTempRegion(temp);
+		});
+		player.sendMessage(getComponent(locale, LocalesPaths.COMMAND_CLEAR_SUCCESS));
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_WAND);
-	}
-
-	@Override
-	public String permission() {
-		return Permissions.WAND;
+		return getComponent(locale, LocalesPaths.COMMANDS_CLEAR);
 	}
 
 	@Override
 	public String command() {
-		return "wand";
+		return "clear";
+	}
+
+	@Override
+	public String permission() {
+		return Permissions.CLEAR;
 	}
 
 	@Override
 	public Component usage(CommandCause cause) {
-		return TextUtils.deserializeLegacy("&6/rg wand&f - ").clickEvent(ClickEvent.runCommand("/rg wand")).append(extendedDescription(getLocale(cause)));
-	}
-
-	@Override
-	public Settings getCommandSettings() {
-		return Settings.unregisteredBuilder().setEnable(true).build();
+		return TextUtils.deserializeLegacy("&6/rg clear&f - ").clickEvent(ClickEvent.runCommand("/rg clear")).append(extendedDescription(getLocale(cause)));
 	}
 
 	@Override

@@ -76,6 +76,8 @@ public class LocalesPaths {
 
 	private static final String PATH_COMMAND_UPDATEDEFAULTFLAGS = "UpdateDefaultFlags";
 
+	private static final String PATH_COMMAND_CLEAR = "UpdateDefaultFlags";
+
 	private static final String PATH_EXCEPTIONS = "Exceptions";
 
 	private static final String PATH_REGION = "Region";
@@ -136,6 +138,7 @@ public class LocalesPaths {
 	public static final Object[] COMMANDS_SETLIMITSUBDIVISIONS = {PATH_COMMANDS, PATH_COMMAND_MAIN, PATH_COMMAND_SETLIMITSUBDIVISIONS};
 	public static final Object[] COMMANDS_SETLIMITMEMBERS = {PATH_COMMANDS, PATH_COMMAND_MAIN, PATH_COMMAND_SETLIMITMEMBERS};
 	public static final Object[] COMMANDS_UPDATE_DEFAULT_FLAGS = {PATH_COMMANDS, PATH_COMMAND_MAIN, PATH_COMMAND_UPDATEDEFAULTFLAGS};
+	public static final Object[] COMMANDS_CLEAR = {PATH_COMMANDS, PATH_COMMAND_MAIN, PATH_COMMAND_CLEAR};
 
 	public static final Object[] COMMAND_CLAIM_WORLD_NOT_FOUND = {PATH_COMMANDS, PATH_COMMAND_CLAIM,  PATH_EXCEPTIONS, "WorldNotFound"};
 	public static final Object[] COMMAND_CLAIM_REGION_NOT_FOUND = {PATH_COMMANDS, PATH_COMMAND_CLAIM, PATH_EXCEPTIONS, "RegionNotFound"};
@@ -341,7 +344,8 @@ public class LocalesPaths {
 	public static final Object[] COMMAND_SETLIMITMEMBERS_EXCEPTION_LESS_THEN_ZERO = {PATH_COMMANDS, PATH_COMMAND_SETLIMITMEMBERS, PATH_EXCEPTIONS, "LessThanZero"};
 	public static final Object[] COMMAND_SETLIMITMEMBERS_SUCCESS_SOURCE = {PATH_COMMANDS, PATH_COMMAND_SETLIMITMEMBERS, "SuccessSource"};
 	public static final Object[] COMMAND_SETLIMITMEMBERS_SUCCESS_TARGET = {PATH_COMMANDS, PATH_COMMAND_SETLIMITMEMBERS, "SuccessTarget"};
-	
+
+	public static final Object[] COMMAND_CLEAR_SUCCESS = {PATH_COMMANDS, PATH_COMMAND_CLEAR, "Success"};
 	
 	
 

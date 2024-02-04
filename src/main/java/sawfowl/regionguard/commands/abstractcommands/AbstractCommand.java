@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.data.command.RawSettings;
 import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.regionguard.RegionGuard;
 
@@ -36,7 +37,7 @@ public abstract class AbstractCommand implements RawCommand {
 
 	@Override
 	public Settings getCommandSettings() {
-		return Settings.builder().setEnable(true).build();
+		return Settings.unregisteredBuilder().setEnable(false).setRawSettings(RawSettings.unregisteredBuilder().setAutoComplete(true).setGenerateRawTree(false).build()).build();
 	}
 
 	@Override
@@ -62,11 +63,6 @@ public abstract class AbstractCommand implements RawCommand {
 	@Override
 	public Map<Integer, RawArgument<?>> getArguments() {
 		return arguments;
-	}
-
-	@Override
-	public boolean enableAutoComplete() {
-		return true;
 	}
 
 	@Override

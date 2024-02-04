@@ -85,14 +85,12 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public void visualizeRegion(Region region, ServerPlayer player, boolean investigating, boolean tempRegion) {
 		CUIUser user = getOrCreateUser(player);
-		if(!user.isSupportCUI()) return;
 		user.setLastTimeSendBorders(System.currentTimeMillis());
 		visualizeRegion(region, region.getCuboid().getMin(), region.getCuboid().getMax(), player, user, investigating, tempRegion);
 	}
 
 	@Override
 	public void visualizeRegion(Region region, Vector3i pos1, Vector3i pos2, ServerPlayer player, CUIUser user, boolean investigating, boolean tempRegion) {
-		if(!user.isSupportCUI()) return;
 		// revert any current visuals if investigating
 		if(investigating) revertVisuals(player, null);
 		Cuboid cuboid = Cuboid.of(pos1, pos2);
@@ -108,7 +106,6 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public void visualizeRegions(List<Region> regions, ServerPlayer player, boolean investigating) {
 		CUIUser user = getOrCreateUser(player);
-		if(!user.isSupportCUI()) return;
 		for (Region region : regions) {
 			long size = region.getCuboid().getSize3D();
 			user.dispatchCUIEvent(new MultiSelectionCuboidEvent(region.getUniqueId()));
@@ -124,7 +121,6 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 	@Override
 	public void revertVisuals(ServerPlayer player, UUID regionUniqueId) {
 		CUIUser user = getOrCreateUser(player);
-		if(!user.isSupportCUI()) return;
 		if (regionUniqueId != null) {
 			user.dispatchCUIEvent(new MultiSelectionClearEvent(regionUniqueId));
 		} else user.dispatchCUIEvent(new MultiSelectionClearEvent());
@@ -132,15 +128,15 @@ public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 
 	@Override
 	public void stopVisualDrag(ServerPlayer player) {
-		final CUIUser user = getOrCreateUser(player);
-		if(!user.isSupportCUI()) return;
+		CUIUser user = getOrCreateUser(player);
+		user.setLastWandLocation(null);
+		user.setDrag(false);
 		user.dispatchCUIEvent(new MultiSelectionClearEvent(player.uniqueId()));
 	}
 
 	@Override
 	public void sendVisualDrag(ServerPlayer player, Vector3i pos) {
 		CUIUser user = getOrCreateUser(player);
-		if(!user.isSupportCUI()) return;
 		final ServerLocation location = getTargetBlock(player, 50).orElse(null);
 		Vector3i point1 = null;
 		if (user.getLastWandLocation() != null) {

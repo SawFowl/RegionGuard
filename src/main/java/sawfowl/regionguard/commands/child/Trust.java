@@ -9,6 +9,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 
@@ -38,9 +39,9 @@ public class Trust extends AbstractPlayerCommand {
 		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
 		if(region.isAdmin()) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_ADMINCLAIM);
 		if((!region.isCurrentTrustType(src, TrustTypes.OWNER) && !region.isCurrentTrustType(src, TrustTypes.MANAGER)) && !src.hasPermission(Permissions.STAFF_TRUST)) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_NEED_TRUST_TYPE);
-		GameProfile trustedPlayer = getArgument(GameProfile.class, args, 0).get();
+		GameProfile trustedPlayer = getArgument(GameProfile.class, cause, args, 0).get();
 		if(!src.hasPermission(Permissions.UNLIMIT_MEMBERS) && plugin.getAPI().getLimitMembers(region.getOwnerUUID()) <= region.getTotalMembers() - 1 && !region.getMemberData(trustedPlayer.uniqueId()).isPresent()) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_LIMIT_REACHED);
-		TrustTypes trustLevel = getArgument(TrustTypes.class, args, 1).get();
+		TrustTypes trustLevel = getArgument(TrustTypes.class, cause, args, 1).get();
 		if((src.uniqueId().equals(trustedPlayer.uniqueId()) && !src.hasPermission(Permissions.STAFF_TRUST)) || (src.uniqueId().equals(trustedPlayer.uniqueId()) && region.isCurrentTrustType(src, TrustTypes.OWNER))) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_TARGET_SELF);
 		if(!region.isCurrentTrustType(src, TrustTypes.OWNER) && trustLevel == TrustTypes.MANAGER) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_PLAYER_IS_NOT_OWNER);
 		region.setTrustType(trustedPlayer, trustLevel);
@@ -81,20 +82,28 @@ public class Trust extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				GameProfile.class,
+				CommandTreeNodeTypes.GAME_PROFILE.get().createNode(),
 				(cause, args) -> Sponge.server().userManager().streamAll().map(profile -> profile.name().orElse(profile.examinableName())),
+				null,
 				(cause, args) -> args.length > 0 ? Sponge.server().userManager().streamAll().filter(profile -> profile.name().orElse(profile.examinableName()).equals(args[0])).findFirst() : Optional.empty(),
+				null,
 				false,
 				false,
 				0,
+				null,
 				LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT
 			),
 			RawArgument.of(
 				TrustTypes.class,
+				null,
 				(cause, args) -> TrustTypes.getValues(),
+				() -> TrustTypes.getValues(),
 				(cause, args) -> args.length > 1 ? Optional.ofNullable(TrustTypes.checkType(args[1])) : Optional.empty(),
+				null,
 				false,
 				false,
 				0,
+				null,
 				LocalesPaths.COMMAND_TRUST_EXCEPTION_TRUST_TYPE_NOT_PRESENT
 			)
 		);

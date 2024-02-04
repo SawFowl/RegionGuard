@@ -50,7 +50,7 @@ public class SetName extends AbstractPlayerCommand {
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
 			src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_NAME_CLEARED));
 		} else {
-			Component newName = getArgument(Component.class, args, 2).get();
+			Component newName = getArgument(Component.class, cause, args, 2).get();
 			if(TextUtils.clearDecorations(newName).length() > 20) exception(srcLocale, LocalesPaths.COMMAND_SET_NAME_TOO_LONG);
 			region.setName(newName, locale);
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
@@ -91,11 +91,15 @@ public class SetName extends AbstractPlayerCommand {
 			RawArguments.createStringArgument(Arrays.asList("-c", "-clear"), true, true, 1, null, null),
 			RawArgument.of(
 				Component.class,
+				null,
 				(cause, args) -> Stream.empty(),
+				null,
 				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, getString(args, 0).orElse("")))) : null),
+				null,
 				false,
 				false,
 				2,
+				null,
 				LocalesPaths.COMMAND_SET_NAME_NOT_PRESENT
 			)
 		);
