@@ -78,7 +78,7 @@ public class Subdivisions extends AbstractPlayerCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		return Arrays.asList(
-				RawArguments.createLongArgument(new ArrayList<Long>(), false, false, 0, null, LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_NOT_PRESENT)
+				RawArguments.createLongArgument("Value", new ArrayList<Long>(), false, false, 0, null, null, LocalesPaths.COMMAND_BUYSUBDIVISIONS_EXCEPTION_NOT_PRESENT)
 		);
 	}
 

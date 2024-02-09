@@ -51,9 +51,8 @@ public class SpongeCUIChannelHandler implements RawPlayDataHandler<ServerPlayerC
 
 		@Listener
 		public void onRecievePacket(RecievePacketEvent event) {
-			if(event.getPacketName().equals(CUI_PLUGIN_CHANNEL.asString())) {
-				plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(event.getMixinPlayer()).handleCUIInitializationMessage(event.getDataAsString());
-			}
+			if(!event.isReadable() || !event.getPacketName().equals(CUI_PLUGIN_CHANNEL.asString())) return;
+			plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(event.getMixinPlayer()).handleCUIInitializationMessage(event.getDataAsString());
 		}
 
 	}

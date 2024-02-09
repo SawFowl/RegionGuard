@@ -69,8 +69,8 @@ public class Blocks extends AbstractCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		return Arrays.asList(
-			RawArguments.createPlayerArgument(false, false, 0, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_PLAYER_NOT_PRESENT),
-			RawArguments.createLongArgument(new ArrayList<Long>(), false, false, 1, null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_VOLUME_NOT_PRESENT)
+			RawArguments.createPlayerArgument(false, false, 0, null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_PLAYER_NOT_PRESENT),
+			RawArguments.createLongArgument("Value", new ArrayList<Long>(), false, false, 1, null, null, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_VOLUME_NOT_PRESENT)
 		);
 	}
 

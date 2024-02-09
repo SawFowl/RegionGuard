@@ -12,6 +12,7 @@ import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.Tristate;
 
@@ -86,11 +87,10 @@ public class Flag extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				FlagConfig.class,
-				null,
+				CommandTreeNodeTypes.STRING.get().createNode(),
 				(cause, args) -> plugin.getAPI().getRegisteredFlags().keySet().stream().filter(flag -> cause.hasPermission(Permissions.setFlag(flag))),
-				null,
 				(cause, args) -> args.length == 0 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().values().stream().filter(flag -> flag.getName().equalsIgnoreCase(args[0]) && cause.hasPermission(Permissions.setFlag(flag.getName()))).findFirst(),
-				null,
+				"Flag",
 				true,
 				true,
 				0,
@@ -98,11 +98,10 @@ public class Flag extends AbstractPlayerCommand {
 			),
 			RawArgument.of(
 				Boolean.class,
-				null,
+				CommandTreeNodeTypes.BOOL.get().createNode(),
 				(cause, args) -> values.stream(),
-				() -> values.stream(),
 				(cause, args) -> args.length < 2 || !getArgument(FlagConfig.class, cause, args, 0).isPresent() ? Optional.empty() : Optional.ofNullable(BooleanUtils.toBooleanObject(args[1])),
-				null,
+				"Value",
 				true,
 				true,
 				1,
@@ -110,11 +109,10 @@ public class Flag extends AbstractPlayerCommand {
 			),
 			RawArgument.of(
 				String.class,
-				null,
+				CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(),
 				(cause, args) -> getArgument(FlagConfig.class, cause, args, 0).map(config -> config.getSettings().getSources()).orElse(Stream.of("all")),
-				null,
 				(cause, args) -> args.length < 3 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, cause, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
-				null,
+				"Source",
 				true,
 				true,
 				2,
@@ -123,11 +121,10 @@ public class Flag extends AbstractPlayerCommand {
 			),
 			RawArgument.of(
 				String.class,
-				null,
+				CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(),
 				(cause, args) -> getArgument(FlagConfig.class, cause, args, 0).map(config -> config.getSettings().getTargets()).orElse(Stream.of("all")),
-				null,
 				(cause, args) -> args.length < 4 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, cause, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
-				null,
+				"Target",
 				true,
 				true,
 				3,

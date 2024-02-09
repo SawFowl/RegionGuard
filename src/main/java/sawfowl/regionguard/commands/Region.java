@@ -14,7 +14,6 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
-import sawfowl.commandpack.api.data.command.RawSettings;
 import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -117,7 +116,7 @@ public class Region extends AbstractCommand {
 
 	@Override
 	public Settings getCommandSettings() {
-		return Settings.unregisteredBuilder().setEnable(true).setAliases(new String[] {"region", "rg"}).setRawSettings(RawSettings.unregisteredBuilder().setAutoComplete(true).setGenerateRawTree(false).build()).build();
+		return Settings.unregisteredBuilder().setEnable(true).setAliases(new String[] {"region", "rg"}).setAutoComplete(true).build();
 	}
 
 }

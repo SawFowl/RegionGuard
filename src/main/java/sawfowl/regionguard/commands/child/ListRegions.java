@@ -113,7 +113,6 @@ public class ListRegions extends AbstractCommand {
 				GameProfile.class,
 				CommandTreeNodeTypes.GAME_PROFILE.get().createNode(),
 				(cause, args) -> cause.hasPermission(Permissions.STAFF_LIST) ? Sponge.server().userManager().streamAll().map(profile -> profile.name().orElse(profile.examinableName())) : Stream.empty(),
-				null,
 				(cause, args) -> args.length > 0 && cause.hasPermission(Permissions.STAFF_LIST) ? Sponge.server().userManager().streamAll().filter(profile -> profile.name().orElse(profile.examinableName()).equals(args[0])).findFirst() : Optional.empty(),
 				null,
 				true,

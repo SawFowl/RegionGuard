@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import net.kyori.adventure.text.Component;
@@ -73,11 +74,10 @@ public class SetSelectorType extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				SelectorTypes.class,
-				null,
+				CommandTreeNodeTypes.STRING.get().createNode(),
 				(cause, args) -> Stream.of(SelectorTypes.values()).map(type -> type.toString()),
-				null,
 				(cause, args) -> args.length > 0 ? Optional.ofNullable(SelectorTypes.checkType(args[0])) : Optional.empty(),
-				null,
+				"Type",
 				false,
 				false,
 				0,

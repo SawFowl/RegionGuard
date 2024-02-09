@@ -12,6 +12,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import net.kyori.adventure.text.Component;
@@ -87,15 +88,14 @@ public class SetName extends AbstractPlayerCommand {
 	public List<RawArgument<?>> getArgs() {
 		if(locales == null) locales = plugin.getLocales().getLocaleService().getLocalesList().stream().collect(Collectors.toMap(locale -> locale.toLanguageTag(), locale -> locale));
 		return Arrays.asList(
-			RawArguments.createStringArgument(locales.keySet(), true, true, 0, null, null),
-			RawArguments.createStringArgument(Arrays.asList("-c", "-clear"), true, true, 1, null, null),
+			RawArguments.createLocaleArgument(true, true, 0, null, null),
+			RawArguments.createStringArgument("Clear | Message", Arrays.asList("-c", "-clear"), true, true, 1, null, null, null),
 			RawArgument.of(
 				Component.class,
-				null,
+				CommandTreeNodeTypes.STRING.get().createNode().greedy(),
 				(cause, args) -> Stream.empty(),
-				null,
 				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, getString(args, 0).orElse("")))) : null),
-				null,
+				"Message",
 				false,
 				false,
 				2,
