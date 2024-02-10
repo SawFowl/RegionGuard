@@ -1,18 +1,21 @@
-# RegionGuard
+# RegionGuard [![](https://jitpack.io/v/SawFowl/RegionGuard.svg)](https://jitpack.io/#SawFowl/RegionGuard)  ![Maven Central](https://github.com/SawFowl/RegionGuard/actions/workflows/gradle-publish.yml/badge.svg?branch=1.10.0)
 
- ![Maven Central](https://github.com/SawFowl/RegionGuard/actions/workflows/gradle-publish.yml/badge.svg?branch=1.10.0)
+####  ***[LocaleAPI](https://ore.spongepowered.org/Semenkovsky_Ivan/LocaleAPI) - required.***
+####  ***[CommandPack](https://ore.spongepowered.org/Semenkovsky_Ivan/CommandPack) - required for plugin version 2.0+.***
+#### ***[MySQLDriver](https://ore.spongepowered.org/Semenkovsky_Ivan/MySQLDriver) - optional support included.***
+#### ***[H2Driver](https://ore.spongepowered.org/Semenkovsky_Ivan/H2Driver) - optional support included. 2.0+.***
 
 ### For server admins:
 #### Features:
 - The commands are partially similar to those in the WorldGuard plugin.
 - Working with flags is similar to what you may have seen in the GriefPrevention plugin.
-- WECui support. No dependence on WorldEdit.
+- [WECui](https://github.com/SawFowl/WorldEditCUI-Forge/releases/tag/1.19.4) support. No dependence on WorldEdit.
 - Players in regions can be assigned different roles.
 - Player limits are set via metadata in the permissions plugin.
 - Developers can use the plugin API to extend its functionality and use its functions in their plugins.
 - Optional Sponge economy support.
-- Supports working with MySQL and H2 databases.
-- Automatically load new and updated data from the MySql database.
+- Supports working with MySQL and H2(2.0+) databases.
+- Automatically load new and updated data from the MySql database. 2.0+.
 - Ability to regenerate territory when a region is removed.
 
 #### Commands:
@@ -46,6 +49,7 @@
 /rg limits set subdivisions <Player> <Volume> - Change the subdivisions limit of the player.
 /rg limits set members <Player> <Volume> - Changing the limit of members in the player regions.
 /rg updatedefaultflags - Setting default flags based on those available in the region at the player location.
+/rg clear - Clear the selection of the area.
 ```
 
 #### Region member types:
@@ -104,6 +108,7 @@ regionguard.staff.setlimit.subdivisions - Change the subdivisions limit of the p
 regionguard.staff.setlimit.members - Changing the limit of members in the player regions.
 regionguard.staff.adminclaim - Creation of subdivisions in admin regions.
 regionguard.staff.updatedefaultflags - Setting default flags based on those available in the region at the player location.
+regionguard.user.clear - Clear the selection of the area.
 ```
 #### Metaperms:
 ```yaml
@@ -139,9 +144,8 @@ lp group default meta set regionguard.limit.max.subdivisions 5
 lp group default meta set regionguard.limit.max.blocks 1000
 lp group default meta set regionguard.limit.max.members 5
 ```
-Starting with update 1.16.1 you need to set both variants of the limits. The same values are allowed. The first option indicates the base value of the limit by the player. The second indicates the maximum value. The first cannot be greater than the second. If the second is missing the player's limit will be 0.
+Starting with update 1.6.1 you need to set both variants of the limits. The same values are allowed. The first option indicates the base value of the limit by the player. The second indicates the maximum value. The first cannot be greater than the second. If the second is missing the player's limit will be 0.
 
-WECui forge version -> https://www.curseforge.com/minecraft/mc-mods/worldeditcui-forge-edition-3
 
 ### For developers:
 javadoc -> https://sawfowl.github.io/RegionGuard/
