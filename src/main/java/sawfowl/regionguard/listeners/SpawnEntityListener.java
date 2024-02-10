@@ -63,7 +63,7 @@ public class SpawnEntityListener {
 			allowSpawnItem = optSource.isPresent() ? isAllowItemSpawn(region, optSource.get(), items) : isAllowItemSpawn(region, null, items);
 		} else allowSpawnItem = false;
 		boolean allowSpawnEntity = spawnEntity && (optSource.isPresent() ? isAllowEntitySpawn(region, optSource.get(), event.entities(), spawnKey) : isAllowEntitySpawn(region, null, event.entities(), spawnKey));
-		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowSpawnEntity;
+		boolean allowSpawn = allowSpawnExp || allowSpawnItem || allowSpawnEntity || spawnType.equals(SpawnTypes.BLOCK_SPAWNING.get());
 		RegionSpawnEntityEvent rgEvent = new RegionSpawnEntityEvent() {
 
 			boolean cancelled;
