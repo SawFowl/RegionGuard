@@ -58,9 +58,9 @@ dependencies {
 	implementation "org.spongepowered:spongeapi:${api}"
 	implementation 'org.spongepowered:spongevanilla:1.19.4-10.0.0-RC1397:universal'
 	implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
-	//implementation "com.github.SawFowl:CommandPack:${commandpack}"
+	implementation "com.github.SawFowl:CommandPack:${commandpack}"
 	minecraft 'net.minecraftforge:forge:1.19.4-45.2.0'
-	implementation fileTree(dir: 'libs', include: '*.jar')
+	//implementation fileTree(dir: 'libs', include: '*.jar')
 }
 
 sponge {
