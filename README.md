@@ -172,6 +172,6 @@ repositories {
 }
 dependencies {
 	...
-	implementation 'com.github.SawFowl:RegionGuard:2.0'
+	implementation 'com.github.SawFowl:RegionGuard:2.1'
 }
 ```
