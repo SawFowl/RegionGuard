@@ -32,6 +32,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent.Pre;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
@@ -850,8 +851,9 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 
 	private boolean resizeOrCreateRegion(ServerPlayer player, Vector3i blockPosition, Region region) {
 		if(!plugin.playerPositionsExist(player)) plugin.addPlayerPositions(player, new PlayerPositions());
-		DataContainer container = player.itemInHand(HandTypes.MAIN_HAND.get()).toContainer();
-		if(!container.get(DataQuery.of("UnsafeData")).isPresent() || !container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) return false;
+		/*DataContainer container = player.itemInHand(HandTypes.MAIN_HAND.get()).toContainer();
+		if(!HandTypes.MAIN_HAND.get().toString().contains("WandItem")) return false;*/
+		if(!ItemTypes.registry().valueKey(player.itemInHand(HandTypes.MAIN_HAND.get()).type()).toString().equals(plugin.getConfig().getWanditem().getItemTypeAsString())) return false;
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			if(region.isAdmin() && !player.hasPermission(Permissions.STAFF_ADMINCLAIM)) player.sendMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.REGION_CREATE_EXCEPTION_ADMIN_CLAIM));
 			if(!region.isGlobal() && !region.getOwnerUUID().equals(player.uniqueId()) && !player.hasPermission(Permissions.STAFF_RESIZE)) player.sendMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.REGION_CREATE_EXCEPTION_POSITION_LOCKED));

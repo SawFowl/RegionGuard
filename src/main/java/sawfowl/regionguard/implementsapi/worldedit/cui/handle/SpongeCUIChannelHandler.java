@@ -9,7 +9,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.lifecycle.RegisterChannelEvent;
-import org.spongepowered.api.network.ServerPlayerConnection;
+import org.spongepowered.api.network.ServerConnectionState.Game;
 import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
@@ -21,7 +21,7 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.worldedit.CUIUser;
 import sawfowl.regionguard.implementsapi.worldedit.cui.handle.utils.SimpleLifecycled;
 
-public class SpongeCUIChannelHandler implements RawPlayDataHandler<ServerPlayerConnection>{
+public class SpongeCUIChannelHandler implements RawPlayDataHandler<Game>{
 
 	public static final ResourceKey CUI_PLUGIN_CHANNEL = ResourceKey.of("worldedit", "cui");
 	private static final SimpleLifecycled<RawDataChannel> CHANNEL = SimpleLifecycled.invalid();
@@ -37,7 +37,7 @@ public class SpongeCUIChannelHandler implements RawPlayDataHandler<ServerPlayerC
 		public void onChannelRegistration(RegisterChannelEvent event) {
 			Optional<Channel> cuiChanel = Sponge.channelManager().get(CUI_PLUGIN_CHANNEL);
 			RawDataChannel channel = cuiChanel.isPresent() && cuiChanel.get() instanceof RawDataChannel ? (RawDataChannel) cuiChanel.get() : event.register(CUI_PLUGIN_CHANNEL, RawDataChannel.class);
-			channel.play().addHandler(ServerPlayerConnection.class, new SpongeCUIChannelHandler());
+			channel.play().addHandler(Game.class, new SpongeCUIChannelHandler());
 			CHANNEL.newValue(channel);
 		}
 
@@ -52,7 +52,7 @@ public class SpongeCUIChannelHandler implements RawPlayDataHandler<ServerPlayerC
 		@Listener
 		public void onRecievePacket(RecievePacketEvent event) {
 			if(!event.isReadable() || !event.getPacketName().equals(CUI_PLUGIN_CHANNEL.asString())) return;
-			plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(event.getMixinPlayer()).handleCUIInitializationMessage(event.getDataAsString());
+			event.getMixinPlayer().ifPresent(player -> plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(event.getDataAsString()));
 		}
 
 	}
@@ -62,7 +62,7 @@ public class SpongeCUIChannelHandler implements RawPlayDataHandler<ServerPlayerC
 	}
 
 	@Override
-	public void handlePayload(ChannelBuf data, ServerPlayerConnection connection) {
+	public void handlePayload(ChannelBuf data, Game connection) {
 		ServerPlayer player = connection.player();
 		if(!player.hasPermission(Permissions.CUI_COMMAND)) return;
 		String packetData = new String(data.readBytes(data.available()), StandardCharsets.UTF_8);
