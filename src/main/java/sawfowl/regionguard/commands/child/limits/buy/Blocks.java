@@ -34,7 +34,7 @@ public class Blocks extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		long toBuy = getLong(args, 0).get();
+		long toBuy = getLong(args, cause, 0).get();
 		if(toBuy <= 0) exception(locale, LocalesPaths.COMMAND_BUYBLOCKS_EXCEPTION_ENTERED_ZERO);
 		if(plugin.getAPI().getLimitMaxBlocks(src) < toBuy + plugin.getAPI().getLimitBlocks(src)) {
 			long max = plugin.getAPI().getLimitMaxBlocks(src) - plugin.getAPI().getLimitBlocks(src);

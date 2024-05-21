@@ -33,8 +33,8 @@ public class Subdivisions extends AbstractCommand {
 	@Override
 	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
 		String sourceName = isPlayer ? ((ServerPlayer) audience).name() : "Server";
-		ServerPlayer target = getPlayer(args, 0).get();
-		long toSet = getLong(args, 1).get();
+		ServerPlayer target = getPlayer(args, cause, 0).get();
+		long toSet = getLong(args, cause, 1).get();
 		if(toSet < 0) exception(locale, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_LESS_THEN_ZERO);
 		plugin.getAPI().setLimitSubdivisions(target, toSet);
 		audience.sendMessage(getText(locale, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_SOURCE).replace(new String[] {Placeholders.SIZE, Placeholders.PLAYER}, toSet, target.name()).get());

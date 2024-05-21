@@ -30,7 +30,7 @@ public class SetCreatingType extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		switch (RegionTypes.valueOfName(getString(args, 0).get())) {
+		switch (RegionTypes.valueOfName(getString(args, cause, 0).get())) {
 		case ARENA: {
 			plugin.getAPI().setCreatingRegionType(src, RegionTypes.ARENA);
 			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_REGION_TYPE_ARENA));

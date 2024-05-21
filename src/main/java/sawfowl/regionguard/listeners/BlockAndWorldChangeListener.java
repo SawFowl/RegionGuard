@@ -851,8 +851,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 
 	private boolean resizeOrCreateRegion(ServerPlayer player, Vector3i blockPosition, Region region) {
 		if(!plugin.playerPositionsExist(player)) plugin.addPlayerPositions(player, new PlayerPositions());
-		/*DataContainer container = player.itemInHand(HandTypes.MAIN_HAND.get()).toContainer();
-		if(!HandTypes.MAIN_HAND.get().toString().contains("WandItem")) return false;*/
+		// if(!player.itemInHand(HandTypes.MAIN_HAND.get()).toContainer().get(DataQuery.of("components")).filter(data -> data.toString().contains("WandItem")).isPresent()) return false;
 		if(!ItemTypes.registry().valueKey(player.itemInHand(HandTypes.MAIN_HAND.get()).type()).toString().equals(plugin.getConfig().getWanditem().getItemTypeAsString())) return false;
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			if(region.isAdmin() && !player.hasPermission(Permissions.STAFF_ADMINCLAIM)) player.sendMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.REGION_CREATE_EXCEPTION_ADMIN_CLAIM));

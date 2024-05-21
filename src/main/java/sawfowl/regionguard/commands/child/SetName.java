@@ -44,8 +44,8 @@ public class SetName extends AbstractPlayerCommand {
 			if(!region.isTrusted(src)) exception(srcLocale, LocalesPaths.COMMAND_SET_NAME_NOT_TRUSTED);
 			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(srcLocale, LocalesPaths.COMMAND_SET_NAME_LOW_TRUST);
 		}
-		Locale locale = getString(args, 0).isPresent() ? locales.get(getString(args, 0).get()) : srcLocale;
-		boolean clearFlag = getString(args, 1).isPresent();
+		Locale locale = getString(args, cause, 0).isPresent() ? locales.get(getString(args, cause, 0).get()) : srcLocale;
+		boolean clearFlag = getString(args, cause, 1).isPresent();
 		if(clearFlag) {
 			region.setName(null, locale);
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
@@ -94,7 +94,7 @@ public class SetName extends AbstractPlayerCommand {
 				Component.class,
 				CommandTreeNodeTypes.STRING.get().createNode().greedy(),
 				(cause, args) -> Stream.empty(),
-				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, getString(args, 0).orElse("")))) : null),
+				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, getString(args, cause, 0).orElse("")))) : null),
 				"Message",
 				false,
 				false,

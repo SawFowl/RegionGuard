@@ -39,7 +39,7 @@ public class Members extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		long toBuy = getLong(args, 0).get();
+		long toBuy = getLong(args, cause, 0).get();
 		if(toBuy <= 0) exception(locale, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_ENTERED_ZERO);
 		if(plugin.getAPI().getLimitMaxMembers(src) < toBuy + plugin.getAPI().getLimitMembers(src)) {
 			long max = plugin.getAPI().getLimitMaxMembers(src) - plugin.getAPI().getLimitMembers(src);

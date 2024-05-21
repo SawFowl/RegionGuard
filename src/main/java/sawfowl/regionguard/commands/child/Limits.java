@@ -40,7 +40,7 @@ public class Limits extends AbstractCommand {
 
 	@Override
 	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
-		ServerPlayer player = getPlayer(args, 0).filter(p -> cause.hasPermission(Permissions.STAFF_LIMITS)).orElse(isPlayer ? (ServerPlayer) audience : null);
+		ServerPlayer player = getPlayer(args, cause, 0).filter(p -> cause.hasPermission(Permissions.STAFF_LIMITS)).orElse(isPlayer ? (ServerPlayer) audience : null);
 		if(!isPlayer && player == null) {
 			sendPaginationList(audience, getComponent(locale, LocalesPaths.COMMANDS_TITLE), getComponent(locale, LocalesPaths.PADDING), 10, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList());
 			return;

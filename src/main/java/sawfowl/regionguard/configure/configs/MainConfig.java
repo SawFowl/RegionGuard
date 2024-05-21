@@ -51,7 +51,7 @@ public class MainConfig {
 	private MySQLConfig mySQLConfig = new MySQLConfig();
 
 	@Setting("WandItem")
-	private SerializedItemStackJsonNbt wanditem = new SerializedItemStackJsonNbt("minecraft:stone_axe", 1, JsonParser.parseString("{\"Damage\":131}").getAsJsonObject());
+	private SerializedItemStackJsonNbt wanditem = new SerializedItemStackJsonNbt("minecraft:stone_axe", 1, JsonParser.parseString("{\"minecraft\":{\"damage\":131}}").getAsJsonObject());
 
 	@Setting("RegisterForgeListeners")
 	@Comment("Sometimes Sponge does not intercept Forge events. Enabling this option may fix the problem.\nIf the territory protection does not work at any action, please report it to the plugin developer's Discord server - https://discord.gg/4SMShjQ3Pe\nIn some cases, modifications to the mod code may be required.")

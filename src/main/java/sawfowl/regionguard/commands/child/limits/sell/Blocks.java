@@ -35,7 +35,7 @@ public class Blocks extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		long toSell = getLong(args, 0).get();
+		long toSell = getLong(args, cause, 0).get();
 		if(toSell <= 0) exception(locale, LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_ENTERED_ZERO);
 		if(!plugin.getAPI().getPlayerData(src).isPresent()) plugin.getAPI().setPlayerData(src, PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(src), plugin.getAPI().getClaimedRegions(src))));
 		if(plugin.getAPI().getPlayerData(src).get().getLimits().getBlocks() < toSell) exception(locale, LocalesPaths.COMMAND_SELLBLOCKS_EXCEPTION_TO_MUCH_VOLUME, new String[] {Placeholders.MAX}, plugin.getAPI().getPlayerData(src).get().getLimits().getBlocks());

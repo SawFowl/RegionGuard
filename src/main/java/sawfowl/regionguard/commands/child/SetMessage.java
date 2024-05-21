@@ -46,10 +46,10 @@ public class SetMessage extends AbstractPlayerCommand {
 			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_LOW_TRUST);
 		}
 		if(args.length == 0) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_PRESENT);
-		boolean clearFlag = getString(args, 2).isPresent();
-		boolean exit = getString(args, 1).filter(string -> string.equals("-e") || string.equals("-exit")).isPresent();
-		boolean join = getString(args, 1).filter(string -> string.equals("-j") || string.equals("-join")).isPresent() || !exit;
-		Locale locale = getString(args, 0).isPresent() ? locales.get(getString(args, 0).get()) : srcLocale;
+		boolean clearFlag = getString(args, cause, 2).isPresent();
+		boolean exit = getString(args, cause, 1).filter(string -> string.equals("-e") || string.equals("-exit")).isPresent();
+		boolean join = getString(args, cause, 1).filter(string -> string.equals("-j") || string.equals("-join")).isPresent() || !exit;
+		Locale locale = getString(args, cause, 0).isPresent() ? locales.get(getString(args, cause, 0).get()) : srcLocale;
 		if(clearFlag) {
 			if(join) {
 				region.setJoinMessage(null, locale);
@@ -116,7 +116,7 @@ public class SetMessage extends AbstractPlayerCommand {
 				Component.class,
 				CommandTreeNodeTypes.STRING.get().createNode().greedy(),
 				(cause, args) -> Stream.empty(),
-				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, getString(args, 0).orElse(""), getString(args, 1).orElse("")))) : null),
+				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, getString(args, cause, 0).orElse(""), getString(args, cause, 1).orElse("")))) : null),
 				"Message",
 				false,
 				false,

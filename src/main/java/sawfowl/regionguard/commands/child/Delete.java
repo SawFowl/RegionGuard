@@ -40,7 +40,7 @@ public class Delete extends AbstractPlayerCommand {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
 		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
 		if(!region.getOwnerUUID().equals(src.uniqueId()) && !src.hasPermission(Permissions.STAFF_DELETE)) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_OWNER);
-		boolean regen = !region.getParrent().isPresent() && (src.hasPermission(Permissions.STAFF_DELETE) ? (getString(args, 0).isPresent()) && plugin.getConfig().getRegenerateTerritory().isStaff() : plugin.getConfig().getRegenerateTerritory().isAllPlayers());
+		boolean regen = !region.getParrent().isPresent() && (src.hasPermission(Permissions.STAFF_DELETE) ? (getString(args, cause, 0).isPresent()) && plugin.getConfig().getRegenerateTerritory().isStaff() : plugin.getConfig().getRegenerateTerritory().isAllPlayers());
 		if(regen) src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_REGEN));
 		src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(messageCause -> {
 			if(region.getParrent().isPresent()) {
