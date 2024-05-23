@@ -13,6 +13,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
@@ -27,7 +28,7 @@ public class Wand extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
+	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		if(src.inventory().contains(plugin.getAPI().getWandItem())) exception(locale, LocalesPaths.COMMAND_WAND_EXCEPTION_ITEM_EXIST);
 		if(src.inventory().freeCapacity() == 0) exception(locale, LocalesPaths.COMMAND_WAND_EXCEPTION_INVENTORY_IS_FULL);
 		src.inventory().offer(plugin.getAPI().getWandItem());

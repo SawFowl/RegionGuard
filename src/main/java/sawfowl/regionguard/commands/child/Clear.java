@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -25,7 +26,7 @@ public class Clear extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer player, Locale locale, String[] args, Mutable mutable) throws CommandException {
+	public void process(CommandCause cause, ServerPlayer player, Locale locale, Mutable mutable, RawArgumentsMap args) throws CommandException {
 		plugin.removePlayerPositions(player);
 		plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
 		plugin.getAPI().getTempRegion(player.uniqueId()).ifPresent(temp -> {

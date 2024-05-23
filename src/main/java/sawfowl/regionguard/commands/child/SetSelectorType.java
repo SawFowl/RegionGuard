@@ -17,6 +17,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -31,8 +32,8 @@ public class SetSelectorType extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		switch (getArgument(SelectorTypes.class, cause, args, 0).get()) {
+	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
+		switch (args.get(SelectorTypes.class, 0).get()) {
 		case CUBOID: {
 			plugin.getAPI().setSelectorType(src, SelectorTypes.CUBOID);
 			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_SELECTOR_CUBOID));

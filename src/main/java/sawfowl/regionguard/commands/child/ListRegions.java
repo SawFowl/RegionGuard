@@ -36,6 +36,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -59,8 +60,8 @@ public class ListRegions extends AbstractCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
-		Optional<GameProfile> optProfile = getArgument(GameProfile.class, cause, args, 0);
+	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, Mutable arguments, RawArgumentsMap args) throws CommandException {
+		Optional<GameProfile> optProfile = args.get(GameProfile.class, 0);
 		if(!isPlayer && !optProfile.isPresent()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT);
 		List<Region> regions = optProfile.isPresent() ? plugin.getAPI().getPlayerRegions(optProfile.get().uniqueId()) : plugin.getAPI().getPlayerRegions((ServerPlayer) audience);
 		if(regions.size() == 0) exception(optProfile.isPresent() ? getComponent(locale, LocalesPaths.COMMAND_LIST_EXCEPTION_EMPTY_OTHER) : getComponent(locale, LocalesPaths.COMMAND_LIST_EXCEPTION_EMPTY_SELF));

@@ -17,6 +17,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -39,8 +40,8 @@ public class Limits extends AbstractCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
-		ServerPlayer player = getPlayer(args, cause, 0).filter(p -> cause.hasPermission(Permissions.STAFF_LIMITS)).orElse(isPlayer ? (ServerPlayer) audience : null);
+	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, Mutable arguments, RawArgumentsMap args) throws CommandException {
+		ServerPlayer player = args.getPlayer(0).filter(p -> cause.hasPermission(Permissions.STAFF_LIMITS)).orElse(isPlayer ? (ServerPlayer) audience : null);
 		if(!isPlayer && player == null) {
 			sendPaginationList(audience, getComponent(locale, LocalesPaths.COMMANDS_TITLE), getComponent(locale, LocalesPaths.PADDING), 10, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList());
 			return;

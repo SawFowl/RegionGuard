@@ -21,6 +21,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -37,21 +38,21 @@ public class SetName extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer src, Locale srcLocale, String[] args, Mutable arguments) throws CommandException {
+	public void process(CommandCause cause, ServerPlayer src, Locale srcLocale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
 		if(region.isGlobal()) exception(srcLocale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
 		if(!src.hasPermission(Permissions.STAFF_SET_NAME)) {
 			if(!region.isTrusted(src)) exception(srcLocale, LocalesPaths.COMMAND_SET_NAME_NOT_TRUSTED);
 			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(srcLocale, LocalesPaths.COMMAND_SET_NAME_LOW_TRUST);
 		}
-		Locale locale = getString(args, cause, 0).isPresent() ? locales.get(getString(args, cause, 0).get()) : srcLocale;
-		boolean clearFlag = getString(args, cause, 1).isPresent();
+		Locale locale = args.getString(0).isPresent() ? locales.get(args.getString(0).get()) : srcLocale;
+		boolean clearFlag = args.getString(1).isPresent();
 		if(clearFlag) {
 			region.setName(null, locale);
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
 			src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_NAME_CLEARED));
 		} else {
-			Component newName = getArgument(Component.class, cause, args, 2).get();
+			Component newName = args.get(Component.class, 2).get();
 			if(TextUtils.clearDecorations(newName).length() > 20) exception(srcLocale, LocalesPaths.COMMAND_SET_NAME_TOO_LONG);
 			region.setName(newName, locale);
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
@@ -94,7 +95,7 @@ public class SetName extends AbstractPlayerCommand {
 				Component.class,
 				CommandTreeNodeTypes.STRING.get().createNode().greedy(),
 				(cause, args) -> Stream.empty(),
-				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, getString(args, cause, 0).orElse("")))) : null),
+				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, locales.containsKey(args[0]) ? args[0] : ""))) : null),
 				"Message",
 				false,
 				false,

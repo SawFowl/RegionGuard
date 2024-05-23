@@ -22,6 +22,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -40,17 +41,17 @@ public class Flag extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
+	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		Optional<FlagConfig> optFlag = getArgument(FlagConfig.class, cause, args, 0);
+		Optional<FlagConfig> optFlag = args.get(FlagConfig.class, 0);
 		if(!optFlag.isPresent()) {
 			sendPaginationList(src, getComponent(locale, LocalesPaths.COMMAND_FLAG_LIST), getComponent(locale, LocalesPaths.PADDING), 10, getFlagList(src, region));
 			return;
 		} else {
 			FlagConfig flag = optFlag.get();
-			Boolean value = getBoolean(args, cause, 1).orElse(false);
-			String source = getString(args, cause, 2).orElse("all");
-			String target = getString(args, cause, 3).orElse("all");
+			Boolean value = args.getBoolean(1).orElse(false);
+			String source = args.getString(2).orElse("all");
+			String target = args.getString(3).orElse("all");
 			setFlag(region, flag.getName(), value, source, target);
 			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_FLAG_SUCCESS));
 		}
@@ -100,7 +101,7 @@ public class Flag extends AbstractPlayerCommand {
 				Boolean.class,
 				CommandTreeNodeTypes.BOOL.get().createNode(),
 				(cause, args) -> values.stream(),
-				(cause, args) -> args.length < 2 || !getArgument(FlagConfig.class, cause, args, 0).isPresent() ? Optional.empty() : Optional.ofNullable(BooleanUtils.toBooleanObject(args[1])),
+				(cause, args) -> args.length < 2 || !plugin.getAPI().getRegisteredFlags().containsKey(args[0]) ? Optional.empty() : Optional.ofNullable(BooleanUtils.toBooleanObject(args[1])),
 				"Value",
 				true,
 				true,
@@ -110,8 +111,8 @@ public class Flag extends AbstractPlayerCommand {
 			RawArgument.of(
 				String.class,
 				CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(),
-				(cause, args) -> getArgument(FlagConfig.class, cause, args, 0).map(config -> config.getSettings().getSources()).orElse(Stream.of("all")),
-				(cause, args) -> args.length < 3 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, cause, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
+				(cause, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getSources()).orElse(Stream.of("all")),
+				(cause, args) -> args.length < 3 ? Optional.ofNullable("all") : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
 				"Source",
 				true,
 				true,
@@ -122,8 +123,8 @@ public class Flag extends AbstractPlayerCommand {
 			RawArgument.of(
 				String.class,
 				CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(),
-				(cause, args) -> getArgument(FlagConfig.class, cause, args, 0).map(config -> config.getSettings().getTargets()).orElse(Stream.of("all")),
-				(cause, args) -> args.length < 4 ? Optional.ofNullable("all") : getArgument(FlagConfig.class, cause, args, 0).filter(config -> config.getSettings().isAllowArgs()).map(config -> config.getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
+				(cause, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getTargets()).orElse(Stream.of("all")),
+				(cause, args) -> args.length < 4 ? Optional.ofNullable("all") : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
 				"Target",
 				true,
 				true,

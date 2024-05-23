@@ -21,6 +21,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -38,18 +39,18 @@ public class SetMessage extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer src, Locale srcLocale, String[] args, Mutable arguments) throws CommandException {
+	public void process(CommandCause cause, ServerPlayer src, Locale srcLocale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
 		if(region.isGlobal()) exception(srcLocale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
 		if(!src.hasPermission(Permissions.STAFF_SET_MESSAGE)) {
 			if(!region.isTrusted(src)) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_TRUSTED);
 			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_LOW_TRUST);
 		}
-		if(args.length == 0) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_PRESENT);
-		boolean clearFlag = getString(args, cause, 2).isPresent();
-		boolean exit = getString(args, cause, 1).filter(string -> string.equals("-e") || string.equals("-exit")).isPresent();
-		boolean join = getString(args, cause, 1).filter(string -> string.equals("-j") || string.equals("-join")).isPresent() || !exit;
-		Locale locale = getString(args, cause, 0).isPresent() ? locales.get(getString(args, cause, 0).get()) : srcLocale;
+		if(args.getInput().length == 0) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_PRESENT);
+		boolean clearFlag = args.getString(2).isPresent();
+		boolean exit = args.getString(1).filter(string -> string.equals("-e") || string.equals("-exit")).isPresent();
+		boolean join = args.getString(1).filter(string -> string.equals("-j") || string.equals("-join")).isPresent() || !exit;
+		Locale locale = args.getString(0).isPresent() ? locales.get(args.getString(0).get()) : srcLocale;
 		if(clearFlag) {
 			if(join) {
 				region.setJoinMessage(null, locale);
@@ -63,7 +64,7 @@ public class SetMessage extends AbstractPlayerCommand {
 				exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT);
 			}
 		} else {
-			Component message = getArgument(Component.class, cause, args, 3).get();
+			Component message = args.get(Component.class, 3).get();
 			if(TextUtils.clearDecorations(message).length() > 50) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TOO_LONG);
 			if(join) {
 				region.setJoinMessage(message, locale);
@@ -116,7 +117,7 @@ public class SetMessage extends AbstractPlayerCommand {
 				Component.class,
 				CommandTreeNodeTypes.STRING.get().createNode().greedy(),
 				(cause, args) -> Stream.empty(),
-				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, getString(args, cause, 0).orElse(""), getString(args, cause, 1).orElse("")))) : null),
+				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, (locales.containsKey(args[0]) ? args[0] : ""), (flags.contains(args[1]) ? args[1] : "")))) : null),
 				"Message",
 				false,
 				false,

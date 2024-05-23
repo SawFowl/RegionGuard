@@ -18,6 +18,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -34,14 +35,14 @@ public class Trust extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
+	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
 		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
 		if(region.isAdmin()) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_ADMINCLAIM);
 		if((!region.isCurrentTrustType(src, TrustTypes.OWNER) && !region.isCurrentTrustType(src, TrustTypes.MANAGER)) && !src.hasPermission(Permissions.STAFF_TRUST)) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_NEED_TRUST_TYPE);
-		GameProfile trustedPlayer = getArgument(GameProfile.class, cause, args, 0).get();
+		GameProfile trustedPlayer = args.get(GameProfile.class, 0).get();
 		if(!src.hasPermission(Permissions.UNLIMIT_MEMBERS) && plugin.getAPI().getLimitMembers(region.getOwnerUUID()) <= region.getTotalMembers() - 1 && !region.getMemberData(trustedPlayer.uniqueId()).isPresent()) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_LIMIT_REACHED);
-		TrustTypes trustLevel = getArgument(TrustTypes.class, cause, args, 1).get();
+		TrustTypes trustLevel = args.get(TrustTypes.class, 1).get();
 		if((src.uniqueId().equals(trustedPlayer.uniqueId()) && !src.hasPermission(Permissions.STAFF_TRUST)) || (src.uniqueId().equals(trustedPlayer.uniqueId()) && region.isCurrentTrustType(src, TrustTypes.OWNER))) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_TARGET_SELF);
 		if(!region.isCurrentTrustType(src, TrustTypes.OWNER) && trustLevel == TrustTypes.MANAGER) exception(locale, LocalesPaths.COMMAND_TRUST_EXCEPTION_PLAYER_IS_NOT_OWNER);
 		region.setTrustType(trustedPlayer, trustLevel);

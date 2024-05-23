@@ -20,6 +20,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -36,11 +37,11 @@ public class SetOwner extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
+	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition()).getPrimaryParent();
 		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
 		if(region.isAdmin() && src.hasPermission(Permissions.STAFF_TRUST)) exception(locale, LocalesPaths.COMMAND_SETOWNER_EXCEPTION_ADMIN);
-		GameProfile newOwner = getArgument(GameProfile.class, cause, args, 0).get();
+		GameProfile newOwner = args.get(GameProfile.class, 0).get();
 		if(src.uniqueId().equals(newOwner.uniqueId()) && region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(locale, LocalesPaths.COMMAND_SETOWNER_EXCEPTION_OWNER_TARGET_SELF);
 		if(src.hasPermission(Permissions.STAFF_TRUST)) {
 			if(region.getOwnerUUID().equals(newOwner.uniqueId())) exception(locale, LocalesPaths.COMMAND_SETOWNER_EXCEPTION_STAFF_TARGET_OWNER, Placeholders.PLAYER, newOwner.name().orElse(newOwner.examinableName()));

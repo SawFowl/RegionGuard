@@ -17,6 +17,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -31,10 +32,10 @@ public class Blocks extends AbstractCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, String[] args, Mutable arguments) throws CommandException {
+	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		String sourceName = isPlayer ? ((ServerPlayer) audience).name() : "Server";
-		ServerPlayer target = getPlayer(args, cause, 0).get();
-		long toSet = getLong(args, cause, 1).get();
+		ServerPlayer target = args.getPlayer(0).get();
+		long toSet = args.getLong(1).get();
 		if(toSet < 0) exception(locale, LocalesPaths.COMMAND_SETLIMITBLOCKS_EXCEPTION_LESS_THEN_ZERO);
 		plugin.getAPI().setLimitBlocks(target, toSet);
 		audience.sendMessage(getText(locale, LocalesPaths.COMMAND_SETLIMITBLOCKS_SUCCESS_SOURCE).replace(new String[] {Placeholders.SIZE, Placeholders.PLAYER}, toSet, target.name()).get());

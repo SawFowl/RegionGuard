@@ -18,6 +18,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -38,8 +39,8 @@ public class Members extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public void process(CommandCause cause, ServerPlayer src, Locale locale, String[] args, Mutable arguments) throws CommandException {
-		long toBuy = getLong(args, cause, 0).get();
+	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
+		long toBuy = args.getLong(0).get();
 		if(toBuy <= 0) exception(locale, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_ENTERED_ZERO);
 		if(plugin.getAPI().getLimitMaxMembers(src) < toBuy + plugin.getAPI().getLimitMembers(src)) {
 			long max = plugin.getAPI().getLimitMaxMembers(src) - plugin.getAPI().getLimitMembers(src);
