@@ -44,11 +44,11 @@ public class ForgeExplosionListener extends ForgeListener {
 		if(event.isCanceled()) return;
 		Explosion explosion = event.getExplosion();
 		ResourceKey worldKey = ResourceKey.resolve(event.getLevel().dimension().location().toString());
-		Vector3i position = Vector3i.from((int) explosion.getPosition().x, (int) explosion.getPosition().y, (int) explosion.getPosition().z);
+		Vector3i position = Vector3i.from((int) explosion.center().x, (int) explosion.center().y, (int) explosion.center().z);
 		Region region = plugin.getAPI().findRegion(worldKey, position);
 		List<String> sources = new ArrayList<String>();
 		if(explosion.getDirectSourceEntity() != null) sources.addAll(flagEntityArgs(explosion.getDirectSourceEntity()));
-		if(explosion.getExploder() != null) sources.addAll(flagEntityArgs(explosion.getExploder()));
+		if(explosion.getIndirectSourceEntity() != null) sources.addAll(flagEntityArgs(explosion.getIndirectSourceEntity()));
 		boolean allow = isAllowExplosion(region, sources, region.getWorld().get().block(position));
 		List<BlockTransaction> transactions = new ArrayList<BlockTransaction>();
 		RegionExplosionEvent.Surface rgEvent = new RegionExplosionEvent.Surface() {

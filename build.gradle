@@ -9,7 +9,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.+', changing: true
 	}
 }
 
@@ -26,11 +26,11 @@ apply plugin: 'net.minecraftforge.gradle'
 group = "sawfowl.regionguard"
 version = "${major}.${minor}.${patch}-${api}-${suffix}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 compileJava.options.compilerArgs << "-Xmaxerrs" << "9999"
 
 minecraft {
-	mappings channel: 'official', version: '1.19.4'
+	mappings channel: 'official', version: "${minecraft}"
 }
 
 repositories {
@@ -56,11 +56,11 @@ tasks.withType(JavaCompile) {
 
 dependencies {
 	implementation "org.spongepowered:spongeapi:${api}"
-	implementation 'org.spongepowered:spongevanilla:1.19.4-10.0.0-RC1397:universal'
-	implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
-	implementation "com.github.SawFowl:CommandPack:${commandpack}"
-	minecraft 'net.minecraftforge:forge:1.19.4-45.2.0'
-	//implementation fileTree(dir: 'libs', include: '*.jar')
+	implementation "org.spongepowered:spongevanilla:1.20.6-11.0.0-RC1607:universal"
+	//implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
+	//implementation "com.github.SawFowl:CommandPack:${commandpack}"
+	minecraft "net.minecraftforge:forge:${minecraft}-${forge}"
+	implementation fileTree(dir: 'libs', include: '*.jar')
 }
 
 sponge {
