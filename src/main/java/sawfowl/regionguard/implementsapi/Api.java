@@ -483,7 +483,7 @@ public class Api implements RegionAPI {
 
 	private ItemStack setNBT(ItemStack itemStack) {
 		SerializedItemStackPlainNBT serializedItemStack = new SerializedItemStackPlainNBT(itemStack);
-		serializedItemStack.getOrCreateTag().putObject(plugin.getPluginContainer(), "WandItem", 1);
+		serializedItemStack.getOrCreateComponent().putObject(plugin.getPluginContainer(), "WandItem", 1);
 		return serializedItemStack.getItemStack();
 	}
 
