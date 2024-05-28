@@ -122,7 +122,7 @@ public class Flag extends AbstractPlayerCommand {
 				true,
 				2,
 				null,
-				new Integer[] {1},
+				new Integer[] {0, 1},
 				null,
 				LocalesPaths.COMMAND_FLAG_WRONG_SOURCE
 			),
@@ -136,7 +136,7 @@ public class Flag extends AbstractPlayerCommand {
 				true,
 				3,
 				null,
-				new Integer[] {1},
+				new Integer[] {0, 1, 2},
 				null,
 				LocalesPaths.COMMAND_FLAG_WRONG_TARGET
 			)
