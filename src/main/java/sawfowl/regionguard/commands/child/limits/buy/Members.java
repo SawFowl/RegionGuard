@@ -84,7 +84,7 @@ public class Members extends AbstractPlayerCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		return Arrays.asList(
-				RawArguments.createLongArgument("Value", new ArrayList<Long>(), false, false, 0, null, null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_NOT_PRESENT)
+				RawArguments.createLongArgument("Value", new ArrayList<Long>(), false, false, 0, null, null, null, null, LocalesPaths.COMMAND_BUYMEMBERS_EXCEPTION_NOT_PRESENT)
 		);
 	}
 

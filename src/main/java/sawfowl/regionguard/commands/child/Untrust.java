@@ -92,6 +92,8 @@ public class Untrust extends AbstractPlayerCommand {
 				false,
 				0,
 				null,
+				null,
+				null,
 				LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT
 			)
 		);

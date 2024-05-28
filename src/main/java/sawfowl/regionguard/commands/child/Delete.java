@@ -171,7 +171,7 @@ public class Delete extends AbstractPlayerCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		if(regen == null) regen = Arrays.asList("-regen", "-r");
-		return Arrays.asList(RawArguments.createStringArgument("Regen", regen, true, true, 0, null, Permissions.STAFF_DELETE, null));
+		return Arrays.asList(RawArguments.createStringArgument("Regen", regen, true, true, 0, null, Permissions.STAFF_DELETE, null, null, null));
 	}
 
 }

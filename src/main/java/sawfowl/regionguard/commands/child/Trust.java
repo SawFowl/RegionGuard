@@ -91,6 +91,8 @@ public class Trust extends AbstractPlayerCommand {
 				false,
 				0,
 				null,
+				null,
+				null,
 				LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT
 			),
 			RawArgument.of(
@@ -102,6 +104,8 @@ public class Trust extends AbstractPlayerCommand {
 				false,
 				false,
 				0,
+				null,
+				null,
 				null,
 				LocalesPaths.COMMAND_TRUST_EXCEPTION_TRUST_TYPE_NOT_PRESENT
 			)

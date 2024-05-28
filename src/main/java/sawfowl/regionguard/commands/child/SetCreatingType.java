@@ -75,7 +75,7 @@ public class SetCreatingType extends AbstractPlayerCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
-		return Arrays.asList(RawArguments.createStringArgument("Type", Arrays.asList("admin", "arena", "claim"), false, false, 0, "claim", null, LocalesPaths.COMMAND_REGION_TYPE_EXCEPTION_NOT_PRESENT));
+		return Arrays.asList(RawArguments.createStringArgument("Type", Arrays.asList("admin", "arena", "claim"), false, false, 0, "claim", null, null, null, LocalesPaths.COMMAND_REGION_TYPE_EXCEPTION_NOT_PRESENT));
 	}
 
 }

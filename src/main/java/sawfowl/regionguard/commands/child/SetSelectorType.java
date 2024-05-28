@@ -83,6 +83,8 @@ public class SetSelectorType extends AbstractPlayerCommand {
 				false,
 				0,
 				null,
+				null,
+				null,
 				LocalesPaths.COMMAND_REGION_TYPE_EXCEPTION_NOT_PRESENT
 			)
 		);

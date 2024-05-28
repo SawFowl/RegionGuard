@@ -89,8 +89,8 @@ public class SetName extends AbstractPlayerCommand {
 	public List<RawArgument<?>> getArgs() {
 		if(locales == null) locales = plugin.getLocales().getLocaleService().getLocalesList().stream().collect(Collectors.toMap(locale -> locale.toLanguageTag(), locale -> locale));
 		return Arrays.asList(
-			RawArguments.createLocaleArgument(true, true, 0, null, null),
-			RawArguments.createStringArgument("Clear | Message", Arrays.asList("-c", "-clear"), true, true, 1, null, null, null),
+			RawArguments.createLocaleArgument(true, true, 0, null, null, null, null),
+			RawArguments.createStringArgument("Clear | Message", Arrays.asList("-c", "-clear"), true, true, 1, null, null, null, null, null),
 			RawArgument.of(
 				Component.class,
 				CommandTreeNodeTypes.STRING.get().createNode().greedy(),
@@ -100,6 +100,8 @@ public class SetName extends AbstractPlayerCommand {
 				false,
 				false,
 				2,
+				null,
+				null,
 				null,
 				LocalesPaths.COMMAND_SET_NAME_NOT_PRESENT
 			)

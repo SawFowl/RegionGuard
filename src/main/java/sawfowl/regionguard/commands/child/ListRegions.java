@@ -120,6 +120,8 @@ public class ListRegions extends AbstractCommand {
 				false,
 				0,
 				null,
+				null,
+				null,
 				LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT
 			)
 		);

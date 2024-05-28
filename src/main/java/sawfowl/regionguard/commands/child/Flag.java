@@ -95,6 +95,8 @@ public class Flag extends AbstractPlayerCommand {
 				true,
 				true,
 				0,
+				null,
+				null,
 				null
 			),
 			RawArgument.of(
@@ -106,17 +108,21 @@ public class Flag extends AbstractPlayerCommand {
 				true,
 				true,
 				1,
+				null,
+				new Integer[] {0},
 				null
 			),
 			RawArgument.of(
 				String.class,
 				CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(),
 				(cause, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getSources()).orElse(Stream.of("all")),
-				(cause, args) -> args.length < 3 ? Optional.ofNullable("all") : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
+				(cause, args) -> args.length < 3 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
 				"Source",
 				true,
 				true,
 				2,
+				null,
+				new Integer[] {1},
 				null,
 				LocalesPaths.COMMAND_FLAG_WRONG_SOURCE
 			),
@@ -124,11 +130,13 @@ public class Flag extends AbstractPlayerCommand {
 				String.class,
 				CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(),
 				(cause, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getTargets()).orElse(Stream.of("all")),
-				(cause, args) -> args.length < 4 ? Optional.ofNullable("all") : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
+				(cause, args) -> args.length < 4 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
 				"Target",
 				true,
 				true,
 				3,
+				null,
+				new Integer[] {1},
 				null,
 				LocalesPaths.COMMAND_FLAG_WRONG_TARGET
 			)

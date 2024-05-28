@@ -111,7 +111,7 @@ public class Limits extends AbstractCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
-		return Arrays.asList(RawArguments.createPlayerArgument(true, true, 0, null, LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT));
+		return Arrays.asList(RawArguments.createPlayerArgument(true, true, 0, null, null, null, LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT));
 	}
 
 	private String toString(Object object) {

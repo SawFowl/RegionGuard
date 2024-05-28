@@ -110,9 +110,9 @@ public class SetMessage extends AbstractPlayerCommand {
 		if(locales == null) locales = plugin.getLocales().getLocaleService().getLocalesList().stream().collect(Collectors.toMap(locale -> locale.toLanguageTag(), locale -> locale));
 		if(flags == null) flags = Arrays.asList("-j", "-join", "-e", "-exit");
 		return Arrays.asList(
-			RawArguments.createLocaleArgument(true, true, 0, null, null),
-			RawArguments.createStringArgument("MessageType", flags, true, true, 1, null, null, null),
-			RawArguments.createStringArgument("Clear | Message", Arrays.asList("-c", "-clear"), true, true, 2, null, null, null),
+			RawArguments.createLocaleArgument(true, true, 0, null, null, null, null),
+			RawArguments.createStringArgument("MessageType", flags, true, true, 1, null, null, null, null, null),
+			RawArguments.createStringArgument("Clear | Message", Arrays.asList("-c", "-clear"), true, true, 2, null, null, null, null, null),
 			RawArgument.of(
 				Component.class,
 				CommandTreeNodeTypes.STRING.get().createNode().greedy(),
@@ -122,6 +122,8 @@ public class SetMessage extends AbstractPlayerCommand {
 				false,
 				false,
 				3,
+				null,
+				null,
 				null,
 				LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT
 			)
