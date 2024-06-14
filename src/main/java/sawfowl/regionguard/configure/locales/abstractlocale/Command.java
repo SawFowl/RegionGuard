@@ -6,12 +6,19 @@ import org.spongepowered.math.vector.Vector3i;
 
 import net.kyori.adventure.text.Component;
 
+import sawfowl.localeapi.api.LocaleReference;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.data.Region;
 
-public interface Command {
+public interface Command extends LocaleReference {
 
-	interface Main extends Command {
+	interface CommandInfo extends LocaleReference {
+
+		Component getDescription();
+
+	}
+
+	interface Main extends CommandInfo {
 
 		Component getTitle();
 
@@ -19,31 +26,27 @@ public interface Command {
 
 	}
 
-	interface Claim extends Command {
+	interface Claim extends CommandInfo {
 
 		Component getRegionNotFound();
 
 		Component getWorldNotFound(String world);
 
-		Component getFail(Vector3i min, Vector3i max);
+		Component getIntersect(Vector3i min, Vector3i max);
 
 		Component getSuccess();
 
 	}
 
-	interface Clear extends Command {
+	interface Clear extends CommandInfo {
 
 		Component getSuccess();
 		
 	}
 
-	interface Delete extends Command {
+	interface Delete extends CommandInfo {
 
-		Component getRegionNotFound();
-
-		Component getNotOwner();
-
-		Component getContainsChild();
+		Component getConfirmRequest();
 
 		Component getSuccesRegen();
 
@@ -51,31 +54,61 @@ public interface Command {
 
 		Component getSuccesChild();
 
-		Component getSucces();
+		Component getSuccess();
 
 	}
 
-	interface Flag extends Command {
+	interface Flag extends CommandInfo {
+
+		interface Hover extends LocaleReference {
+
+			Component getRemove();
+
+			Component getTrue();
+
+			Component getFalse();
+
+			Component getSuggestArgs();
+
+			Component getHoverValues();
+
+		}
+
+		Hover getHover();
 
 		Component getTitle();
 
 		Component getPadding();
 
-		Component getSucces();
+		Component getNotPermitted();
+
+		Component getNotPermittedFlag();
+
+		Component getValueNotPresent();
+
+		Component getInvalidSource();
+
+		Component getInvalidTarget();
+
+		Component getSuccess();
 
 	}
 
-	interface Info extends Command {
+	interface Info extends CommandInfo {
 
-		Component getTitle();
+		interface Buttons extends LocaleReference {
+
+			Component getDelete();
+
+			Component getFlags();
+
+		}
+
+		Buttons getButtons();
+
+		Component getHeader();
 
 		Component getPadding();
-
-		Component getDeleteButton();
-
-		Component getDeleteConfirmRequest();
-
-		Component getFlags();
 
 		Component getUUID(Region region);
 
@@ -83,7 +116,7 @@ public interface Command {
 
 		Component getType(Region region);
 
-		Component getCreated(Region region);
+		Component getCreated(Component created);
 
 		Component getOwner(Region region);
 
@@ -99,9 +132,7 @@ public interface Command {
 
 	}
 
-	interface Leave extends Command {
-
-		Component getRegionNotFound();
+	interface Leave extends CommandInfo {
 
 		Component getOwner();
 
@@ -109,11 +140,63 @@ public interface Command {
 
 		Component getConfirmRequest();
 
-		Component getSucces();
+		Component getSuccess();
 
 	}
 
-	interface Limits extends Command {
+	interface Limits extends CommandInfo {
+
+		interface Buy extends CommandInfo {
+
+			interface Limit extends CommandInfo {
+
+				Component getSuccess(long size, long limit);
+
+			}
+
+			Limit getBlocksLimit();
+
+			Limit getClaimsLimit();
+
+			Limit getSubdivisionsLimit();
+
+			Limit getMembersLimit();
+
+		}
+
+		interface Sell extends Buy {}
+
+		interface Set extends CommandInfo {
+
+			interface Limit extends CommandInfo {
+
+				Component getSuccess(long limit);
+
+				Component getSuccessStaff(String player, long limit);
+
+			}
+
+			Limit getBlocksLimit();
+
+			Limit getClaimsLimit();
+
+			Limit getSubdivisionsLimit();
+
+			Limit getMembersLimit();
+
+			Component getLessThanZero();
+
+		}
+
+		Buy getBuy();
+
+		Sell getSell();
+
+		Set getSet();
+
+		Component getTitle(String player);
+
+		Component getPadding();
 
 		Component getClaims(long claimed, long limit, long max);
 
@@ -125,9 +208,9 @@ public interface Command {
 
 	}
 
-	interface List extends Command {
+	interface List extends CommandInfo {
 
-		Component getTitle();
+		Component getTitle(String player);
 
 		Component getPadding();
 
@@ -135,17 +218,17 @@ public interface Command {
 
 		Component getEmptySelf();
 
+		Component getTeleportNotSafe();
+
 	}
 
-	interface SetCreatingType extends Command {
+	interface SetCreatingType extends CommandInfo {
 
 		Component get(RegionTypes type);
 
 	}
 
-	interface SetMessage extends Command {
-
-		Component getRegionNotFound();
+	interface SetMessage extends CommandInfo {
 
 		Component getNotTrusted();
 
@@ -153,27 +236,23 @@ public interface Command {
 
 		Component getTooLong();
 
-		Component getSuccesJoin(boolean clear);
+		Component getSuccessJoin(boolean clear);
 
-		Component getSuccesExit(boolean clear);
+		Component getSuccessExit(boolean clear);
 
 	}
 
-	interface SetName extends Command {
-
-		Component getRegionNotFound();
+	interface SetName extends CommandInfo {
 
 		Component getNotTrusted();
 
 		Component getLowTrust();
 
-		Component getSucces(boolean clear);
+		Component getSuccess(boolean clear);
 
 	}
 
-	interface SetOwner extends Command {
-
-		Component getRegionNotFound();
+	interface SetOwner extends CommandInfo {
 
 		Component getOnlyOwner();
 
@@ -191,7 +270,7 @@ public interface Command {
 
 	}
 
-	interface SetSelectorType extends Command {
+	interface SetSelectorType extends CommandInfo {
 
 		Component getCuboid();
 
@@ -199,9 +278,7 @@ public interface Command {
 
 	}
 
-	interface Trust extends Command {
-
-		Component getRegionNotFound();
+	interface Trust extends CommandInfo {
 
 		Component getAdminClaim();
 
@@ -217,9 +294,7 @@ public interface Command {
 
 	}
 
-	interface Untrust extends Command {
-
-		Component getRegionNotFound();
+	interface Untrust extends CommandInfo {
 
 		Component getLowTrust();
 
@@ -233,13 +308,13 @@ public interface Command {
 
 	}
 
-	interface UpdateDefaultFlags extends Command {
+	interface UpdateDefaultFlags extends CommandInfo {
 
 		Component getSuccess(RegionTypes type);
 
 	}
 
-	interface Wand extends Command {
+	interface Wand extends CommandInfo {
 
 		Component getExist();
 
@@ -249,7 +324,7 @@ public interface Command {
 
 	}
 
-	interface WeCUI extends Command {
+	interface WeCUI extends CommandInfo {
 
 		Component getEnable();
 
@@ -286,7 +361,5 @@ public interface Command {
 	Wand getWand();
 
 	WeCUI getWeCUI();
-
-	Component getDescription();
 
 }
