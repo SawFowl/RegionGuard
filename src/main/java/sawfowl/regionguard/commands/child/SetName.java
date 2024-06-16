@@ -48,14 +48,14 @@ public class SetName extends AbstractPlayerCommand {
 			if(!region.isTrusted(src)) exception(getSetName(srcLocale).getNotTrusted());
 			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(getSetName(srcLocale).getLowTrust());
 		}
-		Locale locale = args.getString(0).isPresent() ? locales.get(args.getString(0).get()) : srcLocale;
+		Locale locale = args.<Locale>get(0).orElse(srcLocale);
 		boolean clearFlag = args.getString(1).isPresent();
 		if(clearFlag) {
 			region.setName(null, locale);
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
 			src.sendMessage(getSetName(locale).getSuccess(true));
 		} else {
-			Component newName = args.get(Component.class, 2).get();
+			Component newName = args.<Component>get(2).get();
 			if(TextUtils.clearDecorations(newName).length() > 20) exception(getSetName(locale).getTooLong());
 			region.setName(newName, locale);
 			plugin.getAPI().saveRegion(region.getPrimaryParent());
@@ -99,7 +99,7 @@ public class SetName extends AbstractPlayerCommand {
 				Component.class,
 				(cause, args) -> Stream.empty(),
 				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, locales.containsKey(args[0]) ? args[0] : ""))) : null),
-				new RawArgumentData<>("Name", CommandTreeNodeTypes.STRING.get().createNode().greedy(), 2, null, null),
+				new RawArgumentData<>("Name", CommandTreeNodeTypes.MESSAGE.get().createNode(), 2, null, null),
 				RawOptional.notOptional(),
 				locale -> getExceptions(locale).getNameNotPresent()
 			)

@@ -1053,7 +1053,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	private boolean getRegionInfo(ServerPlayer player, Region region) {
 		if(!plugin.playerPositionsExist(player)) plugin.addPlayerPositions(player, new PlayerPositions());
 		DataContainer container = player.itemInHand(HandTypes.MAIN_HAND.get()).toContainer();
-		if(!container.get(DataQuery.of("UnsafeData")).isPresent() || !container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) return false;
+		if(!container.get(DataQuery.of("components")).isPresent() || !container.get(DataQuery.of("components")).get().toString().contains("WandItem")) return false;
 		if(System.currentTimeMillis() - (getPositions(player).secondaryLastTime + 200) < 0) return true;
 		player.sendMessage(getEvents(player).getRegion().getWandInfo().getType(region));
 		player.sendMessage(getEvents(player).getRegion().getWandInfo().getOwner(region));

@@ -50,10 +50,10 @@ public class SetMessage extends AbstractPlayerCommand {
 			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(getSetMessage(srcLocale).getLowTrust());
 		}
 		if(args.getInput().length == 0) exception(getExceptions(srcLocale).getMessageNotPresent());
+		boolean exit = args.getString(0).filter(string -> string.equals("-e") || string.equals("-exit")).isPresent();
+		boolean join = args.getString(0).filter(string -> string.equals("-j") || string.equals("-join")).isPresent() || !exit;
+		Locale locale = args.<Locale>get(1).orElse(srcLocale);
 		boolean clearFlag = args.getString(2).isPresent();
-		boolean exit = args.getString(1).filter(string -> string.equals("-e") || string.equals("-exit")).isPresent();
-		boolean join = args.getString(1).filter(string -> string.equals("-j") || string.equals("-join")).isPresent() || !exit;
-		Locale locale = args.getString(0).isPresent() ? locales.get(args.getString(0).get()) : srcLocale;
 		if(clearFlag) {
 			if(join) {
 				region.setJoinMessage(null, locale);

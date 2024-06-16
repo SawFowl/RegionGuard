@@ -52,7 +52,6 @@ import com.google.gson.JsonParser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
-import sawfowl.localeapi.api.TextUtils;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.AdditionalData;
@@ -220,8 +219,7 @@ public class RegionImpl implements Region {
 
 	@Override
 	public Component getName(Locale locale) {
-		Optional<String> name = getPlainName(locale);
-		return name.isPresent() ? TextUtils.deserialize(name.get()) : Component.empty();
+		return names.containsKey(locale.toLanguageTag()) ? names.get(locale.toLanguageTag()) : names.containsKey(Locales.DEFAULT.toLanguageTag()) ? names.get(Locales.DEFAULT.toLanguageTag()) : names.values().stream().findFirst().orElse(Component.empty());
 	}
 
 	@Override
