@@ -16,7 +16,7 @@ public class ImplementSell implements Sell {
 	@Setting("Description")
 	private Component description = deserialize("&6Selling the limits for game currency.");
 	@Setting("Blocks")
-	private ImplementLimit blocks = new ImplementLimit("&6Selling the limit of blocks for game currency.", "&aYou have reduced your block limit by  &b" + Placeholders.SIZE + "&a. Your current blocks limit: &b" + Placeholders.VOLUME + "&a.");
+	private ImplementLimit blocks = new ImplementLimit("&6Selling the limit of blocks for game currency.", "&aYou have reduced your block limit by &b" + Placeholders.SIZE + "&a. Your current blocks limit: &b" + Placeholders.VOLUME + "&a.");
 	@Setting("Claims")
 	private ImplementLimit claims = new ImplementLimit("&6Selling the limit of claims for game currency.", "&aYou have reduced your claims limit by &b" + Placeholders.SIZE + "&a. Your current claims limit: &b" + Placeholders.VOLUME + "&a.");
 	@Setting("Subdivisions")

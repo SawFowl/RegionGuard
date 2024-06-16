@@ -19,16 +19,16 @@ public class DefaultFlags {
 
 	public DefaultFlags(){}
 
-	@Setting("ClaimFlags")
+	@Setting("Claim")
 	private Map<String, Set<FlagValue>> claimFlags = claimDefaultFlags();
 
-	@Setting("ArenaFlags")
+	@Setting("Arena")
 	private Map<String, Set<FlagValue>> arenaFlags = claimDefaultFlags();
 
-	@Setting("AdminFlags")
+	@Setting("Admin")
 	private Map<String, Set<FlagValue>> adminFlags = claimDefaultFlags();
 
-	@Setting("GlobalFlags")
+	@Setting("Global")
 	private Map<String, Set<FlagValue>> globalFlags = globalDefaultFlags();
 
 	private Consumer<DefaultFlags> save;

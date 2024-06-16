@@ -7,6 +7,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import sawfowl.regionguard.configure.locales.AbstractLocale;
 import sawfowl.regionguard.configure.locales.abstractlocale.Command;
+import sawfowl.regionguard.configure.locales.abstractlocale.Comments;
 import sawfowl.regionguard.configure.locales.abstractlocale.Economy;
 import sawfowl.regionguard.configure.locales.abstractlocale.Events;
 
@@ -21,6 +22,8 @@ public class ImplementLocale implements AbstractLocale {
 	private ImplementEconomy economy = new ImplementEconomy();
 	@Setting("Events")
 	private ImplementEvents events = new ImplementEvents();
+	@Setting("Comments")
+	private ImplementComments comments = new ImplementComments();
 	@Setting("TimeFormat")
 	private String timeFormat = "MM.dd.yyyy HH:mm:ss";
 	private SimpleDateFormat format;
@@ -43,6 +46,11 @@ public class ImplementLocale implements AbstractLocale {
 	@Override
 	public SimpleDateFormat getTimeFormat() {
 		return format == null ? format = new SimpleDateFormat(timeFormat) : format;
+	}
+
+	@Override
+	public Comments getComments() {
+		return comments;
 	}
 
 }

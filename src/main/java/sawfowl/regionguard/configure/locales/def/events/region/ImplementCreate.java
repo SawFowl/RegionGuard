@@ -24,7 +24,7 @@ public class ImplementCreate implements Create {
 	@Setting("LimitSubdivisions")
 	private Component limitSubdivisions = deserialize("&cYou have reached the limit of subdivisions in current region. Your limit: &b" + Placeholders.SIZE + "&c. Max subdivisions: &b" + Placeholders.MAX + "&c.");
 	@Setting("LimitBlocks")
-	private Component limitBlocks = deserialize("&cYou have chosen too large a volume: &b" + Placeholders.SELECTED + "&c. Select the smaller area to create the region. You can select &b" + Placeholders.MAX + " &clocks.");
+	private Component limitBlocks = deserialize("&cYou have chosen too large a volume: &b" + Placeholders.SELECTED + "&c. Select the smaller area to create the region. You can select &b" + Placeholders.MAX + " &cblocks.");
 	@Setting("SmallVolume")
 	private Component smallVolume = deserialize("&cThe volume selected is too small. To complete the operation, select an area larger than the current one by &b" + Placeholders.VOLUME + "&c.");
 	@Setting("IncorrectCords")

@@ -1,8 +1,9 @@
 package sawfowl.regionguard.configure.configs;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
+
+import sawfowl.localeapi.api.LocalisedComment;
 
 @ConfigSerializable
 public class MySQLConfig {
@@ -34,7 +35,7 @@ public class MySQLConfig {
 	private String ssl = "false";
 
 	@Setting("SyncInterval")
-	@Comment("Time between loading new and updated data from the database.\nSynchronization will not be performed if the value is less than 0.")
+	@LocalisedComment(path = {"Comments", "MainConfig", "SyncInterval"}, plugin = "regionguard")
 	private long syncInterval = 10;
 
 	public boolean isEnable() {

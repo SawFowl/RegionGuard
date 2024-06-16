@@ -17,7 +17,7 @@ public class ImplementWand implements Wand {
 	@Setting("Exist")
 	private Component exist = deserialize("&cYou already have a tool for creating regions and getting information about them.");
 	@Setting("FullInventory")
-	private Component fullInventory = deserialize("&cYou have no room in your inventory. Free up at least 1 slot.");
+	private Component fullInventory = deserialize("&cYou have no space in your inventory. Free up at least 1 slot.");
 	@Setting("Success")
 	private Component success = deserialize("&dLeft click to select two points in the world to create a region, then enter the command '/rg claim' in order to claim the region.\n&dThe child regions are added automatically.\n&dA right click on the block will display brief information about the region.");
 

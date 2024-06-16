@@ -15,7 +15,7 @@ public class ImplementSetCreatingType implements SetCreatingType {
 	public ImplementSetCreatingType() {}
 
 	@Setting("Description")
-	private Component description = TextUtils.deserialize("&6The main command of the RegionGuard plugin.");
+	private Component description = TextUtils.deserialize("&6Selection of the type of region to be created.");
 	@Setting("Basic")
 	private Component basic = TextUtils.deserialize("&dYou will now create basic regions.");
 	@Setting("Arena")

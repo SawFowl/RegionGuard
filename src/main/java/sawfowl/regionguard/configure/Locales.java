@@ -11,6 +11,7 @@ import sawfowl.localeapi.api.PluginLocale;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.configure.locales.AbstractLocale;
 import sawfowl.regionguard.configure.locales.def.ImplementLocale;
+import sawfowl.regionguard.configure.locales.ru.ImplementRuLocale;
 
 public class Locales {
 
@@ -19,8 +20,8 @@ public class Locales {
 	public Locales(LocaleService localeService) {
 		this.localeService = localeService;
 		localeService.localesExist(pluginid);
-		localeService.createPluginLocale(pluginid, ConfigTypes.JSON, org.spongepowered.api.util.locale.Locales.DEFAULT);
-		localeService.createPluginLocale(pluginid, ConfigTypes.JSON, org.spongepowered.api.util.locale.Locales.RU_RU);
+		localeService.createPluginLocale(pluginid, ConfigTypes.YAML, org.spongepowered.api.util.locale.Locales.DEFAULT);
+		localeService.createPluginLocale(pluginid, ConfigTypes.HOCON, org.spongepowered.api.util.locale.Locales.RU_RU);
 		localeService.setDefaultReference(RegionGuard.getInstance().getPluginContainer(), ImplementLocale.class);
 		generateDefault();
 		generateRu();
@@ -51,7 +52,14 @@ public class Locales {
 		}
 	}
 
-	private void generateRu() {}
+	private void generateRu() {
+		if(getPluginLocale(org.spongepowered.api.util.locale.Locales.RU_RU).getLocaleRootNode().empty()) try {
+			getPluginLocale(org.spongepowered.api.util.locale.Locales.RU_RU).setLocaleReference(ImplementRuLocale.class);
+			getPluginLocale(org.spongepowered.api.util.locale.Locales.RU_RU).saveLocaleNode();
+		} catch (ConfigurateException e) {
+			e.printStackTrace();
+		}
+	}
 /*
 	private PluginLocale getAbstractLocaleUtil(Locale locale) {
 		return localeService.getPluginLocales(pluginid).getOrDefault(locale, localeService.getPluginLocales(pluginid).get(org.spongepowered.api.util.locale.Locales.DEFAULT));

@@ -17,7 +17,7 @@ public class ImplementItem implements Item {
 	@Setting("Pickup")
 	private Component pickup = deserialize("&cYou cannot pick up items in the current region.");
 	@Setting("Interact")
-	private Component interact = deserialize("&cYou cannot use this item in the current region.");
+	private Component interact = deserialize("&cYou cannot interact with this item in the current region.");
 	@Setting("Use")
 	private Component use = deserialize("&cYou cannot use this item in the current region.");
 

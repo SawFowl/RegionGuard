@@ -32,7 +32,7 @@ public class ImplementSetOwner implements SetOwner {
 	@Setting("Success")
 	private Component success = deserialize("&aYou have appointed &b" + Placeholders.PLAYER + "&a as the new owner of a region in &b" + Placeholders.WORLD + "&a within the boundaries of &b" + Placeholders.MIN + " to &b" + Placeholders.MAX + "&a.");
 	@Setting("SuccessNewOwner")
-	private Component successNewOwner = deserialize("&b" + Placeholders.PLAYER + " &appoints you as the new owner of a region in the &b" + Placeholders.WORLD + "&a the boundaries from &b" + Placeholders.MIN + " to &b" + Placeholders.MAX + "&a.");
+	private Component successNewOwner = deserialize("&b" + Placeholders.PLAYER + " &apoints you as the new owner of a region in the &b" + Placeholders.WORLD + "&a the boundaries from &b" + Placeholders.MIN + " to &b" + Placeholders.MAX + "&a.");
 
 	@Override
 	public Component getDescription() {

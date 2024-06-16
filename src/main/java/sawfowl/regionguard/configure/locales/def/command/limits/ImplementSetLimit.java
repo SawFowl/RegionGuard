@@ -20,11 +20,11 @@ public class ImplementSetLimit implements Limit {
 	}
 
 	@Setting("Description")
-	private Component description = deserialize("&6Change the blocks limit of the player.");
+	private Component description = deserialize("&6Change the limit of the player.");
 	@Setting("Success")
-	private Component success = deserialize("&aYour block limit has been changed to: &b" + Placeholders.VOLUME + "&a.");
+	private Component success = deserialize("&aYour limit has been changed to: &b" + Placeholders.VOLUME + "&a.");
 	@Setting("SuccessStaff")
-	private Component successStaff = deserialize("&aYou have changed the block limit of player " + Placeholders.PLAYER + " to: &b" + Placeholders.VOLUME + "&a.");
+	private Component successStaff = deserialize("&aYou have changed the limit of player " + Placeholders.PLAYER + " to: &b" + Placeholders.VOLUME + "&a.");
 
 	@Override
 	public Component getDescription() {
