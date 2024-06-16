@@ -27,15 +27,12 @@ import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.world.RegionInteractItemEvent;
-import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
-public class InteractItemListener{
+public class InteractItemListener extends ManagementEvents {
 
-	private final RegionGuard plugin;
-	private Cause cause;
 	public InteractItemListener(RegionGuard plugin) {
-		this.plugin = plugin;
+		super(plugin);
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
@@ -126,7 +123,7 @@ public class InteractItemListener{
 			
 		};
 		rgEvent.setCancelled(!isAllow);
-		if(optPlayer.isPresent()) rgEvent.setMessage(liquidInteract ? plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.CANCEL_BREAK) : plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.INTERACT_ITEM));
+		if(optPlayer.isPresent()) rgEvent.setMessage(liquidInteract ? getEvents(optPlayer.get()).getBlock().getBreak() : getEvents(optPlayer.get()).getItem().getInteract());
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);

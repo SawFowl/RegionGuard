@@ -19,8 +19,6 @@ import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.Placeholders;
 
 public class Claim extends AbstractPlayerCommand {
 
@@ -31,19 +29,19 @@ public class Claim extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Optional<Region> optRegion = plugin.getAPI().getTempRegion(src.uniqueId());
-		if(!optRegion.isPresent()) exception(locale, LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND);
+		if(!optRegion.isPresent()) exception(getExceptions(locale).getRegionNotFound());
 		Region region = optRegion.get();
-		if(!region.getWorld().isPresent()) exception(locale, LocalesPaths.COMMAND_CLAIM_REGION_NOT_FOUND, new String[] {Placeholders.WORLD}, region.getWorldKey().toString());
+		if(!region.getWorld().isPresent()) exception(getCommand(locale).getClaim().getWorldNotFound(region.getWorldKey().asString()));
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			Region find = plugin.getAPI().findIntersectsRegion(region);
 			if(!plugin.getAPI().findIntersectsRegion(region).equals(region)) {
-				src.sendMessage(getText(locale, LocalesPaths.COMMAND_CLAIM_CANCEL, new String[] {Placeholders.MIN, Placeholders.MAX}, find.getCuboid().getMin().toString(), find.getCuboid().getMax().toString()).get());
+				src.sendMessage(getCommand(locale).getClaim().getIntersect(find.getCuboid().getMin(), find.getCuboid().getMax()));
 				return;
 			}
 			if(region.isBasicClaim()) region.setFlags(plugin.getDefaultFlagsConfig().getClaimFlags());
 			if(region.isArena()) region.setFlags(plugin.getDefaultFlagsConfig().getArenaFlags());
 			if(region.isAdmin()) region.setFlags(plugin.getDefaultFlagsConfig().getAdminFlags());
-			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_CLAIM_SUCCESS));
+			src.sendMessage(getCommand(locale).getClaim().getSuccess());
 			plugin.getAPI().getWorldEditCUIAPI().visualizeRegion(region, src, false, false);
 			plugin.getAPI().registerRegion(region);
 			plugin.getAPI().saveRegion(region);
@@ -53,7 +51,7 @@ public class Claim extends AbstractPlayerCommand {
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_CLAIM);
+		return getCommand(locale).getClaim().getDescription();
 	}
 
 	@Override

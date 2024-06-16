@@ -66,7 +66,6 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.child.limits.Buy;
 import sawfowl.regionguard.commands.child.limits.Sell;
 import sawfowl.regionguard.configure.Locales;
-import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.configure.MySQL;
 import sawfowl.regionguard.configure.WorkData;
 import sawfowl.regionguard.configure.configs.CuiConfig;
@@ -229,12 +228,11 @@ public class RegionGuard {
 
 	@Listener
 	public void onConstruct(LocaleServiseEvent.Construct event) {
-		localeService = event.getLocaleService();
+		locales = new Locales(localeService = event.getLocaleService());
 		try {
 			configurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("Config.conf")).build().loadToReference();
 			this.mainConfig = configurationReference.referenceTo(MainConfig.class);
 			configurationReference.save();
-			locales = new Locales(localeService, getConfig().isLocaleJsonSerialize());
 		} catch (ConfigurateException e) {
 			e.printStackTrace();
 		}
@@ -365,7 +363,7 @@ public class RegionGuard {
 			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("buy", new Buy(instance));
 			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("sell", new Sell(instance));
 		} else {
-			logger.warn(locales.getComponent(Sponge.server().locale(), LocalesPaths.ECONOMY_NOT_FOUND));
+			logger.warn(locales.getSystemLocale().getEconomy().getEconomyNotFound());
 		}
 		api.generateDefaultGlobalRegion();
 		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));

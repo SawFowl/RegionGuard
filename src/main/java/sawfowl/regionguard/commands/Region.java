@@ -37,7 +37,6 @@ import sawfowl.regionguard.commands.child.Untrust;
 import sawfowl.regionguard.commands.child.UpdateDefaultFlags;
 import sawfowl.regionguard.commands.child.Wand;
 import sawfowl.regionguard.commands.child.WeCUI;
-import sawfowl.regionguard.configure.LocalesPaths;
 
 public class Region extends AbstractCommand {
 
@@ -48,7 +47,7 @@ public class Region extends AbstractCommand {
 
 	@Override
 	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		sendPaginationList(audience, getComponent(locale, LocalesPaths.COMMANDS_TITLE), getComponent(locale, LocalesPaths.PADDING), 15, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList());
+		sendPaginationList(audience, getCommand(locale).getMain().getTitle(), getCommand(locale).getMain().getPadding(), 15, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList());
 	}
 
 	@Override
@@ -58,7 +57,7 @@ public class Region extends AbstractCommand {
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return null;
+		return getCommand(locale).getMain().getDescription();
 	}
 
 	@Override

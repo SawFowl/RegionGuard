@@ -10,7 +10,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -31,16 +30,12 @@ import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.world.RegionSpawnEntityEvent;
-import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
-public class SpawnEntityListener {
+public class SpawnEntityListener extends ManagementEvents {
 
-	private final RegionGuard plugin;
-	private Cause cause;
 	public SpawnEntityListener(RegionGuard plugin) {
-		this.plugin = plugin;
-		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+		super(plugin);
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
@@ -127,7 +122,7 @@ public class SpawnEntityListener {
 			
 		};
 		rgEvent.setCancelled(!allowSpawn);
-		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.SPAWN));
+		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(getEvents(optPlayer.get().locale()).getEntity().getSpawn());
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);

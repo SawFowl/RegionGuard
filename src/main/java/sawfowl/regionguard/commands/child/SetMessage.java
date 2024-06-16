@@ -20,20 +20,23 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentData;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
+import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
+import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
 
 public class SetMessage extends AbstractPlayerCommand {
 
 	private Map<String, Locale> locales;
 	private List<String> flags;
+	private List<String> clear;
 	public SetMessage(RegionGuard plugin) {
 		super(plugin);
 	}
@@ -41,12 +44,12 @@ public class SetMessage extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale srcLocale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		if(region.isGlobal()) exception(srcLocale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
+		if(region.isGlobal()) exception(getExceptions(srcLocale).getRegionNotFound());
 		if(!src.hasPermission(Permissions.STAFF_SET_MESSAGE)) {
-			if(!region.isTrusted(src)) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_TRUSTED);
-			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_LOW_TRUST);
+			if(!region.isTrusted(src)) exception(getSetMessage(srcLocale).getNotTrusted());
+			if(region.isCurrentTrustType(src, TrustTypes.OWNER) || region.isCurrentTrustType(src, TrustTypes.MANAGER)) exception(getSetMessage(srcLocale).getLowTrust());
 		}
-		if(args.getInput().length == 0) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_NOT_PRESENT);
+		if(args.getInput().length == 0) exception(getExceptions(srcLocale).getMessageNotPresent());
 		boolean clearFlag = args.getString(2).isPresent();
 		boolean exit = args.getString(1).filter(string -> string.equals("-e") || string.equals("-exit")).isPresent();
 		boolean join = args.getString(1).filter(string -> string.equals("-j") || string.equals("-join")).isPresent() || !exit;
@@ -54,35 +57,35 @@ public class SetMessage extends AbstractPlayerCommand {
 		if(clearFlag) {
 			if(join) {
 				region.setJoinMessage(null, locale);
-				src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_CLEAR_JOIN));
+				src.sendMessage(getSetMessage(srcLocale).getSuccessJoin(true));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else if(exit) {
 				region.setExitMessage(null, locale);
-				src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_CLEAR_EXIT));
+				src.sendMessage(getSetMessage(srcLocale).getSuccessExit(true));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else {
-				exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT);
+				exception(getSetMessage(srcLocale).getTypeNotPresent());
 			}
 		} else {
 			Component message = args.get(Component.class, 3).get();
-			if(TextUtils.clearDecorations(message).length() > 50) exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TOO_LONG);
+			if(TextUtils.clearDecorations(message).length() > 50) exception(getSetMessage(srcLocale).getTooLong());
 			if(join) {
 				region.setJoinMessage(message, locale);
-				src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_JOIN));
+				src.sendMessage(getSetMessage(srcLocale).getSuccessJoin(false));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else if(exit) {
 				region.setExitMessage(message, locale);
-				src.sendMessage(plugin.getLocales().getComponent(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_SUCCESS_EXIT));
+				src.sendMessage(getSetMessage(srcLocale).getSuccessExit(false));
 				plugin.getAPI().saveRegion(region.getPrimaryParent());
 			} else {
-				exception(srcLocale, LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT);
+				exception(getSetMessage(srcLocale).getTypeNotPresent());
 			}
 		}
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_SET_MESSAGE);
+		return getSetMessage(locale).getDescription();
 	}
 
 	@Override
@@ -109,25 +112,24 @@ public class SetMessage extends AbstractPlayerCommand {
 	public List<RawArgument<?>> getArgs() {
 		if(locales == null) locales = plugin.getLocales().getLocaleService().getLocalesList().stream().collect(Collectors.toMap(locale -> locale.toLanguageTag(), locale -> locale));
 		if(flags == null) flags = Arrays.asList("-j", "-join", "-e", "-exit");
+		if(clear == null) clear = Arrays.asList("-c", "-clear");
 		return Arrays.asList(
-			RawArguments.createLocaleArgument(true, true, 0, null, null, null, null),
-			RawArguments.createStringArgument("MessageType", flags, true, true, 1, null, null, null, null, null),
-			RawArguments.createStringArgument("Clear | Message", Arrays.asList("-c", "-clear"), true, true, 2, null, null, null, null, null),
+			RawArguments.createStringArgument(flags, new RawBasicArgumentData<String>(null, "MessageType", 0, null, null), RawOptional.notOptional(), locale -> getCommand(locale).getSetMessage().getTypeNotPresent()),
+			RawArguments.createLocaleArgument(RawBasicArgumentData.createLocale(1, null, null), RawOptional.optional(), null),
+			RawArguments.createStringArgument(clear, new RawBasicArgumentData<String>(null, "Clear | Message", 2, null, null), RawOptional.optional(), null),
 			RawArgument.of(
 				Component.class,
-				CommandTreeNodeTypes.STRING.get().createNode().greedy(),
 				(cause, args) -> Stream.empty(),
-				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, (locales.containsKey(args[0]) ? args[0] : ""), (flags.contains(args[1]) ? args[1] : "")))) : null),
-				"Message",
-				false,
-				false,
-				3,
-				null,
-				null,
-				null,
-				LocalesPaths.COMMAND_SET_MESSAGE_TYPE_NOT_PRESENT
+				(cause, args) -> Optional.ofNullable(args.length > 1 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, (locales.containsKey(args[1]) ? args[1] : "")))) : null),
+				new RawArgumentData<>("Message", CommandTreeNodeTypes.STRING.get().createNode().greedy(), 3, null, null),
+				RawOptional.notOptional(),
+				locale -> getExceptions(locale).getMessageNotPresent()
 			)
 		);
+	}
+
+	private sawfowl.regionguard.configure.locales.abstractlocale.Command.SetMessage getSetMessage(Locale locale) {
+		return getCommand(locale).getSetMessage();
 	}
 
 }

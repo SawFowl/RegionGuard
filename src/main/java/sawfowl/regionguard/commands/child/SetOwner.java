@@ -3,7 +3,6 @@ package sawfowl.regionguard.commands.child;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.spongepowered.api.Sponge;
@@ -11,7 +10,6 @@ import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 
@@ -20,15 +18,16 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
+import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
+import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.Placeholders;
 
 public class SetOwner extends AbstractPlayerCommand {
 
@@ -39,19 +38,19 @@ public class SetOwner extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition()).getPrimaryParent();
-		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
-		if(region.isAdmin() && src.hasPermission(Permissions.STAFF_TRUST)) exception(locale, LocalesPaths.COMMAND_SETOWNER_EXCEPTION_ADMIN);
+		if(region.isGlobal()) exception(getExceptions(locale).getRegionNotFound());
+		if(region.isAdmin() && src.hasPermission(Permissions.STAFF_TRUST)) exception(getSetOwner(locale).getAdminClaim());
 		GameProfile newOwner = args.get(GameProfile.class, 0).get();
-		if(src.uniqueId().equals(newOwner.uniqueId()) && region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(locale, LocalesPaths.COMMAND_SETOWNER_EXCEPTION_OWNER_TARGET_SELF);
+		if(src.uniqueId().equals(newOwner.uniqueId()) && region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(getExceptions(locale).getTargetSelf());
 		if(src.hasPermission(Permissions.STAFF_TRUST)) {
-			if(region.getOwnerUUID().equals(newOwner.uniqueId())) exception(locale, LocalesPaths.COMMAND_SETOWNER_EXCEPTION_STAFF_TARGET_OWNER, Placeholders.PLAYER, newOwner.name().orElse(newOwner.examinableName()));
-			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_SETOWNER_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(messageCause -> {
+			if(region.getOwnerUUID().equals(newOwner.uniqueId())) exception(getSetOwner(locale).getAlreadyOwnerStaff(newOwner));
+			src.sendMessage(getSetOwner(locale).getConfirmRequest(newOwner).clickEvent(SpongeComponents.executeCallback(messageCause -> {
 				setOwner(src, newOwner, region, true);
 			})));
 			return;
 		}
-		if(!region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(locale, LocalesPaths.COMMAND_SETOWNER_EXCEPTION_PLAYER_IS_NOT_OWNER);
-		src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_SETOWNER_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(messageCause -> {
+		if(!region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(getSetOwner(locale).getOnlyOwner());
+		src.sendMessage(getSetOwner(locale).getConfirmRequest(newOwner).clickEvent(SpongeComponents.executeCallback(messageCause -> {
 			setOwner(src, newOwner, region, false);
 		})));
 	
@@ -59,7 +58,7 @@ public class SetOwner extends AbstractPlayerCommand {
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_SET_NAME);
+		return getSetOwner(locale).getDescription();
 	}
 
 	@Override
@@ -85,39 +84,38 @@ public class SetOwner extends AbstractPlayerCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		return Arrays.asList(
-			RawArgument.of(
-				GameProfile.class,
-				CommandTreeNodeTypes.GAME_PROFILE.get().createNode(),
-				(cause, args) -> Sponge.server().userManager().streamAll().map(profile -> profile.name().orElse(profile.examinableName())),
-				(cause, args) -> args.length > 0 ? Sponge.server().userManager().streamAll().filter(profile -> profile.name().orElse(profile.examinableName()).equals(args[0])).findFirst() : Optional.empty(),
-				"Player",
-				false,
-				false,
-				0,
-				null,
-				null,
-				null,
-				LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_PRESENT
-			)
+			RawArguments.createGameProfile(RawBasicArgumentData.createGameProfile(0, null, null), RawOptional.notOptional(), locale -> getExceptions(locale).getPlayerNotPresent())
 		);
 	}
 
 	private void setOwner(ServerPlayer player, GameProfile newOwner, Region region, boolean staff) {
 		if(staff) {
-			region.setTrustType(region.getOwnerUUID(), TrustTypes.MANAGER);
-			for(Region child: region.getAllChilds()) child.setTrustType(region.getOwnerUUID(), TrustTypes.MANAGER);
-			if(!region.getOwnerUUID().equals(new UUID(0, 0)) && region.getOwner().isPresent()) region.getOwner().get().sendMessage(getText(region.getOwner().get().locale(), LocalesPaths.COMMAND_SETOWNER_SUCCESS_FROM_STAFF).replace(new String[] {Placeholders.WORLD, Placeholders.MIN, Placeholders.MAX}, region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString()).get());
+			if(!region.getOwnerUUID().equals(new UUID(0, 0)) && region.getOwner().isPresent()) {
+				Component message = getSetOwner(region.getOwner().get()).getSuccessFromStaff(region);
+				region.setTrustType(region.getOwnerUUID(), TrustTypes.MANAGER);
+				for(Region child: region.getAllChilds()) child.setTrustType(region.getOwnerUUID(), TrustTypes.MANAGER);
+				region.getOwner().get().sendMessage(message);
+				message = null;
+			}
 		} else {
 			for(Region child: region.getAllChilds()) child.setTrustType(player, TrustTypes.MANAGER);
 			region.setTrustType(player, TrustTypes.MANAGER);
 		}
 		region.setOwner(newOwner);
 		for(Region child: region.getAllChilds()) child.setOwner(newOwner);
-		player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_SETOWNER_SUCCESS_PLAYER).replace(new String[] {Placeholders.PLAYER, Placeholders.WORLD, Placeholders.MIN, Placeholders.MAX}, newOwner.name(), region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString()).get());
+		player.sendMessage(getSetOwner(player).getSuccess(region, newOwner));
 		Sponge.server().player(newOwner.uniqueId()).ifPresent(owner -> {
-			owner.sendMessage(getText(owner.locale(), LocalesPaths.COMMAND_SETOWNER_SUCCESS_TARGET).replace(new String [] {Placeholders.PLAYER, Placeholders.WORLD, Placeholders.MIN, Placeholders.MAX}, player.name(), region.getWorldKey().toString(), region.getCuboid().getMin().toString(), region.getCuboid().getMax().toString()).get());
+			owner.sendMessage(getSetOwner(owner).getSuccessNewOwner(region, player.profile()));
 		});
 		plugin.getAPI().saveRegion(region.getPrimaryParent());
+	}
+
+	private sawfowl.regionguard.configure.locales.abstractlocale.Command.SetOwner getSetOwner(Locale locale) {
+		return getCommand(locale).getSetOwner();
+	}
+
+	private sawfowl.regionguard.configure.locales.abstractlocale.Command.SetOwner getSetOwner(ServerPlayer player) {
+		return getSetOwner(player.locale());
 	}
 
 }

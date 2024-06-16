@@ -16,8 +16,8 @@ public class ImplementDelete implements Delete {
 	private Component description = deserialize("&6Delete the region.");
 	@Setting("ConfirmRequest")
 	private Component confirmRequest = deserialize("&eAre you sure you want to delete the region in your location? Click this message to confirm.");
-	@Setting("SuccesRegen")
-	private Component succesRegen = deserialize("&eATTENTION!!! The area in the region will be restored to its original state!");
+	@Setting("Regen")
+	private Component regen = deserialize("&eATTENTION!!! The area in the region will be restored to its original state!");
 	@Setting("SuccesWhithChilds")
 	private Component succesWhithChilds = deserialize("&aRegion removed. The child regions it contained were also deleted.");
 	@Setting("SuccesChild")
@@ -36,8 +36,8 @@ public class ImplementDelete implements Delete {
 	}
 
 	@Override
-	public Component getSuccesRegen() {
-		return succesRegen;
+	public Component getRegen() {
+		return regen;
 	}
 
 	@Override

@@ -17,13 +17,13 @@ public interface Events {
 
 			Component getPositionLocked();
 
-			Component getLimitRegions(long limit);
+			Component getLimitRegions(long size, long limit);
 
-			Component getLimitSubdivisions(long limit);
+			Component getLimitSubdivisions(long size, long limit);
 
 			Component getLimitBlocks(long size, long limit);
 
-			Component getSmallVolume();
+			Component getSmallVolume(int size);
 
 			Component getIncorrectCords();
 
@@ -75,9 +75,9 @@ public interface Events {
 
 	}
 
-	interface Block {
+	interface Block extends LocaleReference {
 
-		interface Interact {
+		interface Interact extends LocaleReference {
 
 			Component getPrimary();
 
@@ -97,7 +97,7 @@ public interface Events {
 
 	}
 
-	interface Fly {
+	interface Fly extends LocaleReference {
 
 		Component getDisable();
 
@@ -105,19 +105,9 @@ public interface Events {
 
 	}
 
-	interface Teleport {
+	interface Teleport extends LocaleReference {
 
-		interface FromRegion {
-
-			Component getOther();
-
-			Component getSelf();
-
-			Component getEnderpearl();
-
-		}
-
-		interface ToRegion {
+		interface FromRegion extends LocaleReference {
 
 			Component getOther();
 
@@ -127,15 +117,27 @@ public interface Events {
 
 		}
 
-		ToRegion getFromRegion();
+		interface ToRegion extends LocaleReference {
+
+			Component getOther();
+
+			Component getSelf();
+
+			Component getEnderpearl();
+
+		}
+
+		FromRegion getFromRegion();
 
 		ToRegion getToRegion();
 
+		Component getPortalUse();
+
 	}
 
-	interface Entity {
+	interface Entity extends LocaleReference {
 
-		interface Interact {
+		interface Interact extends LocaleReference {
 
 			Component getPrimary();
 
@@ -153,9 +155,11 @@ public interface Events {
 
 		Component getSpawn();
 
+		Component getRiding();
+
 	}
 
-	interface Keep {
+	interface Keep extends LocaleReference {
 
 		Component getExp();
 
@@ -163,7 +167,7 @@ public interface Events {
 
 	}
 
-	interface Piston {
+	interface Piston extends LocaleReference {
 
 		Component getUse();
 
@@ -171,7 +175,7 @@ public interface Events {
 
 	}
 
-	interface Command {
+	interface Command extends LocaleReference {
 
 		Component getExecute();
 
@@ -179,7 +183,7 @@ public interface Events {
 
 	}
 
-	interface Item {
+	interface Item extends LocaleReference {
 
 		Component getDrop();
 
@@ -191,15 +195,11 @@ public interface Events {
 
 	}
 
-	interface Other {
+	interface Move extends LocaleReference {
 
-		Component getCancelJoin();
+		Component getJoin();
 
-		Component getCancelExit();
-
-		Component getRiding();
-
-		Component getPortalUse();
+		Component getExit();
 
 	}
 
@@ -215,10 +215,12 @@ public interface Events {
 
 	Keep getKeep();
 
+	Piston getPiston();
+
 	Command getCommand();
 
 	Item getItem();
 
-	Other getOther();
+	Move getMove();
 
 }

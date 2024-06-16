@@ -1,6 +1,5 @@
 package sawfowl.regionguard.commands.child.limits.set;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -18,12 +17,14 @@ import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
+import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
+import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
+import sawfowl.commandpack.utils.CommandsUtil;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.commands.abstractcommands.AbstractCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.configure.locales.abstractlocale.Command.Limits.Set.Limit;
 
 public class Subdivisions extends AbstractCommand {
 
@@ -33,18 +34,17 @@ public class Subdivisions extends AbstractCommand {
 
 	@Override
 	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		String sourceName = isPlayer ? ((ServerPlayer) audience).name() : "Server";
 		ServerPlayer target = args.getPlayer(0).get();
 		long toSet = args.getLong(1).get();
-		if(toSet < 0) exception(locale, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_LESS_THEN_ZERO);
+		if(toSet < 0) exception(getCommand(locale).getLimits().getSet().getLessThanZero());
 		plugin.getAPI().setLimitSubdivisions(target, toSet);
-		audience.sendMessage(getText(locale, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_SOURCE).replace(new String[] {Placeholders.SIZE, Placeholders.PLAYER}, toSet, target.name()).get());
-		target.sendMessage(getText(target.locale(), LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_SUCCESS_TARGET).replace(new String[] {Placeholders.SIZE, Placeholders.PLAYER}, toSet, sourceName).get());
+		audience.sendMessage(getLimit(locale).getSuccessStaff(target.name(), toSet));
+		target.sendMessage(getLimit(locale).getSuccess(toSet));
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_SETLIMITSUBDIVISIONS);
+		return getLimit(locale).getDescription();
 	}
 
 	@Override
@@ -70,9 +70,13 @@ public class Subdivisions extends AbstractCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		return Arrays.asList(
-			RawArguments.createPlayerArgument(false, false, 0, null, null, null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_PLAYER_NOT_PRESENT),
-			RawArguments.createLongArgument("Value", new ArrayList<Long>(), false, false, 1, null, null, null, null, LocalesPaths.COMMAND_SETLIMITSUBDIVISIONS_EXCEPTION_VOLUME_NOT_PRESENT)
+			RawArguments.createPlayerArgument(RawBasicArgumentData.createPlayer(0, null, null), RawOptional.notOptional(), locale -> getCommand(locale).getExceptions().getPlayerNotPresent()),
+			RawArguments.createLongArgument(CommandsUtil.getEmptyList(), new RawBasicArgumentData<>(null, "Volume", 1, null, null), RawOptional.notOptional(), locale -> getCommand(locale).getExceptions().getVolumeNotPresent())
 		);
+	}
+
+	private Limit getLimit(Locale locale) {
+		return getCommand(locale).getLimits().getSet().getSubdivisionsLimit();
 	}
 
 }

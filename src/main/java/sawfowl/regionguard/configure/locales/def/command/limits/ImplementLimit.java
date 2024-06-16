@@ -5,7 +5,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import net.kyori.adventure.text.Component;
 
-import sawfowl.regionguard.configure.locales.abstractlocale.Command.Limits.Buy.Limit;
+import sawfowl.regionguard.configure.locales.abstractlocale.Command.Limits.Transaction.Limit;
 import sawfowl.regionguard.utils.Placeholders;
 
 @ConfigSerializable

@@ -8,8 +8,6 @@ import java.util.UUID;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -24,16 +22,12 @@ import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.world.RegionInteractEntityEvent;
-import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
-public class InteractEntityListener {
+public class InteractEntityListener extends ManagementEvents {
 
-	private final RegionGuard plugin;
-	private Cause cause;
 	public InteractEntityListener(RegionGuard plugin) {
-		this.plugin = plugin;
-		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+		super(plugin);
 	}
 
 	Map<UUID, Long> lastTime = new HashMap<UUID, Long>();
@@ -104,7 +98,7 @@ public class InteractEntityListener {
 			}
 		};
 		rgEvent.setCancelled(!isAllow);
-		rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_PRIMARY));
+		rgEvent.setMessage(getEvents(player).getEntity().getInteract().getPrimary());
 		ListenerUtils.postEvent(rgEvent);
 		if(!rgEvent.isCancelled()) return;
 		event.setCancelled(true);
@@ -181,7 +175,7 @@ public class InteractEntityListener {
 			}
 		};
 		rgEvent.setCancelled(!isAllow);
-		rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.INTERACT_ENTITY_CANCEL_SECONDARY));
+		rgEvent.setMessage(getEvents(player).getEntity().getInteract().getSecondary());
 		ListenerUtils.postEvent(rgEvent);
 		if(!rgEvent.isCancelled()) return;
 		event.setCancelled(true);

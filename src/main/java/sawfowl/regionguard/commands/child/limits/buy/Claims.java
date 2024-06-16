@@ -1,7 +1,6 @@
 package sawfowl.regionguard.commands.child.limits.buy;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -19,13 +18,15 @@ import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
+import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
+import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
+import sawfowl.commandpack.utils.CommandsUtil;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.configure.locales.abstractlocale.Command.Limits.Transaction.Limit;
 
 public class Claims extends AbstractPlayerCommand {
 
@@ -36,24 +37,24 @@ public class Claims extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		long toBuy = args.getLong(0).get();
-		if(toBuy <= 0) exception(locale, LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_ENTERED_ZERO);
+		if(toBuy <= 0) exception(getExceptions(locale).getEnteredZero());
 		if(plugin.getAPI().getLimitMaxClaims(src) < toBuy + plugin.getAPI().getLimitClaims(src)) {
 			long max = plugin.getAPI().getLimitMaxClaims(src) - plugin.getAPI().getLimitClaims(src);
 			if(max < 0) max = 0;
-			exception(locale, LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_TO_MUCH_VOLUME, new String[]  {Placeholders.MAX}, max);
+			exception(getExceptions(locale).getMaxValue(max));
 		}
 		double needMoney = plugin.getAPI().getBuyClaimPrice(src) * toBuy;
 		Currency currency = plugin.getAPI().getCurrency(src);
-		if(!plugin.getEconomy().checkPlayerBalance(src.uniqueId(), currency, BigDecimal.valueOf(needMoney))) exception(locale, LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_NOT_ENOUGH_MONEY);
-		if(!plugin.getEconomy().removeFromPlayerBalance(src, currency, BigDecimal.valueOf(needMoney))) exception(locale, LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_ECONOMY_EXCEPTION);
+		if(!plugin.getEconomy().checkPlayerBalance(src.uniqueId(), currency, BigDecimal.valueOf(needMoney))) exception(getExceptions(locale).getNotEnoughMoney());
+		if(!plugin.getEconomy().removeFromPlayerBalance(src, currency, BigDecimal.valueOf(needMoney))) exception(getExceptions(locale).getEconomyException());
 		if(!plugin.getAPI().getPlayerData(src).isPresent()) plugin.getAPI().setPlayerData(src, PlayerData.zero());
 		plugin.getAPI().setLimitClaims(src, toBuy);
-		src.sendMessage(getText(locale, LocalesPaths.COMMAND_BUYCLAIMS_SUCCESS).replace(new String[] {Placeholders.SIZE, Placeholders.VOLUME}, toBuy, plugin.getAPI().getLimitClaims(src)).get());
+		src.sendMessage(getLimit(locale).getSuccess(toBuy, plugin.getAPI().getLimitClaims(src)));
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_BUYCLAIMS);
+		return getLimit(locale).getDescription();
 	}
 
 	@Override
@@ -79,8 +80,12 @@ public class Claims extends AbstractPlayerCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		return Arrays.asList(
-				RawArguments.createLongArgument("Value", new ArrayList<Long>(), false, false, 0, null, null, null, null, LocalesPaths.COMMAND_BUYCLAIMS_EXCEPTION_NOT_PRESENT)
+			RawArguments.createLongArgument(CommandsUtil.getEmptyList(), new RawBasicArgumentData<>(null, "Volume", 0, null, null), RawOptional.notOptional(), locale -> getCommand(locale).getExceptions().getVolumeNotPresent())
 		);
+	}
+
+	private Limit getLimit(Locale locale) {
+		return getCommand(locale).getLimits().getBuy().getClaimsLimit();
 	}
 
 }

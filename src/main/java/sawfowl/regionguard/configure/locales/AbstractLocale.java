@@ -1,18 +1,20 @@
 package sawfowl.regionguard.configure.locales;
 
+import java.text.SimpleDateFormat;
+
 import sawfowl.localeapi.api.LocaleReference;
 import sawfowl.regionguard.configure.locales.abstractlocale.Command;
-import sawfowl.regionguard.configure.locales.abstractlocale.CommandExceptions;
+import sawfowl.regionguard.configure.locales.abstractlocale.Economy;
 import sawfowl.regionguard.configure.locales.abstractlocale.Events;
 
 public interface AbstractLocale extends LocaleReference {
 
 	Command getCommand();
 
-	CommandExceptions getExceptions();
+	Economy getEconomy();
 
 	Events getEvents();
 
-	String getEconomyNotFound();
+	SimpleDateFormat getTimeFormat();
 
 }

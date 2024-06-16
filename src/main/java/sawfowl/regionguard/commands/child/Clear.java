@@ -10,6 +10,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
@@ -17,7 +18,6 @@ import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
 
 public class Clear extends AbstractPlayerCommand {
 
@@ -33,12 +33,12 @@ public class Clear extends AbstractPlayerCommand {
 			plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, temp.getUniqueId());
 			plugin.getAPI().removeTempRegion(temp);
 		});
-		player.sendMessage(getComponent(locale, LocalesPaths.COMMAND_CLEAR_SUCCESS));
+		player.sendMessage(getCommand(locale).getClear().getSuccess());
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_CLEAR);
+		return getCommand(locale).getClear().getDescription();
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package sawfowl.regionguard.api;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public enum TrustTypes {
@@ -48,9 +49,7 @@ public enum TrustTypes {
 	},
 	WITHOUT_TRUST;
 
-	public static Stream<String> getValues() {
-		return Stream.of(TrustTypes.values()).filter(value -> value != WITHOUT_TRUST).map(TrustTypes::toString);
-	}
+	private static final List<String> VALUES = Stream.of(TrustTypes.values()).filter(type -> type != WITHOUT_TRUST).map(type -> type.toString()).toList();
 
 	/**
 	 * Search for a trust type by name.
@@ -60,6 +59,10 @@ public enum TrustTypes {
 			if(type.toString().equalsIgnoreCase(string)) return type;
 		}
 		return WITHOUT_TRUST;
+	}
+
+	public static List<String> getValues() {
+		return VALUES;
 	}
 
 }

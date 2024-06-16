@@ -68,22 +68,22 @@ public class ImplementLimits implements Limits {
 	}
 
 	@Override
-	public Component getBlocks(long claimed, long limit, long max) {
+	public Component getBlocks(Object claimed, Object limit, Object max) {
 		return replace(blocks, array(Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX), claimed, limit, max);
 	}
 
 	@Override
-	public Component getClaims(long claimed, long limit, long max) {
+	public Component getClaims(Object claimed, Object limit, Object max) {
 		return replace(claims, array(Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX), claimed, limit, max);
 	}
 
 	@Override
-	public Component getSubdivisions(long claimed, long limit, long max) {
+	public Component getSubdivisions(Object claimed, Object limit, Object max) {
 		return replace(subdivisions, array(Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX), claimed, limit, max);
 	}
 
 	@Override
-	public Component getMembers(long claimed, long limit, long max) {
+	public Component getMembers(Object claimed, Object limit, Object max) {
 		return replace(members, array(Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX), claimed, limit, max);
 	}
 

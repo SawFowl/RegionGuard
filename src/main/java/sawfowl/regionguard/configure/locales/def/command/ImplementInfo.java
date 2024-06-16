@@ -80,8 +80,8 @@ public class ImplementInfo implements Info {
 	}
 
 	@Override
-	public Component getCreated(Component created) {
-		return replace(created, Placeholders.DATE, created);
+	public Component getCreated(String created) {
+		return replace(this.created, Placeholders.DATE, created);
 	}
 
 	@Override

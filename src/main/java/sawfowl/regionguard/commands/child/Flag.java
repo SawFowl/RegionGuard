@@ -22,7 +22,10 @@ import net.kyori.adventure.text.event.HoverEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentData;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
+import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
+import sawfowl.commandpack.api.commands.raw.arguments.RawRequiredArgs;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -30,8 +33,6 @@ import sawfowl.regionguard.api.data.FlagConfig;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.Placeholders;
 
 public class Flag extends AbstractPlayerCommand {
 
@@ -43,23 +44,16 @@ public class Flag extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		Optional<FlagConfig> optFlag = args.get(FlagConfig.class, 0);
-		if(!optFlag.isPresent()) {
-			sendPaginationList(src, getComponent(locale, LocalesPaths.COMMAND_FLAG_LIST), getComponent(locale, LocalesPaths.PADDING), 10, getFlagList(src, region));
-			return;
-		} else {
-			FlagConfig flag = optFlag.get();
-			Boolean value = args.getBoolean(1).orElse(false);
-			String source = args.getString(2).orElse("all");
-			String target = args.getString(3).orElse("all");
-			setFlag(region, flag.getName(), value, source, target);
-			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_FLAG_SUCCESS));
-		}
+		Optional<FlagConfig> optFlag = args.get(0);
+		if(optFlag.isPresent()) {
+			setFlag(region, optFlag.get().getName(), args.getBoolean(1).orElse(false), args.getString(2).orElse("all"), args.getString(3).orElse("all"));
+			src.sendMessage(getCommand(locale).getFlag().getSuccess());
+		} else sendPaginationList(src, getCommand(locale).getFlag().getTitle(), getCommand(locale).getFlag().getPadding(), 10, getFlagList(src, region));
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_FLAG);
+		return getCommand(locale).getFlag().getDescription();
 	}
 
 	@Override
@@ -88,57 +82,35 @@ public class Flag extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				FlagConfig.class,
-				CommandTreeNodeTypes.STRING.get().createNode(),
 				(cause, args) -> plugin.getAPI().getRegisteredFlags().keySet().stream().filter(flag -> cause.hasPermission(Permissions.setFlag(flag))),
 				(cause, args) -> args.length == 0 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().values().stream().filter(flag -> flag.getName().equalsIgnoreCase(args[0]) && cause.hasPermission(Permissions.setFlag(flag.getName()))).findFirst(),
-				"Flag",
-				true,
-				true,
-				0,
-				null,
-				null,
-				null
+				new RawArgumentData<>("Flag", CommandTreeNodeTypes.STRING.get().createNode(), 0, null, null),
+				RawOptional.optional(),
+				locale -> getExceptions(locale).getFlagNotPresent()
 			),
 			RawArgument.of(
 				Boolean.class,
-				CommandTreeNodeTypes.BOOL.get().createNode(),
 				(cause, args) -> values.stream(),
 				(cause, args) -> args.length < 2 || !plugin.getAPI().getRegisteredFlags().containsKey(args[0]) ? Optional.empty() : Optional.ofNullable(BooleanUtils.toBooleanObject(args[1])),
-				"Value",
-				true,
-				true,
-				1,
-				null,
-				new Integer[] {0},
-				null
+				new RawArgumentData<>("Value", CommandTreeNodeTypes.BOOL.get().createNode(), 1, null, new RawRequiredArgs(new Integer[] {0}, null)),
+				RawOptional.optional(),
+				locale -> getCommand(locale).getFlag().getValueNotPresent()
 			),
 			RawArgument.of(
 				String.class,
-				CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(),
 				(cause, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getSources()).orElse(Stream.of("all")),
 				(cause, args) -> args.length < 3 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
-				"Source",
-				true,
-				true,
-				2,
-				null,
-				new Integer[] {0, 1},
-				null,
-				LocalesPaths.COMMAND_FLAG_WRONG_SOURCE
+				new RawArgumentData<>("Source", CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(), 2, null, new RawRequiredArgs(new Integer[] {0, 1}, null)),
+				RawOptional.optional(),
+				locale -> getCommand(locale).getFlag().getInvalidSource()
 			),
 			RawArgument.of(
 				String.class,
-				CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(),
 				(cause, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getTargets()).orElse(Stream.of("all")),
 				(cause, args) -> args.length < 4 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
-				"Target",
-				true,
-				true,
-				3,
-				null,
-				new Integer[] {0, 1, 2},
-				null,
-				LocalesPaths.COMMAND_FLAG_WRONG_TARGET
+				new RawArgumentData<>("Target", CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(), 3, null, new RawRequiredArgs(new Integer[] {0, 1, 2}, null)),
+				RawOptional.optional(),
+				locale -> getCommand(locale).getFlag().getInvalidTarget()
 			)
 		);
 	}
@@ -163,36 +135,36 @@ public class Flag extends AbstractPlayerCommand {
 				Component remove = Component.text("§7[§cRemove§7]§r")
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
-								player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_FLAG_NOT_PERMITTED_FLAG).replace(Placeholders.FLAG, flagName.toString()).get());
+								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
 							}
 							region.removeFlag(flagName);
 							plugin.getAPI().saveRegion(region.getPrimaryParent());
-							sendPaginationList(player, getComponent(player, LocalesPaths.COMMAND_FLAG_LIST), getComponent(player.locale(), LocalesPaths.PADDING), 10, getFlagList(player, region));
+							sendPaginationList(player, getCommand(player).getFlag().getTitle(), getCommand(player).getFlag().getPadding(), 10, getFlagList(player, region));
 						}))
-						.hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_REMOVE)));
+						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getRemove()));
 				Component setTrue = Component.text("§7[§eTrue§7]§r")
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
-								player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_FLAG_NOT_PERMITTED_FLAG).replace(Placeholders.FLAG, flagName.toString()).get());
+								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
 							}
 							region.setFlag(flagName, true, null, null);
 							plugin.getAPI().saveRegion(region.getPrimaryParent());
-							sendPaginationList(player, getComponent(player, LocalesPaths.COMMAND_FLAG_LIST), getComponent(player.locale(), LocalesPaths.PADDING), 10, getFlagList(player, region));
+							sendPaginationList(player, getCommand(player).getFlag().getTitle(), getCommand(player).getFlag().getPadding(), 10, getFlagList(player, region));
 						}))
-						.hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_TRUE)));
+						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getTrue()));
 				Component setFalse = Component.text("§7[§eFalse§7]§r")
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
-								player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_FLAG_NOT_PERMITTED_FLAG).replace(Placeholders.FLAG, flagName.toString()).get());
+								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
 							}
 							region.setFlag(flagName, false, null, null);
 							plugin.getAPI().saveRegion(region.getPrimaryParent());
-							sendPaginationList(player, getComponent(player, LocalesPaths.COMMAND_FLAG_LIST), getComponent(player.locale(), LocalesPaths.PADDING), 10, getFlagList(player, region));
+							sendPaginationList(player, getCommand(player).getFlag().getTitle(), getCommand(player).getFlag().getPadding(), 10, getFlagList(player, region));
 						}))
-						.hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_FALSE)));
+						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getFalse()));
 				messages.add(Component.text("")
 						.append(remove)
 						.append(Component.text("   "))
@@ -201,32 +173,32 @@ public class Flag extends AbstractPlayerCommand {
 						.append(region.getFlagResultWhithoutParrents(flagName, null, null) == Tristate.FALSE ? Component.text("§7[§aFalse§7]§r") : setFalse)
 						.append(Component.text(" - "))
 						.append(Component.text("§7[§b" + flagName.toString() + "§7]").
-								hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_SUGGEST_ARGS)))
+								hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getSuggestArgs()))
 								.clickEvent(ClickEvent.suggestCommand("/rg flag " + flagName.toString() + " ")))
 				);
 			} else {
 				Component setTrue = Component.text(region.getFlagResult(flagName, null, null) == Tristate.TRUE ? "§7[§2True§7]§r" : "§7[§6True§7]§r")
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
-								player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_FLAG_NOT_PERMITTED_FLAG).replace(Placeholders.FLAG, flagName).get());
+								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
 							}
 							region.setFlag(flagName, true, null, null);
 							plugin.getAPI().saveRegion(region.getPrimaryParent());
-							sendPaginationList(player, getComponent(player, LocalesPaths.COMMAND_FLAG_LIST), getComponent(player.locale(), LocalesPaths.PADDING), 10, getFlagList(player, region));
+							sendPaginationList(player, getCommand(player).getFlag().getTitle(), getCommand(player).getFlag().getPadding(), 10, getFlagList(player, region));
 						}))
-						.hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_TRUE)));
+						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getTrue()));
 				Component setFalse = Component.text(region.getFlagResult(flagName, null, null) == Tristate.FALSE ? "§7[§2False§7]§r" : "§7[§6False§7]§r")
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
-								player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_FLAG_NOT_PERMITTED_FLAG).replace(Placeholders.FLAG, flagName).get());
+								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
 							}
 							region.setFlag(flagName, false, null, null);
 							plugin.getAPI().saveRegion(region.getPrimaryParent());
-							sendPaginationList(player, getComponent(player, LocalesPaths.COMMAND_FLAG_LIST), getComponent(player.locale(), LocalesPaths.PADDING), 10, getFlagList(player, region));
+							sendPaginationList(player, getCommand(player).getFlag().getTitle(), getCommand(player).getFlag().getPadding(), 10, getFlagList(player, region));
 						}))
-						.hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_FALSE)));
+						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getFalse()));
 				messages.add(Component.text("")
 						.append(Component.text("§7[§eRemove§7]§r"))
 						.append(Component.text("   "))
@@ -235,7 +207,7 @@ public class Flag extends AbstractPlayerCommand {
 						.append(setFalse)
 						.append(Component.text(" - "))
 						.append(Component.text("§7[§3" + flagName + "§7]").
-								hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_SUGGEST_ARGS)))
+								hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getSuggestArgs()))
 								.clickEvent(ClickEvent.suggestCommand("/rg flag " + flagName + " ")))
 				);
 			
@@ -255,37 +227,37 @@ public class Flag extends AbstractPlayerCommand {
 				Component remove = Component.text("§7[§cRemove§7]§r")
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(!player.hasPermission(Permissions.setFlag(flag))) {
-								player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_FLAG_NOT_PERMITTED_FLAG).replace(Placeholders.FLAG, flag.toString()).get());
+								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flag));
 								return;
 							}
 							region.removeFlag(flag, flagValue);
 							plugin.getAPI().saveRegion(region.getPrimaryParent());
-							sendPaginationList(player, getComponent(player, LocalesPaths.COMMAND_FLAG_LIST), getComponent(player.locale(), LocalesPaths.PADDING), 10, getFlagList(player, region));
+							sendPaginationList(player, getCommand(player).getFlag().getTitle(), getCommand(player).getFlag().getPadding(), 10, getFlagList(player, region));
 						}))
-						.hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_REMOVE)));
+						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getRemove()));
 				Component setTrue = Component.text("§7[§eTrue§7]§r")
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(!player.hasPermission(Permissions.setFlag(flag.toString()))) {
-								player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_FLAG_NOT_PERMITTED_FLAG).replace(Placeholders.FLAG, flag.toString()).get());
+								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flag));
 								return;
 							}
 							region.setFlag(flag, true, flagValue.getSource(), flagValue.getTarget());
 							plugin.getAPI().saveRegion(region.getPrimaryParent());
-							sendPaginationList(player, getComponent(player, LocalesPaths.COMMAND_FLAG_LIST), getComponent(player.locale(), LocalesPaths.PADDING), 10, getFlagList(player, region));
+							sendPaginationList(player, getCommand(player).getFlag().getTitle(), getCommand(player).getFlag().getPadding(), 10, getFlagList(player, region));
 						}))
-						.hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_TRUE)));
+						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getTrue()));
 				Component setFalse = Component.text("§7[§eFalse§7]§r")
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(!player.hasPermission(Permissions.setFlag(flag))) {
-								player.sendMessage(getText(player.locale(), LocalesPaths.COMMAND_FLAG_NOT_PERMITTED_FLAG).replace(Placeholders.FLAG, flag.toString()).get());
+								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flag));
 								return;
 							}
 							region.setFlag(flag, false, flagValue.getSource(), flagValue.getTarget());
 							plugin.getAPI().saveRegion(region.getPrimaryParent());
-							sendPaginationList(player, getComponent(player, LocalesPaths.COMMAND_FLAG_LIST), getComponent(player.locale(), LocalesPaths.PADDING), 10, getFlagList(player, region));
+							sendPaginationList(player, getCommand(player).getFlag().getTitle(), getCommand(player).getFlag().getPadding(), 10, getFlagList(player, region));
 						}))
-						.hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_FALSE)));
-				Component display = Component.text("§d" + flag).hoverEvent(HoverEvent.showText(getText(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_VALUES).replace(new String[] {Placeholders.SOURCE, Placeholders.TARGET}, flagValue.getSource(), flagValue.getTarget()).get()));
+						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getFalse()));
+				Component display = Component.text("§d" + flag).hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getHoverValues(flagValue)));
 				messages.add(Component.text("")
 						.append(remove)
 						.append(Component.text("   "))
@@ -295,7 +267,7 @@ public class Flag extends AbstractPlayerCommand {
 						.append(Component.text(" - "))
 						.append(Component.text("§7[").append(display).append(Component.text("§7]"))));
 			} else {
-				Component display = Component.text("§5" + flag).hoverEvent(HoverEvent.showText(getText(player.locale(), LocalesPaths.COMMAND_FLAG_HOVER_VALUES).replace(new String[] {Placeholders.SOURCE, Placeholders.TARGET}, flagValue.getSource(), flagValue.getTarget()).get()));
+				Component display = Component.text("§5" + flag).hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getHoverValues(flagValue)));
 				messages.add(Component.text("")
 						.append(Component.text("§7[§eRemove§7]§r"))
 						.append(Component.text("   "))

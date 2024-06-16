@@ -61,8 +61,8 @@ public class ImplementFlag implements Flag {
 	}
 
 	@Override
-	public Component getNotPermittedFlag() {
-		return notPermittedFlag;
+	public Component getNotPermittedFlag(String flag) {
+		return replace(notPermittedFlag, Placeholders.FLAG, flag);
 	}
 
 	@Override

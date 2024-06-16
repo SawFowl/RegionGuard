@@ -8,8 +8,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.First;
@@ -28,16 +26,12 @@ import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.world.RegionChangeInventoryEvent;
-import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
-public class PickupDropItemListener {
+public class PickupDropItemListener extends ManagementEvents {
 
-	private final RegionGuard plugin;
-	private Cause cause;
 	public PickupDropItemListener(RegionGuard plugin) {
-		this.plugin = plugin;
-		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+		super(plugin);
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
@@ -122,7 +116,7 @@ public class PickupDropItemListener {
 		}
 		RegionChangeInventoryEvent rgEvent = new DropEvent();
 		rgEvent.setCancelled(!allowPickup);
-		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.ITEM_PICKUP));
+		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(getEvents(optPlayer.get().locale()).getItem().getPickup());
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);
@@ -217,7 +211,7 @@ public class PickupDropItemListener {
 		}
 		RegionChangeInventoryEvent rgEvent = new DropEvent();
 		rgEvent.setCancelled(!allowDrop);
-		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.ITEM_DROP));
+		if(optPlayer.isPresent() && rgEvent.isCancelled()) rgEvent.setMessage(getEvents(optPlayer.get().locale()).getItem().getDrop());
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);

@@ -8,7 +8,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -32,16 +31,12 @@ import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.world.RegionEntityChangeWorldEvent;
 import sawfowl.regionguard.api.events.world.RegionMoveEntityEvent;
-import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
-public class EntityMoveListener {
+public class EntityMoveListener extends ManagementEvents {
 
-	private final RegionGuard plugin;
-	private Cause cause;
 	public EntityMoveListener(RegionGuard plugin) {
-		this.plugin = plugin;
-		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+		super(plugin);
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
@@ -177,10 +172,10 @@ public class EntityMoveListener {
 			
 		};
 		moveEvent.setAllowRiding(isAllowRiding);
-		if(isRiding && !isAllowRiding && player != null) moveEvent.setStopRidingMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.RIDING));
+		if(isRiding && !isAllowRiding && player != null) moveEvent.setStopRidingMessage(getEvents(player).getEntity().getRiding());
 		if(player != null && !isAllowPlayerFly(player, from) && player.get(Keys.CAN_FLY).isPresent() && player.get(Keys.CAN_FLY).get()) {
 			moveEvent.setAllowFly(false);
-			moveEvent.setStopFlyingMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.DISABLE_FLY));
+			moveEvent.setStopFlyingMessage(getEvents(player).getFly().getDisable());
 		}
 		ListenerUtils.postEvent(moveEvent);
 		if(!moveEvent.isAllowRiding() && moveEvent.isRiding() && moveEvent.getRidingEntity().isPresent()) {
@@ -213,20 +208,20 @@ public class EntityMoveListener {
 				if(command && event.cause().first(ServerPlayer.class).isPresent())  {
 					ServerPlayer commandPlayer = event.cause().first(ServerPlayer.class).get();
 					if(!allowTo && !commandPlayer.hasPermission(Permissions.bypassFlag(Flags.ENTITY_TELEPORT_TO)) && !destination.isTrusted(player.uniqueId())) {
-						commandPlayer.sendMessage(plugin.getLocales().getComponent(commandPlayer.locale(), LocalesPaths.TELEPORT_OTHER_TO_REGION));
+						commandPlayer.sendMessage(getEvents(commandPlayer).getTeleport().getToRegion().getOther());
 						event.setCancelled(true);
 						return;
 					} else if(!allowFrom && !commandPlayer.hasPermission(Permissions.bypassFlag(Flags.ENTITY_TELEPORT_FROM)) && !from.isTrusted(player.uniqueId())) {
-						commandPlayer.sendMessage(plugin.getLocales().getComponent(commandPlayer.locale(), LocalesPaths.TELEPORT_OTHER_FROM_REGION));
+						commandPlayer.sendMessage(getEvents(commandPlayer).getTeleport().getFromRegion().getOther());
 						event.setCancelled(true);
 						return;
 					}
 				}
 				if(portal) {
-					message = plugin.getLocales().getComponent(player.locale(), LocalesPaths.PORTAL_USE);
+					message = getEvents(player).getTeleport().getPortalUse();
 				} else {
-					if(!allowFrom) message = enderPeal ? plugin.getLocales().getComponent(player.locale(), LocalesPaths.TELEPORT_ENDERPEARL_FROM_REGION) : plugin.getLocales().getComponent(player.locale(), LocalesPaths.TELEPORT_FROM_REGION);
-					if(!allowTo) message = enderPeal ? plugin.getLocales().getComponent(player.locale(), LocalesPaths.TELEPORT_ENDERPEARL_TO_REGION) : plugin.getLocales().getComponent(player.locale(), LocalesPaths.TELEPORT_TO_REGION);
+					if(!allowFrom) message = enderPeal ? getEvents(player).getTeleport().getFromRegion().getEnderpearl() : getEvents(player).getTeleport().getFromRegion().getSelf();
+					if(!allowTo) message = enderPeal ? getEvents(player).getTeleport().getToRegion().getEnderpearl() : getEvents(player).getTeleport().getToRegion().getSelf();
 				}
 			}
 		} else if(player != null) {
@@ -380,12 +375,12 @@ public class EntityMoveListener {
 		if(!allowTo || !allowFrom || !isAllowPortalUse) {
 			rgEvent.setCancelled(true);
 			if(!portal) {
-				if(!allowTo && player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.CANCEL_JOIN));
-				if(!allowFrom && player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.CANCEL_EXIT));
+				if(!allowTo && player != null) rgEvent.setMessage(getEvents(player).getMove().getJoin());
+				if(!allowFrom && player != null) rgEvent.setMessage(getEvents(player).getMove().getExit());
 			}
 		}
-		if(!allowFly && player != null) rgEvent.setStopFlyingMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.DISABLE_FLY_ON_JOIN));
-		if(isRiding && !isAllowRiding && player != null) rgEvent.setStopRidingMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.RIDING));
+		if(!allowFly && player != null) rgEvent.setStopFlyingMessage(getEvents(player).getFly().getDisableOnJoin());
+		if(isRiding && !isAllowRiding && player != null) rgEvent.setStopRidingMessage(getEvents(player).getEntity().getRiding());
 		rgEvent.setDestinationPosition(event.destinationPosition());
 		rgEvent.setAllowFly(allowFly);
 		rgEvent.setAllowRiding(isAllowRiding);
@@ -434,12 +429,12 @@ public class EntityMoveListener {
 		boolean isAllowFly = optPlayer.isPresent() && !optPlayer.get().uniqueId().equals(entity.uniqueId()) ? isAllowPlayerFly(optPlayer.get(), from) : (optSourcePlayer.isPresent() ? isAllowPlayerFly(optSourcePlayer.get(), to) : true);
 		if(optPlayer.isPresent() && optSourcePlayer.isPresent() && !optPlayer.get().uniqueId().equals(optSourcePlayer.get().uniqueId())) {
 			if(!isAllowFrom) {
-				optPlayer.get().sendMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.TELEPORT_OTHER_FROM_REGION));
+				optPlayer.get().sendMessage(getEvents(optPlayer.get()).getTeleport().getFromRegion().getOther());
 				event.setCancelled(true);
 				return;
 			}
 			if(!isAllowTo) {
-				optPlayer.get().sendMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.TELEPORT_OTHER_TO_REGION));
+				optPlayer.get().sendMessage(getEvents(optPlayer.get()).getTeleport().getToRegion().getOther());
 				event.setCancelled(true);
 				return;
 			}
@@ -544,8 +539,8 @@ public class EntityMoveListener {
 		};
 		rgEvent.setCancelled(!isAllowFrom || !isAllowTo);
 		rgEvent.setAllowFly(isAllowFly);
-		if(optPlayer.isPresent() && !isAllowFly) rgEvent.setStopFlyingMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.DISABLE_FLY_ON_JOIN));
-		if(rgEvent.isCancelled() && optPlayer.isPresent()) rgEvent.setMessage(!isAllowFrom ? plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.TELEPORT_FROM_REGION) : plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.TELEPORT_TO_REGION));
+		if(optPlayer.isPresent() && !isAllowFly) rgEvent.setStopFlyingMessage(getEvents(optPlayer.get()).getFly().getDisable());
+		if(rgEvent.isCancelled() && optPlayer.isPresent()) rgEvent.setMessage(!isAllowFrom ? getEvents(optPlayer.get()).getTeleport().getFromRegion().getSelf() : getEvents(optPlayer.get()).getTeleport().getToRegion().getSelf());
 		ListenerUtils.postEvent(rgEvent);
 		if(!rgEvent.isAllowFly() && rgEvent.getPlayer().isPresent()) {
 			rgEvent.getPlayer().get().offer(Keys.CAN_FLY, false);

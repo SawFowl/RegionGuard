@@ -22,15 +22,12 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.world.RegionUseItemStackEvent;
-import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
-public class ItemUseListener {
+public class ItemUseListener extends ManagementEvents {
 
-	private final RegionGuard plugin;
-	private Cause cause;
 	public ItemUseListener(RegionGuard plugin) {
-		this.plugin = plugin;
+		super(plugin);
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
@@ -109,7 +106,7 @@ public class ItemUseListener {
 
 		};
 		rgEvent.setCancelled(!isAllow);
-		if(optPlayer.isPresent()) rgEvent.setMessage(plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.ITEM_USE));
+		if(optPlayer.isPresent()) rgEvent.setMessage(getEvents(optPlayer.get()).getItem().getUse());
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);

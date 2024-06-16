@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.spongepowered.api.command.CommandCompletion;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.plugin.PluginContainer;
 
 import net.kyori.adventure.text.Component;
@@ -15,6 +16,8 @@ import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.regionguard.RegionGuard;
+import sawfowl.regionguard.configure.locales.abstractlocale.Command;
+import sawfowl.regionguard.configure.locales.abstractlocale.Command.Exceptions;
 
 public abstract class AbstractCommand implements RawCommand {
 
@@ -67,6 +70,18 @@ public abstract class AbstractCommand implements RawCommand {
 	@Override
 	public Component shortDescription(Locale locale) {
 		return extendedDescription(locale);
+	}
+
+	protected Command getCommand(Locale locale) {
+		return plugin.getLocales().getLocale(locale).getCommand();
+	}
+
+	protected Command getCommand(ServerPlayer player) {
+		return getCommand(player.locale());
+	}
+
+	protected Exceptions getExceptions(Locale locale) {
+		return getCommand(locale).getExceptions();
 	}
 
 }

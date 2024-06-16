@@ -3,13 +3,10 @@ package sawfowl.regionguard.commands.child;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import net.kyori.adventure.text.Component;
@@ -17,13 +14,15 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
+import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
+import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.SelectorTypes;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
 
 public class SetSelectorType extends AbstractPlayerCommand {
 
@@ -33,21 +32,14 @@ public class SetSelectorType extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		switch (args.get(SelectorTypes.class, 0).get()) {
-		case CUBOID: {
-			plugin.getAPI().setSelectorType(src, SelectorTypes.CUBOID);
-			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_SELECTOR_CUBOID));
-			break;
-		}
-		default:
-			plugin.getAPI().setSelectorType(src, SelectorTypes.FLAT);
-			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_SELECTOR_FLAT));
-		}
+		SelectorTypes type = args.get(SelectorTypes.class, 0).get();
+		plugin.getAPI().setSelectorType(src, type);
+		src.sendMessage(getCommand(locale).getSetSelectorType().get(type == SelectorTypes.FLAT));
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_SET_SELECTOR_TYPE);
+		return getCommand(locale).getSetSelectorType().getDescription();
 	}
 
 	@Override
@@ -72,22 +64,7 @@ public class SetSelectorType extends AbstractPlayerCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
-		return Arrays.asList(
-			RawArgument.of(
-				SelectorTypes.class,
-				CommandTreeNodeTypes.STRING.get().createNode(),
-				(cause, args) -> Stream.of(SelectorTypes.values()).map(type -> type.toString()),
-				(cause, args) -> args.length > 0 ? Optional.ofNullable(SelectorTypes.checkType(args[0])) : Optional.empty(),
-				"Type",
-				false,
-				false,
-				0,
-				null,
-				null,
-				null,
-				LocalesPaths.COMMAND_REGION_TYPE_EXCEPTION_NOT_PRESENT
-			)
-		);
+		return Arrays.asList(RawArguments.createStringArgument(SelectorTypes.getValues(), new RawBasicArgumentData<String>(null, "Type", 0, null, null), RawOptional.notOptional(), locale -> getExceptions(locale).getSelectorTypeNotPresent()));
 	}
 
 }

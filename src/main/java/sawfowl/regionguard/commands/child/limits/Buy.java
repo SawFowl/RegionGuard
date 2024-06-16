@@ -22,7 +22,7 @@ import sawfowl.regionguard.commands.child.limits.buy.Blocks;
 import sawfowl.regionguard.commands.child.limits.buy.Claims;
 import sawfowl.regionguard.commands.child.limits.buy.Members;
 import sawfowl.regionguard.commands.child.limits.buy.Subdivisions;
-import sawfowl.regionguard.configure.LocalesPaths;
+import sawfowl.regionguard.configure.locales.abstractlocale.Command.Limits;
 
 public class Buy extends AbstractCommand {
 
@@ -37,12 +37,12 @@ public class Buy extends AbstractCommand {
 
 	@Override
 	public void process(CommandCause cause, Audience audience, Locale locale, boolean isPlayer, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		sendPaginationList(audience, getComponent(locale, LocalesPaths.COMMANDS_TITLE), getComponent(locale, LocalesPaths.PADDING), 10, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList());
+		sendPaginationList(audience, getCommand(locale).getMain().getTitle(), getCommand(locale).getMain().getPadding(), 10, getChildExecutors().values().stream().filter(child -> child.canExecute(cause)).map(child -> child.usage(cause)).toList());
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_BUYLIMIT);
+		return getLimits(locale).getBuy().getDescription();
 	}
 
 	@Override
@@ -68,6 +68,10 @@ public class Buy extends AbstractCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		return null;
+	}
+
+	private Limits getLimits(Locale locale) {
+		return getCommand(locale).getLimits();
 	}
 
 }

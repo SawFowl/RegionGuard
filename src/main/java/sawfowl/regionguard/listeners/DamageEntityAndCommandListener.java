@@ -10,8 +10,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -33,16 +31,12 @@ import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.world.RegionDamageEntityEvent;
 import sawfowl.regionguard.api.events.world.RegionExecuteCommandEvent;
-import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
-public class DamageEntityAndCommandListener {
+public class DamageEntityAndCommandListener extends ManagementEvents {
 
-	private final RegionGuard plugin;
-	private Cause cause;
 	public DamageEntityAndCommandListener(RegionGuard plugin) {
-		this.plugin = plugin;
-		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+		super(plugin);
 	}
 
 	Map<UUID, Long> lastDamage = new HashMap<UUID, Long>();
@@ -53,7 +47,7 @@ public class DamageEntityAndCommandListener {
 		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
 		boolean isPvP = lastDamage.containsKey(player.uniqueId()) && System.currentTimeMillis() - lastDamage.get(player.uniqueId()) < 20000;
 		boolean isAllow = isPvP ? isAllowPvPCommand(region, player, event.command()) : isAllowCommand(region, player, event.command());
-		Component message = isPvP ? plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_EXECUTE_PVP) : plugin.getLocales().getComponent(player.locale(), LocalesPaths.COMMAND_EXECUTE);
+		Component message = isPvP ? getEvents(player).getCommand().getExecutePvP() : getEvents(player).getCommand().getExecute();
 		RegionExecuteCommandEvent rgEvent = new RegionExecuteCommandEvent() {
 
 			boolean cencelled;
@@ -137,7 +131,7 @@ public class DamageEntityAndCommandListener {
 		boolean isAllow = true;
 		if(optPlayer.isPresent() && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get()) && !optPlayer.get().uniqueId().equals(event.entity().uniqueId())) {
 			isAllow = false;
-			message = plugin.getLocales().getComponent(optPlayer.get().locale(), LocalesPaths.PVP);
+			message = getEvents(player).getEntity().getPvP();
 		} else if(optEntity.isPresent() && !optEntity.get().uniqueId().equals(event.entity().uniqueId())) {
 			Entity entity = optEntity.get();
 			if(entity instanceof Projectile) {
@@ -150,10 +144,10 @@ public class DamageEntityAndCommandListener {
 			if(!entity.uniqueId().equals(event.entity().uniqueId())) {
 				if(player != null && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get())) {
 					isAllow = false;
-					message = plugin.getLocales().getComponent(player.locale(), LocalesPaths.PVP);
+					message = getEvents(player).getEntity().getPvP();
 				} else if(!isAllowDamage(region, event.entity(), entity)) {
 					if(player != null) {
-						message = plugin.getLocales().getComponent(player.locale(), LocalesPaths.ENTITY_DAMAGE);
+						message = getEvents(player).getEntity().getDamage();
 					}
 					isAllow = false;
 				}

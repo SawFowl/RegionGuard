@@ -19,7 +19,6 @@ import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.worldedit.CUIUser;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
 
 public class WeCUI extends AbstractPlayerCommand {
 
@@ -31,19 +30,17 @@ public class WeCUI extends AbstractPlayerCommand {
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		CUIUser user = plugin.getAPI().getWorldEditCUIAPI().getOrCreateUser(src);
 		boolean newValue = !user.isSupportCUI();
-		if(newValue) {
-			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_WECUI_ENABLE));
-		} else {
+		if(!newValue) {
 			plugin.getAPI().getWorldEditCUIAPI().revertVisuals(src, null);
 			plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(src);
-			src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_WECUI_DISABLE));
 		}
 		user.setSupportCUI(newValue);
+		src.sendMessage(getCommand(locale).getWeCUI().get(newValue));
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_WECUI);
+		return getCommand(locale).getWeCUI().getDescription();
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package sawfowl.regionguard.commands.child.limits.sell;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -18,6 +17,9 @@ import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
+import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
+import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
+import sawfowl.commandpack.utils.CommandsUtil;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -25,8 +27,7 @@ import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.configure.locales.abstractlocale.Command.Limits.Transaction.Limit;
 
 public class Subdivisions extends AbstractPlayerCommand {
 
@@ -37,17 +38,17 @@ public class Subdivisions extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		long toSell = args.getLong(0).get();
-		if(toSell <= 0) exception(locale, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ENTERED_ZERO);
+		if(toSell <= 0) exception(getExceptions(locale).getEnteredZero());
 		if(!plugin.getAPI().getPlayerData(src).isPresent()) plugin.getAPI().setPlayerData(src, PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(src), plugin.getAPI().getClaimedRegions(src))));
-		if(plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions() < toSell) exception(locale, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_TO_MUCH_VOLUME, new String[] {Placeholders.MAX}, plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions());
-		if(!plugin.getEconomy().addToPlayerBalance(src, plugin.getAPI().getCurrency(src), BigDecimal.valueOf(toSell * plugin.getAPI().getSellSubdivisionPrice(src)))) exception(locale, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_ECONOMY_EXCEPTION);
+		if(plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions() < toSell) exception(getExceptions(locale).getMaxValue(plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions()));
+		if(!plugin.getEconomy().addToPlayerBalance(src, plugin.getAPI().getCurrency(src), BigDecimal.valueOf(toSell * plugin.getAPI().getSellSubdivisionPrice(src)))) exception(getExceptions(locale).getEconomyException());
 		plugin.getAPI().setLimitSubdivisions(src, plugin.getAPI().getPlayerData(src).get().getLimits().getSubdivisions() - toSell);
-		src.sendMessage(getText(locale, LocalesPaths.COMMAND_SELLSUBDIVISIONS_SUCCESS).replace(new String[] {Placeholders.SIZE, Placeholders.VOLUME}, toSell, plugin.getAPI().getLimitSubdivisions(src)).get());
+		src.sendMessage(getLimit(locale).getSuccess(toSell, plugin.getAPI().getLimitSubdivisions(src)));
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_SELLSUBDIVISIONS);
+		return getLimit(locale).getDescription();
 	}
 
 	@Override
@@ -73,8 +74,12 @@ public class Subdivisions extends AbstractPlayerCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		return Arrays.asList(
-			RawArguments.createLongArgument("Value", new ArrayList<Long>(), false, false, 0, null, null, null, null, LocalesPaths.COMMAND_SELLSUBDIVISIONS_EXCEPTION_NOT_PRESENT)
+			RawArguments.createLongArgument(CommandsUtil.getEmptyList(), new RawBasicArgumentData<>(null, "Volume", 0, null, null), RawOptional.notOptional(), locale -> getCommand(locale).getExceptions().getVolumeNotPresent())
 		);
+	}
+
+	private Limit getLimit(Locale locale) {
+		return getCommand(locale).getLimits().getSell().getMembersLimit();
 	}
 
 }

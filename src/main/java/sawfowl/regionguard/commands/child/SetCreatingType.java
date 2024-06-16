@@ -16,41 +16,32 @@ import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
+import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
+import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
 
 public class SetCreatingType extends AbstractPlayerCommand {
 
+	private List<String> types;
 	public SetCreatingType(RegionGuard plugin) {
 		super(plugin);
 	}
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		switch (RegionTypes.valueOfName(args.getString(0).get())) {
-		case ARENA: {
-			plugin.getAPI().setCreatingRegionType(src, RegionTypes.ARENA);
-			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_REGION_TYPE_ARENA));
-			break;
-		}
-		case ADMIN: {
-			plugin.getAPI().setCreatingRegionType(src, RegionTypes.ADMIN);
-			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_REGION_TYPE_ADMIN));
-			break;
-		}
-		default:
-			plugin.getAPI().setCreatingRegionType(src, RegionTypes.CLAIM);
-			src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_REGION_TYPE_CLAIM));
-		}
+		RegionTypes type = RegionTypes.valueOfName(args.getString(0).get());
+		if(type != RegionTypes.CLAIM && type != RegionTypes.ADMIN && type != RegionTypes.ARENA) return;
+		plugin.getAPI().setCreatingRegionType(src, type);
+		src.sendMessage(getCommand(locale).getCreatingType().get(type));
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_SET_CREATING_TYPE);
+		return getCommand(locale).getCreatingType().getDescription();
 	}
 
 	@Override
@@ -75,7 +66,8 @@ public class SetCreatingType extends AbstractPlayerCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
-		return Arrays.asList(RawArguments.createStringArgument("Type", Arrays.asList("admin", "arena", "claim"), false, false, 0, "claim", null, null, null, LocalesPaths.COMMAND_REGION_TYPE_EXCEPTION_NOT_PRESENT));
+		types = Arrays.asList("admin", "arena", "claim");
+		return Arrays.asList(RawArguments.createStringArgument(types, new RawBasicArgumentData<String>("claim", "Type", 0, null, null), RawOptional.notOptional(), locale -> getExceptions(locale).getRegionTypeNotPresent()));
 	}
 
 }

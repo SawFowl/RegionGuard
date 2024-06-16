@@ -4,8 +4,9 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import net.kyori.adventure.text.Component;
-
+import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Flag.Hover;
+import sawfowl.regionguard.utils.Placeholders;
 
 @ConfigSerializable
 public class ImplementHover implements Hover {
@@ -21,7 +22,7 @@ public class ImplementHover implements Hover {
 	@Setting("SuggestArgs")
 	private Component suggestArgs = deserialize("&2Click to specify arguments.");
 	@Setting("Values")
-	private Component hoverValues = deserialize("&5Event source &b%source%&5.\n&5Event target &b%target%&5.");
+	private Component hoverValues = deserialize("&5Event source &b" + Placeholders.SOURCE + "&5.\n&5Event target &b" + Placeholders.TARGET + "&5.");
 
 	@Override
 	public Component getRemove() {
@@ -44,8 +45,8 @@ public class ImplementHover implements Hover {
 	}
 
 	@Override
-	public Component getHoverValues() {
-		return hoverValues;
+	public Component getHoverValues(FlagValue flagValue) {
+		return replace(hoverValues, array(Placeholders.SOURCE, Placeholders.TARGET), flagValue.getSource(), flagValue.getTarget());
 	}
 
 }

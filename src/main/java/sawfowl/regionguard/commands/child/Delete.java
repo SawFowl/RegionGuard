@@ -20,6 +20,8 @@ import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
+import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
+import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -27,7 +29,6 @@ import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionDeleteEvent;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
 
 public class Delete extends AbstractPlayerCommand {
 
@@ -39,11 +40,11 @@ public class Delete extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
-		if(!region.getOwnerUUID().equals(src.uniqueId()) && !src.hasPermission(Permissions.STAFF_DELETE)) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_PLAYER_NOT_OWNER);
+		if(region.isGlobal()) exception(getExceptions(locale).getRegionNotFound());
+		if(!region.getOwnerUUID().equals(src.uniqueId()) && !src.hasPermission(Permissions.STAFF_DELETE)) exception(getExceptions(locale).getNotOwner());
 		boolean regen = !region.getParrent().isPresent() && (src.hasPermission(Permissions.STAFF_DELETE) ? (args.getString(0).isPresent()) && plugin.getConfig().getRegenerateTerritory().isStaff() : plugin.getConfig().getRegenerateTerritory().isAllPlayers());
-		if(regen) src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_REGEN));
-		src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_CONFIRMATION_REQUEST).clickEvent(SpongeComponents.executeCallback(messageCause -> {
+		if(regen) src.sendMessage(getCommand(locale).getDelete().getRegen());
+		src.sendMessage(getCommand(locale).getDelete().getConfirmRequest().clickEvent(SpongeComponents.executeCallback(messageCause -> {
 			if(region.getParrent().isPresent()) {
 				Region parrent = region.getParrent().get();
 				RegionDeleteEvent event = new RegionDeleteEvent() {
@@ -83,7 +84,7 @@ public class Delete extends AbstractPlayerCommand {
 						return src;
 					}
 				};
-				event.setMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_CHILD_DELETED));
+				event.setMessage(getCommand(locale).getDelete().getSuccesChild());
 				Sponge.eventManager().post(event);
 				if(!event.isCancelled()) {
 					parrent.removeChild(region);
@@ -128,7 +129,7 @@ public class Delete extends AbstractPlayerCommand {
 						return src;
 					}
 				};
-				event.setMessage(region.containsChilds() ? plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_DELETED_MAIN_AND_CHILDS) : plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_DELETE_DELETED));
+				event.setMessage(region.containsChilds() ? getCommand(locale).getDelete().getSuccesWhithChilds() : getCommand(locale).getDelete().getSuccess());
 				Sponge.eventManager().post(event);
 				if(!event.isCancelled()) {
 					if(region.getType() != RegionTypes.UNSET) {
@@ -145,7 +146,7 @@ public class Delete extends AbstractPlayerCommand {
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_DELETE);
+		return getCommand(locale).getDelete().getDescription();
 	}
 
 	@Override
@@ -171,7 +172,7 @@ public class Delete extends AbstractPlayerCommand {
 	@Override
 	public List<RawArgument<?>> getArgs() {
 		if(regen == null) regen = Arrays.asList("-regen", "-r");
-		return Arrays.asList(RawArguments.createStringArgument("Regen", regen, true, true, 0, null, Permissions.STAFF_DELETE, null, null, null));
+		return Arrays.asList(RawArguments.createStringArgument(regen, new RawBasicArgumentData<String>(null, "Regen", 0, Permissions.STAFF_DELETE, null), RawOptional.optional(), null));
 	}
 
 }

@@ -1,19 +1,30 @@
 package sawfowl.regionguard.listeners;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.math.vector.Vector3i;
 
 import net.kyori.adventure.text.Component;
-
+import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.RegionCreateEvent;
 import sawfowl.regionguard.api.events.RegionResizeEvent;
+import sawfowl.regionguard.configure.locales.abstractlocale.Events;
 
 class ManagementEvents {
+
+	protected final RegionGuard plugin;
+	protected Cause cause;
+	public ManagementEvents(RegionGuard plugin) {
+		this.plugin = plugin;
+		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+	}
 
 	class Create extends AbstractEvent implements RegionCreateEvent {
 
@@ -143,6 +154,14 @@ class ManagementEvents {
 			return oppositeCorner;
 		}
 
+	}
+
+	protected Events getEvents(Locale locale) {
+		return plugin.getLocales().getLocale(locale).getEvents();
+	}
+
+	protected Events getEvents(ServerPlayer player) {
+		return player == null ? plugin.getLocales().getSystemLocale().getEvents() : getEvents(player.locale());
 	}
 
 }

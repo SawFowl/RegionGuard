@@ -7,8 +7,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.CollideBlockEvent;
@@ -26,16 +24,12 @@ import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.events.world.RegionImpactEvent;
-import sawfowl.regionguard.configure.LocalesPaths;
 import sawfowl.regionguard.utils.ListenerUtils;
 
-public class ImpactListener{
+public class ImpactListener extends ManagementEvents {
 
-	private final RegionGuard plugin;
-	private Cause cause;
 	public ImpactListener(RegionGuard plugin) {
-		this.plugin = plugin;
-		cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+		super(plugin);
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
@@ -113,7 +107,7 @@ public class ImpactListener{
 			
 		};
 		rgEvent.setCancelled(!isAllow);
-		if(player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.IMPACT_BLOCK));
+		if(player != null) rgEvent.setMessage(getEvents(player).getBlock().getImpact());
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);
@@ -198,7 +192,7 @@ public class ImpactListener{
 			
 		};
 		rgEvent.setCancelled(!isAllow);
-		if(player != null) rgEvent.setMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.IMPACT_ENTITY));
+		if(player != null) rgEvent.setMessage(getEvents(player).getEntity().getImpact());
 		ListenerUtils.postEvent(rgEvent);
 		if(rgEvent.isCancelled()) {
 			event.setCancelled(true);

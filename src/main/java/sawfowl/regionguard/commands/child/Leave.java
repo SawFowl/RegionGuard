@@ -19,7 +19,6 @@ import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
 
 public class Leave extends AbstractPlayerCommand {
 
@@ -30,16 +29,16 @@ public class Leave extends AbstractPlayerCommand {
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
 		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
-		if(region.isGlobal()) exception(locale, LocalesPaths.COMMANDS_EXCEPTION_REGION_NOT_FOUND);
-		if(region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_LEAVE_PLAYER_IS_OWNER));
-		if(!region.isTrusted(src)) exception(locale, LocalesPaths.COMMAND_LEAVE_PLAYER_NOT_TRUSTED);
-		src.sendMessage(getText(locale, LocalesPaths.COMMAND_LEAVE_CONFIRMATION_REQUEST).createCallBack(messageCause -> {
+		if(region.isGlobal()) exception(getExceptions(locale).getRegionNotFound());
+		if(region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(getExceptions(locale).getNotOwner());
+		if(!region.isTrusted(src)) exception(getCommand(locale).getLeave().getNotTrusted());
+		src.sendMessage(TextUtils.createCallBack(getCommand(locale).getLeave().getConfirmRequest(), messageCause -> {
 			if(region.isTrusted(src)) {
 				region.untrust(src);
 				plugin.getAPI().saveRegion(region);
-				src.sendMessage(plugin.getLocales().getComponent(locale, LocalesPaths.COMMAND_LEAVE_SUCCESS));
+				src.sendMessage(getCommand(locale).getLeave().getSuccess());
 			}
-		}).get());
+		}));
 	}
 
 	@Override
@@ -49,7 +48,7 @@ public class Leave extends AbstractPlayerCommand {
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_LEAVE);
+		return getCommand(locale).getLeave().getDescription();
 	}
 
 	@Override

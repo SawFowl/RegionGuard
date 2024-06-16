@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.localeapi.api.LocaleReference;
 import sawfowl.regionguard.api.RegionTypes;
+import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.Region;
 
 public interface Command extends LocaleReference {
@@ -48,7 +49,7 @@ public interface Command extends LocaleReference {
 
 		Component getConfirmRequest();
 
-		Component getSuccesRegen();
+		Component getRegen();
 
 		Component getSuccesWhithChilds();
 
@@ -70,7 +71,7 @@ public interface Command extends LocaleReference {
 
 			Component getSuggestArgs();
 
-			Component getHoverValues();
+			Component getHoverValues(FlagValue flagValue);
 
 		}
 
@@ -82,7 +83,7 @@ public interface Command extends LocaleReference {
 
 		Component getNotPermitted();
 
-		Component getNotPermittedFlag();
+		Component getNotPermittedFlag(String flag);
 
 		Component getValueNotPresent();
 
@@ -116,7 +117,7 @@ public interface Command extends LocaleReference {
 
 		Component getType(Region region);
 
-		Component getCreated(Component created);
+		Component getCreated(String created);
 
 		Component getOwner(Region region);
 
@@ -146,7 +147,7 @@ public interface Command extends LocaleReference {
 
 	interface Limits extends CommandInfo {
 
-		interface Buy extends CommandInfo {
+		interface Transaction extends CommandInfo {
 
 			interface Limit extends CommandInfo {
 
@@ -164,7 +165,9 @@ public interface Command extends LocaleReference {
 
 		}
 
-		interface Sell extends Buy {}
+		interface Buy extends Transaction {}
+
+		interface Sell extends Transaction {}
 
 		interface Set extends CommandInfo {
 
@@ -198,13 +201,13 @@ public interface Command extends LocaleReference {
 
 		Component getPadding();
 
-		Component getClaims(long claimed, long limit, long max);
+		Component getClaims(Object claimed, Object limit, Object max);
 
-		Component getBlocks(long claimed, long limit, long max);
+		Component getBlocks(Object claimed, Object limit, Object max);
 
-		Component getMembers(long claimed, long limit, long max);
+		Component getMembers(Object claimed, Object limit, Object max);
 
-		Component getSubdivisions(long claimed, long limit, long max);
+		Component getSubdivisions(Object claimed, Object limit, Object max);
 
 	}
 
@@ -219,6 +222,10 @@ public interface Command extends LocaleReference {
 		Component getEmptySelf();
 
 		Component getTeleportNotSafe();
+
+		default Component getEmpty(boolean other) {
+			return other ? getEmptyOther() : getEmptySelf();
+		}
 
 	}
 
@@ -236,6 +243,8 @@ public interface Command extends LocaleReference {
 
 		Component getTooLong();
 
+		Component getTypeNotPresent();
+
 		Component getSuccessJoin(boolean clear);
 
 		Component getSuccessExit(boolean clear);
@@ -248,6 +257,8 @@ public interface Command extends LocaleReference {
 
 		Component getLowTrust();
 
+		Component getTooLong();
+
 		Component getSuccess(boolean clear);
 
 	}
@@ -256,25 +267,25 @@ public interface Command extends LocaleReference {
 
 		Component getOnlyOwner();
 
-		Component getAlreadyOwner(GameProfile profile);
+		Component getAdminClaim();
 
-		Component getStaffConfirmRequest(GameProfile profile);
+		Component getAlreadyOwner();
+
+		Component getAlreadyOwnerStaff(GameProfile profile);
 
 		Component getConfirmRequest(GameProfile profile);
 
 		Component getSuccessFromStaff(Region region);
 
-		Component getSuccess(Region region);
+		Component getSuccess(Region region, GameProfile newOwner);
 
-		Component getSuccessNewOwner(Region region);
+		Component getSuccessNewOwner(Region region, GameProfile newOwner);
 
 	}
 
 	interface SetSelectorType extends CommandInfo {
 
-		Component getCuboid();
-
-		Component getFlat();
+		Component get(boolean flat);
 
 	}
 
@@ -290,7 +301,7 @@ public interface Command extends LocaleReference {
 
 		Component getSuccess(String trustlevel, GameProfile profile);
 
-		Component getSuccessTarget(String trustlevel, ServerPlayer profile, Region region);
+		Component getSuccessTarget(String trustlevel, ServerPlayer player, Region region);
 
 	}
 
@@ -304,13 +315,15 @@ public interface Command extends LocaleReference {
 
 		Component getSuccess(GameProfile profile);
 
-		Component getSuccessTarget(GameProfile profile, Region region);
+		Component getSuccessTarget(ServerPlayer player, Region region);
 
 	}
 
 	interface UpdateDefaultFlags extends CommandInfo {
 
 		Component getSuccess(RegionTypes type);
+
+		Component getException();
 
 	}
 
@@ -326,9 +339,43 @@ public interface Command extends LocaleReference {
 
 	interface WeCUI extends CommandInfo {
 
-		Component getEnable();
+		Component get(boolean enable);
 
-		Component getDisable();
+	}
+
+	interface Exceptions extends LocaleReference {
+
+		Component getOnlyPlayer();
+
+		Component getPlayerNotPresent();
+
+		Component getTargetSelf();
+
+		Component getRegionNotFound();
+
+		Component getFlagNotPresent();
+
+		Component getMessageNotPresent();
+
+		Component getNameNotPresent();
+
+		Component getVolumeNotPresent();
+
+		Component getEnteredZero();
+
+		Component getNotEnoughMoney();
+
+		Component getNotOwner();
+
+		Component getEconomyException();
+
+		Component getMaxValue(long value);
+
+		Component getRegionTypeNotPresent();
+
+		Component getSelectorTypeNotPresent();
+
+		Component getTrustTypeNotPresent();
 
 	}
 
@@ -352,6 +399,14 @@ public interface Command extends LocaleReference {
 
 	SetCreatingType getCreatingType();
 
+	SetMessage getSetMessage();
+
+	SetName getSetName();
+
+	SetOwner getSetOwner();
+
+	SetSelectorType getSetSelectorType();
+
 	Trust getTrust();
 
 	Untrust getUntrust();
@@ -361,5 +416,7 @@ public interface Command extends LocaleReference {
 	Wand getWand();
 
 	WeCUI getWeCUI();
+
+	Exceptions getExceptions();
 
 }

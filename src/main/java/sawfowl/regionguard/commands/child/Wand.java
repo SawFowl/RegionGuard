@@ -19,7 +19,6 @@ import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.commands.abstractcommands.AbstractPlayerCommand;
-import sawfowl.regionguard.configure.LocalesPaths;
 
 public class Wand extends AbstractPlayerCommand {
 
@@ -29,15 +28,15 @@ public class Wand extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		if(src.inventory().contains(plugin.getAPI().getWandItem())) exception(locale, LocalesPaths.COMMAND_WAND_EXCEPTION_ITEM_EXIST);
-		if(src.inventory().freeCapacity() == 0) exception(locale, LocalesPaths.COMMAND_WAND_EXCEPTION_INVENTORY_IS_FULL);
+		if(src.inventory().contains(plugin.getAPI().getWandItem())) exception(getCommand(locale).getWand().getExist());
+		if(src.inventory().freeCapacity() == 0) exception(getCommand(locale).getWand().getFullInventory());
 		src.inventory().offer(plugin.getAPI().getWandItem());
-		src.sendMessage(getComponent(locale, LocalesPaths.COMMAND_WAND_SUCCESS));
+		src.sendMessage(getCommand(locale).getWand().getSuccess());
 	}
 
 	@Override
 	public Component extendedDescription(Locale locale) {
-		return getComponent(locale, LocalesPaths.COMMANDS_WAND);
+		return getCommand(locale).getWand().getDescription();
 	}
 
 	@Override

@@ -17,17 +17,14 @@ import org.spongepowered.api.util.Tristate;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
 import sawfowl.regionguard.api.data.Region;
-import sawfowl.regionguard.configure.LocalesPaths;
 
-public class DeathListener {
+public class DeathListener extends ManagementEvents {
 
-	private final RegionGuard plugin;
 	//private Cause cause;
 	Map<UUID, Map<Integer, ItemStack>> inventories = new HashMap<UUID, Map<Integer, ItemStack>>();
 	Map<UUID, Integer> exps = new HashMap<UUID, Integer>();
 	public DeathListener(RegionGuard plugin) {
-		this.plugin = plugin;
-		//cause = Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, plugin.getPluginContainer()).build(), plugin.getPluginContainer());
+		super(plugin);
 	}
 
 	@Listener(order = Order.LAST)
@@ -47,13 +44,13 @@ public class DeathListener {
 			});
 			if(!map.isEmpty()) {
 				inventories.put(player.uniqueId(), map);
-				player.sendMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.KEEP_INVENTORY));
+				player.sendMessage(getEvents(player).getKeep().getInventory());
 			}
 		}
 		if(keepExp && !event.keepInventory() && player.get(Keys.EXPERIENCE).isPresent() && player.get(Keys.EXPERIENCE).get() > 0) {
 			exps.put(player.uniqueId(), player.get(Keys.EXPERIENCE).get());
 			player.offer(Keys.EXPERIENCE, 0);
-			player.sendMessage(plugin.getLocales().getComponent(player.locale(), LocalesPaths.KEEP_EXP));
+			player.sendMessage(getEvents(player).getKeep().getExp());
 		}
 	}
 
