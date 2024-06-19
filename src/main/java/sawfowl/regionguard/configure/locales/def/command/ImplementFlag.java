@@ -7,7 +7,7 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Flag;
 import sawfowl.regionguard.configure.locales.def.command.flag.ImplementHover;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementFlag implements Flag {
@@ -25,7 +25,7 @@ public class ImplementFlag implements Flag {
 	@Setting("NotPermittedRegion")
 	private Component notPermitted = deserialize("&cYou cannot change the flags in this region.");
 	@Setting("NotPermittedFlag")
-	private Component notPermittedFlag = deserialize("&cYou cannot change or delete the flag: &b" + Placeholders.FLAG + "&c.");
+	private Component notPermittedFlag = deserialize("&cYou cannot change or delete the flag: &b" + PlaceholderKeys.FLAG + "&c.");
 	@Setting("ValueNotPresent")
 	private Component valueNotPresent = deserialize("&cYou must specify the value of the flag.");
 	@Setting("InvalidSource")
@@ -62,7 +62,7 @@ public class ImplementFlag implements Flag {
 
 	@Override
 	public Component getNotPermittedFlag(String flag) {
-		return replace(notPermittedFlag, Placeholders.FLAG, flag);
+		return replace(notPermittedFlag, PlaceholderKeys.FLAG, flag);
 	}
 
 	@Override

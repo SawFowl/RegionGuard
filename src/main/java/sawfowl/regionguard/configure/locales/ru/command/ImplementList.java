@@ -6,7 +6,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.List;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementList implements List {
@@ -16,7 +16,7 @@ public class ImplementList implements List {
 	@Setting("Description")
 	private Component description = deserialize("&6Показ списка регионов.");
 	@Setting("Title")
-	private Component title = deserialize("&3Регионы: " + Placeholders.PLAYER);
+	private Component title = deserialize("&3Регионы: " + PlaceholderKeys.PLAYER);
 	@Setting("Padding")
 	private Component padding = deserialize("&3=");
 	@Setting("EmptyOther")
@@ -33,7 +33,7 @@ public class ImplementList implements List {
 
 	@Override
 	public Component getTitle(String player) {
-		return replace(title, Placeholders.PLAYER, player);
+		return replace(title, PlaceholderKeys.PLAYER, player);
 	}
 
 	@Override

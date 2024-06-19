@@ -6,7 +6,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.configure.locales.abstractlocale.Events.RegionEvents.Resize;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementResize implements Resize {
@@ -16,9 +16,9 @@ public class ImplementResize implements Resize {
 	@Setting("IncorrectCords")
 	private Component incorrectCords = deserialize("&cOne of the XYZ(3D)/XZ(2D) coordinates of the new point coincides with the same coordinate of the opposite corner of the region. Select a different position.");
 	@Setting("SmallVolume")
-	private Component smallVolume = deserialize("&cThe volume selected is too small. To complete the operation, select an area larger than the current one by &b" + Placeholders.VOLUME + "&c.");
+	private Component smallVolume = deserialize("&cThe volume selected is too small. To complete the operation, select an area larger than the current one by &b" + PlaceholderKeys.VOLUME + "&c.");
 	@Setting("LimitBlocks")
-	private Component limitBlocks = deserialize("&cThe new size is too large. You have selected: &b" + Placeholders.SELECTED + "&c blocks.\nBlocks available: &b" + Placeholders.VOLUME + "&c.");
+	private Component limitBlocks = deserialize("&cThe new size is too large. You have selected: &b" + PlaceholderKeys.SELECTED + "&c blocks.\nBlocks available: &b" + PlaceholderKeys.VOLUME + "&c.");
 	@Setting("Intersect")
 	private Component intersect = deserialize("&cIt is not possible to change the size of a region, as this would cause it to intersect with another region.");
 	@Setting("ChildOut")
@@ -35,12 +35,12 @@ public class ImplementResize implements Resize {
 
 	@Override
 	public Component getSmallVolume(int size) {
-		return replace(smallVolume, Placeholders.VOLUME, size);
+		return replace(smallVolume, PlaceholderKeys.VOLUME, size);
 	}
 
 	@Override
 	public Component getLimitBlocks(long size, long limit) {
-		return replace(smallVolume, array(Placeholders.SELECTED, Placeholders.VOLUME), size, limit);
+		return replace(smallVolume, array(PlaceholderKeys.SELECTED, PlaceholderKeys.VOLUME), size, limit);
 	}
 
 	@Override

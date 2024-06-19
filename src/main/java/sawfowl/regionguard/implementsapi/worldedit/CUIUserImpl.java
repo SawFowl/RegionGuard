@@ -13,7 +13,6 @@ import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.worldedit.CUIUser;
 import sawfowl.regionguard.implementsapi.worldedit.cui.events.CUIEvent;
-import sawfowl.regionguard.implementsapi.worldedit.cui.handle.SpongeCUIChannelHandler;
 
 public class CUIUserImpl implements CUIUser {
 
@@ -26,6 +25,7 @@ public class CUIUserImpl implements CUIUser {
 	private boolean isDrag = false;
 	private int failedCuiAttempts = 0;
 	private Cuboid dragCuboid;
+	private static final String cuiPacketId = "worldedit:cui";
 	public CUIUserImpl(ServerPlayer player) {
 		playerUUID = player.uniqueId();
 	}
@@ -37,7 +37,7 @@ public class CUIUserImpl implements CUIUser {
 	public void dispatchCUIEvent(CUIEvent event) {
 		if(!isSupportCUI()) return;
 		getPlayer().ifPresent(player -> {
-			if(event.getParameters().length > 0) CustomPacket.of(SpongeCUIChannelHandler.CUI_PLUGIN_CHANNEL.asString(), event.getTypeId() + "|" + StringUtil.joinString(event.getParameters(), "|")).sendTo(player);
+			if(event.getParameters().length > 0) CustomPacket.of(cuiPacketId, event.getTypeId() + "|" + StringUtil.joinString(event.getParameters(), "|")).sendTo(player);
 		});
 	}
 

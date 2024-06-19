@@ -6,7 +6,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Limits.Transaction.Limit;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementLimit implements Limit {
@@ -21,7 +21,7 @@ public class ImplementLimit implements Limit {
 	@Setting("Description")
 	private Component description = deserialize("&6Увеличение лимита за игровую валюту.");
 	@Setting("Success")
-	private Component success = deserialize("&aВы увеличили свой лимит на &b" + Placeholders.SIZE + "&a. Ваш текущий лимит: &b" + Placeholders.VOLUME + "&a.");
+	private Component success = deserialize("&aВы увеличили свой лимит на &b" + PlaceholderKeys.SIZE + "&a. Ваш текущий лимит: &b" + PlaceholderKeys.VOLUME + "&a.");
 
 	@Override
 	public Component getDescription() {
@@ -30,7 +30,7 @@ public class ImplementLimit implements Limit {
 
 	@Override
 	public Component getSuccess(long size, long limit) {
-		return replace(success, array(Placeholders.SIZE, Placeholders.VOLUME), size, limit);
+		return replace(success, array(PlaceholderKeys.SIZE, PlaceholderKeys.VOLUME), size, limit);
 	}
 
 }

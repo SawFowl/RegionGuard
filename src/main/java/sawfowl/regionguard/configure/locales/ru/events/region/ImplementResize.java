@@ -6,7 +6,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.configure.locales.abstractlocale.Events.RegionEvents.Resize;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementResize implements Resize {
@@ -16,9 +16,9 @@ public class ImplementResize implements Resize {
 	@Setting("IncorrectCords")
 	private Component incorrectCords = deserialize("&cОдна из координат XYZ(3D)/XZ(2D) новой точки совпадает с такой же координатой противоположного угла области. Выберите другую позицию.");
 	@Setting("SmallVolume")
-	private Component smallVolume = deserialize("&cВыбранный объем слишком мал. Чтобы завершить операцию, выберите область больше &b" + Placeholders.VOLUME + "&c.");
+	private Component smallVolume = deserialize("&cВыбранный объем слишком мал. Чтобы завершить операцию, выберите область больше &b" + PlaceholderKeys.VOLUME + "&c.");
 	@Setting("LimitBlocks")
-	private Component limitBlocks = deserialize("&cНовый размер слишком велик. Вы выбрали блоков: &b" + Placeholders.SELECTED + "&c.\nДоступно блоков: &b" + Placeholders.VOLUME + "&c.");
+	private Component limitBlocks = deserialize("&cНовый размер слишком велик. Вы выбрали блоков: &b" + PlaceholderKeys.SELECTED + "&c.\nДоступно блоков: &b" + PlaceholderKeys.VOLUME + "&c.");
 	@Setting("Intersect")
 	private Component intersect = deserialize("&cНевозможно изменить размер региона, так как это приведет к ее пересечению с другим регионом.");
 	@Setting("ChildOut")
@@ -35,12 +35,12 @@ public class ImplementResize implements Resize {
 
 	@Override
 	public Component getSmallVolume(int size) {
-		return replace(smallVolume, Placeholders.VOLUME, size);
+		return replace(smallVolume, PlaceholderKeys.VOLUME, size);
 	}
 
 	@Override
 	public Component getLimitBlocks(long size, long limit) {
-		return replace(smallVolume, array(Placeholders.SELECTED, Placeholders.VOLUME), size, limit);
+		return replace(smallVolume, array(PlaceholderKeys.SELECTED, PlaceholderKeys.VOLUME), size, limit);
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Exceptions;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementExceptions implements Exceptions {
@@ -38,7 +38,7 @@ public class ImplementExceptions implements Exceptions {
 	@Setting("EconomyException")
 	private Component economyException = deserialize("&cПри выполнении транзакции что-то пошло не так. Подробности могут быть в консоли сервера.");
 	@Setting("MaxValue")
-	private Component maxValue = deserialize("&cМаксимально допустимое значение " + Placeholders.MAX + ".");
+	private Component maxValue = deserialize("&cМаксимально допустимое значение " + PlaceholderKeys.MAX + ".");
 	@Setting("RegionTypeNotPresent")
 	private Component regionTypeNotPresent = deserialize("&cВы должны указать тип региона.");
 	@Setting("SelectorTypeNotPresent")
@@ -108,7 +108,7 @@ public class ImplementExceptions implements Exceptions {
 
 	@Override
 	public Component getMaxValue(long value) {
-		return replace(maxValue, Placeholders.MAX, value);
+		return replace(maxValue, PlaceholderKeys.MAX, value);
 	}
 
 	@Override

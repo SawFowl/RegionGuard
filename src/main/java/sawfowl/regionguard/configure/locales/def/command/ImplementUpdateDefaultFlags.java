@@ -7,7 +7,7 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.UpdateDefaultFlags;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementUpdateDefaultFlags implements UpdateDefaultFlags {
@@ -17,7 +17,7 @@ public class ImplementUpdateDefaultFlags implements UpdateDefaultFlags {
 	@Setting("Description")
 	private Component description = deserialize("&6Setting default flags based on those available in the region at the player location.");
 	@Setting("Success")
-	private Component success = deserialize("&aYou have changed the default flags for regions with type &b" + Placeholders.TYPE + "&a.");
+	private Component success = deserialize("&aYou have changed the default flags for regions with type &b" + PlaceholderKeys.TYPE + "&a.");
 	@Setting("Exception")
 	private Component exception = deserialize("&cSomething has gone wrong. The details may be in the console.");
 
@@ -28,7 +28,7 @@ public class ImplementUpdateDefaultFlags implements UpdateDefaultFlags {
 
 	@Override
 	public Component getSuccess(RegionTypes type) {
-		return replace(success, Placeholders.TYPE, type.toString());
+		return replace(success, PlaceholderKeys.TYPE, type.toString());
 	}
 
 	@Override

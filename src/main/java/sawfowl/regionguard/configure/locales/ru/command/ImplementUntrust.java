@@ -9,7 +9,7 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Untrust;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementUntrust implements Untrust {
@@ -24,9 +24,9 @@ public class ImplementUntrust implements Untrust {
 	@Setting("NotOwner")
 	private Component notOwner = deserialize("&cВы не являетесь владельцем или управляющим этого региона и не можете исключить из него других игроков.");
 	@Setting("Success")
-	private Component success = deserialize("&aВы исключили из региона игрока &b" + Placeholders.PLAYER + "&a.");
+	private Component success = deserialize("&aВы исключили из региона игрока &b" + PlaceholderKeys.PLAYER + "&a.");
 	@Setting("SuccessTarget")
-	private Component successTarget = deserialize("&b" + Placeholders.PLAYER + " &eисключает вас из региона в мире &b" + Placeholders.WORLD + " &eс границами от &e" + Placeholders.MIN + " &aдо &e" + Placeholders.MAX + "&a.");
+	private Component successTarget = deserialize("&b" + PlaceholderKeys.PLAYER + " &eисключает вас из региона в мире &b" + PlaceholderKeys.WORLD + " &eс границами от &e" + PlaceholderKeys.MIN + " &aдо &e" + PlaceholderKeys.MAX + "&a.");
 
 	@Override
 	public Component getDescription() {
@@ -50,12 +50,12 @@ public class ImplementUntrust implements Untrust {
 
 	@Override
 	public Component getSuccess(GameProfile profile) {
-		return replace(success, Placeholders.PLAYER, profile.name().orElse(profile.examinableName()));
+		return replace(success, PlaceholderKeys.PLAYER, profile.name().orElse(profile.examinableName()));
 	}
 
 	@Override
 	public Component getSuccessTarget(ServerPlayer player, Region region) {
-		return replace(successTarget, array(Placeholders.PLAYER, Placeholders.WORLD, Placeholders.MIN, Placeholders.MAX), player.name(), region.getWorldKey().asString(), region.getCuboid().getMin(), region.getCuboid().getMax());
+		return replace(successTarget, array(PlaceholderKeys.PLAYER, PlaceholderKeys.WORLD, PlaceholderKeys.MIN, PlaceholderKeys.MAX), player.name(), region.getWorldKey().asString(), region.getCuboid().getMin(), region.getCuboid().getMax());
 	}
 
 }

@@ -9,7 +9,7 @@ import sawfowl.regionguard.configure.locales.abstractlocale.Command.Limits;
 import sawfowl.regionguard.configure.locales.def.command.limits.ImplementBuy;
 import sawfowl.regionguard.configure.locales.def.command.limits.ImplementSell;
 import sawfowl.regionguard.configure.locales.def.command.limits.ImplementSet;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementLimits implements Limits {
@@ -25,17 +25,17 @@ public class ImplementLimits implements Limits {
 	@Setting("Description")
 	private Component description = deserialize("&6Information about your limits.");
 	@Setting("Title")
-	private Component title = deserialize("&6" + Placeholders.PLAYER + " &3limits");
+	private Component title = deserialize("&6" + PlaceholderKeys.PLAYER + " &3limits");
 	@Setting("Padding")
 	private Component padding = deserialize("&3=");
 	@Setting("Blocks")
-	private Component blocks = deserialize("&eBlocks&f: &2" + Placeholders.CURRENT + "&f/&2" + Placeholders.SIZE + "&f/&2" + Placeholders.MAX);
+	private Component blocks = deserialize("&eBlocks&f: &2" + PlaceholderKeys.CURRENT + "&f/&2" + PlaceholderKeys.SIZE + "&f/&2" + PlaceholderKeys.MAX);
 	@Setting("Claims")
-	private Component claims = deserialize("&eClaims&f: &2" + Placeholders.CURRENT + "&f/&2" + Placeholders.SIZE + "&f/&2" + Placeholders.MAX);
+	private Component claims = deserialize("&eClaims&f: &2" + PlaceholderKeys.CURRENT + "&f/&2" + PlaceholderKeys.SIZE + "&f/&2" + PlaceholderKeys.MAX);
 	@Setting("Subdivisions")
-	private Component subdivisions = deserialize("&eSubdivisions&f: &2" + Placeholders.CURRENT + "&f/&2" + Placeholders.SIZE + "&f/&2" + Placeholders.MAX);
+	private Component subdivisions = deserialize("&eSubdivisions&f: &2" + PlaceholderKeys.CURRENT + "&f/&2" + PlaceholderKeys.SIZE + "&f/&2" + PlaceholderKeys.MAX);
 	@Setting("Members")
-	private Component members = deserialize("&eMembers&f: &2" + Placeholders.CURRENT + "&f/&2" + Placeholders.SIZE + "&f/&2" + Placeholders.MAX);
+	private Component members = deserialize("&eMembers&f: &2" + PlaceholderKeys.CURRENT + "&f/&2" + PlaceholderKeys.SIZE + "&f/&2" + PlaceholderKeys.MAX);
 
 	@Override
 	public Buy getBuy() {
@@ -59,7 +59,7 @@ public class ImplementLimits implements Limits {
 
 	@Override
 	public Component getTitle(String player) {
-		return replace(title, Placeholders.PLAYER, player);
+		return replace(title, PlaceholderKeys.PLAYER, player);
 	}
 
 	@Override
@@ -69,22 +69,22 @@ public class ImplementLimits implements Limits {
 
 	@Override
 	public Component getBlocks(Object claimed, Object limit, Object max) {
-		return replace(blocks, array(Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX), claimed, limit, max);
+		return replace(blocks, array(PlaceholderKeys.CURRENT, PlaceholderKeys.SIZE, PlaceholderKeys.MAX), claimed, limit, max);
 	}
 
 	@Override
 	public Component getClaims(Object claimed, Object limit, Object max) {
-		return replace(claims, array(Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX), claimed, limit, max);
+		return replace(claims, array(PlaceholderKeys.CURRENT, PlaceholderKeys.SIZE, PlaceholderKeys.MAX), claimed, limit, max);
 	}
 
 	@Override
 	public Component getSubdivisions(Object claimed, Object limit, Object max) {
-		return replace(subdivisions, array(Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX), claimed, limit, max);
+		return replace(subdivisions, array(PlaceholderKeys.CURRENT, PlaceholderKeys.SIZE, PlaceholderKeys.MAX), claimed, limit, max);
 	}
 
 	@Override
 	public Component getMembers(Object claimed, Object limit, Object max) {
-		return replace(members, array(Placeholders.CURRENT, Placeholders.SIZE, Placeholders.MAX), claimed, limit, max);
+		return replace(members, array(PlaceholderKeys.CURRENT, PlaceholderKeys.SIZE, PlaceholderKeys.MAX), claimed, limit, max);
 	}
 
 }

@@ -9,7 +9,7 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Trust;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementTrust implements Trust {
@@ -27,9 +27,9 @@ public class ImplementTrust implements Trust {
 	@Setting("NotOwner")
 	private Component notOwner = deserialize("&cOnly the owner of the region can appoint managers.");
 	@Setting("Success")
-	private Component success = deserialize("&aYou have assigned the trust type &b" + Placeholders.TRUST_TYPE + "&a to &b" + Placeholders.PLAYER + "&a.");
+	private Component success = deserialize("&aYou have assigned the trust type &b" + PlaceholderKeys.TRUST_TYPE + "&a to &b" + PlaceholderKeys.PLAYER + "&a.");
 	@Setting("SuccessTarget")
-	private Component successTarget = deserialize("&b" + Placeholders.PLAYER + " &aassigns you the trust type &b" + Placeholders.TRUST_TYPE + " &ain the region in the world &b" + Placeholders.WORLD + " &aas the boundaries from &b" + Placeholders.MIN + " &ato &b" + Placeholders.MAX + "&a.");
+	private Component successTarget = deserialize("&b" + PlaceholderKeys.PLAYER + " &aassigns you the trust type &b" + PlaceholderKeys.TRUST_TYPE + " &ain the region in the world &b" + PlaceholderKeys.WORLD + " &aas the boundaries from &b" + PlaceholderKeys.MIN + " &ato &b" + PlaceholderKeys.MAX + "&a.");
 
 	@Override
 	public Component getDescription() {
@@ -58,12 +58,12 @@ public class ImplementTrust implements Trust {
 
 	@Override
 	public Component getSuccess(String trustlevel, GameProfile profile) {
-		return replace(success, array(Placeholders.TRUST_TYPE, Placeholders.PLAYER), trustlevel, profile.name().orElse(profile.examinableName()));
+		return replace(success, array(PlaceholderKeys.TRUST_TYPE, PlaceholderKeys.PLAYER), trustlevel, profile.name().orElse(profile.examinableName()));
 	}
 
 	@Override
 	public Component getSuccessTarget(String trustlevel, ServerPlayer player, Region region) {
-		return replace(successTarget, array(Placeholders.PLAYER, Placeholders.TRUST_TYPE, Placeholders.WORLD, Placeholders.MIN, Placeholders.MAX), player.name(), trustlevel, region.getWorldKey().asString(), region.getCuboid().getMin(), region.getCuboid().getMax());
+		return replace(successTarget, array(PlaceholderKeys.PLAYER, PlaceholderKeys.TRUST_TYPE, PlaceholderKeys.WORLD, PlaceholderKeys.MIN, PlaceholderKeys.MAX), player.name(), trustlevel, region.getWorldKey().asString(), region.getCuboid().getMin(), region.getCuboid().getMax());
 	}
 
 }

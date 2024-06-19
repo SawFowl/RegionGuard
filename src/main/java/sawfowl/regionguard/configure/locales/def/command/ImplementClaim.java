@@ -7,7 +7,7 @@ import org.spongepowered.math.vector.Vector3i;
 import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Claim;
-import sawfowl.regionguard.utils.Placeholders;
+import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
 public class ImplementClaim implements Claim {
@@ -19,9 +19,9 @@ public class ImplementClaim implements Claim {
 	@Setting("RegionNotFound")
 	private Component regionNotFound = deserialize("&cNo region available to create a claim.");
 	@Setting("WorldNotFound")
-	private Component worldNotFound = deserialize("&cRegion world not found: &b" + Placeholders.WORLD);
+	private Component worldNotFound = deserialize("&cRegion world not found: &b" + PlaceholderKeys.WORLD);
 	@Setting("Intersect")
-	private Component intersect = deserialize("&cThe region touches another already existing region with boundaries from &b" + Placeholders.MIN + " &c to &b" + Placeholders.MAX + "&c. Highlight the other region.");
+	private Component intersect = deserialize("&cThe region touches another already existing region with boundaries from &b" + PlaceholderKeys.MIN + " &c to &b" + PlaceholderKeys.MAX + "&c. Highlight the other region.");
 	@Setting("Success")
 	private Component success = deserialize("&aYou have successfully claimed a region.");
 
@@ -37,12 +37,12 @@ public class ImplementClaim implements Claim {
 
 	@Override
 	public Component getWorldNotFound(String world) {
-		return replace(worldNotFound, Placeholders.WORLD, world);
+		return replace(worldNotFound, PlaceholderKeys.WORLD, world);
 	}
 
 	@Override
 	public Component getIntersect(Vector3i min, Vector3i max) {
-		return replace(intersect, array(Placeholders.MIN, Placeholders.MAX), min, max);
+		return replace(intersect, array(PlaceholderKeys.MIN, PlaceholderKeys.MAX), min, max);
 	}
 
 	@Override
