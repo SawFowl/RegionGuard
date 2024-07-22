@@ -103,9 +103,9 @@ import sawfowl.regionguard.listeners.ExplosionListener;
 import sawfowl.regionguard.listeners.InteractEntityListener;
 import sawfowl.regionguard.listeners.InteractItemListener;
 import sawfowl.regionguard.listeners.ItemUseListener;
+import sawfowl.regionguard.listeners.ModExplosionListener;
 import sawfowl.regionguard.listeners.SpawnEntityListener;
 import sawfowl.regionguard.listeners.BlockAndWorldChangeListener.PlayerPositions;
-import sawfowl.regionguard.listeners.forge.ForgeExplosionListener;
 import sawfowl.regionguard.utils.Economy;
 import sawfowl.regionguard.utils.Logger;
 import sawfowl.regionguard.utils.PlaceholderKeys;
@@ -370,7 +370,7 @@ public class RegionGuard {
 		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new RecievePacketListener(instance));
-		if(getConfig().isRegisterForgeListeners() && commandPack.isForgeServer()) new ForgeExplosionListener(instance);
+		if(getConfig().isRegisterForgeListeners() && commandPack.isModifiedServer()) Sponge.eventManager().registerListeners(pluginContainer, new ModExplosionListener(instance));
 		Sponge.asyncScheduler().executor(pluginContainer).submit(() -> {
 			long time = System.currentTimeMillis();
 			regionsDataWork.loadRegions();

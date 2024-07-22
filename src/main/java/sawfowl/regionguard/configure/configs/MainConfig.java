@@ -6,10 +6,8 @@ import java.util.List;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import com.google.gson.JsonParser;
-
 import sawfowl.localeapi.api.LocalisedComment;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 import sawfowl.regionguard.api.SelectorTypes;
 
 @ConfigSerializable
@@ -49,7 +47,7 @@ public class MainConfig {
 
 	@Setting("WandItem")
 	@LocalisedComment(path = {"Comments", "MainConfig", "WandItem"}, plugin = "regionguard")
-	private SerializedItemStackJsonNbt wanditem = new SerializedItemStackJsonNbt("minecraft:stone_axe", 1, JsonParser.parseString("{\"minecraft\":{\"damage\":131}}").getAsJsonObject());
+	private SerializedItemStack wanditem = new SerializedItemStack("minecraft:stone_axe", 1, "{\"minecraft\":{\"damage\":131}}").toJsonComponents();
 
 	@Setting("RegisterForgeListeners")
 	@LocalisedComment(path = {"Comments", "MainConfig", "RegisterForgeListeners"}, plugin = "regionguard")
@@ -83,7 +81,7 @@ public class MainConfig {
 		return mySQLConfig;
 	}
 
-	public SerializedItemStackJsonNbt getWanditem() {
+	public SerializedItemStack getWanditem() {
 		return wanditem;
 	}
 

@@ -18,8 +18,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -72,7 +70,7 @@ public class RegionImpl implements Region {
 		return new Builder() {
 			
 			@Override
-			public @NotNull Region build() {
+			public Region build() {
 				if(creationTime == 0) setCreationTime(System.currentTimeMillis());
 				return RegionImpl.this;
 			}

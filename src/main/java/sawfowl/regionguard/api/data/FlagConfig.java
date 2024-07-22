@@ -1,6 +1,5 @@
 package sawfowl.regionguard.api.data;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
 
@@ -15,7 +14,7 @@ public interface FlagConfig extends DataSerializable {
 	/**
 	 * Build a flag configuration with the specified name and parameters.
 	 */
-	static FlagConfig of(@NotNull String name, @NotNull FlagSettings settings) {
+	static FlagConfig of(String name, FlagSettings settings) {
 		return builder().setName(name).setSettings(settings).build();
 	}
 

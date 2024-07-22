@@ -1,6 +1,5 @@
 package sawfowl.regionguard.implementsapi.data;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.persistence.DataContainer;
 
 import sawfowl.regionguard.api.data.PlayerLimits;
@@ -12,7 +11,7 @@ public class PlayerLimitsImpl implements PlayerLimits {
 		return new Builder() {
 
 			@Override
-			public @NotNull PlayerLimits build() {
+			public PlayerLimits build() {
 				return PlayerLimitsImpl.this;
 			}
 

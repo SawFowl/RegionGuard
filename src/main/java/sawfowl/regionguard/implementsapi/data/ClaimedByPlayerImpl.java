@@ -1,6 +1,5 @@
 package sawfowl.regionguard.implementsapi.data;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.persistence.DataContainer;
 
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
@@ -13,7 +12,7 @@ public class ClaimedByPlayerImpl implements ClaimedByPlayer {
 		return new Builder() {
 
 			@Override
-			public @NotNull ClaimedByPlayer build() {
+			public ClaimedByPlayer build() {
 				return ClaimedByPlayerImpl.this;
 			}
 

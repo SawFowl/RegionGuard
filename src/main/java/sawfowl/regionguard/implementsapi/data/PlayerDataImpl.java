@@ -1,6 +1,5 @@
 package sawfowl.regionguard.implementsapi.data;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.persistence.DataContainer;
 
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
@@ -14,7 +13,7 @@ public class PlayerDataImpl implements PlayerData {
 		return new Builder() {
 			
 			@Override
-			public @NotNull PlayerData build() {
+			public PlayerData build() {
 				return PlayerDataImpl.this;
 			}
 			

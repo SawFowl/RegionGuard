@@ -17,8 +17,6 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
 
-import com.google.common.collect.Maps;
-
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
@@ -34,7 +32,7 @@ import sawfowl.regionguard.implementsapi.worldedit.cui.events.MultiSelectionPoin
 public class WorldEditAPI extends Thread implements WorldEditCUIAPI {
 
 	private final RegionGuard plugin;
-	private Map<UUID, CUIUser> worldEditPlayers = Maps.newHashMap();
+	private Map<UUID, CUIUser> worldEditPlayers = new HashMap<UUID, CUIUser>();
 	private Map<String, String[]> cuiColors = new HashMap<String, String[]>();
 	private Map<String, Integer> cuiSpaces = new HashMap<String, Integer>();
 	private String sendMethodName;

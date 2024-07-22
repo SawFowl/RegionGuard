@@ -3,7 +3,6 @@ package sawfowl.regionguard.implementsapi.data;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -26,7 +25,7 @@ public class MemberDataImpl implements MemberData {
 		return new Builder() {
 
 			@Override
-			public @NotNull MemberData build() {
+			public MemberData build() {
 				if(memberName == null) memberName = "n/a";
 				return MemberDataImpl.this;
 			}

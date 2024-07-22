@@ -2,7 +2,7 @@ package sawfowl.regionguard.implementsapi.data;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jetbrains.annotations.NotNull;
+
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -23,7 +23,7 @@ public class CuboidImpl implements Cuboid {
 		return new Builder() {
 
 			@Override
-			public @NotNull Cuboid build() {
+			public Cuboid build() {
 				return CuboidImpl.this;
 			}
 

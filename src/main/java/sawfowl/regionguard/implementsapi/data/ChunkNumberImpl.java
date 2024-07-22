@@ -2,7 +2,6 @@ package sawfowl.regionguard.implementsapi.data;
 
 import java.util.Objects;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -22,7 +21,7 @@ public class ChunkNumberImpl implements ChunkNumber {
 		return new Builder() {
 
 			@Override
-			public @NotNull ChunkNumber build() {
+			public ChunkNumber build() {
 				return ChunkNumberImpl.this;
 			}
 

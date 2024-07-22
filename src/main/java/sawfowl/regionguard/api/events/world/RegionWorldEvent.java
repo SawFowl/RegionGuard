@@ -1,6 +1,5 @@
 package sawfowl.regionguard.api.events.world;
 
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -23,7 +22,6 @@ public interface RegionWorldEvent extends Event, Cancellable {
 	 * Getting the Sponge event.<br>
 	 * May be `null` if the original event is not a Sponge event.<br>
 	 */
-	@Nullable
 	<T extends Event> T getSpongeEvent();
 
 }

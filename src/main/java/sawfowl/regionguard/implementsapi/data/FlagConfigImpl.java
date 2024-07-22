@@ -1,6 +1,5 @@
 package sawfowl.regionguard.implementsapi.data;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.persistence.DataContainer;
 
 import sawfowl.regionguard.api.data.FlagConfig;
@@ -14,7 +13,7 @@ public class FlagConfigImpl implements FlagConfig {
 		return new Builder() {
 
 			@Override
-			public @NotNull FlagConfig build() {
+			public FlagConfig build() {
 				return FlagConfigImpl.this;
 			}
 

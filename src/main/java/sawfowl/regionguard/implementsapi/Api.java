@@ -25,7 +25,7 @@ import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackPlainNBT;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -482,7 +482,7 @@ public class Api implements RegionAPI {
 	}
 
 	private ItemStack setNBT(ItemStack itemStack) {
-		SerializedItemStackPlainNBT serializedItemStack = new SerializedItemStackPlainNBT(itemStack);
+		SerializedItemStack serializedItemStack = new SerializedItemStack(itemStack);
 		serializedItemStack.getOrCreateComponent().putObject(plugin.getPluginContainer(), "WandItem", 1);
 		return serializedItemStack.getItemStack();
 	}
