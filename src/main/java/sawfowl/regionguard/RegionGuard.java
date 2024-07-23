@@ -54,6 +54,7 @@ import com.google.inject.Inject;
 import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.utils.StorageType;
 import sawfowl.localeapi.api.LocaleService;
+import sawfowl.localeapi.api.Logger;
 import sawfowl.localeapi.api.event.LocaleServiseEvent;
 import sawfowl.localeapi.api.placeholders.Placeholders;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
@@ -107,7 +108,6 @@ import sawfowl.regionguard.listeners.ModExplosionListener;
 import sawfowl.regionguard.listeners.SpawnEntityListener;
 import sawfowl.regionguard.listeners.BlockAndWorldChangeListener.PlayerPositions;
 import sawfowl.regionguard.utils.Economy;
-import sawfowl.regionguard.utils.Logger;
 import sawfowl.regionguard.utils.PlaceholderKeys;
 import sawfowl.regionguard.utils.RegenUtil;
 
@@ -224,7 +224,7 @@ public class RegionGuard {
 	@Inject
 	public RegionGuard(PluginContainer pluginContainer, @ConfigDir(sharedRoot = false) Path configDirectory) {
 		instance = this;
-		logger = new Logger();
+		logger = Logger.createApacheLogger("RegionGuard");
 		this.pluginContainer = pluginContainer;
 		configDir = configDirectory;
 		configDirectory.toFile();
