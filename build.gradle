@@ -12,7 +12,7 @@ minecraft {
 }
 
 group = "sawfowl.regionguard"
-version = "${major}.${minor}.${patch}-${api}-${suffix}"
+version = "${major}.${minor}.${patch}-${suffix}-S${api}"
 
 java {
 	sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
