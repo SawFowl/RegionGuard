@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -36,12 +37,14 @@ import net.minecraft.world.level.block.BedBlock;
 
 public class ListenerUtils {
 
+	private static final String UNKNOWN = "unknown:";
+
 	public static String entityId(Entity entity) {
 		return EntityTypes.registry().valueKey(entity.type()).asString();
 	}
 
 	public static String entityCategory(Entity entity) {
-		return Sponge.game().registry(RegistryTypes.ENTITY_CATEGORY).valueKey(entity.type().category()).asString();
+		return Sponge.game().registry(RegistryTypes.ENTITY_CATEGORY).findValueKey(entity.type().category()).map(ResourceKey::asString).orElse(UNKNOWN + entity.type().category().toString().toLowerCase());
 	}
 
 	public static String blockID(BlockSnapshot block) {
