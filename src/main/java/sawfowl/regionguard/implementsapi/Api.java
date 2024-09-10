@@ -87,10 +87,17 @@ public class Api implements RegionAPI {
 
 	@Override
 	public void updateGlobalRegionData(ServerWorld serverWorld, Region region) {
-		if(globalRegionsPerWorlds.containsKey(serverWorld.key())) {
-			globalRegionsPerWorlds.remove(serverWorld.key());
+		if(serverWorld != null) {
+			if(globalRegionsPerWorlds.containsKey(serverWorld.key())) {
+				globalRegionsPerWorlds.remove(serverWorld.key());
+			}
+			globalRegionsPerWorlds.put(serverWorld.key(), region);
+		} else {
+			if(globalRegionsPerWorlds.containsKey(region.getWorldKey())) {
+				globalRegionsPerWorlds.remove(region.getWorldKey());
+			}
+			globalRegionsPerWorlds.put(region.getWorldKey(), region);
 		}
-		globalRegionsPerWorlds.put(serverWorld.key(), region);
 	}
 
 	@Override

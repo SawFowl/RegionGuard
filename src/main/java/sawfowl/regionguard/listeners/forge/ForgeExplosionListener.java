@@ -7,12 +7,9 @@ import java.util.Optional;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.transaction.BlockTransaction;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.block.ChangeBlockEvent.All;
@@ -137,9 +134,8 @@ public class ForgeExplosionListener extends ForgeListener {
 		List<BlockPos> positions = new ArrayList<BlockPos>(explosion.getToBlow());
 		Builder builder = org.spongepowered.api.world.explosion.Explosion.builder().location(region.getWorld().get().location(position)).shouldBreakBlocks(positions.size() > 0).shouldDamageEntities(explosion.getHitPlayers().size() > 0);
 		if(explosion.getDirectSourceEntity() != null) {
-			Optional<Entity> optSource = EntityTypes.registry().findValue(ResourceKey.resolve(explosion.getDirectSourceEntity().getEncodeId())).map(type -> Sponge.server().worldManager().world(worldKey).get().createEntity(type, position));
-			if(optSource.isPresent() && optSource.get() instanceof Explosive) {
-				builder = builder.sourceExplosive((@Nullable Explosive) optSource.get());
+			if(explosion.getDirectSourceEntity() instanceof Explosive) {
+				builder = builder.sourceExplosive((@Nullable Explosive) explosion.getDirectSourceEntity());
 			}
 		}
 		rgEvent.setExplosion(builder.build());

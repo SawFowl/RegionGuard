@@ -37,6 +37,7 @@ import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -268,6 +269,95 @@ public class RegionGuard {
 			mySQL = new MySQL(instance, getConfig().getMySQLConfig());
 		}
 		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
+		setStorages();
+		api.updateWandItem();
+		if(Sponge.server().serviceProvider().economyService().isPresent()) {
+			economyService  = Sponge.server().serviceProvider().economyService().get();
+			economy = new Economy(instance);
+			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("buy", new Buy(instance));
+			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("sell", new Sell(instance));
+		} else {
+			logger.warn(locales.getComponent(Sponge.server().locale(), LocalesPaths.ECONOMY_NOT_FOUND));
+		}
+		api.generateDefaultGlobalRegion();
+		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new BlockAndWorldChangeListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new ExplosionListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new InteractEntityListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new EntityMoveListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new DeathListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new DamageEntityAndCommandListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new ImpactListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new SpawnEntityListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
+		if(getConfig().isRegisterForgeListeners() && commandPack.isForgeServer()) new ForgeExplosionListener(instance);
+		Sponge.asyncScheduler().submit(Task.builder().plugin(pluginContainer).execute(() -> {
+			long time = System.currentTimeMillis();
+			regionsDataWork.loadRegions();
+			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
+			playersDataWork.loadDataOfPlayers();
+			Sponge.eventManager().post(new RegionAPI.PostAPI() {
+				@Override
+				public Cause cause() {
+					return Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, pluginContainer).build(), pluginContainer);
+				}
+				@Override
+				public RegionAPI getAPI() {
+					return api;
+				}
+			});
+		}).build());
+	}
+
+	@Listener
+	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
+		mainCommand = new sawfowl.regionguard.commands.Region(instance);
+		mainCommand.register(event);
+		mainCommand.getChildExecutors().get("wand").register(event);
+		saveConfigs();
+	}
+
+	@Listener
+	public void registerBuilders(RegisterBuilderEvent event) {
+		event.register(ChunkNumber.Builder.class, () -> new ChunkNumberImpl().builder());
+		event.register(ClaimedByPlayer.Builder.class, () -> new ClaimedByPlayerImpl().builder());
+		event.register(Cuboid.Builder.class, () -> new CuboidImpl().builder());
+		event.register(FlagValue.Builder.class, () -> new FlagValueImpl().builder());
+		event.register(MemberData.Builder.class, () -> new MemberDataImpl().builder());
+		event.register(PlayerData.Builder.class, () -> new PlayerDataImpl().builder());
+		event.register(PlayerLimits.Builder.class, () -> new PlayerLimitsImpl().builder());
+		event.register(Region.Builder.class, () -> new RegionImpl().builder());
+		event.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
+	}
+
+	@Listener
+	public void onRefresh(RefreshGameEvent event) {
+		if(playersDataWork instanceof MySqlStorage) {
+			((MySqlStorage) playersDataWork).updateSync();
+		} else if (regionsDataWork instanceof MySqlStorage) {
+			((MySqlStorage) regionsDataWork).updateSync();
+		}
+	}
+
+	private void saveConfigs() {
+		try {
+			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.register(FlagValue.class, RegionSerializerCollection.COLLETCTION.get(FlagValue.class)))).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
+			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
+			flagsConfigurationReference.save();
+			flagsConfig.get().setSaveConsumer(consumer -> flagsConfig.setAndSave(flagsConfig.get()));
+			
+			cuiConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
+			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
+			cuiConfigurationReference.save();
+		} catch (ConfigurateException e) {
+			logger.warn(e.getLocalizedMessage());
+		}
+	}
+
+	public void setStorages() {
 		boolean h2 = Sponge.pluginManager().plugin("h2driver").isPresent();
 		boolean mysql = Sponge.pluginManager().plugin("mysqldriver").isPresent() && mySQL != null && mySQL.checkConnection();
 		if(getConfig().getMySQLConfig().isEnable()) {
@@ -357,90 +447,6 @@ public class RegionGuard {
 					break;
 				}
 			} else playersDataWork = regionsDataWork = new FileStorage(instance);
-		}
-		api.updateWandItem();
-		if(Sponge.server().serviceProvider().economyService().isPresent()) {
-			economyService  = Sponge.server().serviceProvider().economyService().get();
-			economy = new Economy(instance);
-			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("buy", new Buy(instance));
-			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("sell", new Sell(instance));
-		} else {
-			logger.warn(locales.getComponent(Sponge.server().locale(), LocalesPaths.ECONOMY_NOT_FOUND));
-		}
-		api.generateDefaultGlobalRegion();
-		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new BlockAndWorldChangeListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ExplosionListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new InteractEntityListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new EntityMoveListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new DeathListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new DamageEntityAndCommandListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ImpactListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new SpawnEntityListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
-		if(getConfig().isRegisterForgeListeners() && commandPack.isForgeServer()) new ForgeExplosionListener(instance);
-		Sponge.asyncScheduler().executor(pluginContainer).submit(() -> {
-			long time = System.currentTimeMillis();
-			regionsDataWork.loadRegions();
-			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
-			Sponge.eventManager().post(new RegionAPI.PostAPI() {
-				@Override
-				public Cause cause() {
-					return Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, pluginContainer).build(), pluginContainer);
-				}
-				@Override
-				public RegionAPI getAPI() {
-					return api;
-				}
-			});
-		});
-	}
-
-	@Listener
-	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
-		mainCommand = new sawfowl.regionguard.commands.Region(instance);
-		mainCommand.register(event);
-		mainCommand.getChildExecutors().get("wand").register(event);
-		saveConfigs();
-	}
-
-	@Listener
-	public void registerBuilders(RegisterBuilderEvent event) {
-		event.register(ChunkNumber.Builder.class, () -> new ChunkNumberImpl().builder());
-		event.register(ClaimedByPlayer.Builder.class, () -> new ClaimedByPlayerImpl().builder());
-		event.register(Cuboid.Builder.class, () -> new CuboidImpl().builder());
-		event.register(FlagValue.Builder.class, () -> new FlagValueImpl().builder());
-		event.register(MemberData.Builder.class, () -> new MemberDataImpl().builder());
-		event.register(PlayerData.Builder.class, () -> new PlayerDataImpl().builder());
-		event.register(PlayerLimits.Builder.class, () -> new PlayerLimitsImpl().builder());
-		event.register(Region.Builder.class, () -> new RegionImpl().builder());
-		event.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
-	}
-
-	@Listener
-	public void onRefresh(RefreshGameEvent event) {
-		if(playersDataWork instanceof MySqlStorage) {
-			((MySqlStorage) playersDataWork).updateSync();
-		} else if (regionsDataWork instanceof MySqlStorage) {
-			((MySqlStorage) regionsDataWork).updateSync();
-		}
-	}
-
-	private void saveConfigs() {
-		try {
-			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.register(FlagValue.class, RegionSerializerCollection.COLLETCTION.get(FlagValue.class)))).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
-			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
-			flagsConfigurationReference.save();
-			flagsConfig.get().setSaveConsumer(consumer -> flagsConfig.setAndSave(flagsConfig.get()));
-			
-			cuiConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
-			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
-			cuiConfigurationReference.save();
-		} catch (ConfigurateException e) {
-			logger.warn(e.getLocalizedMessage());
 		}
 	}
 

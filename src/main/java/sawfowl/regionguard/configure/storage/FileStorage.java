@@ -31,7 +31,6 @@ public class FileStorage implements WorkData {
 		this.plugin = plugin;
 		if(!plugin.getConfig().getSplitStorage().isEnable() || plugin.getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
 			createDataForWorlds();
-			loadDataOfPlayers();
 		}
 	}
 
