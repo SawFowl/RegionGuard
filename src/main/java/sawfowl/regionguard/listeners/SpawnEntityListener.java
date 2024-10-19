@@ -49,7 +49,7 @@ public class SpawnEntityListener extends ManagementEvents {
 		String spawnKey = Sponge.game().registry(RegistryTypes.SPAWN_TYPE).valueKey(spawnType).asString();
 		boolean spawnExp = spawnType.equals(SpawnTypes.EXPERIENCE.get());
 		boolean spawnItem = spawnType.equals(SpawnTypes.DROPPED_ITEM.get());
-		boolean spawnEntity = spawnType.equals(SpawnTypes.WORLD_SPAWNER.get()) || spawnType.equals(SpawnTypes.MOB_SPAWNER.get()) || spawnType.equals(SpawnTypes.SPAWN_EGG.get()) || spawnType.equals(SpawnTypes.PLACEMENT.get()) || spawnType.equals(SpawnTypes.PROJECTILE.get()) || spawnType.equals(SpawnTypes.PASSIVE.get());
+		boolean spawnEntity = spawnType.equals(SpawnTypes.WORLD_SPAWNER.get()) || spawnType.equals(SpawnTypes.MOB_SPAWNER.get()) || spawnType.equals(SpawnTypes.SPAWN_EGG.get()) || spawnType.equals(SpawnTypes.PLACEMENT.get()) || spawnType.equals(SpawnTypes.PROJECTILE.get()) || spawnType.equals(SpawnTypes.PASSIVE.get()) || spawnType.equals(SpawnTypes.BREEDING.get());
 		if(optPlayer.isPresent() && (spawnExp || spawnItem)) return;
 		boolean allowSpawnExp = spawnExp && (optSource.isPresent() ? isAllowExpSpawn(region, optSource.get()) : isAllowExpSpawn(region, null));
 		boolean allowSpawnItem = true;

@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
@@ -34,8 +35,9 @@ public class RegionSerializer implements TypeSerializer<Region> {
 	public Region deserialize(Type type, ConfigurationNode node) throws SerializationException {
 		return node.virtual() || node.empty() ? null : Region.builder()
 				.setUniqueId(node.node("UUID").get(UUID.class))
-				.addNames(node.node("RegionName").get(mapComponentsToken, new HashMap<>()))
+				.setWorld(ResourceKey.resolve(node.node("World").getString("unknown:unknown")))
 				.setCuboid(node.node("Cuboid").virtual() ? null : node.node("Cuboid").get(Cuboid.class))
+				.addNames(node.node("RegionName").get(mapComponentsToken, new HashMap<>()))
 				.addChilds(node.node("Childs").getList(Region.class, new ArrayList<>()))
 				.setFlags(node.node("Flags").get(flagsToken, new HashMap<>()))
 				.addMembers(node.node("Members").getList(MemberData.class, new ArrayList<>()))

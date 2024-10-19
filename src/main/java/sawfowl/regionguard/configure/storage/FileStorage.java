@@ -31,7 +31,6 @@ public class FileStorage implements WorkData {
 		this.plugin = plugin;
 		if(!plugin.getConfig().getSplitStorage().isEnable() || plugin.getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
 			createDataForWorlds();
-			loadDataOfPlayers();
 		}
 	}
 
@@ -169,7 +168,7 @@ public class FileStorage implements WorkData {
 				ValueReference<PlayerData, CommentedConfigurationNode> reference = createPlayerDataConfig(file.toPath());
 				if(!reference.node().virtual() && !reference.node().empty()) {
 					UUID uuid = UUID.fromString(file.getName().split(".conf")[0]);
-					savePlayerData(uuid, reference.get());
+					if(reference.get() != null) plugin.getAPI().setPlayerData(uuid, reference.get());
 				}
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());

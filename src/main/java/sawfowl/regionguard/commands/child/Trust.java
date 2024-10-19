@@ -3,11 +3,13 @@ package sawfowl.regionguard.commands.child;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 
@@ -16,6 +18,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
+import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentData;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
@@ -79,10 +82,14 @@ public class Trust extends AbstractPlayerCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
-		
 		return Arrays.asList(
 			RawArguments.createGameProfile(RawBasicArgumentData.createGameProfile(0, null, null), RawOptional.notOptional(), locale -> getExceptions(locale).getPlayerNotPresent()),
-			RawArguments.createStringArgument(TrustTypes.getValues(), new RawBasicArgumentData<>(null, "TrustType", 1, null, null), RawOptional.notOptional(), locale -> getExceptions(locale).getTrustTypeNotPresent())
+			RawArgument.of(TrustTypes.class,
+				(cause, args) -> TrustTypes.getValues().stream(),
+				(cause, args) -> args.length > 1 ? Stream.of(TrustTypes.values()).filter(t -> t.toString().equals(args[1])).findFirst() : null,
+				new RawArgumentData<>("TrustType", CommandTreeNodeTypes.STRING.get().createNode(), 1, null, null),
+				RawOptional.notOptional(),
+				locale -> getExceptions(locale).getTrustTypeNotPresent())
 		);
 	}
 

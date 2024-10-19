@@ -39,6 +39,7 @@ import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -256,6 +257,129 @@ public class RegionGuard {
 			mySQL = new MySQL(instance, getConfig().getMySQLConfig());
 		}
 		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
+		setStorages();
+		api.updateWandItem();
+		if(Sponge.server().serviceProvider().economyService().isPresent()) {
+			economyService  = Sponge.server().serviceProvider().economyService().get();
+			economy = new Economy(instance);
+			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("buy", new Buy(instance));
+			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("sell", new Sell(instance));
+		} else {
+			logger.warn(locales.getSystemLocale().getEconomy().getEconomyNotFound());
+		}
+		api.generateDefaultGlobalRegion();
+		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new BlockAndWorldChangeListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new ExplosionListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new InteractEntityListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new EntityMoveListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new DeathListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new DamageEntityAndCommandListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new ImpactListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new SpawnEntityListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
+		Sponge.eventManager().registerListeners(pluginContainer, new RecievePacketListener(instance));
+		if(getConfig().isRegisterForgeListeners() && commandPack.isForgeServer()) new ForgeExplosionListener(instance);
+		Sponge.asyncScheduler().submit(Task.builder().plugin(pluginContainer).execute(() -> {
+			long time = System.currentTimeMillis();
+			regionsDataWork.loadRegions();
+			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
+			playersDataWork.loadDataOfPlayers();
+			Sponge.eventManager().post(new RegionAPI.PostAPI() {
+				@Override
+				public Cause cause() {
+					return Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, pluginContainer).build(), pluginContainer);
+				}
+				@Override
+				public RegionAPI getAPI() {
+					return api;
+				}
+			});
+		}).build());
+		registerPlaceholders();
+	}
+
+	@Listener
+	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
+		mainCommand = new sawfowl.regionguard.commands.Region(instance);
+		mainCommand.register(event);
+		mainCommand.getChildExecutors().get("wand").register(event);
+		saveConfigs();
+	}
+
+	@Listener
+	public void registerBuilders(RegisterBuilderEvent event) {
+		event.register(ChunkNumber.Builder.class, () -> new ChunkNumberImpl().builder());
+		event.register(ClaimedByPlayer.Builder.class, () -> new ClaimedByPlayerImpl().builder());
+		event.register(Cuboid.Builder.class, () -> new CuboidImpl().builder());
+		event.register(FlagValue.Builder.class, () -> new FlagValueImpl().builder());
+		event.register(MemberData.Builder.class, () -> new MemberDataImpl().builder());
+		event.register(PlayerData.Builder.class, () -> new PlayerDataImpl().builder());
+		event.register(PlayerLimits.Builder.class, () -> new PlayerLimitsImpl().builder());
+		event.register(Region.Builder.class, () -> new RegionImpl().builder());
+		event.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
+	}
+
+	@Listener
+	public void onRefresh(RefreshGameEvent event) {
+		if(playersDataWork instanceof MySqlStorage) {
+			((MySqlStorage) playersDataWork).updateSync();
+		} else if (regionsDataWork instanceof MySqlStorage) {
+			((MySqlStorage) regionsDataWork).updateSync();
+		}
+	}
+
+	private void saveConfigs() {
+		try {
+			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.register(FlagValue.class, RegionSerializerCollection.COLLETCTION.get(FlagValue.class)))).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
+			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
+			flagsConfigurationReference.save();
+			flagsConfig.get().setSaveConsumer(consumer -> flagsConfig.setAndSave(flagsConfig.get()));
+			
+			cuiConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
+			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
+			cuiConfigurationReference.save();
+		} catch (ConfigurateException e) {
+			logger.warn(e.getLocalizedMessage());
+		}
+	}
+
+	private void registerPlaceholders() {
+		Placeholders.register(ServerPlayer.class, "RegionCreated", (original, player, def) -> original.replace(PlaceholderKeys.REGION_DATE, getDateCreated(player, getRegion(player).getCreationTime(), locales.getLocale(player).getTimeFormat())));
+		Placeholders.register(ServerPlayer.class, "RegionTrustLevel", (original, player, def) -> original.replace(PlaceholderKeys.REGION_TRUST_LEVEL, getRegion(player).getMemberData(player).map(data -> data.getTrustType().toString()).orElse("-")));
+		Placeholders.register(ServerPlayer.class, "BlocksClaimed", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_BLOCKS_CLAIMED, api.getClaimedBlocks(player)));
+		Placeholders.register(ServerPlayer.class, "ClaimsCreated", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_CLAIMS_CREATED, api.getClaimedRegions(player)));
+		Placeholders.register(ServerPlayer.class, "LimitBlocks", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_BLOCKS_LIMIT, api.getLimitBlocks(player)));
+		Placeholders.register(ServerPlayer.class, "LimitClaims", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_CLAIMS_LIMIT, api.getLimitClaims(player)));
+		Placeholders.register(ServerPlayer.class, "LimitSubdivisions", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_SUBDIVISIONS_LIMIT, api.getLimitSubdivisions(player)));
+		Placeholders.register(ServerPlayer.class, "LimitMembers", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_MEMBERS_LIMIT, api.getLimitMembers(player)));
+		Placeholders.register(ServerPlayer.class, "MaxLimitBlocks", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_MAX_BLOCKS_LIMIT, api.getLimitMaxBlocks(player)));
+		Placeholders.register(ServerPlayer.class, "MaxLimitClaims", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_MAX_CLAIMS_LIMIT, api.getLimitMaxClaims(player)));
+		Placeholders.register(ServerPlayer.class, "MaxLimitSubdivisions", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_MAX_SUBDIVISIONS_LIMIT, api.getLimitMaxSubdivisions(player)));
+		Placeholders.register(ServerPlayer.class, "MaxLimitMembers", (original, player, def) -> original.replace(PlaceholderKeys.MAX_MEMBERS_LIMIT, api.getLimitMaxMembers(player)));
+		Placeholders.register(ServerPlayer.class, "RegionName", (original, player, def) -> original.replace(PlaceholderKeys.REGION_NAME, getRegion(player).getName(player.locale())));
+		Placeholders.register(Region.class, "RegionType", (original, region, def) -> original.replace(PlaceholderKeys.REGION_TYPE, region.getType().toString()));
+		Placeholders.register(Region.class, "RegionOwner", (original, region, def) -> original.replace(PlaceholderKeys.REGION_OWNER, region.getOwnerName()));
+		Placeholders.register(Region.class, "RegionMinPos", (original, region, def) -> original.replace(PlaceholderKeys.REGION_MIN, !region.isGlobal() ? region.getCuboid().getMin().toString() : region.getWorld().map(ServerWorld::min).orElse(Vector3i.ZERO)));
+		Placeholders.register(Region.class, "RegionMaxPos", (original, region, def) -> original.replace(PlaceholderKeys.REGION_MAX, !region.isGlobal() ? region.getCuboid().getMax().toString() : region.getWorld().map(ServerWorld::max).orElse(Vector3i.ZERO)));
+		Placeholders.register(Region.class, "RegionSize", (original, region, def) -> original.replace(PlaceholderKeys.REGION_SIZE, !region.isGlobal() ? region.getCuboid().getSizeXYZ().toInt().toString() : region.getWorld().map(ServerWorld::size).orElse(Vector3i.ZERO)));
+		Placeholders.register(Region.class, "RegionMembers", (original, region, def) -> original.replace(PlaceholderKeys.REGION_MEMBERS_SIZE, region.getTotalMembers()));
+	}
+
+	private Region getRegion(ServerPlayer player) {
+		return api.findRegion(player.world(), player.blockPosition());
+	}
+
+	private String getDateCreated(ServerPlayer player, long time, SimpleDateFormat dateFormat) {
+		Calendar calendar = Calendar.getInstance(player.locale());
+		calendar.setTimeInMillis(time);
+		return dateFormat.format(calendar.getTime());
+	}
+
+	private void setStorages() {
 		boolean h2 = Sponge.pluginManager().plugin("h2driver").isPresent();
 		boolean mysql = Sponge.pluginManager().plugin("mysqldriver").isPresent() && mySQL != null && mySQL.checkConnection();
 		if(getConfig().getMySQLConfig().isEnable()) {
@@ -346,124 +470,6 @@ public class RegionGuard {
 				}
 			} else playersDataWork = regionsDataWork = new FileStorage(instance);
 		}
-		api.updateWandItem();
-		if(Sponge.server().serviceProvider().economyService().isPresent()) {
-			economyService  = Sponge.server().serviceProvider().economyService().get();
-			economy = new Economy(instance);
-			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("buy", new Buy(instance));
-			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("sell", new Sell(instance));
-		} else {
-			logger.warn(locales.getSystemLocale().getEconomy().getEconomyNotFound());
-		}
-		api.generateDefaultGlobalRegion();
-		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new BlockAndWorldChangeListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ExplosionListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new InteractEntityListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new EntityMoveListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new DeathListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new DamageEntityAndCommandListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ImpactListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new SpawnEntityListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new RecievePacketListener(instance));
-		if(getConfig().isRegisterForgeListeners() && commandPack.isForgeServer()) new ForgeExplosionListener(instance);
-		Sponge.asyncScheduler().executor(pluginContainer).submit(() -> {
-			long time = System.currentTimeMillis();
-			regionsDataWork.loadRegions();
-			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
-			Sponge.eventManager().post(new RegionAPI.PostAPI() {
-				@Override
-				public Cause cause() {
-					return Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, pluginContainer).build(), pluginContainer);
-				}
-				@Override
-				public RegionAPI getAPI() {
-					return api;
-				}
-			});
-		});
-		registerPlaceholders();
-	}
-
-	@Listener
-	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
-		mainCommand = new sawfowl.regionguard.commands.Region(instance);
-		mainCommand.register(event);
-		mainCommand.getChildExecutors().get("wand").register(event);
-		saveConfigs();
-	}
-
-	@Listener
-	public void registerBuilders(RegisterBuilderEvent event) {
-		event.register(ChunkNumber.Builder.class, () -> new ChunkNumberImpl().builder());
-		event.register(ClaimedByPlayer.Builder.class, () -> new ClaimedByPlayerImpl().builder());
-		event.register(Cuboid.Builder.class, () -> new CuboidImpl().builder());
-		event.register(FlagValue.Builder.class, () -> new FlagValueImpl().builder());
-		event.register(MemberData.Builder.class, () -> new MemberDataImpl().builder());
-		event.register(PlayerData.Builder.class, () -> new PlayerDataImpl().builder());
-		event.register(PlayerLimits.Builder.class, () -> new PlayerLimitsImpl().builder());
-		event.register(Region.Builder.class, () -> new RegionImpl().builder());
-		event.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
-	}
-
-	@Listener
-	public void onRefresh(RefreshGameEvent event) {
-		if(playersDataWork instanceof MySqlStorage) {
-			((MySqlStorage) playersDataWork).updateSync();
-		} else if (regionsDataWork instanceof MySqlStorage) {
-			((MySqlStorage) regionsDataWork).updateSync();
-		}
-	}
-
-	private void saveConfigs() {
-		try {
-			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.register(FlagValue.class, RegionSerializerCollection.COLLETCTION.get(FlagValue.class)))).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
-			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
-			flagsConfigurationReference.save();
-			flagsConfig.get().setSaveConsumer(consumer -> flagsConfig.setAndSave(flagsConfig.get()));
-			
-			cuiConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
-			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
-			cuiConfigurationReference.save();
-		} catch (ConfigurateException e) {
-			logger.warn(e.getLocalizedMessage());
-		}
-	}
-
-	private void registerPlaceholders() {
-		Placeholders.register(ServerPlayer.class, "RegionCreated", (original, player, def) -> original.replace(PlaceholderKeys.REGION_DATE, getDateCreated(player, getRegion(player).getCreationTime(), locales.getLocale(player).getTimeFormat())));
-		Placeholders.register(ServerPlayer.class, "RegionTrustLevel", (original, player, def) -> original.replace(PlaceholderKeys.REGION_TRUST_LEVEL, getRegion(player).getMemberData(player).map(data -> data.getTrustType().toString()).orElse("-")));
-		Placeholders.register(ServerPlayer.class, "BlocksClaimed", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_BLOCKS_CLAIMED, api.getClaimedBlocks(player)));
-		Placeholders.register(ServerPlayer.class, "ClaimsCreated", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_CLAIMS_CREATED, api.getClaimedRegions(player)));
-		Placeholders.register(ServerPlayer.class, "LimitBlocks", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_BLOCKS_LIMIT, api.getLimitBlocks(player)));
-		Placeholders.register(ServerPlayer.class, "LimitClaims", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_CLAIMS_LIMIT, api.getLimitClaims(player)));
-		Placeholders.register(ServerPlayer.class, "LimitSubdivisions", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_SUBDIVISIONS_LIMIT, api.getLimitSubdivisions(player)));
-		Placeholders.register(ServerPlayer.class, "LimitMembers", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_MEMBERS_LIMIT, api.getLimitMembers(player)));
-		Placeholders.register(ServerPlayer.class, "MaxLimitBlocks", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_MAX_BLOCKS_LIMIT, api.getLimitMaxBlocks(player)));
-		Placeholders.register(ServerPlayer.class, "MaxLimitClaims", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_MAX_CLAIMS_LIMIT, api.getLimitMaxClaims(player)));
-		Placeholders.register(ServerPlayer.class, "MaxLimitSubdivisions", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_MAX_SUBDIVISIONS_LIMIT, api.getLimitMaxSubdivisions(player)));
-		Placeholders.register(ServerPlayer.class, "MaxLimitMembers", (original, player, def) -> original.replace(PlaceholderKeys.MAX_MEMBERS_LIMIT, api.getLimitMaxMembers(player)));
-		Placeholders.register(ServerPlayer.class, "RegionName", (original, player, def) -> original.replace(PlaceholderKeys.REGION_NAME, getRegion(player).getName(player.locale())));
-		Placeholders.register(Region.class, "RegionType", (original, region, def) -> original.replace(PlaceholderKeys.REGION_TYPE, region.getType().toString()));
-		Placeholders.register(Region.class, "RegionOwner", (original, region, def) -> original.replace(PlaceholderKeys.REGION_OWNER, region.getOwnerName()));
-		Placeholders.register(Region.class, "RegionMinPos", (original, region, def) -> original.replace(PlaceholderKeys.REGION_MIN, !region.isGlobal() ? region.getCuboid().getMin().toString() : region.getWorld().map(ServerWorld::min).orElse(Vector3i.ZERO)));
-		Placeholders.register(Region.class, "RegionMaxPos", (original, region, def) -> original.replace(PlaceholderKeys.REGION_MAX, !region.isGlobal() ? region.getCuboid().getMax().toString() : region.getWorld().map(ServerWorld::max).orElse(Vector3i.ZERO)));
-		Placeholders.register(Region.class, "RegionSize", (original, region, def) -> original.replace(PlaceholderKeys.REGION_SIZE, !region.isGlobal() ? region.getCuboid().getSizeXYZ().toInt().toString() : region.getWorld().map(ServerWorld::size).orElse(Vector3i.ZERO)));
-		Placeholders.register(Region.class, "RegionMembers", (original, region, def) -> original.replace(PlaceholderKeys.REGION_MEMBERS_SIZE, region.getTotalMembers()));
-	}
-
-	private Region getRegion(ServerPlayer player) {
-		return api.findRegion(player.world(), player.blockPosition());
-	}
-
-	private String getDateCreated(ServerPlayer player, long time, SimpleDateFormat dateFormat) {
-		Calendar calendar = Calendar.getInstance(player.locale());
-		calendar.setTimeInMillis(time);
-		return dateFormat.format(calendar.getTime());
 	}
 
 }
