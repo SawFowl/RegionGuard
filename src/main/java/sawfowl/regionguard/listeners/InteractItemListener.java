@@ -42,7 +42,7 @@ public class InteractItemListener extends ManagementEvents {
 		ServerWorld world = entity.serverLocation().world();
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		Optional<RayTraceResult<LocatableBlock>> blockRay = Optional.empty();
-		String itemid = ListenerUtils.itemId(event.itemStack().createStack());
+		String itemid = ListenerUtils.itemId(event.itemStack().asMutable());
 		if(optPlayer.isPresent() && plugin.getConfig().getTankItems().contains(itemid)) {
 			blockRay = RayTrace.block()
 					.world(optPlayer.get().world())
@@ -54,7 +54,7 @@ public class InteractItemListener extends ManagementEvents {
 		}
 		boolean liquidInteract = isLiquidInteract(blockRay);
 		Region region = plugin.getAPI().findRegion(world, liquidInteract ? blockRay.get().hitPosition().toInt() : entity.blockPosition());
-		boolean isAllow = !liquidInteract ? isAllowInteractItem(region, entity,  event.itemStack().createStack()) : isAllowInteractItem(region, entity, event.itemStack().createStack()) && isAllowInteractBlockSecondary(region, entity, blockRay.get().selectedObject().blockState(), true) && isAllowBreak(region, entity, blockRay.get().selectedObject().blockState(), true) ;
+		boolean isAllow = !liquidInteract ? isAllowInteractItem(region, entity,  event.itemStack().asMutable()) : isAllowInteractItem(region, entity, event.itemStack().asMutable()) && isAllowInteractBlockSecondary(region, entity, blockRay.get().selectedObject().blockState(), true) && isAllowBreak(region, entity, blockRay.get().selectedObject().blockState(), true) ;
 		RegionInteractItemEvent rgEvent = new RegionInteractItemEvent() {
 
 			boolean cancelled;
@@ -66,7 +66,7 @@ public class InteractItemListener extends ManagementEvents {
 
 			@Override
 			public ItemStack getItemStack() {
-				return event.itemStack().createStack();
+				return event.itemStack().asMutable();
 			}
 
 			@Override

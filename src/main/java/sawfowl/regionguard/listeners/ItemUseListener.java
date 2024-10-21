@@ -36,7 +36,7 @@ public class ItemUseListener extends ManagementEvents {
 		if(container.get(DataQuery.of("UnsafeData")).isPresent() && container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) return;
 		ServerWorld world = entity.serverLocation().world();
 		Region region = plugin.getAPI().findRegion(world, entity.blockPosition());
-		boolean isAllow = isAllowUse(region, entity, event.itemStackInUse().createStack());
+		boolean isAllow = isAllowUse(region, entity, event.itemStackInUse().asMutable());
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		RegionUseItemStackEvent rgEvent = new RegionUseItemStackEvent() {
 
@@ -49,7 +49,7 @@ public class ItemUseListener extends ManagementEvents {
 
 			@Override
 			public ItemStack getItemStack() {
-				return event.itemStackInUse().createStack();
+				return event.itemStackInUse().asMutable();
 			}
 
 			@Override

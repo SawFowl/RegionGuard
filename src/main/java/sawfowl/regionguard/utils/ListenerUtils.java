@@ -89,7 +89,7 @@ public class ListenerUtils {
 	public static List<String> flagItemsSnapshotsArgs(List<ItemStackSnapshot> snapshots) {
 		List<String> list = new ArrayList<String>();
 		snapshots.forEach(snapshot -> {
-			if(!list.contains(itemId(snapshot.createStack()))) list.add(itemId(snapshot.createStack()));
+			if(!list.contains(itemId(snapshot.asMutable()))) list.add(itemId(snapshot.asMutable()));
 		});
 		list.add("all");
 		return list;

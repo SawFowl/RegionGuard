@@ -30,10 +30,10 @@ repositories {
 		name = "Sponge"
 		url = "https://repo.spongepowered.org/repository/maven-public"
 	}
-	maven {
-		name = "AspectRepo"
-		url 'https://maven.aspect-realms.ru/repository/maven-public/'
-	}
+	//maven {
+	//	name = "AspectRepo"
+	//	url 'https://maven.aspect-realms.ru/repository/maven-public/'
+	//}
 }
 
 tasks.withType(JavaCompile) {
@@ -43,9 +43,9 @@ tasks.withType(JavaCompile) {
 dependencies {
 	implementation "org.spongepowered:spongeapi:${api}"
 	implementation "org.spongepowered:spongevanilla:1.21-12.0.0-RC1779:universal"
-	implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
-	implementation "com.github.SawFowl:CommandPack:${commandpack}"
-	//implementation fileTree(dir: 'libs', include: '*.jar')
+	//implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
+	//implementation "com.github.SawFowl:CommandPack:${commandpack}"
+	implementation fileTree(dir: 'libs', include: '*.jar')
 }
 
 sponge {

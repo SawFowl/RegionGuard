@@ -31,6 +31,7 @@ public class PlayerDataSerializer implements TypeSerializer<PlayerData> {
 
 	@Override
 	public void serialize(Type type, @Nullable PlayerData data, ConfigurationNode node) throws SerializationException {
+		if(data == null) return;
 		node.node("Limit", "Blocks").set(data.getLimits().getBlocks());
 		node.node("Limit", "Claims").set(data.getLimits().getRegions());
 		node.node("Limit", "Subdivisions").set(data.getLimits().getSubdivisions());
