@@ -11,6 +11,8 @@ import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import com.google.gson.JsonObject;
+
 import net.kyori.adventure.builder.AbstractBuilder;
 
 import sawfowl.regionguard.api.SelectorTypes;
@@ -169,6 +171,8 @@ public interface Cuboid extends DataSerializable {
 	 */
 	Cuboid toFlat(ServerWorld world);
 
+	JsonObject asJson();
+
 	interface Builder extends AbstractBuilder<Cuboid>, org.spongepowered.api.util.Builder<Cuboid, Builder> {
 
 		Builder setPosition(Vector3i vector3i, boolean first);
@@ -178,6 +182,8 @@ public interface Cuboid extends DataSerializable {
 		Builder setSecondPosition(Vector3i vector3i);
 
 		Builder setSelectorType(SelectorTypes type);
+
+		Cuboid fromJson(JsonObject json);
 
 	}
 

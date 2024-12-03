@@ -7,6 +7,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
+
+import com.google.gson.JsonObject;
+
 import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.api.TrustTypes;
@@ -62,6 +65,7 @@ public class MemberDataImpl implements MemberData {
 				memberName = data.getName();
 				uuid = data.getUniqueId();
 				trustLevel = data.getTrustType();
+				if(data instanceof MemberDataImpl d) replaceNameInTitle = d.replaceNameInTitle;
 				return MemberDataImpl.this;
 			}
 
@@ -75,6 +79,23 @@ public class MemberDataImpl implements MemberData {
 			public Builder setUUID(UUID uuid) {
 				MemberDataImpl.this.uuid = uuid;
 				return this;
+			}
+
+			@Override
+			public MemberData fromJson(JsonObject jsonObject) {
+				if(jsonObject.has("Name")) {
+					memberName = jsonObject.get("Name").getAsString();
+				}
+				if(jsonObject.has("UUID")) {
+					uuid = UUID.fromString(jsonObject.get("UUID").getAsString());
+				}
+				if(jsonObject.has("TrustLevel")) {
+					trustLevel = TrustTypes.checkType(jsonObject.get("TrustLevel").getAsString());
+				}
+				if(jsonObject.has("ReplaceNameInTitle")) {
+					replaceNameInTitle = jsonObject.get("ReplaceNameInTitle").getAsBoolean();
+				}
+				return build();
 			}
 		};
 	}
@@ -142,6 +163,15 @@ public class MemberDataImpl implements MemberData {
 	@Override
 	public DataContainer toContainer() {
 		return null;
+	}
+	@Override
+	public JsonObject asJson() {
+		JsonObject json = new JsonObject();
+		json.addProperty("Name", memberName);
+		json.addProperty("UUID", uuid.toString());
+		json.addProperty("TrustLevel", trustLevel.toString());
+		json.addProperty("ReplaceNameInTitle", replaceNameInTitle);
+		return json;
 	}
 
 }

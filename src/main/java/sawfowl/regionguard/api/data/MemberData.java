@@ -9,6 +9,8 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import com.google.gson.JsonObject;
+
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 
@@ -81,6 +83,8 @@ public interface MemberData extends DataSerializable {
 
 	void setReplaceNameInTitle(boolean replaceNameInTitle);
 
+	JsonObject asJson();
+
 	interface Builder extends AbstractBuilder<MemberData>, org.spongepowered.api.util.Builder<MemberData, Builder> {
 
 		Builder setPlayer(ServerPlayer player, TrustTypes type);
@@ -96,6 +100,8 @@ public interface MemberData extends DataSerializable {
 		MemberData setServer();
 
 		MemberData from(MemberData data);
+
+		MemberData fromJson(JsonObject jsonObject);
 
 	}
 

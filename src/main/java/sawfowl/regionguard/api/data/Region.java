@@ -653,6 +653,8 @@ public interface Region extends DataSerializable {
 	 */
 	Region copy();
 
+	JsonObject asJson();
+
 	interface Builder extends AbstractBuilder<Region>, org.spongepowered.api.util.Builder<Region, Builder> {
 
 		Builder setUniqueId(UUID uuid);
@@ -688,6 +690,8 @@ public interface Region extends DataSerializable {
 		Builder addAdditionalData(Map<String, Map<String, JsonObject>> dataMap);
 
 		Builder addChilds(Collection<Region> regions);
+
+		Region fromJson(JsonObject jsonObject);
 
 	}
 }

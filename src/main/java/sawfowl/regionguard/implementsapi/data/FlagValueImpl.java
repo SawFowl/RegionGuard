@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import org.spongepowered.api.data.persistence.DataContainer;
 
+import com.google.gson.JsonObject;
+
 import sawfowl.regionguard.api.data.FlagValue;
 
 public class FlagValueImpl implements FlagValue {
@@ -34,6 +36,14 @@ public class FlagValueImpl implements FlagValue {
 			public Builder setTarget(String id) {
 				if(id != null) target = id;
 				return this;
+			}
+
+			@Override
+			public FlagValue fromJson(JsonObject jsonObject) {
+				if(jsonObject.has("Value")) value = jsonObject.get("Value").getAsBoolean();
+				if(jsonObject.has("Source")) source = jsonObject.get("Source").getAsString();
+				if(jsonObject.has("Target")) target = jsonObject.get("Target").getAsString();
+				return build();
 			}
 		};
 	}
@@ -73,7 +83,7 @@ public class FlagValueImpl implements FlagValue {
 
 	@Override
 	public String toString() {
-		return "FlagValue(Source=" + source + ", Target" + target + ")";
+		return "FlagValue[value=" + value + ", source=" + source + ", target=" + target + "]";
 	}
 
 	@Override
@@ -84,6 +94,15 @@ public class FlagValueImpl implements FlagValue {
 	@Override
 	public DataContainer toContainer() {
 		return null;
+	}
+
+	@Override
+	public JsonObject asJson() {
+		JsonObject json = new JsonObject();
+		json.addProperty("Value", value);
+		json.addProperty("Source", source);
+		json.addProperty("Target", target);
+		return json;
 	}
 
 }

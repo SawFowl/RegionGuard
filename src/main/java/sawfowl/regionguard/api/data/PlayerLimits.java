@@ -4,6 +4,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import com.google.gson.JsonObject;
+
 import net.kyori.adventure.builder.AbstractBuilder;
 
 @ConfigSerializable
@@ -37,6 +39,8 @@ public interface PlayerLimits extends DataSerializable {
 
 	PlayerLimits setMembersPerRegion(long limit);
 
+	JsonObject asJson();
+
 	interface Builder extends AbstractBuilder<PlayerLimits>, org.spongepowered.api.util.Builder<PlayerLimits, Builder> {
 
 		Builder setBlocks(long limit);
@@ -46,6 +50,8 @@ public interface PlayerLimits extends DataSerializable {
 		Builder setSubdivisions(long limit);
 
 		Builder setMembersPerRegion(long limit);
+
+		PlayerLimits fromJson(JsonObject jsonObject);
 
 	}
 

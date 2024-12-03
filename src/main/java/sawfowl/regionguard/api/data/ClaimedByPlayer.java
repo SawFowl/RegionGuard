@@ -4,6 +4,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import com.google.gson.JsonObject;
+
 import net.kyori.adventure.builder.AbstractBuilder;
 
 @ConfigSerializable
@@ -29,11 +31,15 @@ public interface ClaimedByPlayer extends DataSerializable {
 
 	ClaimedByPlayer setRegions(long value);
 
+	JsonObject asJson();
+
 	interface Builder extends AbstractBuilder<ClaimedByPlayer>, org.spongepowered.api.util.Builder<ClaimedByPlayer, Builder> {
 
 		Builder setBlocks(long value);
 
 		Builder setRegions(long value);
+
+		ClaimedByPlayer fromJson(JsonObject jsonObject);
 
 	}
 

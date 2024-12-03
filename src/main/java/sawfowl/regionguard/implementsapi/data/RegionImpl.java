@@ -44,10 +44,12 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
@@ -191,6 +193,51 @@ public class RegionImpl implements Region {
 					child.setParrent(RegionImpl.this);
 				});
 				return this;
+			}
+
+			@Override
+			public Region fromJson(JsonObject jsonObject) {
+				regionUUID = jsonObject.has("UUID") ? UUID.fromString(jsonObject.get("UUID").getAsString()) : UUID.randomUUID();
+				if(jsonObject.has("RegionName") && jsonObject.get("RegionName") instanceof JsonObject jsonNames) {
+					jsonNames.entrySet().forEach(entry -> names.put(entry.getKey(), GsonComponentSerializer.gson().deserialize(entry.getValue().getAsString())));
+				}
+				if(jsonObject.has("Cuboid") && jsonObject.get("Cuboid") instanceof JsonObject jsonCuboidData) cuboid = Cuboid.builder().fromJson(jsonCuboidData);
+				world = jsonObject.has("World") ? jsonObject.get("World").getAsString() : "unknown:unknown";
+				if(jsonObject.has("Childs") && jsonObject.get("Childs") instanceof JsonArray jsonChilds) {
+					jsonChilds.asList().forEach(child -> {
+						if(child instanceof JsonObject jsonChild) childs.add(Region.builder().fromJson(jsonChild).setParrent(RegionImpl.this));
+					});
+				}
+				if(jsonObject.has("Flags") && jsonObject.get("Flags") instanceof JsonObject jsonFlags) {
+					jsonFlags.entrySet().forEach(entry -> {
+						if(entry.getValue() instanceof JsonArray arrayValues) flagValues.put(entry.getKey(), arrayValues.asList().stream().map(e -> e instanceof JsonObject jsonValue ? FlagValue.builder().fromJson(jsonValue) : null).filter(e -> e != null).collect(Collectors.toSet()));
+					});
+				}
+				if(jsonObject.has("Members") && jsonObject.get("Members") instanceof JsonArray jsonMembers) {
+					members.addAll(jsonMembers.asList().stream().map(e -> e instanceof JsonObject jsonMemberData ? MemberData.builder().fromJson(jsonMemberData) : null).filter(e -> e != null).collect(Collectors.toSet()));
+				}
+				regionType = jsonObject.has("Type") ? RegionTypes.valueOfName(jsonObject.get("Type").getAsString()) : RegionTypes.CLAIM;
+				creationTime = jsonObject.has("Created") ? jsonObject.get("Created").getAsLong() : 0;
+				if(jsonObject.has("JoinMessage") && jsonObject.get("JoinMessage") instanceof JsonObject jsonMessages) {
+					jsonMessages.entrySet().forEach(entry -> joinMessages.put(entry.getKey(), GsonComponentSerializer.gson().deserialize(entry.getValue().getAsString())));
+				}
+				if(jsonObject.has("ExitMessage") && jsonObject.get("ExitMessage") instanceof JsonObject jsonMessages) {
+					jsonMessages.entrySet().forEach(entry -> exitMessages.put(entry.getKey(), GsonComponentSerializer.gson().deserialize(entry.getValue().getAsString())));
+				}
+				if(jsonObject.has("AdditionalData") && jsonObject.get("AdditionalData") instanceof JsonObject jsonData) {
+					jsonData.entrySet().forEach(entry -> {
+						if(entry.getValue() instanceof JsonObject pluginData) {
+							pluginData.entrySet().forEach((entryData) -> {
+								if(entryData.getValue() instanceof JsonObject additionalData) {
+									if(!additionalDataMap.containsKey(entry.getKey())) additionalDataMap.put(entry.getKey(), new HashMap<>());
+									if(additionalDataMap.get(entry.getKey()).containsKey(entryData.getKey())) additionalDataMap.get(entry.getKey()).remove(entryData.getKey());
+									additionalDataMap.get(entry.getKey()).put(entryData.getKey(), additionalData);
+								}
+							});
+						}
+					});
+				}
+				return build();
 			}
 		};
 	}
@@ -937,6 +984,61 @@ public class RegionImpl implements Region {
 
 	private GsonConfigurationLoader createWriter(StringWriter sink) {
 		return GsonConfigurationLoader.builder().defaultOptions(SerializeOptions.selectOptions(2)).sink(() -> new BufferedWriter(sink)).build();
+	}
+	@Override
+	public JsonObject asJson() {
+		JsonObject json = new JsonObject();
+		if(!names.isEmpty()) {
+			JsonObject names = new JsonObject();
+			this.names.forEach((k,v) -> names.addProperty(k, GsonComponentSerializer.gson().serialize(v)));
+			json.add("RegionName", names);
+		}
+		json.addProperty("UUID", regionUUID.toString());
+		if(cuboid != null) json.add("Cuboid", cuboid.asJson());
+		json.addProperty("World", world);
+		if(!childs.isEmpty()) {
+			JsonArray childs = new JsonArray();
+			this.childs.forEach(child -> childs.add(child.asJson()));
+			json.add("Childs", childs);
+		}
+		if(!flagValues.isEmpty()) {
+			JsonObject flagValues = new JsonObject();
+			this.flagValues.forEach((flag, values) -> {
+				JsonArray jsonValues = new JsonArray();
+				values.forEach(value -> {
+					jsonValues.add(value.asJson());
+				});
+				flagValues.add(flag, flagValues);
+			});
+			json.add("Flags", flagValues);
+		}
+		if(!members.isEmpty()) {
+			JsonArray members = new JsonArray();
+			this.members.forEach(member -> members.add(member.asJson()));
+			json.add("Members", members);
+		}
+		json.addProperty("Type", regionType.toString());
+		json.addProperty("Created", creationTime);
+		if(!joinMessages.isEmpty()) {
+			JsonObject joinMessages = new JsonObject();
+			this.joinMessages.forEach((k,v) -> joinMessages.addProperty(k, GsonComponentSerializer.gson().serialize(v)));
+			json.add("JoinMessage", joinMessages);
+		}
+		if(!exitMessages.isEmpty()) {
+			JsonObject exitMessages = new JsonObject();
+			this.exitMessages.forEach((k,v) -> exitMessages.addProperty(k, GsonComponentSerializer.gson().serialize(v)));
+			json.add("ExitMessage", exitMessages);
+		}
+		if(additionalDataMap != null && !additionalDataMap.isEmpty()) {
+			JsonObject additionalDataMap = new JsonObject();
+			this.additionalDataMap.forEach((plugin, dataMap) -> {
+				JsonObject pluginData = new JsonObject();
+				dataMap.forEach((name, data) -> pluginData.add(name, data));
+				additionalDataMap.add(plugin, pluginData);
+			});
+			json.add("AdditionalData", additionalDataMap);
+		}
+		return json;
 	}
 
 }

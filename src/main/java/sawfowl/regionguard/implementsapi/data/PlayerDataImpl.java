@@ -2,6 +2,8 @@ package sawfowl.regionguard.implementsapi.data;
 
 import org.spongepowered.api.data.persistence.DataContainer;
 
+import com.google.gson.JsonObject;
+
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
@@ -27,6 +29,11 @@ public class PlayerDataImpl implements PlayerData {
 			public Builder setClaimed(ClaimedByPlayer claimed) {
 				PlayerDataImpl.this.claimed = (ClaimedByPlayerImpl) (claimed instanceof ClaimedByPlayerImpl ? claimed : ClaimedByPlayer.of(claimed.getBlocks(), claimed.getRegions()));
 				return this;
+			}
+
+			@Override
+			public PlayerData fromJson(JsonObject jsonObject) {
+				return null;
 			}
 		};
 	}
@@ -66,6 +73,13 @@ public class PlayerDataImpl implements PlayerData {
 	@Override
 	public DataContainer toContainer() {
 		return null;
+	}
+	@Override
+	public JsonObject asJson() {
+		JsonObject json = new JsonObject();
+		json.add("Limit", limits.asJson());
+		json.add("Claimed", claimed.asJson());
+		return json;
 	}
 
 }

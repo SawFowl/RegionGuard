@@ -8,6 +8,8 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import com.google.gson.JsonObject;
+
 import net.kyori.adventure.builder.AbstractBuilder;
 
 @ConfigSerializable
@@ -40,6 +42,8 @@ public interface FlagValue extends DataSerializable {
 	 */
 	boolean getValue();
 
+	JsonObject asJson();
+
 	default Tristate asTristate() {
 		return Tristate.fromBoolean(getValue());
 	}
@@ -55,6 +59,8 @@ public interface FlagValue extends DataSerializable {
 		Builder setSource(String id);
 
 		Builder setTarget(String id);
+
+		FlagValue fromJson(JsonObject jsonObject);
 
 		default Builder setSource(Entity entity) {
 			return setSource(EntityTypes.registry().findValueKey(entity.type()).map(ResourceKey::asString).orElse("all"));

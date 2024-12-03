@@ -11,6 +11,8 @@ import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import com.google.gson.JsonObject;
+
 import sawfowl.regionguard.api.SelectorTypes;
 import sawfowl.regionguard.api.data.Cuboid;
 
@@ -47,7 +49,30 @@ public class CuboidImpl implements Cuboid {
 
 			@Override
 			public Builder setPosition(Vector3i vector3i, boolean first) {
+				if(first) {
+					min = vector3i;
+				} else max = vector3i;
+				if(min != null && max != null) {
+					Vector3i min = CuboidImpl.this.min.min(CuboidImpl.this.max);
+					Vector3i max = CuboidImpl.this.max.max(CuboidImpl.this.min);
+					CuboidImpl.this.min = min;
+					CuboidImpl.this.max = max;
+				}
 				return this;
+			}
+
+			@Override
+			public Cuboid fromJson(JsonObject json) {
+				if(json.has("Min") && json.has("Max") && json.has("SelectorType")) {
+					selectorType = SelectorTypes.checkType(json.get("SelectorType").getAsString());
+					if(json.get("Min") instanceof JsonObject jsonMin && jsonMin.has("X") && jsonMin.has("Y") && jsonMin.has("Z")) {
+						min = Vector3i.from(jsonMin.get("X").getAsInt(), jsonMin.get("Y").getAsInt(), jsonMin.get("Z").getAsInt());
+					}
+					if(json.get("Max") instanceof JsonObject jsonMax && jsonMax.has("X") && jsonMax.has("Y") && jsonMax.has("Z")) {
+						max = Vector3i.from(jsonMax.get("X").getAsInt(), jsonMax.get("Y").getAsInt(), jsonMax.get("Z").getAsInt());
+					}
+				}
+				return build();
 			}
 		};
 	}
@@ -247,6 +272,23 @@ public class CuboidImpl implements Cuboid {
 	@Override
 	public DataContainer toContainer() {
 		return null;
+	}
+
+	@Override
+	public JsonObject asJson() {
+		JsonObject minJson = new JsonObject();
+		minJson.addProperty("X", min.x());
+		minJson.addProperty("Y", min.y());
+		minJson.addProperty("Z", min.z());
+		JsonObject maxJson = new JsonObject();
+		minJson.addProperty("X", max.x());
+		minJson.addProperty("Y", max.y());
+		minJson.addProperty("Z", max.z());
+		JsonObject json = new JsonObject();
+		json.add("Min", minJson);
+		json.add("Max", maxJson);
+		json.addProperty("SelectorType", selectorType.toString());
+		return json;
 	}
 
 }

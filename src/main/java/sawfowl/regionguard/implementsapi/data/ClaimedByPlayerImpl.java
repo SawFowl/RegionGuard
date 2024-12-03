@@ -2,6 +2,8 @@ package sawfowl.regionguard.implementsapi.data;
 
 import org.spongepowered.api.data.persistence.DataContainer;
 
+import com.google.gson.JsonObject;
+
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
 
 public class ClaimedByPlayerImpl implements ClaimedByPlayer {
@@ -26,6 +28,13 @@ public class ClaimedByPlayerImpl implements ClaimedByPlayer {
 			public Builder setRegions(long value) {
 				regions = value;
 				return this;
+			}
+
+			@Override
+			public ClaimedByPlayer fromJson(JsonObject jsonObject) {
+				if(jsonObject.has("Blocks")) blocks = jsonObject.getAsJsonPrimitive("Blocks").getAsLong();
+				if(jsonObject.has("Regions")) regions = jsonObject.getAsJsonPrimitive("Regions").getAsLong();
+				return build();
 			}
 		};
 	}
@@ -65,6 +74,14 @@ public class ClaimedByPlayerImpl implements ClaimedByPlayer {
 	@Override
 	public DataContainer toContainer() {
 		return null;
+	}
+
+	@Override
+	public JsonObject asJson() {
+		JsonObject json = new JsonObject();
+		json.addProperty("Blocks", blocks);
+		json.addProperty("Regions", regions);
+		return json;
 	}
 
 }
