@@ -8,6 +8,9 @@ import com.google.gson.JsonObject;
 
 import net.kyori.adventure.builder.AbstractBuilder;
 
+/**
+ * Getting and changing the limits available to a player.
+ */
 @ConfigSerializable
 public interface PlayerLimits extends DataSerializable {
 
@@ -39,6 +42,9 @@ public interface PlayerLimits extends DataSerializable {
 
 	PlayerLimits setMembersPerRegion(long limit);
 
+	/**
+	 * Convert all data of this object to Json format.
+	 */
 	JsonObject asJson();
 
 	interface Builder extends AbstractBuilder<PlayerLimits>, org.spongepowered.api.util.Builder<PlayerLimits, Builder> {
@@ -51,6 +57,9 @@ public interface PlayerLimits extends DataSerializable {
 
 		Builder setMembersPerRegion(long limit);
 
+		/**
+		 * Getting object data from Json.
+		 */
 		PlayerLimits fromJson(JsonObject jsonObject);
 
 	}

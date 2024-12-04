@@ -8,6 +8,9 @@ import com.google.gson.JsonObject;
 
 import net.kyori.adventure.builder.AbstractBuilder;
 
+/**
+ * Getting and changing the volume of player-owned blocks and regions.
+ */
 @ConfigSerializable
 public interface ClaimedByPlayer extends DataSerializable {
 
@@ -31,6 +34,9 @@ public interface ClaimedByPlayer extends DataSerializable {
 
 	ClaimedByPlayer setRegions(long value);
 
+	/**
+	 * Convert all data of this object to Json format.
+	 */
 	JsonObject asJson();
 
 	interface Builder extends AbstractBuilder<ClaimedByPlayer>, org.spongepowered.api.util.Builder<ClaimedByPlayer, Builder> {
@@ -39,6 +45,9 @@ public interface ClaimedByPlayer extends DataSerializable {
 
 		Builder setRegions(long value);
 
+		/**
+		 * Getting object data from Json.
+		 */
 		ClaimedByPlayer fromJson(JsonObject jsonObject);
 
 	}

@@ -171,6 +171,9 @@ public interface Cuboid extends DataSerializable {
 	 */
 	Cuboid toFlat(ServerWorld world);
 
+	/**
+	 * Convert all data of this object to Json format.
+	 */
 	JsonObject asJson();
 
 	interface Builder extends AbstractBuilder<Cuboid>, org.spongepowered.api.util.Builder<Cuboid, Builder> {
@@ -183,7 +186,10 @@ public interface Cuboid extends DataSerializable {
 
 		Builder setSelectorType(SelectorTypes type);
 
-		Cuboid fromJson(JsonObject json);
+		/**
+		 * Getting object data from Json.
+		 */
+		Cuboid fromJson(JsonObject jsonObject);
 
 	}
 

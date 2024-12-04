@@ -42,6 +42,9 @@ public interface FlagValue extends DataSerializable {
 	 */
 	boolean getValue();
 
+	/**
+	 * Convert all data of this object to Json format.
+	 */
 	JsonObject asJson();
 
 	default Tristate asTristate() {
@@ -60,6 +63,9 @@ public interface FlagValue extends DataSerializable {
 
 		Builder setTarget(String id);
 
+		/**
+		 * Getting object data from Json.
+		 */
 		FlagValue fromJson(JsonObject jsonObject);
 
 		default Builder setSource(Entity entity) {

@@ -624,7 +624,6 @@ public interface Region extends DataSerializable {
 	 */
 	boolean putSchematic(Schematic schematic, int heigt);
 
-
 	/**
 	 * Insert Schematic into the region.<br><br>
 	 * This operation can work overload the server.
@@ -633,7 +632,6 @@ public interface Region extends DataSerializable {
 	 * @param vector3i - central position
 	 */
 	boolean putSchematic(Schematic schematic, Vector3i vector3i);
-
 
 	/**
 	 * Territory regeneration in the region.
@@ -653,6 +651,9 @@ public interface Region extends DataSerializable {
 	 */
 	Region copy();
 
+	/**
+	 * Convert all data of this object to Json format.
+	 */
 	JsonObject asJson();
 
 	interface Builder extends AbstractBuilder<Region>, org.spongepowered.api.util.Builder<Region, Builder> {
@@ -691,6 +692,9 @@ public interface Region extends DataSerializable {
 
 		Builder addChilds(Collection<Region> regions);
 
+		/**
+		 * Getting object data from Json.
+		 */
 		Region fromJson(JsonObject jsonObject);
 
 	}

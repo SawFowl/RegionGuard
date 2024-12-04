@@ -28,6 +28,9 @@ public interface PlayerData extends DataSerializable {
 	 */
 	PlayerLimits getLimits();
 
+	/**
+	 * Set block limits, region limits, and so on for the player.
+	 */
 	PlayerData setLimits(PlayerLimits limits);
 
 	/**
@@ -35,8 +38,14 @@ public interface PlayerData extends DataSerializable {
 	 */
 	ClaimedByPlayer getClaimed();
 
+	/**
+	 * Changing the volume of player-owned blocks and regions.
+	 */
 	PlayerData setClaimed(ClaimedByPlayer claimed);
 
+	/**
+	 * Convert all data of this object to Json format.
+	 */
 	JsonObject asJson();
 
 	interface Builder extends AbstractBuilder<PlayerData>, org.spongepowered.api.util.Builder<PlayerData, Builder> {
@@ -45,6 +54,9 @@ public interface PlayerData extends DataSerializable {
 
 		Builder setClaimed(ClaimedByPlayer claimed);
 
+		/**
+		 * Getting object data from Json.
+		 */
 		PlayerData fromJson(JsonObject jsonObject);
 
 	}

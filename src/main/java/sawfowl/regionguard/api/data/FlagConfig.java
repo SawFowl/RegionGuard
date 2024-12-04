@@ -18,8 +18,14 @@ public interface FlagConfig extends DataSerializable {
 		return builder().setName(name).setSettings(settings).build();
 	}
 
+	/**
+	 * Getting the name of the flag.
+	 */
 	String getName();
 
+	/**
+	 * Getting the flag parameters.
+	 */
 	FlagSettings getSettings();
 
 	interface Builder extends AbstractBuilder<FlagConfig>, org.spongepowered.api.util.Builder<FlagConfig, Builder> {

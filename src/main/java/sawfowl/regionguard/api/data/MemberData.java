@@ -79,10 +79,19 @@ public interface MemberData extends DataSerializable {
 	 */
 	void setTrustType(TrustTypes level);
 
+	/**
+	 * Determines whether a player will be shown his nickname instead of the region owner's name.
+	 */
 	boolean isReplaceNameInTitle();
 
+	/**
+	 * It is recommended to set to `true` if the server is the owner of the region.
+	 */
 	void setReplaceNameInTitle(boolean replaceNameInTitle);
 
+	/**
+	 * Convert all data of this object to Json format.
+	 */
 	JsonObject asJson();
 
 	interface Builder extends AbstractBuilder<MemberData>, org.spongepowered.api.util.Builder<MemberData, Builder> {
@@ -101,6 +110,9 @@ public interface MemberData extends DataSerializable {
 
 		MemberData from(MemberData data);
 
+		/**
+		 * Getting object data from Json.
+		 */
 		MemberData fromJson(JsonObject jsonObject);
 
 	}
