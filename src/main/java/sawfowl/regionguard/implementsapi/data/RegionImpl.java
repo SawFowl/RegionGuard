@@ -961,8 +961,8 @@ public class RegionImpl implements Region {
 
 	@Override
 	public String toString() {
-		return "RegionImplUUID: " + regionUUID +
-				" RegionImpl names: " + names.toString() +
+		return "RegionUUID: " + regionUUID +
+				" Region names: " + names.toString() +
 				" OwnerUUID: " + getOwnerUUID() +
 				" Owner name: " + getOwnerName() +
 				" Region names: " + names.toString();
