@@ -281,9 +281,9 @@ public class CuboidImpl implements Cuboid {
 		minJson.addProperty("Y", min.y());
 		minJson.addProperty("Z", min.z());
 		JsonObject maxJson = new JsonObject();
-		minJson.addProperty("X", max.x());
-		minJson.addProperty("Y", max.y());
-		minJson.addProperty("Z", max.z());
+		maxJson.addProperty("X", max.x());
+		maxJson.addProperty("Y", max.y());
+		maxJson.addProperty("Z", max.z());
 		JsonObject json = new JsonObject();
 		json.add("Min", minJson);
 		json.add("Max", maxJson);
