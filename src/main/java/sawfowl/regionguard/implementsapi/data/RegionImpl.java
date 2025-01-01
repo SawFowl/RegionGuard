@@ -754,7 +754,7 @@ public class RegionImpl implements Region {
 
 	@Override
 	public <T extends AdditionalData> Optional<T> getAdditionalData(PluginContainer container, String dataName, Class<T> clazz) {
-		if(additionalDataMap.containsKey(container.metadata().id()) && additionalDataMap.get(container.metadata().id()).containsKey(dataName)) {
+		if(additionalDataMap != null && additionalDataMap.containsKey(container.metadata().id()) && additionalDataMap.get(container.metadata().id()).containsKey(dataName)) {
 			BasicConfigurationNode node = BasicConfigurationNode.root(options -> options.options().serializers(serializers -> serializers.registerAll(SerializeOptions.selectSerializersCollection(2))));
 			try {
 				node.set(JsonObject.class, additionalDataMap.get(container.metadata().id()).get(dataName));
