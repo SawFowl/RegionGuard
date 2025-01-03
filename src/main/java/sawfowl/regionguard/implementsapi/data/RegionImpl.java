@@ -905,7 +905,6 @@ public class RegionImpl implements Region {
 	@Override
 	public boolean putSchematic(Schematic schematic, int heigt) {
 		if(getWorld().isPresent()) {
-			RegionGuard.getInstance().getLogger().warn(Vector3i.from(cuboid.getAABB().center().toInt().x(), heigt, cuboid.getAABB().center().toInt().z()));
 			schematic.applyToWorld(getWorld().get(), Vector3i.from(cuboid.getAABB().center().toInt().x(), heigt, cuboid.getAABB().center().toInt().z()), SpawnTypes.PLUGIN);
 			return true;
 		}
