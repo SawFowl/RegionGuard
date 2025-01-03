@@ -39,6 +39,7 @@ import org.spongepowered.api.world.volume.stream.StreamOptions.LoadingStyle;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.gson.GsonConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3i;
@@ -62,6 +63,7 @@ import sawfowl.regionguard.api.data.MemberData;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
+import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.SelectorTypes;
 
@@ -242,6 +244,7 @@ public class RegionImpl implements Region {
 		};
 	}
 
+	private static final ConfigurationOptions OPTIONS = SerializeOptions.OPTIONS_VARIANT_2.serializers(s -> s.registerAll(RegionSerializerCollection.COLLETCTION));
 	private Map<String, Component> names = new HashMap<String, Component>();
 	private UUID regionUUID = UUID.randomUUID();
 	private String world = DefaultWorldKeys.DEFAULT.asString();
@@ -791,7 +794,7 @@ public class RegionImpl implements Region {
 
 	@Override
 	public Region removeAdditionalData(PluginContainer container, String dataName) {
-		if(this.additionalDataMap.containsKey(container.metadata().id()) && this.additionalDataMap.get(container.metadata().id()).containsKey(dataName)) this.additionalDataMap.get(container.metadata().id()).remove(dataName);
+		if(additionalDataMap != null && this.additionalDataMap.containsKey(container.metadata().id()) && this.additionalDataMap.get(container.metadata().id()).containsKey(dataName)) this.additionalDataMap.get(container.metadata().id()).remove(dataName);
 		return this;
 	}
 
@@ -902,7 +905,8 @@ public class RegionImpl implements Region {
 	@Override
 	public boolean putSchematic(Schematic schematic, int heigt) {
 		if(getWorld().isPresent()) {
-			schematic.applyToWorld(getWorld().get(), Vector3i.from(cuboid.getAABB().center().floorX(), heigt, cuboid.getAABB().center().floorY()), SpawnTypes.PLUGIN);
+			RegionGuard.getInstance().getLogger().warn(Vector3i.from(cuboid.getAABB().center().toInt().x(), heigt, cuboid.getAABB().center().toInt().z()));
+			schematic.applyToWorld(getWorld().get(), Vector3i.from(cuboid.getAABB().center().toInt().x(), heigt, cuboid.getAABB().center().toInt().z()), SpawnTypes.PLUGIN);
 			return true;
 		}
 		return false;
@@ -987,58 +991,12 @@ public class RegionImpl implements Region {
 	}
 	@Override
 	public JsonObject asJson() {
-		JsonObject json = new JsonObject();
-		if(!names.isEmpty()) {
-			JsonObject names = new JsonObject();
-			this.names.forEach((k,v) -> names.addProperty(k, GsonComponentSerializer.gson().serialize(v)));
-			json.add("RegionName", names);
+		try {
+			return SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set((Region) this).get(JsonObject.class);
+		} catch (SerializationException e) {
+			e.printStackTrace();
 		}
-		json.addProperty("UUID", regionUUID.toString());
-		if(cuboid != null) json.add("Cuboid", cuboid.asJson());
-		json.addProperty("World", world);
-		if(!childs.isEmpty()) {
-			JsonArray childs = new JsonArray();
-			this.childs.forEach(child -> childs.add(child.asJson()));
-			json.add("Childs", childs);
-		}
-		if(!flagValues.isEmpty()) {
-			JsonObject flagValues = new JsonObject();
-			this.flagValues.forEach((flag, values) -> {
-				JsonArray jsonValues = new JsonArray();
-				values.forEach(value -> {
-					jsonValues.add(value.asJson());
-				});
-				flagValues.add(flag, flagValues);
-			});
-			json.add("Flags", flagValues);
-		}
-		if(!members.isEmpty()) {
-			JsonArray members = new JsonArray();
-			this.members.forEach(member -> members.add(member.asJson()));
-			json.add("Members", members);
-		}
-		json.addProperty("Type", regionType.toString());
-		json.addProperty("Created", creationTime);
-		if(!joinMessages.isEmpty()) {
-			JsonObject joinMessages = new JsonObject();
-			this.joinMessages.forEach((k,v) -> joinMessages.addProperty(k, GsonComponentSerializer.gson().serialize(v)));
-			json.add("JoinMessage", joinMessages);
-		}
-		if(!exitMessages.isEmpty()) {
-			JsonObject exitMessages = new JsonObject();
-			this.exitMessages.forEach((k,v) -> exitMessages.addProperty(k, GsonComponentSerializer.gson().serialize(v)));
-			json.add("ExitMessage", exitMessages);
-		}
-		if(additionalDataMap != null && !additionalDataMap.isEmpty()) {
-			JsonObject additionalDataMap = new JsonObject();
-			this.additionalDataMap.forEach((plugin, dataMap) -> {
-				JsonObject pluginData = new JsonObject();
-				dataMap.forEach((name, data) -> pluginData.add(name, data));
-				additionalDataMap.add(plugin, pluginData);
-			});
-			json.add("AdditionalData", additionalDataMap);
-		}
-		return json;
+		return null;
 	}
 
 }
