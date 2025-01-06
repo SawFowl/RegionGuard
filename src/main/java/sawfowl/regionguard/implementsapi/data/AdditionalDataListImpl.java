@@ -22,6 +22,12 @@ public class AdditionalDataListImpl {
 		this.rawData = rawData;
 	}
 
+	public AdditionalDataListImpl(JsonObject asJson) {
+		asJson.asMap().forEach((k, v) -> {
+			if(v.isJsonObject()) rawData.put(k, v.getAsJsonObject());
+		});
+	}
+
 	private Map<String, AdditionalData> additionalData = new HashMap<>();
 	private Map<String, JsonObject> rawData = new HashMap<>();
 
