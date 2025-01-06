@@ -61,7 +61,8 @@ public class AdditionalDataListImpl {
 			} catch (SerializationException e) {
 				e.printStackTrace();
 			}
-		} return Optional.empty();
+		}
+		return Optional.empty();
 	}
 
 	public JsonObject serialize() {
