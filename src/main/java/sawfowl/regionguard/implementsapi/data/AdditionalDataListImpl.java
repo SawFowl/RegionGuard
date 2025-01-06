@@ -77,8 +77,9 @@ public class AdditionalDataListImpl {
 	}
 
 	public Map<String, JsonObject> getRawMap() {
-		Map<String, JsonObject> raw = new HashMap<>();
+		Map<String, JsonObject> raw = new HashMap<>(rawData);
 		additionalData.forEach((k, v) -> {
+			 if(raw.containsKey(k)) raw.remove(k);
 			JsonObject json = v.toJsonObject();
 			try {
 				raw.put(k, json != null ? json : SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(v).get(JsonObject.class));
