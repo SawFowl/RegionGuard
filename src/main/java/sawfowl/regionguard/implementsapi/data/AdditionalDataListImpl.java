@@ -11,7 +11,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import com.google.gson.JsonObject;
 
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
-import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.AdditionalData;
 
@@ -27,7 +26,6 @@ public class AdditionalDataListImpl {
 	private Map<String, JsonObject> rawData = new HashMap<>();
 
 	public <T extends AdditionalData> void add(String key, AdditionalData data) {
-		RegionGuard.getInstance().getLogger().warn("Запись дополнительных данных");
 		if(additionalData.containsKey(key)) additionalData.remove(key);
 		additionalData.put(key, data);
 	}

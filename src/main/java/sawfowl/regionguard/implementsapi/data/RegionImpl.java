@@ -780,7 +780,6 @@ public class RegionImpl implements Region {
 	public Map<String, Map<String, JsonObject>> getAllAdditionalData() {
 		Map<String, Map<String, JsonObject>> copy = new HashMap<String, Map<String,JsonObject>>();
 		if(additionalDataMap != null) additionalDataMap.forEach((k, v) -> copy.put(k, v.getRawMap()));
-		RegionGuard.getInstance().getLogger().warn("Получение всех дополнительных данных " + copy.toString());
 		return copy;
 	}
 
