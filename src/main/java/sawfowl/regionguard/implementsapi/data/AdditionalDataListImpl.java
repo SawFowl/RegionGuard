@@ -74,6 +74,9 @@ public class AdditionalDataListImpl {
 				e.printStackTrace();
 			}
 		});
+		rawData.forEach((k, v) -> {
+			if(!json.has(k)) json.add(k, v);
+		});
 		return json;
 	}
 
