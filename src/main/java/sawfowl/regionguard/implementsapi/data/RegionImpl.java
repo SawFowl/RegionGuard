@@ -37,17 +37,12 @@ import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.StreamOptions.LoadingStyle;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
-import org.spongepowered.configurate.BasicConfigurationNode;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.gson.GsonConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -183,7 +178,11 @@ public class RegionImpl implements Region {
 			@Override
 			public Builder addAdditionalData(Map<String, Map<String, JsonObject>> dataMap) {
 				if(dataMap == null) return this;
-				if(additionalDataMap == null) additionalDataMap = dataMap;
+				if(additionalDataMap == null) additionalDataMap = new HashMap<String, AdditionalDataListImpl>();;
+				dataMap.forEach((k, v) -> {
+					if(additionalDataMap.containsKey(k)) additionalDataMap.remove(k);
+					additionalDataMap.put(k, new AdditionalDataListImpl(v));
+				});
 				return this;
 			}
 
@@ -231,9 +230,9 @@ public class RegionImpl implements Region {
 						if(entry.getValue() instanceof JsonObject pluginData) {
 							pluginData.entrySet().forEach((entryData) -> {
 								if(entryData.getValue() instanceof JsonObject additionalData) {
-									if(!additionalDataMap.containsKey(entry.getKey())) additionalDataMap.put(entry.getKey(), new HashMap<>());
-									if(additionalDataMap.get(entry.getKey()).containsKey(entryData.getKey())) additionalDataMap.get(entry.getKey()).remove(entryData.getKey());
-									additionalDataMap.get(entry.getKey()).put(entryData.getKey(), additionalData);
+									if(!additionalDataMap.containsKey(entry.getKey())) additionalDataMap.put(entry.getKey(), new AdditionalDataListImpl());
+									additionalDataMap.get(entry.getKey()).remove(entryData.getKey());
+									additionalDataMap.get(entry.getKey()).add(entryData.getKey(), additionalData);
 								}
 							});
 						}
@@ -244,7 +243,6 @@ public class RegionImpl implements Region {
 		};
 	}
 
-	private static final ConfigurationOptions OPTIONS = SerializeOptions.OPTIONS_VARIANT_2.serializers(s -> s.registerAll(RegionSerializerCollection.COLLETCTION));
 	private Map<String, Component> names = new HashMap<String, Component>();
 	private UUID regionUUID = UUID.randomUUID();
 	private String world = DefaultWorldKeys.DEFAULT.asString();
@@ -257,7 +255,7 @@ public class RegionImpl implements Region {
 	private long creationTime = 0;
 	private Map<String, Component> joinMessages = new HashMap<String, Component>();
 	private Map<String, Component> exitMessages = new HashMap<String, Component>();
-	private Map<String, Map<String, JsonObject>> additionalDataMap = null;
+	private Map<String, AdditionalDataListImpl> additionalDataMap = null;
 	private Region parrent;
 
 	@Override
@@ -757,14 +755,8 @@ public class RegionImpl implements Region {
 
 	@Override
 	public <T extends AdditionalData> Optional<T> getAdditionalData(PluginContainer container, String dataName, Class<T> clazz) {
-		if(additionalDataMap != null && additionalDataMap.containsKey(container.metadata().id()) && additionalDataMap.get(container.metadata().id()).containsKey(dataName)) {
-			BasicConfigurationNode node = BasicConfigurationNode.root(options -> options.options().serializers(serializers -> serializers.registerAll(SerializeOptions.selectSerializersCollection(2))));
-			try {
-				node.set(JsonObject.class, additionalDataMap.get(container.metadata().id()).get(dataName));
-				return Optional.ofNullable(node.get(clazz));
-			} catch (SerializationException e) {
-				e.printStackTrace();
-			}
+		if(additionalDataMap != null && additionalDataMap.containsKey(container.metadata().id()) && additionalDataMap.get(container.metadata().id()).contains(dataName)) {
+			return additionalDataMap.get(container.metadata().id()).get(dataName, clazz);
 		}
 		return Optional.empty();
 	}
@@ -773,34 +765,23 @@ public class RegionImpl implements Region {
 	public <T extends AdditionalData> Region setAdditionalData(PluginContainer container, String dataName, T additionalData) {
 		if(additionalData == null) return this;
 		if(this.additionalDataMap == null) this.additionalDataMap = new HashMap<>();
-		if(!additionalDataMap.containsKey(container.metadata().id())) additionalDataMap.put(container.metadata().id(), new HashMap<>());
-		if(additionalData.toJsonObject() == null) {
-			StringWriter sink = new StringWriter();
-			GsonConfigurationLoader loader = createWriter(sink);
-			BasicConfigurationNode tempNode = BasicConfigurationNode.root(options -> options.options().serializers(serializers -> serializers.registerAll(SerializeOptions.SERIALIZER_COLLECTION_VARIANT_2)));
-			try {
-				tempNode.set(additionalData.getClass(), additionalData);
-				loader.save(tempNode);
-				if(sink.toString() != null) additionalDataMap.get(container.metadata().id()).put(dataName, JsonParser.parseString(sink.toString()).getAsJsonObject());
-			} catch (ConfigurateException e) {
-				e.printStackTrace();
-			}
-			sink = null;
-			loader = null;
-			tempNode = null;
-		} else additionalDataMap.get(container.metadata().id()).put(dataName, additionalData.toJsonObject());
+		if(!additionalDataMap.containsKey(container.metadata().id())) additionalDataMap.put(container.metadata().id(), new AdditionalDataListImpl());
+		additionalDataMap.get(container.metadata().id()).add(dataName, additionalData);
 		return this;
 	}
 
 	@Override
 	public Region removeAdditionalData(PluginContainer container, String dataName) {
-		if(additionalDataMap != null && this.additionalDataMap.containsKey(container.metadata().id()) && this.additionalDataMap.get(container.metadata().id()).containsKey(dataName)) this.additionalDataMap.get(container.metadata().id()).remove(dataName);
+		if(additionalDataMap != null && this.additionalDataMap.containsKey(container.metadata().id())) this.additionalDataMap.get(container.metadata().id()).remove(dataName);
 		return this;
 	}
 
 	@Override
 	public Map<String, Map<String, JsonObject>> getAllAdditionalData() {
-		return additionalDataMap == null ? null : new HashMap<>(additionalDataMap);
+		Map<String, Map<String, JsonObject>> copy = new HashMap<String, Map<String,JsonObject>>();
+		if(additionalDataMap != null) additionalDataMap.forEach((k, v) -> copy.put(k, v.getRawMap()));
+		RegionGuard.getInstance().getLogger().warn("Получение всех дополнительных данных " + copy.toString());
+		return copy;
 	}
 
 	@Override
@@ -881,19 +862,12 @@ public class RegionImpl implements Region {
 					.createArchetypeVolume(
 							cuboid.getMin(),
 							cuboid.getMax(),
-							cuboid.getAABB().center().toInt()
+							cuboid.getMin()
 							);
-			if(altAuthor != null && archetypeVolume != null) {
+			if(archetypeVolume != null) {
 				schematic = Schematic.builder()
 						.volume(archetypeVolume)
-						.metaValue(Schematic.METADATA_AUTHOR, altAuthor)
-						.metaValue(Schematic.METADATA_DATE, Instant.ofEpochMilli(creationTime).toString())
-						.metaValue(Schematic.METADATA_NAME, schematicName)
-						.build();
-			} else {
-				schematic = Schematic.builder()
-						.volume(archetypeVolume)
-						.metaValue(Schematic.METADATA_AUTHOR, getOwnerData().getName())
+						.metaValue(Schematic.METADATA_AUTHOR, altAuthor != null ? altAuthor : getOwnerName())
 						.metaValue(Schematic.METADATA_DATE, Instant.ofEpochMilli(creationTime).toString())
 						.metaValue(Schematic.METADATA_NAME, schematicName)
 						.build();
@@ -905,7 +879,7 @@ public class RegionImpl implements Region {
 	@Override
 	public boolean putSchematic(Schematic schematic, int heigt) {
 		if(getWorld().isPresent()) {
-			schematic.applyToWorld(getWorld().get(), Vector3i.from(cuboid.getAABB().center().toInt().x(), heigt, cuboid.getAABB().center().toInt().z()), SpawnTypes.PLUGIN);
+			schematic.applyToWorld(getWorld().get(), Vector3i.from(cuboid.getAABB().center().toInt().x(), heigt, cuboid.getAABB().center().toInt().z()), SpawnTypes.CUSTOM);
 			return true;
 		}
 		return false;
@@ -914,7 +888,7 @@ public class RegionImpl implements Region {
 	@Override
 	public boolean putSchematic(Schematic schematic, Vector3i vector3i) {
 		if(getWorld().isPresent()) {
-			schematic.applyToWorld(getWorld().get(), vector3i, SpawnTypes.PLUGIN);
+			schematic.applyToWorld(getWorld().get(), vector3i, SpawnTypes.CUSTOM);
 			return true;
 		}
 		return false;
@@ -985,9 +959,6 @@ public class RegionImpl implements Region {
 		return PlainTextComponentSerializer.plainText().serialize(component);
 	}
 
-	private GsonConfigurationLoader createWriter(StringWriter sink) {
-		return GsonConfigurationLoader.builder().defaultOptions(SerializeOptions.selectOptions(2)).sink(() -> new BufferedWriter(sink)).build();
-	}
 	@Override
 	public JsonObject asJson() {
 		try {

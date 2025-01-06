@@ -3,10 +3,12 @@ package sawfowl.regionguard.commands.child;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader.Mutable;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import net.kyori.adventure.text.Component;
@@ -14,7 +16,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import sawfowl.commandpack.api.commands.raw.RawCommand;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgument;
-import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
 import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
@@ -64,7 +65,16 @@ public class SetSelectorType extends AbstractPlayerCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
-		return Arrays.asList(RawArguments.createStringArgument(SelectorTypes.getValues(), new RawBasicArgumentData<String>(null, "Type", 0, null, null), RawOptional.notOptional(), locale -> getExceptions(locale).getSelectorTypeNotPresent()));
+		return Arrays.asList(
+			RawArgument.of(
+				SelectorTypes.class,
+				(cause, args) -> SelectorTypes.getValues().stream(),
+				(cause, args) -> args.length >= 1 ? Optional.ofNullable(SelectorTypes.checkType(args[0])) : Optional.empty(),
+				new RawBasicArgumentData<String>(null, "Type", 0, null, null).toRawArgumentData(CommandTreeNodeTypes.STRING.get().createNode()),
+				RawOptional.notOptional(),
+				locale -> getExceptions(locale).getSelectorTypeNotPresent()
+			)
+		);
 	}
 
 }

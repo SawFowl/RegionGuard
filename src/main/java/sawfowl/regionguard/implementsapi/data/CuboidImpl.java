@@ -26,6 +26,12 @@ public class CuboidImpl implements Cuboid {
 
 			@Override
 			public Cuboid build() {
+				Vector3i min = CuboidImpl.this.min;
+				Vector3i max = CuboidImpl.this.max;
+				if(min == null) throw new RuntimeException("The minimum position is not set.");
+				if(max == null) throw new RuntimeException("The maximum position is not set.");
+				CuboidImpl.this.min = min.min(max);
+				CuboidImpl.this.max = min.max(max);
 				return CuboidImpl.this;
 			}
 
