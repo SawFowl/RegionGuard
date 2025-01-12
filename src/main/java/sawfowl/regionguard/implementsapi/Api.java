@@ -66,6 +66,13 @@ public class Api implements RegionAPI {
 	private Map<UUID, PlayerData> dataPlayers = new HashMap<UUID, PlayerData>();
 	private ItemStack wandItem;
 
+	@Override
+	public boolean cleanWorldData(ResourceKey world) {
+		if(Sponge.server().worldManager().worldExists(world)) return false;
+		plugin.getRegionsDataWork().removeAllWorldData(world);
+		return true;
+	}
+
 	public void generateDefaultGlobalRegion() {
 		defaultGlobal = Region.createGlobal(DefaultWorldKeys.DEFAULT, getDefaultFlags(RegionTypes.GLOBAL));
 	}
@@ -87,11 +94,16 @@ public class Api implements RegionAPI {
 
 	@Override
 	public void updateGlobalRegionData(ServerWorld serverWorld, Region region) {
+		updateGlobalRegionData(serverWorld != null ? serverWorld.key() : null, region);
+	}
+
+	@Override
+	public void updateGlobalRegionData(ResourceKey serverWorld, Region region) {
 		if(serverWorld != null) {
-			if(globalRegionsPerWorlds.containsKey(serverWorld.key())) {
-				globalRegionsPerWorlds.remove(serverWorld.key());
+			if(globalRegionsPerWorlds.containsKey(serverWorld)) {
+				globalRegionsPerWorlds.remove(serverWorld);
 			}
-			globalRegionsPerWorlds.put(serverWorld.key(), region);
+			globalRegionsPerWorlds.put(serverWorld, region);
 		} else {
 			if(globalRegionsPerWorlds.containsKey(region.getWorldKey())) {
 				globalRegionsPerWorlds.remove(region.getWorldKey());
@@ -516,6 +528,10 @@ public class Api implements RegionAPI {
 
 	public boolean isRegisteredGlobal(ServerWorld world) {
 		return globalRegionsPerWorlds.containsKey(world.key());
+	}
+
+	public boolean isRegisteredGlobal(ResourceKey world) {
+		return globalRegionsPerWorlds.containsKey(world);
 	}
 
 }

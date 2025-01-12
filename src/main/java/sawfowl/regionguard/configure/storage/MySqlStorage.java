@@ -57,22 +57,28 @@ public class MySqlStorage extends AbstractSqlStorage {
 	}
 
 	@Override
+	public void removeAllWorldData(ResourceKey world) {
+		executeSQL("DELETE FROM " + prefix + "worlds WHERE WORLD ='" + world.asString() + "';");
+		executeSQL("DROP TABLE IF EXISTS '" + prefix + "world_" + world.asString().replace(':', '_') + "';");
+	}
+
+	@Override
 	protected Statement getStatement() throws SQLException {
 		return statement == null || statement.isClosed() ? statement = plugin.getMySQL().getOrOpenConnection().createStatement() : statement;
 	}
 
 	@Override
-	public Region getWorldRegion(ServerWorld world) {
+	public Region getWorldRegion(ResourceKey world) {
 		try {
 			ResultSet results = resultSet("SELECT * FROM " + prefix + "worlds;");
 			while(!results.isClosed() && results.next()) {
-				if(world.key().asString().equals(results.getString("world"))) {
+				if(world.asString().equals(results.getString("world"))) {
 					if(lastGlobalSync == null) lastGlobalSync = results.getString("written");
 					return getGlobalRegionfromResultSet(results, world);
 				}
 			}
 		} catch (SQLException | ConfigurateException e) {
-			plugin.getLogger().error("Get global region data. World " + world.key().asString() + "\n" + e.getLocalizedMessage());
+			plugin.getLogger().error("Get global region data. World " + world.asString() + "\n" + e.getLocalizedMessage());
 		}
 		Region region = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
 		saveRegion(region);
@@ -125,33 +131,32 @@ public class MySqlStorage extends AbstractSqlStorage {
 	}
 
 	@Override
-	public void loadRegions() {
-		Sponge.server().worldManager().worlds().forEach(world -> {
-			Map<UUID, Set<Region>> childs = new HashMap<>();
-			try {
-				ResultSet results = resultSet("SELECT * FROM " + prefix + "world_" + world.key().asString().replace(':', '_') + " ORDER BY written;");
-				while(!results.isClosed() && results.next()) {
-					if(lastRegionSync == null) lastRegionSync =  results.getString("written");
-					Region region = getRegionfromResultSet(results, world);
-					UUID uuid = region.getUniqueId();
-					String parrent = results.getString("parrent");
-					if(parrent != null && !parrent.equalsIgnoreCase("null")) {
-						if(plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().toString().equals(parrent)).findFirst().isPresent()) {
-							plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().toString().equals(parrent)).findFirst().get().addChild(region);
-						} else {
-							if(!childs.containsKey(UUID.fromString(parrent))) childs.put(UUID.fromString(parrent), new HashSet<Region>());
-							childs.get(UUID.fromString(parrent)).add(region);
-						}
+	public void loadRegions(ResourceKey world) {
+		Map<UUID, Set<Region>> childs = new HashMap<>();
+		try {
+			ResultSet results = resultSet("SELECT * FROM " + prefix + "world_" + world.asString().replace(':', '_') + " ORDER BY written;");
+			while(!results.isClosed() && results.next()) {
+				if(lastRegionSync == null) lastRegionSync =  results.getString("written");
+				Region region = getRegionfromResultSet(results, world);
+				UUID uuid = region.getUniqueId();
+				String parrent = results.getString("parrent");
+				if(parrent != null && !parrent.equalsIgnoreCase("null")) {
+					if(plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().toString().equals(parrent)).findFirst().isPresent()) {
+						plugin.getAPI().getRegions().stream().filter(rg -> rg.getUniqueId().toString().equals(parrent)).findFirst().get().addChild(region);
 					} else {
-						if(childs.containsKey(uuid)) childs.get(uuid).forEach(child -> region.addChild(region));
-						plugin.getAPI().registerRegion(region);
+						if(!childs.containsKey(UUID.fromString(parrent))) childs.put(UUID.fromString(parrent), new HashSet<Region>());
+						childs.get(UUID.fromString(parrent)).add(region);
 					}
+				} else {
+					if(childs.containsKey(uuid)) childs.get(uuid).forEach(child -> region.addChild(region));
+					plugin.getAPI().registerRegion(region);
 				}
-				plugin.getAPI().updateGlobalRegionData(world, getWorldRegion(world));
-			} catch (SQLException | ConfigurateException e) {
-				plugin.getLogger().error("Load region data\n" + e.getLocalizedMessage());
 			}
-		});
+			plugin.getAPI().updateGlobalRegionData(world, getWorldRegion(world));
+		} catch (SQLException | ConfigurateException e) {
+			plugin.getLogger().error("Load region data\n" + e.getLocalizedMessage());
+		}
+	
 	}
 
 	@Override
@@ -211,14 +216,18 @@ public class MySqlStorage extends AbstractSqlStorage {
 	private ScheduledTask syncTask() {
 		if(plugin.getConfig().getMySQLConfig().getSyncInterval() < 1) return null;
 		return Sponge.asyncScheduler().submit(Task.builder().plugin(plugin.getPluginContainer()).interval(plugin.getConfig().getMySQLConfig().getSyncInterval(), TimeUnit.SECONDS).execute(() -> {
-			for(ServerWorld world : Sponge.server().worldManager().worlds()) {
-				try {
+			try {
+				for(ServerWorld world : Sponge.server().worldManager().worlds()) {
+					syncGlobals(world.key());
+					syncClaims(world.key());
+				}
+				for(ResourceKey world : Sponge.server().worldManager().offlineWorldKeys()) {
 					syncGlobals(world);
 					syncClaims(world);
-					syncPlayers();
-				} catch (SQLException | ConfigurateException e) {
-					plugin.getLogger().error(e.getLocalizedMessage());
 				}
+				syncPlayers();
+			} catch (SQLException | ConfigurateException e) {
+				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		}).build());
 	}
@@ -241,13 +250,13 @@ public class MySqlStorage extends AbstractSqlStorage {
 		} else loadDataOfPlayers();
 	}
 
-	private void syncGlobals(ServerWorld world) throws SQLException, ConfigurateException {
+	private void syncGlobals(ResourceKey world) throws SQLException, ConfigurateException {
 		if(this.lastGlobalSync != null) {
 			ResultSet globalSet = resultSet("SELECT * FROM " + prefix + "worlds WHERE written > '" + this.lastGlobalSync + "' ORDER BY written;");
 			boolean updateTimeGlobal = false;
 			while(!globalSet.isClosed() && globalSet.next()) {
 				String key = globalSet.getString("world");
-				if(key.equals(world.key().asString())) {
+				if(key.equals(world.asString())) {
 					if(!updateTimeGlobal) {
 						lastGlobalSync = globalSet.getString("written");
 						updateTimeGlobal = true;
@@ -258,8 +267,8 @@ public class MySqlStorage extends AbstractSqlStorage {
 		} else plugin.getAPI().updateGlobalRegionData(world, getWorldRegion(world));
 	}
 
-	private void syncClaims(ServerWorld world) throws SQLException, ConfigurateException {
-		ResultSet regionsSet = resultSet("SELECT * FROM " + prefix + "world_" + world.key().asString().replace(':', '_') + (this.lastRegionSync != null ? " WHERE written > '" + this.lastRegionSync + "'" : "") + " ORDER BY written;");
+	private void syncClaims(ResourceKey world) throws SQLException, ConfigurateException {
+		ResultSet regionsSet = resultSet("SELECT * FROM " + prefix + "world_" + world.asString().replace(':', '_') + (this.lastRegionSync != null ? " WHERE written > '" + this.lastRegionSync + "'" : "") + " ORDER BY written;");
 		boolean updateTimeRegion = false;
 		while(!regionsSet.isClosed() && regionsSet.next()) {
 			if(!updateTimeRegion) {
@@ -297,7 +306,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 		return PlayerData.of(getPlayerLimits(results), getClaimedByPlayer(results));
 	}
 
-	private Region getRegionfromResultSet(ResultSet results, ServerWorld world) throws SQLException, ConfigurateException {
+	private Region getRegionfromResultSet(ResultSet results, ResourceKey world) throws SQLException, ConfigurateException {
 		UUID uuid = UUID.fromString(results.getString("uuid"));
 		String mames = results.getString("name");
 		String joinMessage = results.getString("join_message");
@@ -320,7 +329,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 				.build();
 	}
 
-	private Region getGlobalRegionfromResultSet(ResultSet results, ServerWorld world) throws SQLException, ConfigurateException {
+	private Region getGlobalRegionfromResultSet(ResultSet results, ResourceKey world) throws SQLException, ConfigurateException {
 		String mames = results.getString("name");
 		String joinMessage = results.getString("join_message");
 		String exitMessage = results.getString("exit_message");

@@ -2,8 +2,9 @@ package sawfowl.regionguard.configure;
 
 import java.util.UUID;
 
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
@@ -15,15 +16,27 @@ import sawfowl.regionguard.implementsapi.data.RegionImpl;
 
 public interface WorkData {
 
-	public void createDataForWorlds();
+	default void loadRegions() {
+		Sponge.server().worldManager().worlds().forEach(world -> loadRegions(world.key()));
+		Sponge.server().worldManager().offlineWorldKeys().forEach(this::loadRegions);
+	}
 
-	public Region getWorldRegion(ServerWorld world);
+	default void createDataForWorlds() {
+		Sponge.server().worldManager().worlds().forEach(world -> createDataForWorld(world.key()));
+		Sponge.server().worldManager().offlineWorldKeys().forEach(this::createDataForWorld);
+	}
+
+	public void removeAllWorldData(ResourceKey world);
+
+	public void createDataForWorld(ResourceKey world);
+
+	public Region getWorldRegion(ResourceKey world);
 
 	public void saveRegion(Region region);
 
 	public void deleteRegion(Region region);
 
-	public void loadRegions();
+	public void loadRegions(ResourceKey world);
 
 	public void savePlayerData(ServerPlayer player, PlayerData playerData);
 

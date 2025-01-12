@@ -766,7 +766,7 @@ public class RegionImpl implements Region {
 		if(additionalData == null) return this;
 		if(this.additionalDataMap == null) this.additionalDataMap = new HashMap<>();
 		if(!additionalDataMap.containsKey(container.metadata().id())) additionalDataMap.put(container.metadata().id(), new AdditionalDataListImpl());
-		additionalDataMap.get(container.metadata().id()).add(dataName, additionalData);
+		additionalDataMap.get(container.metadata().id()).set(dataName, additionalData);
 		return this;
 	}
 
@@ -914,15 +914,27 @@ public class RegionImpl implements Region {
 	@Override
 	public Region copy() {
 		RegionImpl region = new RegionImpl();
-		region.childs = childs;
+		region.childs = new HashSet<>();
+		childs.forEach(child -> region.childs.add(child.copy()));
 		region.creationTime = creationTime;
-		region.cuboid = cuboid;
-		region.additionalDataMap = additionalDataMap;
-		region.exitMessages = exitMessages;
-		region.flagValues = flagValues;
-		region.joinMessages = joinMessages;
-		region.members = members;
-		region.names = names;
+		region.cuboid = Cuboid.of(cuboid.getAABB());
+		region.additionalDataMap = new HashMap<>();
+		additionalDataMap.forEach((plugin, collection) -> region.additionalDataMap.put(plugin, collection.copy()));
+		region.exitMessages = new HashMap<>();
+		exitMessages.forEach((k, v) -> region.exitMessages.put(k, Component.empty().append(v)));
+		region.flagValues = new HashMap<String, Set<FlagValue>>();
+		flagValues.forEach((k, v) -> {
+			if(!v.isEmpty()) {
+				region.flagValues.put(k, new HashSet<FlagValue>());
+				v.forEach(flagValue -> region.flagValues.get(k).add(FlagValue.of(flagValue.getValue(), flagValue.getSource(), flagValue.getTarget())));
+			}
+		});
+		region.joinMessages = new HashMap<>();
+		joinMessages.forEach((k, v) -> region.joinMessages.put(k, Component.empty().append(v)));
+		region.members = new HashSet<MemberData>();
+		members.forEach(member -> region.members.add(MemberData.builder().from(member)));
+		region.names = new HashMap<>();
+		names.forEach((k, v) -> region.names.put(k, Component.empty().append(v)));
 		region.parrent = parrent;
 		region.regionType = regionType;
 		region.regionUUID = regionUUID;

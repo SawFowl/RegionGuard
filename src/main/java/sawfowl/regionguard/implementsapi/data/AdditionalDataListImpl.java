@@ -11,6 +11,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import com.google.gson.JsonObject;
 
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
+import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.AdditionalData;
 
@@ -31,8 +32,9 @@ public class AdditionalDataListImpl {
 	private Map<String, AdditionalData> additionalData = new HashMap<>();
 	private Map<String, JsonObject> rawData = new HashMap<>();
 
-	public <T extends AdditionalData> void add(String key, AdditionalData data) {
+	public <T extends AdditionalData> void set(String key, AdditionalData data) {
 		if(additionalData.containsKey(key)) additionalData.remove(key);
+		if(rawData.containsKey(key)) rawData.remove(key);
 		additionalData.put(key, data);
 	}
 
@@ -42,6 +44,7 @@ public class AdditionalDataListImpl {
 	}
 
 	public void remove(String key) {
+		RegionGuard.getInstance().getLogger().warn("Удаление дополнительных данных");
 		if(additionalData.containsKey(key)) additionalData.remove(key);
 		if(rawData.containsKey(key)) rawData.remove(key);
 	}
@@ -62,7 +65,7 @@ public class AdditionalDataListImpl {
 			try {
 				T data = SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(rawData.get(key)).get(clazz);
 				if(data == null) return Optional.empty();
-				add(key, data);
+				set(key, data);
 				return Optional.ofNullable(data);
 			} catch (SerializationException e) {
 				e.printStackTrace();
@@ -98,6 +101,12 @@ public class AdditionalDataListImpl {
 			}
 		});
 		return raw;
+	}
+
+	public AdditionalDataListImpl copy() {
+		AdditionalDataListImpl copy = new AdditionalDataListImpl();
+		getRawMap().forEach((k, v) -> copy.rawData.put(k, v));
+		return copy;
 	}
 
 }

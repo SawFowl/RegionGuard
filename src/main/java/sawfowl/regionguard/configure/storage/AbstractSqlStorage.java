@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -51,17 +51,16 @@ public abstract class AbstractSqlStorage extends Thread implements WorkData {
 	protected abstract Statement getStatement() throws SQLException;
 
 	@Override
-	public void createDataForWorlds() {
-		Sponge.server().worldManager().worlds().forEach(world -> {
-			Region global = getWorldRegion(world);
-			if(global == null) {
-				global = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
-				saveRegion(global);
-				plugin.getAPI().updateGlobalRegionData(world, global);
-			} else {
-				plugin.getAPI().updateGlobalRegionData(world, global);
-			}
-		});
+	public void createDataForWorld(ResourceKey world) {
+		Region global = getWorldRegion(world);
+		if(global == null) {
+			global = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
+			saveRegion(global);
+			plugin.getAPI().updateGlobalRegionData(world, global);
+		} else {
+			plugin.getAPI().updateGlobalRegionData(world, global);
+		}
+	
 	}
 
 	@Override

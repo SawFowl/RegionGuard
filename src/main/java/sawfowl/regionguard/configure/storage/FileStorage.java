@@ -4,9 +4,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.UUID;
 
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.reference.ValueReference;
@@ -36,31 +35,36 @@ public class FileStorage implements WorkData {
 	}
 
 	@Override
-	public void createDataForWorlds() {
-		checkWorldsFolder();
-		Sponge.server().worldManager().worlds().forEach(world -> {
-			if(!plugin.getAPI().isRegisteredGlobal(world)) {
-				if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-")).toFile().exists()) plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-")).toFile().mkdir();
-				try {
-					ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
-					if(reference.node().virtual() || reference.node().empty()) reference.setAndSave(Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags()));
-					plugin.getAPI().updateGlobalRegionData(world, reference.get());
-				} catch (ConfigurateException e) {
-					plugin.getLogger().error(e.getLocalizedMessage());
-				}
-				if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().exists()) {
-					plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().mkdir();
-				}
-			}
-		});
+	public void removeAllWorldData(ResourceKey world) {
+		File file = plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-")).toFile();
+		if(file.exists()) file.delete();
 	}
 
 	@Override
-	public Region getWorldRegion(ServerWorld world) {
+	public void createDataForWorld(ResourceKey world) {
 		checkWorldsFolder();
-		if((plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf")).toFile().exists()) {
+		if(!plugin.getAPI().isRegisteredGlobal(world)) {
+			if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-")).toFile().exists()) plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-")).toFile().mkdir();
 			try {
-				ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
+				ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
+				if(reference.node().virtual() || reference.node().empty()) reference.setAndSave(Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags()));
+				plugin.getAPI().updateGlobalRegionData(world, reference.get());
+			} catch (ConfigurateException e) {
+				plugin.getLogger().error(e.getLocalizedMessage());
+			}
+			if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-") + File.separator + "Regions").toFile().exists()) {
+				plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-") + File.separator + "Regions").toFile().mkdir();
+			}
+		}
+	
+	}
+
+	@Override
+	public Region getWorldRegion(ResourceKey world) {
+		checkWorldsFolder();
+		if((plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-") + File.separator + "WorldRegion.conf")).toFile().exists()) {
+			try {
+				ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
 				if(reference.node().virtual() || reference.node().empty()) reference.setAndSave(Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags()));
 				return reference.get();
 			} catch (ConfigurateException e) {
@@ -99,37 +103,34 @@ public class FileStorage implements WorkData {
 		if(file.exists()) file.delete(); 
 	}
 
-	@Override
-	public void loadRegions() {
+	public void loadRegions(ResourceKey world) {
 		checkWorldsFolder();
-		Sponge.server().worldManager().worlds().forEach(world -> {
-			try {
-				ValueReference<Region, CommentedConfigurationNode> globalReference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
-				if(globalReference.node().virtual() || globalReference.node().empty() || globalReference.get().getWorldKey() == null) globalReference.setAndSave(Region.createGlobal(world, !globalReference.node().virtual() && !globalReference.node().empty() && globalReference.get() != null && globalReference.get().getFlags() != null && !globalReference.get().getFlags().isEmpty() ? globalReference.get().getFlags() : plugin.getDefaultFlagsConfig().getGlobalFlags()));
-				plugin.getAPI().updateGlobalRegionData(world, globalReference.get());
-			} catch (ConfigurateException e) {
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
-			if(plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().exists()) {
-				for(File file : plugin.getConfigDir().resolve("Worlds" + File.separator + world.key().asString().replace(":", "-") + File.separator + "Regions").toFile().listFiles()) {
-					if(file.getName().startsWith(".") && file.getName().endsWith(".tmp")) file.delete();
-					if(file.getName().endsWith(".conf")) {
-						try {
-							ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(file.toPath());
-							if(!reference.node().virtual() && !reference.node().empty()) {
-								Region region = reference.get();
-								if(region != null && region.getWorldKey() != null) {
-									//setParentAfterLoad(region);
-									plugin.getAPI().registerRegion(region);
-								}
+		try {
+			ValueReference<Region, CommentedConfigurationNode> globalReference = createRegionConfig(plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-") + File.separator + "WorldRegion.conf"));
+			if(globalReference.node().virtual() || globalReference.node().empty() || globalReference.get().getWorldKey() == null) globalReference.setAndSave(Region.createGlobal(world, !globalReference.node().virtual() && !globalReference.node().empty() && globalReference.get() != null && globalReference.get().getFlags() != null && !globalReference.get().getFlags().isEmpty() ? globalReference.get().getFlags() : plugin.getDefaultFlagsConfig().getGlobalFlags()));
+			plugin.getAPI().updateGlobalRegionData(world, globalReference.get());
+		} catch (ConfigurateException e) {
+			plugin.getLogger().error(e.getLocalizedMessage());
+		}
+		if(plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-") + File.separator + "Regions").toFile().exists()) {
+			for(File file : plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-") + File.separator + "Regions").toFile().listFiles()) {
+				if(file.getName().startsWith(".") && file.getName().endsWith(".tmp")) file.delete();
+				if(file.getName().endsWith(".conf")) {
+					try {
+						ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(file.toPath());
+						if(!reference.node().virtual() && !reference.node().empty()) {
+							Region region = reference.get();
+							if(region != null && region.getWorldKey() != null) {
+								//setParentAfterLoad(region);
+								plugin.getAPI().registerRegion(region);
 							}
-						} catch (ConfigurateException e) {
-							plugin.getLogger().error(e.getLocalizedMessage());
 						}
+					} catch (ConfigurateException e) {
+						plugin.getLogger().error(e.getLocalizedMessage());
 					}
 				}
 			}
-		});
+		}
 	}
 
 	@Override

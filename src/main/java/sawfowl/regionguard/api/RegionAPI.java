@@ -27,6 +27,11 @@ import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 public interface RegionAPI {
 
 	/**
+	 * Removes all world data from the plugin if the world does not exist.
+	 */
+	public boolean cleanWorldData(ResourceKey world);
+
+	/**
 	 * Getting all registered flags.
 	 */
 	Map<String, FlagConfig> getRegisteredFlags();
@@ -43,6 +48,14 @@ public interface RegionAPI {
 	 * @param region - world region.
 	 */
 	void updateGlobalRegionData(ServerWorld serverWorld, Region region);
+
+	/**
+	 * Update global region data.
+	 * 
+	 * @param serverWorld - world key
+	 * @param region - world region.
+	 */
+	void updateGlobalRegionData(ResourceKey serverWorld, Region region);
 
 	/**
 	 * Adding a temporary region
