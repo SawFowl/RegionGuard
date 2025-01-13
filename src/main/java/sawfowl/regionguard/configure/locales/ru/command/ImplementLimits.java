@@ -6,9 +6,9 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Limits;
-import sawfowl.regionguard.configure.locales.def.command.limits.ImplementBuy;
-import sawfowl.regionguard.configure.locales.def.command.limits.ImplementSell;
-import sawfowl.regionguard.configure.locales.def.command.limits.ImplementSet;
+import sawfowl.regionguard.configure.locales.ru.command.limits.ImplementBuy;
+import sawfowl.regionguard.configure.locales.ru.command.limits.ImplementSell;
+import sawfowl.regionguard.configure.locales.ru.command.limits.ImplementSet;
 import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable

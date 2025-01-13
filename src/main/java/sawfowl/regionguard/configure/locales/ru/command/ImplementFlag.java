@@ -6,7 +6,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Flag;
-import sawfowl.regionguard.configure.locales.def.command.flag.ImplementHover;
+import sawfowl.regionguard.configure.locales.ru.command.flag.ImplementHover;
 import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable

@@ -7,7 +7,7 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.configure.locales.abstractlocale.Command.Info;
-import sawfowl.regionguard.configure.locales.def.command.info.ImplementButtons;
+import sawfowl.regionguard.configure.locales.ru.command.info.ImplementButtons;
 import sawfowl.regionguard.utils.PlaceholderKeys;
 
 @ConfigSerializable
