@@ -308,6 +308,12 @@ public class RegionImpl implements Region {
 	}
 
 	@Override
+	public Region addMember(MemberData member) {
+		members.add(member);
+		return this;
+	}
+
+	@Override
 	public Region setTrustType(ServerPlayer player, TrustTypes type) {
 		return setTrustType(player.profile(), type);
 	}

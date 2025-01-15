@@ -109,6 +109,13 @@ public interface Region extends DataSerializable {
 	Region setOwner(GameProfile owner);
 
 	/**
+	 * Adding a member to a region.
+	 *
+	 * @param member - addable member
+	 */
+	Region addMember(MemberData member);
+
+	/**
 	 * Adding a player to a region.
 	 *
 	 * @param player - addable player

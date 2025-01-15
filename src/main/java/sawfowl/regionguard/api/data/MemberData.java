@@ -90,6 +90,11 @@ public interface MemberData extends DataSerializable {
 	void setReplaceNameInTitle(boolean replaceNameInTitle);
 
 	/**
+	 * See {@link ServerPlayer#sendMessage(Component)}
+	 */
+	public void sendMessage(Component component);
+
+	/**
 	 * Convert all data of this object to Json format.
 	 */
 	JsonObject asJson();

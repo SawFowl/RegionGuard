@@ -1,5 +1,6 @@
 package sawfowl.regionguard.implementsapi.data;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -156,6 +157,13 @@ public class MemberDataImpl implements MemberData {
 	}
 
 	@Override
+	public void sendMessage(Component component) {
+		if(isPlayer()) {
+			getPlayer().ifPresent(player -> player.sendMessage(component));
+		} else Sponge.systemSubject().sendMessage(component);
+	}
+
+	@Override
 	public int contentVersion() {
 		return 0;
 	}
@@ -164,6 +172,7 @@ public class MemberDataImpl implements MemberData {
 	public DataContainer toContainer() {
 		return null;
 	}
+
 	@Override
 	public JsonObject asJson() {
 		JsonObject json = new JsonObject();
@@ -172,6 +181,19 @@ public class MemberDataImpl implements MemberData {
 		json.addProperty("TrustLevel", trustLevel.toString());
 		json.addProperty("ReplaceNameInTitle", replaceNameInTitle);
 		return json;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(uuid);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		return Objects.equals(uuid, ((MemberDataImpl) obj).uuid);
 	}
 
 }
