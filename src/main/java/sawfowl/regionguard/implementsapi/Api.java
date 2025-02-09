@@ -68,7 +68,7 @@ public class Api implements RegionAPI {
 
 	@Override
 	public boolean cleanWorldData(ResourceKey world) {
-		if(Sponge.server().worldManager().worldExists(world)) return false;
+		if(world.equals(DefaultWorldKeys.DEFAULT) || world.equals(DefaultWorldKeys.THE_END) || world.equals(DefaultWorldKeys.THE_NETHER)) return false;
 		plugin.getRegionsDataWork().removeAllWorldData(world);
 		return true;
 	}

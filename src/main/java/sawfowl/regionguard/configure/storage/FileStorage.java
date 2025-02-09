@@ -36,8 +36,7 @@ public class FileStorage implements WorkData {
 
 	@Override
 	public void removeAllWorldData(ResourceKey world) {
-		File file = plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-")).toFile();
-		if(file.exists()) file.delete();
+		removeFiles(plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-")).toFile());
 	}
 
 	@Override
@@ -192,6 +191,11 @@ public class FileStorage implements WorkData {
 
 	private ValueReference<PlayerData, CommentedConfigurationNode> createPlayerDataConfig(Path path) throws ConfigurateException {
 		return SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.register(PlayerData.class, new PlayerDataSerializer()))).path(path).build().loadToReference().referenceTo(PlayerData.class);
+	}
+
+	private void removeFiles(File file) {
+		if(file.isDirectory()) for(File child : file.listFiles()) removeFiles(child);
+		if(file.exists()) file.delete();
 	}
 
 }
