@@ -226,6 +226,7 @@ public class RegionImpl implements Region {
 					jsonMessages.entrySet().forEach(entry -> exitMessages.put(entry.getKey(), GsonComponentSerializer.gson().deserialize(entry.getValue().getAsString())));
 				}
 				if(jsonObject.has("AdditionalData") && jsonObject.get("AdditionalData") instanceof JsonObject jsonData) {
+					if(additionalDataMap == null) additionalDataMap = new HashMap<>();
 					jsonData.entrySet().forEach(entry -> {
 						if(entry.getValue() instanceof JsonObject pluginData) {
 							pluginData.entrySet().forEach((entryData) -> {
