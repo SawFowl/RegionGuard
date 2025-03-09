@@ -11,7 +11,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import com.google.gson.JsonObject;
 
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
-import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.AdditionalData;
 
@@ -44,7 +43,6 @@ public class AdditionalDataListImpl {
 	}
 
 	public void remove(String key) {
-		RegionGuard.getInstance().getLogger().warn("Удаление дополнительных данных");
 		if(additionalData.containsKey(key)) additionalData.remove(key);
 		if(rawData.containsKey(key)) rawData.remove(key);
 	}
