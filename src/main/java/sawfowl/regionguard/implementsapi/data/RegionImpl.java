@@ -1,7 +1,5 @@
 package sawfowl.regionguard.implementsapi.data;
 
-import java.io.BufferedWriter;
-import java.io.StringWriter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +35,6 @@ import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.StreamOptions.LoadingStyle;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
-import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -48,7 +45,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
-import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.regionguard.api.TrustTypes;
 import sawfowl.regionguard.api.data.AdditionalData;
 import sawfowl.regionguard.api.data.ChunkNumber;
@@ -58,7 +54,6 @@ import sawfowl.regionguard.api.data.MemberData;
 import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
-import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.SelectorTypes;
 
@@ -979,12 +974,54 @@ public class RegionImpl implements Region {
 
 	@Override
 	public JsonObject asJson() {
-		try {
-			return SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set((Region) this).get(JsonObject.class);
-		} catch (SerializationException e) {
-			e.printStackTrace();
+		JsonObject json = new JsonObject();
+		json.addProperty("UUID", regionUUID.toString());
+		if(!names.isEmpty()) {
+			JsonObject names = new JsonObject();
+			this.names.forEach((k,v) -> names.addProperty(k, GsonComponentSerializer.gson().serialize(v)));
+			json.add("RegionName", names);
 		}
-		return null;
+		if(cuboid != null) json.add("Cuboid", cuboid.asJson());
+		json.addProperty("World", world);
+		if(!childs.isEmpty()) {
+			JsonArray childs = new JsonArray();
+			this.childs.forEach(child -> childs.add(child.asJson()));
+			json.add("Childs", childs);
+		}
+		if(!flagValues.isEmpty()) {
+			JsonObject flagValues = new JsonObject();
+			this.flagValues.forEach((flag, values) -> {
+				JsonArray jsonValues = new JsonArray();
+				values.forEach(value -> {
+					jsonValues.add(value.asJson());
+				});
+				flagValues.add(flag, jsonValues);
+			});
+			json.add("Flags", flagValues);
+		}
+		if(!members.isEmpty()) {
+			JsonArray members = new JsonArray();
+			this.members.forEach(member -> members.add(member.asJson()));
+			json.add("Members", members);
+		}
+		json.addProperty("Type", regionType.toString());
+		json.addProperty("Created", creationTime);
+		if(!joinMessages.isEmpty()) {
+			JsonObject joinMessages = new JsonObject();
+			this.joinMessages.forEach((k,v) -> joinMessages.addProperty(k, GsonComponentSerializer.gson().serialize(v)));
+			json.add("JoinMessage", joinMessages);
+		}
+		if(!exitMessages.isEmpty()) {
+			JsonObject exitMessages = new JsonObject();
+			this.exitMessages.forEach((k,v) -> exitMessages.addProperty(k, GsonComponentSerializer.gson().serialize(v)));
+			json.add("ExitMessage", exitMessages);
+		}
+		if(additionalDataMap != null && additionalDataMap.size() != 0) {
+			JsonObject additionalData = new JsonObject();
+			additionalDataMap.forEach((k,v) -> additionalData.add(k, v.serialize()));
+			json.add("AdditionalData", additionalData);
+		}
+		return json;
 	}
 
 }
