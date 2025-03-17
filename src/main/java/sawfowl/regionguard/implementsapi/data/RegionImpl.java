@@ -920,8 +920,10 @@ public class RegionImpl implements Region {
 		childs.forEach(child -> region.childs.add(child.copy()));
 		region.creationTime = creationTime;
 		region.cuboid = Cuboid.of(cuboid.getAABB());
-		region.additionalDataMap = new HashMap<>();
-		additionalDataMap.forEach((plugin, collection) -> region.additionalDataMap.put(plugin, collection.copy()));
+		if(additionalDataMap != null) {
+			region.additionalDataMap = new HashMap<>();
+			additionalDataMap.forEach((plugin, collection) -> region.additionalDataMap.put(plugin, collection.copy()));
+		}
 		region.exitMessages = new HashMap<>();
 		exitMessages.forEach((k, v) -> region.exitMessages.put(k, Component.empty().append(v)));
 		region.flagValues = new HashMap<String, Set<FlagValue>>();
