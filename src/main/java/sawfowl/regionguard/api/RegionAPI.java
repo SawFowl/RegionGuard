@@ -285,7 +285,17 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The amount of blocks the player owns according to the type of allocation of each region.
 	 */
-	long getClaimedBlocks(ServerPlayer player);
+	default long getClaimedBlocks(ServerPlayer player) {
+		return getClaimedBlocks(player.uniqueId());
+	}
+
+	/**
+	 * Get the number of blocks that belong to the player.
+	 * 
+	 * @param player - Checked player
+	 * @return - The amount of blocks the player owns according to the type of allocation of each region.
+	 */
+	long getClaimedBlocks(UUID player);
 
 	/**
 	 * Get the number of regions belonging to the player.
@@ -293,7 +303,17 @@ public interface RegionAPI {
 	 * @param player - Checked player
 	 * @return - The number of regions belonging to the player.
 	 */
-	long getClaimedRegions(ServerPlayer player);
+	default long getClaimedRegions(ServerPlayer player) {
+		return getClaimedRegions(player.uniqueId());
+	}
+
+	/**
+	 * Get the number of regions belonging to the player.
+	 * 
+	 * @param player - Checked player
+	 * @return - The number of regions belonging to the player.
+	 */
+	long getClaimedRegions(UUID player);
 
 	/**
 	 * Getting the limit of blocks that can claiming the player.

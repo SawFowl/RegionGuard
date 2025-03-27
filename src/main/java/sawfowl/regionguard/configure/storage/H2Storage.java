@@ -13,7 +13,6 @@ import java.util.UUID;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -33,7 +32,7 @@ public class H2Storage extends AbstractSqlStorage {
 		super(plugin);
 		createTableForPlayers();
 		createWorldsTables();
-		createDataForWorlds();
+		createGlobalRegions();
 	}
 
 	@Override
@@ -53,12 +52,12 @@ public class H2Storage extends AbstractSqlStorage {
 			plugin.getLogger().error("Get global region data. World " + world.asString() + "\n" + e.getLocalizedMessage());
 		}
 		Region region = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
-		saveRegion(region);
+		save(region);
 		return region;
 	}
 
 	@Override
-	public void saveRegion(Region region) {
+	public void save(Region region) {
 		String sql = null;
 		if(region.isGlobal()) {
 			sql = "MERGE INTO " + prefix + "worlds(UUID, WORLD, NAME, CREATION_TIME, JOIN_MESSAGE, EXIT_MESSAGE, FLAGS, MEMBERS, ADDITIONAL_DATA) VALUES('"
@@ -92,14 +91,14 @@ public class H2Storage extends AbstractSqlStorage {
 					+ region.getParrent().map(rg -> rg.getUniqueId().toString()).orElse(null) + "');";
 		}
 		executeSQL(sql);
-		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::saveRegion);
+		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::save);
 	}
 
 	@Override
-	public void deleteRegion(Region region) {
+	public void delete(Region region) {
 		if(region.isGlobal()) return;
 		executeSQL("DELETE FROM " + prefix + "world_" + region.getWorldKey().asString().replace(':', '_') + " WHERE " + prefix + "world_" + region.getWorldKey().asString().replace(':', '_') + ".UUID = '" + region.getUniqueId().toString() + "';");
-		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::deleteRegion);
+		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::delete);
 	}
 
 	@Override
@@ -131,7 +130,7 @@ public class H2Storage extends AbstractSqlStorage {
 	}
 
 	@Override
-	public void savePlayerData(UUID player, PlayerData playerData) {
+	public void save(UUID player, PlayerData playerData) {
 		String sql = "MERGE INTO " + prefix + "player_data(UUID, CLAIMED_BLOCKS, CLAIMED_REGIONS, LIMIT_BLOCKS, LIMIT_CLAIMS, LIMIT_SUBDIVISIONS, LIMIT_MEMBERS) VALUES("
 				+ "'" + player.toString() + "', '"
 				+ playerData.getClaimed().getBlocks() + "', '"
@@ -144,18 +143,18 @@ public class H2Storage extends AbstractSqlStorage {
 	}
 
 	@Override
-	public PlayerData getPlayerData(ServerPlayer player) {
+	public PlayerData getPlayerData(UUID player) {
 		try {
-			ResultSet results = resultSet("SELECT " + player.uniqueId() + " FROM " + prefix + "player_data");
+			ResultSet results = resultSet("SELECT " + player + " FROM " + prefix + "player_data");
 			if(!results.isClosed() && results.next()) return getPlayerDataFromResultSet(results);
 		} catch (SQLException e) {
-			plugin.getLogger().error("Get player data. Player: " + player.name() + "\n" + e.getLocalizedMessage());
+			plugin.getLogger().error("Get player data. Player: " + player + "\n" + e.getLocalizedMessage());
 		}
 		return PlayerData.zero();
 	}
 
 	@Override
-	public void loadDataOfPlayers() {
+	public void loadAll() {
 		try {
 			ResultSet results = resultSet("SELECT * FROM " + prefix + "player_data");
 			while(!results.isClosed() && results.next()) {

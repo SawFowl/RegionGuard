@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -51,7 +50,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 		if(!plugin.getConfig().getSplitStorage().isEnable() || plugin.getConfig().getSplitStorage().getPlayers() == StorageType.MYSQL) createTableForPlayers();
 		if(!plugin.getConfig().getSplitStorage().isEnable() || plugin.getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
 			createWorldsTables();
-			createDataForWorlds();
+			createGlobalRegions();
 		}
 		sync = syncTask();
 	}
@@ -81,12 +80,12 @@ public class MySqlStorage extends AbstractSqlStorage {
 			plugin.getLogger().error("Get global region data. World " + world.asString() + "\n" + e.getLocalizedMessage());
 		}
 		Region region = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
-		saveRegion(region);
+		save(region);
 		return region;
 	}
 
 	@Override
-	public void saveRegion(Region region) {
+	public void save(Region region) {
 		String sql = null;
 		if(region.isGlobal()) {
 			sql = "REPLACE INTO " + prefix + "worlds(uuid, world, name, creation_time, join_message, exit_message, flags, members, additional_data) VALUES('"
@@ -120,14 +119,14 @@ public class MySqlStorage extends AbstractSqlStorage {
 			+ region.getParrent().map(rg -> rg.getUniqueId().toString()).orElse(null) + "');";
 		}
 		executeSQL(sql);
-		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::saveRegion);
+		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::save);
 	}
 
 	@Override
-	public void deleteRegion(Region region) {
+	public void delete(Region region) {
 		if(region.isGlobal()) return;
 		executeSQL("DELETE FROM " + prefix + "world_" + region.getWorldKey().asString().replace(':', '_') + " WHERE " + prefix + "world_" + region.getWorldKey().asString().replace(':', '_') + ".uuid = '" + region.getUniqueId().toString() + "';");
-		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::deleteRegion);
+		if(!region.getChilds().isEmpty()) region.getChilds().forEach(this::delete);
 	}
 
 	@Override
@@ -160,7 +159,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 	}
 
 	@Override
-	public void savePlayerData(UUID player, PlayerData playerData) {
+	public void save(UUID player, PlayerData playerData) {
 		if(player == null || playerData == null) return;
 		String sql = "REPLACE INTO " + prefix + "player_data(uuid, claimed_blocks, claimed_regions, limit_blocks, limit_claims, limit_subdivisions, limit_members) VALUES("
 				+ "'" + player.toString() + "', '"
@@ -174,18 +173,18 @@ public class MySqlStorage extends AbstractSqlStorage {
 	}
 
 	@Override
-	public PlayerData getPlayerData(ServerPlayer player) {
+	public PlayerData getPlayerData(UUID player) {
 		try {
-			ResultSet results = resultSet("SELECT " + player.uniqueId() + " FROM " + prefix + "player_data");
+			ResultSet results = resultSet("SELECT " + player + " FROM " + prefix + "player_data");
 			if(!results.isClosed() && results.next()) return getPlayerDataFromResultSet(results);
 		} catch (SQLException e) {
-			plugin.getLogger().error("Get player data. Player: " + player.name() + "\n" + e.getLocalizedMessage());
+			plugin.getLogger().error("Get player data. Player: " + player + "\n" + e.getLocalizedMessage());
 		}
 		return PlayerData.zero();
 	}
 
 	@Override
-	public void loadDataOfPlayers() {
+	public void loadAll() {
 		try {
 			ResultSet results = resultSet("SELECT * FROM " + prefix + "player_data ORDER BY written");
 			while(!results.isClosed() && results.next()) {
@@ -247,7 +246,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 					optData.get().setLimits(getPlayerLimits(playersSet)).setClaimed(getClaimedByPlayer(playersSet));
 				} else plugin.getAPI().setPlayerData(uuid, getPlayerDataFromResultSet(playersSet));
 			}
-		} else loadDataOfPlayers();
+		} else loadAll();
 	}
 
 	private void syncGlobals(ResourceKey world) throws SQLException, ConfigurateException {

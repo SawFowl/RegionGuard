@@ -29,8 +29,8 @@ public class FileStorage implements WorkData {
 	public FileStorage(RegionGuard plugin) {
 		this.plugin = plugin;
 		if(!plugin.getConfig().getSplitStorage().isEnable() || plugin.getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
-			createDataForWorlds();
-			loadDataOfPlayers();
+			createGlobalRegions();
+			loadAll();
 		}
 	}
 
@@ -40,7 +40,7 @@ public class FileStorage implements WorkData {
 	}
 
 	@Override
-	public void createDataForWorld(ResourceKey world) {
+	public void createGlobalRegionForWorld(ResourceKey world) {
 		checkWorldsFolder();
 		if(!plugin.getAPI().isRegisteredGlobal(world)) {
 			if(!plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-")).toFile().exists()) plugin.getConfigDir().resolve("Worlds" + File.separator + world.asString().replace(":", "-")).toFile().mkdir();
@@ -71,12 +71,12 @@ public class FileStorage implements WorkData {
 			}
 		}
 		Region region = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
-		saveRegion(region);
+		save(region);
 		return region;
 	}
 
 	@Override
-	public void saveRegion(Region region) {
+	public void save(Region region) {
 		checkWorldsFolder();
 		try {
 			ValueReference<Region, CommentedConfigurationNode> reference = createRegionConfig(region.isGlobal() ? plugin.getConfigDir().resolve("Worlds" + File.separator + region.getWorldKey().asString().replace(":", "-") + File.separator + "WorldRegion.conf") : plugin.getConfigDir().resolve(
@@ -92,7 +92,7 @@ public class FileStorage implements WorkData {
 	}
 
 	@Override
-	public void deleteRegion(Region region) {
+	public void delete(Region region) {
 		File file = plugin.getConfigDir().resolve(
 				"Worlds" + File.separator + 
 				region.getWorldKey().asString().replace(":", "-")
@@ -133,12 +133,12 @@ public class FileStorage implements WorkData {
 	}
 
 	@Override
-	public void savePlayerData(ServerPlayer player, PlayerData playerData) {
-		savePlayerData(player.uniqueId(), playerData);
+	public void save(ServerPlayer player, PlayerData playerData) {
+		save(player.uniqueId(), playerData);
 	}
 
 	@Override
-	public void savePlayerData(UUID player, PlayerData playerData) {
+	public void save(UUID player, PlayerData playerData) {
 		checkPlayersFolder();
 		try {
 			createPlayerDataConfig(plugin.getConfigDir().resolve("PlayersData" + File.separator + player.toString() + ".conf")).setAndSave(playerData);
@@ -149,10 +149,10 @@ public class FileStorage implements WorkData {
 	}
 
 	@Override
-	public PlayerData getPlayerData(ServerPlayer player) {
+	public PlayerData getPlayerData(UUID player) {
 		checkPlayersFolder();
 		try {
-			ValueReference<PlayerData, CommentedConfigurationNode> reference = createPlayerDataConfig(plugin.getConfigDir().resolve("PlayersData" + File.separator + player.uniqueId().toString() + ".conf"));
+			ValueReference<PlayerData, CommentedConfigurationNode> reference = createPlayerDataConfig(plugin.getConfigDir().resolve("PlayersData" + File.separator + player.toString() + ".conf"));
 			if(reference.node().virtual() || reference.node().empty()) reference.setAndSave(PlayerData.of(PlayerLimits.zero(), ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player))));
 			return reference.get();
 		} catch (ConfigurateException e) {
@@ -162,7 +162,7 @@ public class FileStorage implements WorkData {
 	}
 
 	@Override
-	public void loadDataOfPlayers() {
+	public void loadAll() {
 		checkPlayersFolder();
 		for(File file : plugin.getConfigDir().resolve("PlayersData").toFile().listFiles()) {
 			if(file.getName().endsWith(".conf")) try {

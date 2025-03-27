@@ -190,13 +190,13 @@ public class Info extends AbstractPlayerCommand {
 								if(optPlayerData.isPresent()) {
 									optPlayerData.get().getClaimed().setRegions(plugin.getAPI().getClaimedRegions(player) - 1);
 									optPlayerData.get().getClaimed().setBlocks(plugin.getAPI().getClaimedBlocks(player) - region.getCuboid().getSize());
-									plugin.getPlayersDataWork().savePlayerData(player, optPlayerData.get());
+									plugin.getPlayersDataWork().save(player, optPlayerData.get());
 								} else {
 									PlayerData playerData = PlayerData.of(
 										PlayerLimits.of(plugin.getAPI().getLimitBlocks(player), plugin.getAPI().getLimitClaims(player), plugin.getAPI().getLimitSubdivisions(player), plugin.getAPI().getLimitMembers(player)), 
 										ClaimedByPlayer.of(plugin.getAPI().getClaimedBlocks(player), plugin.getAPI().getClaimedRegions(player))
 									);
-									plugin.getPlayersDataWork().savePlayerData(player, playerData);
+									plugin.getPlayersDataWork().save(player, playerData);
 								}
 							}
 							if(event.getMessage().isPresent()) player.sendMessage(event.getMessage().get());

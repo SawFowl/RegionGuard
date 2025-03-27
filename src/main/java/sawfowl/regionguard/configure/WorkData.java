@@ -1,58 +1,15 @@
 package sawfowl.regionguard.configure;
 
-import java.util.UUID;
-
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import sawfowl.regionguard.RegionGuard;
-import sawfowl.regionguard.api.data.PlayerData;
-import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.data.storage.PlayerDataStorage;
+import sawfowl.regionguard.api.data.storage.RegionDataStorage;
 import sawfowl.regionguard.implementsapi.data.PlayerDataImpl;
 import sawfowl.regionguard.implementsapi.data.RegionImpl;
 
-public interface WorkData {
-
-	default void loadRegions() {
-		Sponge.server().worldManager().worlds().forEach(world -> loadRegions(world.key()));
-		Sponge.server().worldManager().offlineWorldKeys().forEach(this::loadRegions);
-	}
-
-	default void createDataForWorlds() {
-		Sponge.server().worldManager().worlds().forEach(world -> createDataForWorld(world.key()));
-		Sponge.server().worldManager().offlineWorldKeys().forEach(this::createDataForWorld);
-	}
-
-	public void removeAllWorldData(ResourceKey world);
-
-	public void createDataForWorld(ResourceKey world);
-
-	public Region getWorldRegion(ResourceKey world);
-
-	public void saveRegion(Region region);
-
-	public void deleteRegion(Region region);
-
-	public void loadRegions(ResourceKey world);
-
-	public void savePlayerData(ServerPlayer player, PlayerData playerData);
-
-	public void savePlayerData(UUID player, PlayerData playerData);
-
-	public PlayerData getPlayerData(ServerPlayer player);
-
-	public void loadDataOfPlayers();
-
-	default void setParentAfterLoad(Region region) {
-		if(!region.containsChilds()) return;
-		for(Region child : region.getChilds()) {
-			child.setParrent(region);
-			setParentAfterLoad(child);
-		}
-	}
+public interface WorkData extends PlayerDataStorage, RegionDataStorage {
 
 	default RegionImpl getRegionFromConfig(ConfigurationNode node, String fileOrUUID) {
 		try {

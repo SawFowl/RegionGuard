@@ -251,12 +251,12 @@ public class Api implements RegionAPI {
 
 	@Override
 	public void saveRegion(Region region) {
-		plugin.getRegionsDataWork().saveRegion(region);
+		plugin.getRegionsDataWork().save(region);
 	}
 
 	@Override
 	public void deleteRegion(Region region) {
-		plugin.getRegionsDataWork().deleteRegion(region);
+		plugin.getRegionsDataWork().delete(region);
 		unregisterRegion(region);
 	}
 
@@ -322,15 +322,15 @@ public class Api implements RegionAPI {
 	}
 
 	@Override
-	public long getClaimedBlocks(ServerPlayer player) {
-		long blocks = dataPlayers.containsKey(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getClaimed() != null && dataPlayers.get(player.uniqueId()).getClaimed().getBlocks() != null ? dataPlayers.get(player.uniqueId()).getClaimed().getBlocks() : 0;
-		if(blocks == 0 && getClaimedRegions(player) > 0) for(Region region : playersRegions.get(player.uniqueId())) blocks += region.getCuboid().getSize();
+	public long getClaimedBlocks(UUID player) {
+		long blocks = dataPlayers.containsKey(player) && dataPlayers.get(player).getClaimed() != null && dataPlayers.get(player).getClaimed().getBlocks() != null ? dataPlayers.get(player).getClaimed().getBlocks() : 0;
+		if(blocks == 0 && getClaimedRegions(player) > 0) for(Region region : playersRegions.get(player)) blocks += region.getCuboid().getSize();
 		return blocks;
 	}
 
 	@Override
-	public long getClaimedRegions(ServerPlayer player) {
-		return containsLimits(player.uniqueId()) && dataPlayers.get(player.uniqueId()).getClaimed() != null && dataPlayers.get(player.uniqueId()).getClaimed().getRegions() != null ? dataPlayers.get(player.uniqueId()).getClaimed().getRegions() : playersRegions.containsKey(player.uniqueId()) ? playersRegions.get(player.uniqueId()).size() : 0;
+	public long getClaimedRegions(UUID player) {
+		return containsLimits(player) && dataPlayers.get(player).getClaimed() != null && dataPlayers.get(player).getClaimed().getRegions() != null ? dataPlayers.get(player).getClaimed().getRegions() : playersRegions.containsKey(player) ? playersRegions.get(player).size() : 0;
 	}
 
 	@Override
@@ -383,7 +383,7 @@ public class Api implements RegionAPI {
 		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), PlayerData.zero());
 		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(PlayerLimits.zero());
 		dataPlayers.get(player.uniqueId()).getLimits().setBlocks(limit);
-		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
+		plugin.getPlayersDataWork().save(player, dataPlayers.get(player.uniqueId()));
 	}
 
 	@Override
@@ -391,7 +391,7 @@ public class Api implements RegionAPI {
 		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), PlayerData.zero());
 		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(PlayerLimits.zero());
 		dataPlayers.get(player.uniqueId()).getLimits().setClaims(limit);
-		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
+		plugin.getPlayersDataWork().save(player, dataPlayers.get(player.uniqueId()));
 	}
 
 	@Override
@@ -399,7 +399,7 @@ public class Api implements RegionAPI {
 		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), PlayerData.zero());
 		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(PlayerLimits.zero());
 		dataPlayers.get(player.uniqueId()).getLimits().setSubdivisions(limit);
-		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
+		plugin.getPlayersDataWork().save(player, dataPlayers.get(player.uniqueId()));
 	}
 
 	@Override
@@ -407,7 +407,7 @@ public class Api implements RegionAPI {
 		if(!dataPlayers.containsKey(player.uniqueId())) dataPlayers.put(player.uniqueId(), PlayerData.zero());
 		if(dataPlayers.get(player.uniqueId()).getLimits() == null) dataPlayers.get(player.uniqueId()).setLimits(PlayerLimits.zero());
 		dataPlayers.get(player.uniqueId()).getLimits().setMembersPerRegion(limit);
-		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player.uniqueId()));
+		plugin.getPlayersDataWork().save(player, dataPlayers.get(player.uniqueId()));
 	}
 
 	@Override
@@ -464,7 +464,7 @@ public class Api implements RegionAPI {
 	public void setPlayerData(UUID player, PlayerData playerData) {
 		if(dataPlayers.containsKey(player)) dataPlayers.remove(player);
 		dataPlayers.put(player, playerData);
-		if(plugin.getPlayersDataWork() != null) plugin.getPlayersDataWork().savePlayerData(player, playerData);
+		if(plugin.getPlayersDataWork() != null) plugin.getPlayersDataWork().save(player, playerData);
 	}
 
 	@Override
@@ -478,7 +478,7 @@ public class Api implements RegionAPI {
 		long blocks = 0;
 		if(playersRegions.containsKey(player) && !playersRegions.get(player).isEmpty()) for(Region region1 : playersRegions.get(player)) blocks += region1.getCuboid().getSize();
 		if(playersRegions.containsKey(player) && containsLimits(player)) dataPlayers.get(player).getClaimed().setBlocks(blocks);
-		plugin.getPlayersDataWork().savePlayerData(player, dataPlayers.get(player));
+		plugin.getPlayersDataWork().save(player, dataPlayers.get(player));
 	}
 
 	@Override

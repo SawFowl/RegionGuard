@@ -70,6 +70,9 @@ import sawfowl.regionguard.api.data.MemberData;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.data.storage.PlayerDataStorage;
+import sawfowl.regionguard.api.data.storage.RegionDataStorage;
+import sawfowl.regionguard.api.events.storage.SetStorageEvent;
 import sawfowl.regionguard.commands.child.limits.Buy;
 import sawfowl.regionguard.commands.child.limits.Sell;
 import sawfowl.regionguard.configure.Locales;
@@ -91,6 +94,8 @@ import sawfowl.regionguard.implementsapi.data.MemberDataImpl;
 import sawfowl.regionguard.implementsapi.data.PlayerDataImpl;
 import sawfowl.regionguard.implementsapi.data.PlayerLimitsImpl;
 import sawfowl.regionguard.implementsapi.data.RegionImpl;
+import sawfowl.regionguard.implementsapi.storageevents.SetPlayerStorageEvent;
+import sawfowl.regionguard.implementsapi.storageevents.SetRegionStorageEvent;
 import sawfowl.regionguard.implementsapi.worldedit.WorldEditAPI;
 import sawfowl.regionguard.listeners.BlockAndWorldChangeListener;
 import sawfowl.regionguard.listeners.ChunkListener;
@@ -132,8 +137,8 @@ public class RegionGuard {
 	private Api api;
 	private sawfowl.regionguard.commands.Region mainCommand;
 	private MySQL mySQL;
-	private WorkData playersDataWork;
-	private WorkData regionsDataWork;
+	private PlayerDataStorage playersDataWork;
+	private RegionDataStorage regionsDataWork;
 	private RegenUtil regenUtil;
 	private Economy economy;
 	private CommandPack commandPack;
@@ -167,11 +172,11 @@ public class RegionGuard {
 		return mySQL;
 	}
 
-	public WorkData getPlayersDataWork() {
+	public PlayerDataStorage getPlayersDataWork() {
 		return playersDataWork;
 	}
 
-	public WorkData getRegionsDataWork() {
+	public RegionDataStorage getRegionsDataWork() {
 		return regionsDataWork;
 	}
 
@@ -287,7 +292,7 @@ public class RegionGuard {
 			long time = System.currentTimeMillis();
 			regionsDataWork.loadRegions();
 			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
-			playersDataWork.loadDataOfPlayers();
+			playersDataWork.loadAll();
 			Sponge.eventManager().post(new RegionAPI.PostAPI() {
 				@Override
 				public Cause cause() {
@@ -380,95 +385,121 @@ public class RegionGuard {
 	}
 
 	private void setStorages() {
+		SetStorageEvent.Region region = new SetRegionStorageEvent(instance);
+		SetStorageEvent.Player player = new SetPlayerStorageEvent(instance);
+		Sponge.eventManager().post(region);
+		if(region.getStorage() != null) regionsDataWork = region.getStorage();
+		if(player.getStorage() != null) playersDataWork = player.getStorage();
+		region = null;
+		player = null;
+		if(regionsDataWork != null && playersDataWork != null) return; 
 		boolean h2 = Sponge.pluginManager().plugin("h2driver").isPresent();
 		boolean mysql = Sponge.pluginManager().plugin("mysqldriver").isPresent() && mySQL != null && mySQL.checkConnection();
 		if(getConfig().getMySQLConfig().isEnable()) {
 			if(getConfig().getSplitStorage().isEnable()) {
 				switch (getConfig().getSplitStorage().getPlayers()) {
 				case FILE: {
-					playersDataWork = new FileStorage(instance);
+					if(playersDataWork == null) playersDataWork = new FileStorage(instance);
 					if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
-						regionsDataWork = playersDataWork;
+						regionsDataWork = playersDataWork instanceof WorkData ? (WorkData) playersDataWork : new FileStorage(instance);
 					} else if(mysql && getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
 						regionsDataWork = new MySqlStorage(instance);
 					} else if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
 						regionsDataWork = new H2Storage(instance);
-					} else regionsDataWork = playersDataWork;
+					} else regionsDataWork = playersDataWork instanceof WorkData ? (WorkData) playersDataWork : new FileStorage(instance);
 					break;
 				}
 				case MYSQL: {
 					if(mysql) {
-						playersDataWork = new MySqlStorage(instance);
+						if(playersDataWork == null) playersDataWork = new MySqlStorage(instance);
 						if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
 							regionsDataWork = new FileStorage(instance);
 						} else if(getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
-							regionsDataWork = playersDataWork;
+							regionsDataWork = playersDataWork instanceof WorkData ? (WorkData) playersDataWork : new MySqlStorage(instance) ;
 						} else if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
 							regionsDataWork = new H2Storage(instance);
-						} else regionsDataWork = playersDataWork;
+						} else regionsDataWork = playersDataWork instanceof WorkData ? (WorkData) playersDataWork : new FileStorage(instance);
 					} else if(h2) {
 						if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
 							regionsDataWork = new FileStorage(instance);
 						} else if(getConfig().getSplitStorage().getRegions() == StorageType.H2) {
 							regionsDataWork = new H2Storage(instance);
-						} else regionsDataWork = playersDataWork;
-					} else regionsDataWork = playersDataWork = new FileStorage(instance);
+						} else regionsDataWork = (WorkData) playersDataWork;
+					} else regionsDataWork = (WorkData) (playersDataWork = new FileStorage(instance));
 					break;
 				}
 				case H2: {
 					if(h2) {
-						playersDataWork = new H2Storage(instance);
+						if(playersDataWork == null) playersDataWork = new H2Storage(instance);
 						if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
 							regionsDataWork = new FileStorage(instance);
 						} else if(mysql && getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
 							regionsDataWork = new MySqlStorage(instance);
 						} else if(getConfig().getSplitStorage().getRegions() == StorageType.H2) {
-							regionsDataWork = playersDataWork;
-						} else regionsDataWork = playersDataWork = new FileStorage(instance);
+							regionsDataWork = playersDataWork instanceof WorkData ? (WorkData) playersDataWork : new H2Storage(instance);
+						} else regionsDataWork = (WorkData) (playersDataWork = new FileStorage(instance));
 					} else {
-						playersDataWork = new H2Storage(instance);
+						if(playersDataWork == null) playersDataWork = new H2Storage(instance);
 						if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
 							regionsDataWork = new FileStorage(instance);
 						} else if(mysql && getConfig().getSplitStorage().getRegions() == StorageType.MYSQL) {
 							regionsDataWork = new MySqlStorage(instance);
-						} else regionsDataWork = playersDataWork = new FileStorage(instance);
+						} else regionsDataWork = (WorkData) (playersDataWork = new FileStorage(instance));
 					}
 					break;
 				}
 				default:
-					playersDataWork = regionsDataWork = new MySqlStorage(instance);
+					if(playersDataWork == null) {
+						if(regionsDataWork == null) {
+							playersDataWork = (WorkData) (regionsDataWork = new MySqlStorage(instance));
+						} else playersDataWork = new MySqlStorage(instance);
+					} else if(regionsDataWork == null) regionsDataWork = new MySqlStorage(instance);
 					break;
 				}
-			} else playersDataWork = regionsDataWork = new MySqlStorage(instance);
+			} else {
+				if(playersDataWork == null) {
+					if(regionsDataWork == null) {
+						playersDataWork = (WorkData) (regionsDataWork = new MySqlStorage(instance));
+					} else playersDataWork = new MySqlStorage(instance);
+				} else if(regionsDataWork == null) regionsDataWork = new MySqlStorage(instance);
+			}
 		} else {
 			if(getConfig().getSplitStorage().isEnable()) {
 				switch (getConfig().getSplitStorage().getPlayers()) {
 				case FILE: {
-					playersDataWork = new FileStorage(instance);
+					if(playersDataWork == null) playersDataWork = new FileStorage(instance);
 					if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
 						regionsDataWork = new H2Storage(instance);
-					} else regionsDataWork = playersDataWork;
+					} else regionsDataWork = playersDataWork instanceof WorkData ? (WorkData) playersDataWork : new FileStorage(instance);
 					break;
 				}
 				case MYSQL: {
-					playersDataWork = new FileStorage(instance);
+					playersDataWork = new MySqlStorage(instance);
 					if(h2 && getConfig().getSplitStorage().getRegions() == StorageType.H2) {
 						regionsDataWork = new H2Storage(instance);
-					} else regionsDataWork = playersDataWork;
+					} else regionsDataWork = playersDataWork instanceof WorkData ? (WorkData) playersDataWork : new MySqlStorage(instance);
 					break;
 				}
 				case H2: {
-					playersDataWork = new H2Storage(instance);
+					if(playersDataWork == null) playersDataWork = new H2Storage(instance);
 					if(getConfig().getSplitStorage().getRegions() == StorageType.FILE) {
 						regionsDataWork = new FileStorage(instance);
-					} else regionsDataWork = playersDataWork;
+					} else regionsDataWork = playersDataWork instanceof WorkData ? (WorkData) playersDataWork : new H2Storage(instance);
 					break;
 				}
 				default:
-					playersDataWork = regionsDataWork = new FileStorage(instance);
+					if(playersDataWork == null) {
+						if(regionsDataWork == null) {
+							playersDataWork = (WorkData) (regionsDataWork = new FileStorage(instance));
+						} else playersDataWork = new FileStorage(instance);
+					} else if(regionsDataWork == null) regionsDataWork = new FileStorage(instance);
 					break;
 				}
-			} else playersDataWork = regionsDataWork = new FileStorage(instance);
+			} else if(playersDataWork == null) {
+				if(regionsDataWork == null) {
+					playersDataWork = (WorkData) (regionsDataWork = new FileStorage(instance));
+				} else playersDataWork = new FileStorage(instance);
+			} else if(regionsDataWork == null) regionsDataWork = new FileStorage(instance);
 		}
 	}
 

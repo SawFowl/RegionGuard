@@ -51,11 +51,11 @@ public abstract class AbstractSqlStorage extends Thread implements WorkData {
 	protected abstract Statement getStatement() throws SQLException;
 
 	@Override
-	public void createDataForWorld(ResourceKey world) {
+	public void createGlobalRegionForWorld(ResourceKey world) {
 		Region global = getWorldRegion(world);
 		if(global == null) {
 			global = Region.createGlobal(world, plugin.getDefaultFlagsConfig().getGlobalFlags());
-			saveRegion(global);
+			save(global);
 			plugin.getAPI().updateGlobalRegionData(world, global);
 		} else {
 			plugin.getAPI().updateGlobalRegionData(world, global);
@@ -64,8 +64,8 @@ public abstract class AbstractSqlStorage extends Thread implements WorkData {
 	}
 
 	@Override
-	public void savePlayerData(ServerPlayer player, PlayerData playerData) {
-		savePlayerData(player.uniqueId(), playerData);
+	public void save(ServerPlayer player, PlayerData playerData) {
+		save(player.uniqueId(), playerData);
 	}
 
 	protected ResultSet resultSet(String sql) throws SQLException {
