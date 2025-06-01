@@ -67,6 +67,11 @@ public class Api implements RegionAPI {
 	private ItemStack wandItem;
 
 	@Override
+	public void cleanNotExistWorldsData() {
+		plugin.getRegionsDataWork().cleanNotExistWorldsData();
+	}
+
+	@Override
 	public boolean cleanWorldData(ResourceKey world) {
 		if(world.equals(DefaultWorldKeys.DEFAULT) || world.equals(DefaultWorldKeys.THE_END) || world.equals(DefaultWorldKeys.THE_NETHER)) return false;
 		plugin.getRegionsDataWork().removeAllWorldData(world);

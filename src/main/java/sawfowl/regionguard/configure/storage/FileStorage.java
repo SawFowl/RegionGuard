@@ -1,10 +1,15 @@
 package sawfowl.regionguard.configure.storage;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -32,6 +37,24 @@ public class FileStorage implements WorkData {
 			createGlobalRegions();
 			loadAll();
 		}
+	}
+
+	@Override
+	public void cleanNotExistWorldsData() {
+		if(!plugin.isLoaded()) return;
+		Set<String> worlds = new HashSet<>();
+		worlds.addAll(Sponge.server().worldManager().worlds().stream().map(world -> world.key().asString().replace(":", "-")).toList());
+		worlds.addAll(Sponge.server().worldManager().offlineWorldKeys().stream().map(key -> key.asString().replace(":", "-")).toList());
+		for(File file : plugin.getConfigDir().resolve("Worlds").toFile().listFiles()) {
+			if(!worlds.contains(file.getName())) try {
+				FileUtils.deleteDirectory(file);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		worlds.clear();
+		worlds = null;
 	}
 
 	@Override

@@ -64,7 +64,6 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 		super(plugin);
 	}
 
-	
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onPrimary(InteractBlockEvent.Primary.Start event, @Root Entity entity) {
 		ServerPlayer player = event.source() instanceof ServerPlayer ? (ServerPlayer) event.source() : null;

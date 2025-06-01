@@ -10,6 +10,8 @@ import sawfowl.regionguard.api.data.Region;
  */
 public interface RegionDataStorage {
 
+	public void cleanNotExistWorldsData();
+
 	void removeAllWorldData(ResourceKey world);
 
 	/**

@@ -26,6 +26,8 @@ import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 
 public interface RegionAPI {
 
+	public void cleanNotExistWorldsData();
+
 	/**
 	 * Removes all world data from the plugin if the world does not exist.
 	 */

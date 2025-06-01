@@ -56,6 +56,37 @@ public class MySqlStorage extends AbstractSqlStorage {
 	}
 
 	@Override
+	public void cleanNotExistWorldsData() {
+		if(!plugin.isLoaded()) return;
+		Set<String> worlds = new HashSet<>();
+		worlds.addAll(Sponge.server().worldManager().worlds().stream().map(world -> world.key().asString().replace(":", "-")).toList());
+		worlds.addAll(Sponge.server().worldManager().offlineWorldKeys().stream().map(key -> key.asString().replace(":", "-")).toList());
+		Set<String> saved = new HashSet<String>();
+		try {
+			ResultSet results = resultSet("SELECT * FROM " + prefix + "worlds;");
+			while(!results.isClosed() && results.next()) saved.add(results.getString("world"));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			ResultSet results = resultSet("SHOW TABLES;");
+			while(!results.isClosed() && results.next()) {
+				String name = results.getString(1);
+				if(name.contains("_") && !name.contains(".") && !name.chars().mapToObj(i -> (char) i).filter(ch -> Character.isUpperCase(ch)).findFirst().isPresent()) saved.add(name);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		for(String dbWorld : saved) {
+			if(worlds.contains(dbWorld)) continue;
+			executeSQL("DELETE FROM " + prefix + "worlds WHERE WORLD ='" + dbWorld + "';");
+			executeSQL("DROP TABLE IF EXISTS '" + prefix + "world_" + dbWorld + "';");
+		}
+		worlds.clear();
+		worlds = null;
+	}
+
+	@Override
 	public void removeAllWorldData(ResourceKey world) {
 		executeSQL("DELETE FROM " + prefix + "worlds WHERE WORLD ='" + world.asString() + "';");
 		executeSQL("DROP TABLE IF EXISTS '" + prefix + "world_" + world.asString().replace(':', '_') + "';");

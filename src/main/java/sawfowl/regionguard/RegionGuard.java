@@ -143,6 +143,7 @@ public class RegionGuard {
 	private Economy economy;
 	private CommandPack commandPack;
 	private Map<UUID, PlayerPositions> selectedPositions = new HashMap<>();
+	private boolean loaded = false;
 
 	public static RegionGuard getInstance() {
 		return instance;
@@ -227,6 +228,10 @@ public class RegionGuard {
 		return selectedPositions.containsKey(player.uniqueId());
 	}
 
+	public boolean isLoaded() {
+		return loaded;
+	}
+
 	@Inject
 	public RegionGuard(PluginContainer pluginContainer, @ConfigDir(sharedRoot = false) Path configDirectory) {
 		instance = this;
@@ -293,6 +298,7 @@ public class RegionGuard {
 			regionsDataWork.loadRegions();
 			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
 			playersDataWork.loadAll();
+			loaded = true;
 			Sponge.eventManager().post(new RegionAPI.PostAPI() {
 				@Override
 				public Cause cause() {
