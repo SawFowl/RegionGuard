@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
@@ -256,6 +257,8 @@ public class RegionGuard {
 	@Listener
 	public void getCommandPackAPI(CommandPack.PostAPI event) {
 		commandPack = event.getAPI();
+		commandPack.getCustomPayloadsService().registerRawCodec(ResourceKey.resolve("worldedit:cui"));
+		commandPack.getCustomPayloadsService().registerRawListener(pluginContainer, ResourceKey.resolve("worldedit:cui"), (player, packet) -> api.getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(packet.data()));
 	}
 
 	@Listener(order = Order.LAST)
