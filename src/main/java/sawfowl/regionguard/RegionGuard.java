@@ -257,8 +257,8 @@ public class RegionGuard {
 	@Listener
 	public void getCommandPackAPI(CommandPack.PostAPI event) {
 		commandPack = event.getAPI();
-		commandPack.getCustomPayloadsService().registerRawCodec(ResourceKey.resolve("worldedit:cui"));
-		commandPack.getCustomPayloadsService().registerRawListener(pluginContainer, ResourceKey.resolve("worldedit:cui"), (player, packet) -> api.getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(packet.data()));
+		commandPack.getCustomPayloadsService().registerRawCodecAndChannel(ResourceKey.resolve("worldedit:cui"));
+		commandPack.getCustomPayloadsService().registerRawListener(pluginContainer, ResourceKey.resolve("worldedit:cui"), (player, packet) -> api.getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(packet.getDataAsString()));
 	}
 
 	@Listener(order = Order.LAST)

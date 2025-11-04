@@ -3,11 +3,12 @@ package sawfowl.regionguard.implementsapi.worldedit;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.math.vector.Vector3i;
 
-import sawfowl.commandpack.api.mixin.network.CustomPacket;
+import sawfowl.commandpack.api.network.packets.RawPacket;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.data.Cuboid;
 import sawfowl.regionguard.api.data.Region;
@@ -26,6 +27,7 @@ public class CUIUserImpl implements CUIUser {
 	private int failedCuiAttempts = 0;
 	private Cuboid dragCuboid;
 	private static final String cuiPacketId = "worldedit:cui";
+	private static final ResourceKey cuiChannel = ResourceKey.resolve(cuiPacketId);
 	public CUIUserImpl(ServerPlayer player) {
 		playerUUID = player.uniqueId();
 	}
@@ -37,7 +39,7 @@ public class CUIUserImpl implements CUIUser {
 	public void dispatchCUIEvent(CUIEvent event) {
 		if(!isSupportCUI()) return;
 		getPlayer().ifPresent(player -> {
-			if(event.getParameters().length > 0) CustomPacket.of(cuiPacketId, event.getTypeId() + "|" + StringUtil.joinString(event.getParameters(), "|")).sendTo(player);
+			if(event.getParameters().length > 0) RawPacket.of(cuiChannel, event.getTypeId() + "|" + StringUtil.joinString(event.getParameters(), "|")).sendTo(player);
 		});
 	}
 
