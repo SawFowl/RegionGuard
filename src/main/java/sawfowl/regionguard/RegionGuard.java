@@ -105,7 +105,6 @@ import sawfowl.regionguard.listeners.ImpactListener;
 import sawfowl.regionguard.listeners.DamageEntityAndCommandListener;
 import sawfowl.regionguard.listeners.DeathListener;
 import sawfowl.regionguard.listeners.PickupDropItemListener;
-import sawfowl.regionguard.listeners.RecievePacketListener;
 import sawfowl.regionguard.listeners.EntityMoveListener;
 import sawfowl.regionguard.listeners.ExplosionListener;
 import sawfowl.regionguard.listeners.InteractEntityListener;
@@ -257,7 +256,7 @@ public class RegionGuard {
 	@Listener
 	public void getCommandPackAPI(CommandPack.PostAPI event) {
 		commandPack = event.getAPI();
-		commandPack.getCustomPayloadsService().registerRawCodecAndChannel(ResourceKey.resolve("worldedit:cui"));
+		commandPack.getCustomPayloadsService().registerChannel(ResourceKey.resolve("worldedit:cui"));
 		commandPack.getCustomPayloadsService().registerRawListener(pluginContainer, ResourceKey.resolve("worldedit:cui"), (player, packet) -> api.getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(packet.getDataAsString()));
 	}
 
@@ -294,7 +293,7 @@ public class RegionGuard {
 		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
 		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new RecievePacketListener(instance));
+		//Sponge.eventManager().registerListeners(pluginContainer, new RecievePacketListener(instance));
 		if(getConfig().isRegisterForgeListeners() && commandPack.isModifiedServer()) Sponge.eventManager().registerListeners(pluginContainer, new ModExplosionListener(instance));
 		Sponge.asyncScheduler().submit(Task.builder().plugin(pluginContainer).execute(() -> {
 			long time = System.currentTimeMillis();
