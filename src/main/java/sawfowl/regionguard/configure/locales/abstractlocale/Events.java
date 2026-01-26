@@ -4,14 +4,14 @@ import org.spongepowered.math.vector.Vector3i;
 
 import net.kyori.adventure.text.Component;
 
-import sawfowl.localeapi.api.LocaleReference;
+import sawfowl.localeapi.api.Translation;
 import sawfowl.regionguard.api.data.Region;
 
 public interface Events {
 
 	interface RegionEvents {
 
-		interface Create extends LocaleReference {
+		interface Create extends Translation {
 
 			Component getNoAdminPerm();
 
@@ -41,7 +41,7 @@ public interface Events {
 
 		}
 
-		interface Resize extends LocaleReference {
+		interface Resize extends Translation {
 
 			Component getIncorrectCords();
 
@@ -59,7 +59,7 @@ public interface Events {
 
 		}
 
-		interface WandInfo extends LocaleReference {
+		interface WandInfo extends Translation {
 
 			Component getType(Region region);
 
@@ -75,9 +75,9 @@ public interface Events {
 
 	}
 
-	interface Block extends LocaleReference {
+	interface Block extends Translation {
 
-		interface Interact extends LocaleReference {
+		interface Interact extends Translation {
 
 			Component getPrimary();
 
@@ -97,7 +97,7 @@ public interface Events {
 
 	}
 
-	interface Fly extends LocaleReference {
+	interface Fly extends Translation {
 
 		Component getDisable();
 
@@ -105,9 +105,9 @@ public interface Events {
 
 	}
 
-	interface Teleport extends LocaleReference {
+	interface Teleport extends Translation {
 
-		interface FromRegion extends LocaleReference {
+		interface FromRegion extends Translation {
 
 			Component getOther();
 
@@ -117,7 +117,7 @@ public interface Events {
 
 		}
 
-		interface ToRegion extends LocaleReference {
+		interface ToRegion extends Translation {
 
 			Component getOther();
 
@@ -135,9 +135,9 @@ public interface Events {
 
 	}
 
-	interface Entity extends LocaleReference {
+	interface Entity extends Translation {
 
-		interface Interact extends LocaleReference {
+		interface Interact extends Translation {
 
 			Component getPrimary();
 
@@ -159,7 +159,7 @@ public interface Events {
 
 	}
 
-	interface Keep extends LocaleReference {
+	interface Keep extends Translation {
 
 		Component getExp();
 
@@ -167,7 +167,7 @@ public interface Events {
 
 	}
 
-	interface Piston extends LocaleReference {
+	interface Piston extends Translation {
 
 		Component getUse();
 
@@ -175,7 +175,7 @@ public interface Events {
 
 	}
 
-	interface Command extends LocaleReference {
+	interface Command extends Translation {
 
 		Component getExecute();
 
@@ -183,7 +183,7 @@ public interface Events {
 
 	}
 
-	interface Item extends LocaleReference {
+	interface Item extends Translation {
 
 		Component getDrop();
 
@@ -195,7 +195,7 @@ public interface Events {
 
 	}
 
-	interface Move extends LocaleReference {
+	interface Move extends Translation {
 
 		Component getJoin();
 

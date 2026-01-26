@@ -17,6 +17,7 @@
  */
 package sawfowl.regionguard;
 
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -42,11 +43,8 @@ import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
+import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.reference.ConfigurationReference;
-import org.spongepowered.configurate.reference.ValueReference;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -55,13 +53,14 @@ import com.google.inject.Inject;
 
 import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.utils.StorageType;
+import sawfowl.localeapi.api.ConfigTypes;
 import sawfowl.localeapi.api.LocaleService;
+import sawfowl.localeapi.api.LocalesList;
 import sawfowl.localeapi.api.Logger;
-import sawfowl.localeapi.api.event.LocaleServiseEvent;
+import sawfowl.localeapi.api.config.ReferencedConfig;
 import sawfowl.localeapi.api.placeholders.Placeholders;
-import sawfowl.localeapi.api.serializetools.SerializeOptions;
+import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.regionguard.api.RegionAPI;
-import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.ChunkNumber;
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.Cuboid;
@@ -76,12 +75,14 @@ import sawfowl.regionguard.api.data.storage.RegionDataStorage;
 import sawfowl.regionguard.api.events.storage.SetStorageEvent;
 import sawfowl.regionguard.commands.child.limits.Buy;
 import sawfowl.regionguard.commands.child.limits.Sell;
-import sawfowl.regionguard.configure.Locales;
 import sawfowl.regionguard.configure.MySQL;
 import sawfowl.regionguard.configure.WorkData;
 import sawfowl.regionguard.configure.configs.CuiConfig;
 import sawfowl.regionguard.configure.configs.DefaultFlags;
 import sawfowl.regionguard.configure.configs.MainConfig;
+import sawfowl.regionguard.configure.locales.AbstractLocale;
+import sawfowl.regionguard.configure.locales.def.ImplementLocale;
+import sawfowl.regionguard.configure.locales.ru.ImplementRuLocale;
 import sawfowl.regionguard.configure.storage.FileStorage;
 import sawfowl.regionguard.configure.storage.H2Storage;
 import sawfowl.regionguard.configure.storage.MySqlStorage;
@@ -121,18 +122,16 @@ import sawfowl.regionguard.utils.RegenUtil;
 public class RegionGuard {
 
 	private Logger logger;
-	private LocaleService localeService;
 
 	private static RegionGuard instance;
-	private Locales locales;
+	private LocalesList<AbstractLocale> locales;
 	private PluginContainer pluginContainer;
 	private Path configDir;
-	private ConfigurationReference<CommentedConfigurationNode> configurationReference;
-	private ValueReference<MainConfig, CommentedConfigurationNode> mainConfig;
-	private ConfigurationReference<CommentedConfigurationNode> flagsConfigurationReference;
-	private ValueReference<DefaultFlags, CommentedConfigurationNode> flagsConfig;
-	private ConfigurationReference<CommentedConfigurationNode> cuiConfigurationReference;
-	private ValueReference<CuiConfig, CommentedConfigurationNode> cuiConfig;
+	//private ConfigurationReference<CommentedConfigurationNode> configurationReference;
+	//private ConfigurationReference<CommentedConfigurationNode> flagsConfigurationReference;
+	//private ValueReference<DefaultFlags, CommentedConfigurationNode> flagsConfig;
+	//private ConfigurationReference<CommentedConfigurationNode> cuiConfigurationReference;
+	//private ValueReference<CuiConfig, CommentedConfigurationNode> cuiConfig;
 	private EconomyService economyService;
 	private Api api;
 	private sawfowl.regionguard.commands.Region mainCommand;
@@ -144,6 +143,9 @@ public class RegionGuard {
 	private CommandPack commandPack;
 	private Map<UUID, PlayerPositions> selectedPositions = new HashMap<>();
 	private boolean loaded = false;
+	private ReferencedConfig<MainConfig> mainConfig;
+	private ReferencedConfig<DefaultFlags> flagsConfig;
+	private ReferencedConfig<CuiConfig> cuiConfig;
 
 	public static RegionGuard getInstance() {
 		return instance;
@@ -157,7 +159,7 @@ public class RegionGuard {
 		return configDir;
 	}
 
-	public Locales getLocales() {
+	public LocalesList<AbstractLocale> getLocales() {
 		return locales;
 	}
 
@@ -190,12 +192,12 @@ public class RegionGuard {
 	}
 
 	public DefaultFlags getDefaultFlagsConfig() {
-		if(flagsConfig == null) saveConfigs();
+		//if(flagsConfig == null) saveConfigs();
 		return flagsConfig.get();
 	}
 
 	public CuiConfig getCuiConfig() {
-		if(cuiConfig == null) saveConfigs();
+		//if(cuiConfig == null) saveConfigs();
 		return cuiConfig.get();
 	}
 
@@ -239,11 +241,15 @@ public class RegionGuard {
 		this.pluginContainer = pluginContainer;
 		configDir = configDirectory;
 		configDirectory.toFile();
+		locales = LocaleService.getInstance().createLocales(pluginContainer, ImplementLocale.class);
+		if(!locales.contains(Locales.DEFAULT)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.DEFAULT, ImplementLocale.class);
+		if(!locales.contains(Locales.RU_RU)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.DEFAULT, ImplementRuLocale.class);
+		commandPack = CommandPack.getInstance();
+		mainConfig = ReferencedConfig.create(pluginContainer, configDirectory, "Config.conf", ConfigTypes.HOCON, ItemStackSerializerType.JSON, MainConfig.class);
 	}
 
-	@Listener
+	/*@Listener
 	public void onConstruct(LocaleServiseEvent.Construct event) {
-		locales = new Locales(localeService = event.getLocaleService());
 		try {
 			configurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("Config.conf")).build().loadToReference();
 			this.mainConfig = configurationReference.referenceTo(MainConfig.class);
@@ -256,13 +262,12 @@ public class RegionGuard {
 	@Listener
 	public void getCommandPackAPI(CommandPack.PostAPI event) {
 		commandPack = event.getAPI();
-		commandPack.getCustomPayloadsService().registerChannel(ResourceKey.resolve("worldedit:cui"));
-		commandPack.getCustomPayloadsService().registerRawListener(pluginContainer, ResourceKey.resolve("worldedit:cui"), (player, packet) -> api.getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(packet.getDataAsString()));
-	}
+	}*/
 
 	@Listener(order = Order.LAST)
 	public void onStart(StartedEngineEvent<Server> event) {
-		if(localeService == null) return;
+		commandPack.getCustomPayloadsService().registerChannel(ResourceKey.resolve("worldedit:cui"));
+		commandPack.getCustomPayloadsService().registerRawListener(pluginContainer, ResourceKey.resolve("worldedit:cui"), (player, packet) -> api.getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(packet.getDataAsString()));
 		api = new Api(instance);
 		regenUtil = new RegenUtil(instance);
 		if(getConfig().getMySQLConfig().isEnable()) {
@@ -277,24 +282,24 @@ public class RegionGuard {
 			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("buy", new Buy(instance));
 			mainCommand.getChildExecutors().get("limits").getChildExecutors().put("sell", new Sell(instance));
 		} else {
-			logger.warn(locales.getSystemLocale().getEconomy().getEconomyNotFound());
+			logger.warn(locales.getSystemAsReferenced().getEconomy().getEconomyNotFound());
 		}
 		api.generateDefaultGlobalRegion();
-		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new BlockAndWorldChangeListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ExplosionListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new InteractEntityListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new EntityMoveListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new DeathListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new DamageEntityAndCommandListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ImpactListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new SpawnEntityListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance));
-		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance));
+		if(getConfig().isUnloadRegions()) Sponge.eventManager().registerListeners(pluginContainer, new ChunkListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new ClientConnectionListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new BlockAndWorldChangeListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new ExplosionListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new InteractEntityListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new EntityMoveListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new DeathListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new DamageEntityAndCommandListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new ImpactListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new SpawnEntityListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new PickupDropItemListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new InteractItemListener(instance), MethodHandles.lookup());
+		Sponge.eventManager().registerListeners(pluginContainer, new ItemUseListener(instance), MethodHandles.lookup());
 		//Sponge.eventManager().registerListeners(pluginContainer, new RecievePacketListener(instance));
-		if(getConfig().isRegisterForgeListeners() && commandPack.isModifiedServer()) Sponge.eventManager().registerListeners(pluginContainer, new ModExplosionListener(instance));
+		if(getConfig().isRegisterForgeListeners() && commandPack.isModifiedServer()) Sponge.eventManager().registerListeners(pluginContainer, new ModExplosionListener(instance), MethodHandles.lookup());
 		Sponge.asyncScheduler().submit(Task.builder().plugin(pluginContainer).execute(() -> {
 			long time = System.currentTimeMillis();
 			regionsDataWork.loadRegions();
@@ -320,7 +325,8 @@ public class RegionGuard {
 		mainCommand = new sawfowl.regionguard.commands.Region(instance);
 		mainCommand.register(event);
 		mainCommand.getChildExecutors().get("wand").register(event);
-		saveConfigs();
+		this.flagsConfig = ReferencedConfig.create(pluginContainer, configDir, "DefaultFlags.conf", ConfigTypes.HOCON, ItemStackSerializerType.JSON, DefaultFlags.class);
+		this.cuiConfig = ReferencedConfig.create(pluginContainer, configDir, "CuiSettings.conf", ConfigTypes.HOCON, ItemStackSerializerType.JSON, CuiConfig.class);
 	}
 
 	@Listener
@@ -345,23 +351,8 @@ public class RegionGuard {
 		}
 	}
 
-	private void saveConfigs() {
-		try {
-			flagsConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.register(FlagValue.class, RegionSerializerCollection.COLLETCTION.get(FlagValue.class)))).path(configDir.resolve("DefaultFlags.conf")).build().loadToReference();
-			this.flagsConfig = flagsConfigurationReference.referenceTo(DefaultFlags.class);
-			flagsConfigurationReference.save();
-			flagsConfig.get().setSaveConsumer(consumer -> flagsConfig.setAndSave(flagsConfig.get()));
-			
-			cuiConfigurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("CuiSettings.conf")).build().loadToReference();
-			this.cuiConfig = cuiConfigurationReference.referenceTo(CuiConfig.class);
-			cuiConfigurationReference.save();
-		} catch (ConfigurateException e) {
-			logger.warn(e.getLocalizedMessage());
-		}
-	}
-
 	private void registerPlaceholders() {
-		Placeholders.register(ServerPlayer.class, "RegionCreated", (original, player, def) -> original.replace(PlaceholderKeys.REGION_DATE, getDateCreated(player, getRegion(player).getCreationTime(), locales.getLocale(player).getTimeFormat())));
+		Placeholders.register(ServerPlayer.class, "RegionCreated", (original, player, def) -> original.replace(PlaceholderKeys.REGION_DATE, getDateCreated(player, getRegion(player).getCreationTime(), locales.getAsReferenced(player).getTimeFormat())));
 		Placeholders.register(ServerPlayer.class, "RegionTrustLevel", (original, player, def) -> original.replace(PlaceholderKeys.REGION_TRUST_LEVEL, getRegion(player).getMemberData(player).map(data -> data.getTrustType().toString()).orElse("-")));
 		Placeholders.register(ServerPlayer.class, "BlocksClaimed", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_BLOCKS_CLAIMED, api.getClaimedBlocks(player)));
 		Placeholders.register(ServerPlayer.class, "ClaimsCreated", (original, player, def) -> original.replace(PlaceholderKeys.REGIONGUARD_CLAIMS_CREATED, api.getClaimedRegions(player)));

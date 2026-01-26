@@ -16,6 +16,7 @@ import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.reference.ValueReference;
 
 import sawfowl.commandpack.utils.StorageType;
+import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
 
 import sawfowl.regionguard.RegionGuard;
@@ -209,11 +210,11 @@ public class FileStorage implements WorkData {
 	}
 
 	private ValueReference<Region, CommentedConfigurationNode> createRegionConfig(Path path) throws ConfigurateException {
-		return SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).path(path).build().loadToReference().referenceTo(Region.class);
+		return SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).path(path).build().loadToReference().referenceTo(Region.class);
 	}
 
 	private ValueReference<PlayerData, CommentedConfigurationNode> createPlayerDataConfig(Path path) throws ConfigurateException {
-		return SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.register(PlayerData.class, new PlayerDataSerializer()))).path(path).build().loadToReference().referenceTo(PlayerData.class);
+		return SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.register(PlayerData.class, new PlayerDataSerializer()))).path(path).build().loadToReference().referenceTo(PlayerData.class);
 	}
 
 	private void removeFiles(File file) {

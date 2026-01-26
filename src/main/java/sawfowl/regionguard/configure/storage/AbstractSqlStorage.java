@@ -25,7 +25,7 @@ import com.google.gson.JsonObject;
 import io.leangen.geantyref.TypeToken;
 
 import net.kyori.adventure.text.Component;
-
+import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionSerializerCollection;
@@ -83,7 +83,7 @@ public abstract class AbstractSqlStorage extends Thread implements WorkData {
 
 	protected <T> T createTempConfigReader(String string, TypeToken<T> token) {
 		if(string == null || string.isEmpty() || string.equalsIgnoreCase("null") || string.startsWith("{}")) return null;
-		HoconConfigurationLoader loader = SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).source(() -> new BufferedReader(new StringReader(string))).build();
+		HoconConfigurationLoader loader = SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).source(() -> new BufferedReader(new StringReader(string))).build();
 		try {
 			return loader.load().get(token);
 		} catch (ConfigurateException e) {
@@ -96,8 +96,8 @@ public abstract class AbstractSqlStorage extends Thread implements WorkData {
 		if(object == null) return null;
 		StringWriter sink = new StringWriter();
 		try {
-			HoconConfigurationLoader loader = SerializeOptions.createHoconConfigurationLoader(2).sink(() -> new BufferedWriter(sink)).build();
-			BasicConfigurationNode basicNode = BasicConfigurationNode.root(SerializeOptions.selectOptions(2).serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION)));
+			HoconConfigurationLoader loader = SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).sink(() -> new BufferedWriter(sink)).build();
+			BasicConfigurationNode basicNode = BasicConfigurationNode.root(SerializeOptions.selectOptions(ItemStackSerializerType.JSON).serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION)));
 			basicNode.set(token, object);
 			loader.save(basicNode);
 		} catch (ConfigurateException e) {

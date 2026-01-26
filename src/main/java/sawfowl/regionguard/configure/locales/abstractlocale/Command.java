@@ -6,14 +6,14 @@ import org.spongepowered.math.vector.Vector3i;
 
 import net.kyori.adventure.text.Component;
 
-import sawfowl.localeapi.api.LocaleReference;
+import sawfowl.localeapi.api.Translation;
 import sawfowl.regionguard.api.RegionTypes;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.Region;
 
-public interface Command extends LocaleReference {
+public interface Command extends Translation {
 
-	interface CommandInfo extends LocaleReference {
+	interface CommandInfo extends Translation {
 
 		Component getDescription();
 
@@ -61,7 +61,7 @@ public interface Command extends LocaleReference {
 
 	interface Flag extends CommandInfo {
 
-		interface Hover extends LocaleReference {
+		interface Hover extends Translation {
 
 			Component getRemove();
 
@@ -97,7 +97,7 @@ public interface Command extends LocaleReference {
 
 	interface Info extends CommandInfo {
 
-		interface Buttons extends LocaleReference {
+		interface Buttons extends Translation {
 
 			Component getDelete();
 
@@ -343,7 +343,7 @@ public interface Command extends LocaleReference {
 
 	}
 
-	interface Exceptions extends LocaleReference {
+	interface Exceptions extends Translation {
 
 		Component getOnlyPlayer();
 

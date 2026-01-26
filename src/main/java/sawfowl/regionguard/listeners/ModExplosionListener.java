@@ -134,7 +134,8 @@ public class ModExplosionListener {
 
 			@Override
 			public void removeBlock(Vector3i vector3i) {
-				event.removeBlock(vector3i);
+				//event.removeBlock(vector3i);
+				event.removeBlockIf(vec -> vec.equals(vector3i));
 				regions.forEach((r, m) -> m.remove(vector3i));
 				allowBlockDestruction.forEach((r, m) -> m.remove(vector3i));
 			}
@@ -147,7 +148,7 @@ public class ModExplosionListener {
 		Sponge.eventManager().post(regionEvent);
 		if(regionEvent.isCancelled()) return;
 		regionEvent.getAllowBlockDestruction().forEach((r, m) -> m.forEach((p, v) -> {
-			if(!v) event.removeBlock(p);
+			if(!v) event.removeBlockIf(vec -> vec.equals(p));
 		}));
 	}
 

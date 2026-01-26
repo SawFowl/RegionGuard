@@ -15,6 +15,7 @@ import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -29,7 +30,6 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.data.MemoryDataView;
 import org.spongepowered.math.vector.Vector3i;
 
 import net.minecraft.world.level.block.BedBlock;
@@ -146,8 +146,8 @@ public class ListenerUtils {
 		return block.state().type() instanceof BedBlock;
 	}
 
-	public static boolean isPiston(BlockSnapshot blockSnapshot) {
-		return blockSnapshot.state().type().equals(BlockTypes.PISTON.get()) || blockSnapshot.state().type().equals(BlockTypes.STICKY_PISTON.get());
+	public static boolean isPiston(BlockState state) {
+		return state.type().equals(BlockTypes.PISTON.get()) || state.type().equals(BlockTypes.STICKY_PISTON.get());
 	}
 
 	public static boolean isDestructBlock(List<BlockTransaction> transactions) {
@@ -179,8 +179,8 @@ public class ListenerUtils {
 	}
 
 	public static int getLiquidFlowLevel(BlockTransaction transaction) {
-		if(nonReplacement(transaction) || !((MemoryDataView) transaction.toContainer().get(Queries.DEFAULT_REPLACEMENT).get()).values(true).containsKey(DataQuery.of("BlockState", "BlockState"))) return 0;
-		String check = ((MemoryDataView) transaction.toContainer().get(Queries.DEFAULT_REPLACEMENT).get()).values(true).get(DataQuery.of("BlockState", "BlockState")).toString();
+		if(nonReplacement(transaction) || !((DataView) transaction.toContainer().get(Queries.DEFAULT_REPLACEMENT).get()).values(true).containsKey(DataQuery.of("BlockState", "BlockState"))) return 0;
+		String check = ((DataView) transaction.toContainer().get(Queries.DEFAULT_REPLACEMENT).get()).values(true).get(DataQuery.of("BlockState", "BlockState")).toString();
 		if(!check.contains("level=")) return 0;
 		check = check.split("level=")[1].replace("]", "");
 		return NumberUtils.isCreatable(check) ? NumberUtils.createInteger(check) : 0;

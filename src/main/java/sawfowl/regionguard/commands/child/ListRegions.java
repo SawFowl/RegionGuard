@@ -356,7 +356,7 @@ public class ListRegions extends AbstractCommand {
 		messages.add(getInfo(player).getUUID(region));
 		if(region.getPlainName(player.locale()).isPresent()) messages.add(getInfo(player).getName(region.getName(player.locale())));
 		messages.add(getInfo(player).getType(region));
-		messages.add(getInfo(player).getCreated(plugin.getLocales().getLocale(player).getTimeFormat().format(calendar.getTime())));
+		messages.add(getInfo(player).getCreated(plugin.getLocales().getAsReferenced(player).getTimeFormat().format(calendar.getTime())));
 		messages.add(Component.text("  "));
 		messages.add(getInfo(player).getOwner(region));
 		messages.add(getInfo(player).getOwnerUUID(region));

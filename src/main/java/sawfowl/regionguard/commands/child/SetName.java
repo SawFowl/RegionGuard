@@ -25,6 +25,7 @@ import sawfowl.commandpack.api.commands.raw.arguments.RawArguments;
 import sawfowl.commandpack.api.commands.raw.arguments.RawArgumentsMap;
 import sawfowl.commandpack.api.commands.raw.arguments.RawBasicArgumentData;
 import sawfowl.commandpack.api.commands.raw.arguments.RawOptional;
+import sawfowl.localeapi.api.LocaleService;
 import sawfowl.localeapi.api.TextUtils;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
@@ -90,7 +91,7 @@ public class SetName extends AbstractPlayerCommand {
 
 	@Override
 	public List<RawArgument<?>> getArgs() {
-		if(locales == null) locales = plugin.getLocales().getLocaleService().getLocalesList().stream().collect(Collectors.toMap(locale -> locale.toLanguageTag(), locale -> locale));
+		if(locales == null) locales = LocaleService.getInstance().getLocalesList().stream().collect(Collectors.toMap(locale -> locale.toLanguageTag(), locale -> locale));
 		if(clear == null) clear = Arrays.asList("-c", "-clear");
 		return Arrays.asList(
 			RawArguments.createLocaleArgument(RawBasicArgumentData.createLocale(0, null, null), RawOptional.optional(), null),

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.projectile.Projectile;
@@ -120,7 +121,7 @@ public class DamageEntityAndCommandListener extends ManagementEvents {
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
-	public void onDamage(DamageEntityEvent event) {
+	public void onDamage(DamageEntityEvent.Pre event) {
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		ServerPlayer player = optPlayer.isPresent() ? optPlayer.get() : null;
 		Optional<Entity> optEntity = event.cause().first(Entity.class);
@@ -224,7 +225,7 @@ public class DamageEntityAndCommandListener extends ManagementEvents {
 			if(lastDamage.containsKey(player.uniqueId())) lastDamage.remove(player.uniqueId());
 			if(lastDamage.containsKey(event.entity().uniqueId())) lastDamage.remove(event.entity().uniqueId());
 			lastDamage.put(player.uniqueId(), time);
-			if(!event.willCauseDeath()) lastDamage.put(event.entity().uniqueId(), time);
+			if(event.baseDamage() > event.entity().get(Keys.HEALTH).orElse(0d)) lastDamage.put(event.entity().uniqueId(), time);
 		}
 	}
 

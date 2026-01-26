@@ -2,9 +2,9 @@ package sawfowl.regionguard.configure.locales.abstractlocale;
 
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import sawfowl.localeapi.api.LocaleReference;
+import sawfowl.localeapi.api.Translation;
 
-public interface Economy extends LocaleReference {
+public interface Economy extends Translation {
 
 	String getEconomyNotFound();
 

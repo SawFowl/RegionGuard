@@ -10,6 +10,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 import com.google.gson.JsonObject;
 
+import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.AdditionalData;
@@ -61,7 +62,7 @@ public class AdditionalDataListImpl {
 			}
 		} else if(rawData.containsKey(key)) {
 			try {
-				T data = SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(rawData.get(key)).get(clazz);
+				T data = SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(rawData.get(key)).get(clazz);
 				if(data == null) return Optional.empty();
 				set(key, data);
 				return Optional.ofNullable(data);
@@ -76,7 +77,7 @@ public class AdditionalDataListImpl {
 		JsonObject json = new JsonObject();
 		additionalData.forEach((k, v) -> {
 			try {
-				json.add(k, SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(v).get(JsonObject.class));
+				json.add(k, SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(v).get(JsonObject.class));
 			} catch (SerializationException e) {
 				e.printStackTrace();
 			}
@@ -93,7 +94,7 @@ public class AdditionalDataListImpl {
 			 if(raw.containsKey(k)) raw.remove(k);
 			JsonObject json = v.toJsonObject();
 			try {
-				raw.put(k, json != null ? json : SerializeOptions.createHoconConfigurationLoader(2).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(v).get(JsonObject.class));
+				raw.put(k, json != null ? json : SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(v).get(JsonObject.class));
 			} catch (SerializationException e) {
 				e.printStackTrace();
 			}

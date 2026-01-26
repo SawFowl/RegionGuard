@@ -73,7 +73,7 @@ public abstract class AbstractCommand implements RawCommand {
 	}
 
 	protected Command getCommand(Locale locale) {
-		return plugin.getLocales().getLocale(locale).getCommand();
+		return plugin.getLocales().getAsReferenced(locale).getCommand();
 	}
 
 	protected Command getCommand(ServerPlayer player) {

@@ -34,10 +34,10 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.world.server.SpongeLocatableBlock;
 import org.spongepowered.math.vector.Vector3i;
 
 import net.kyori.adventure.text.Component;
@@ -151,7 +151,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	}
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
-	public void onSecondary(InteractBlockEvent.Secondary event, @Root Entity entity) {
+	public void onSecondary(InteractBlockEvent.Secondary.Pre event, @Root Entity entity) {
 		ServerPlayer player = event.source() instanceof ServerPlayer ? (ServerPlayer) event.source() : null;
 		Region region = plugin.getAPI().findRegion(entity.serverLocation().world(), event.block().position());
 		if(player != null && getRegionInfo(player, region)) {
@@ -239,10 +239,10 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onPreChange(ChangeBlockEvent.Pre event) {
 		if(event.locations().size() == 1) return;
-		if(event.source() instanceof SpongeLocatableBlock && ListenerUtils.isPiston(((SpongeLocatableBlock) event.source()).location().createSnapshot())) {
-			onPistonMove(event, ((SpongeLocatableBlock) event.source()).location().createSnapshot());
+		if(event.source() instanceof LocatableBlock && ListenerUtils.isPiston(((LocatableBlock) event.source()).location().block())) {
+			onPistonMove(event, event.world().createSnapshot(((LocatableBlock) event.source()).location().blockPosition())); // Нужно оптимизировать миксином в CommandPack
 		} else {
-			event.locations().stream().filter(l -> (ListenerUtils.isPiston(l.createSnapshot()))).findFirst().ifPresent(location -> {
+			event.locations().stream().filter(l -> (ListenerUtils.isPiston(l.block()))).findFirst().ifPresent(location -> {
 				onPistonMove(event, location.createSnapshot());
 			});
 		}

@@ -157,11 +157,11 @@ class ManagementEvents {
 	}
 
 	protected Events getEvents(Locale locale) {
-		return plugin.getLocales().getLocale(locale).getEvents();
+		return plugin.getLocales().getAsReferenced(locale).getEvents();
 	}
 
 	protected Events getEvents(ServerPlayer player) {
-		return player == null ? plugin.getLocales().getSystemLocale().getEvents() : getEvents(player.locale());
+		return player == null ? plugin.getLocales().getSystemAsReferenced().getEvents() : getEvents(player.locale());
 	}
 
 }
