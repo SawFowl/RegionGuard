@@ -63,22 +63,22 @@ public class DefaultFlags {
 
 	private Map<String, Set<FlagValue>> claimDefaultFlags() {
 		Map<String, Set<FlagValue>> claimFlags = new HashMap<String, Set<FlagValue>>();
-		claimFlags.put(Flags.BLOCK_BREAK.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.BLOCK_PLACE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.PISTON_GRIEF.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.ENTITY_DAMAGE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.ETITY_RIDING.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.INTERACT_BLOCK_PRIMARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.INTERACT_BLOCK_SECONDARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.INTERACT_ENTITY_PRIMARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.INTERACT_ENTITY_SECONDARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.INTERACT_ITEM.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.ITEM_PICKUP.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.ITEM_USE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.PROJECTILE_IMPACT_BLOCK.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.PROJECTILE_IMPACT_ENTITY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		claimFlags.put(Flags.PORTAL_USE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(false).build())));
-		for(Flags flag : Flags.values()) if(!claimFlags.containsKey(flag.toString())) claimFlags.put(flag.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(true).build())));
+		claimFlags.put(Flags.BLOCK_BREAK.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.BLOCK_PLACE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.PISTON_GRIEF.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.ENTITY_DAMAGE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.ETITY_RIDING.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_BLOCK_PRIMARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_BLOCK_SECONDARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_ENTITY_PRIMARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_ENTITY_SECONDARY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.INTERACT_ITEM.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.ITEM_PICKUP.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.ITEM_USE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.PROJECTILE_IMPACT_BLOCK.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.PROJECTILE_IMPACT_ENTITY.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		claimFlags.put(Flags.PORTAL_USE.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(false).build())));
+		for(Flags flag : Flags.values()) if(!claimFlags.containsKey(flag.toString())) claimFlags.put(flag.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(true).build())));
 		return claimFlags;
 	}
 
@@ -100,7 +100,7 @@ public class DefaultFlags {
 
 	private Map<String, Set<FlagValue>> globalDefaultFlags() {
 		Map<String, Set<FlagValue>> worldFlags = new HashMap<String, Set<FlagValue>>();
-		for(Flags flag : Flags.values()) worldFlags.put(flag.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.builder().setValue(true).build())));
+		for(Flags flag : Flags.values()) worldFlags.put(flag.toString(), new HashSet<FlagValue>(Arrays.asList(FlagValue.cpBuilder().setValue(true).build())));
 		return worldFlags;
 	}
 

@@ -4,6 +4,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
 
 import net.kyori.adventure.builder.AbstractBuilder;
+import sawfowl.commandpack.api.CPBuilders;
 
 public interface FlagConfig extends DataSerializable {
 
@@ -16,6 +17,10 @@ public interface FlagConfig extends DataSerializable {
 	 */
 	static FlagConfig of(String name, FlagSettings settings) {
 		return builder().setName(name).setSettings(settings).build();
+	}
+
+	public static FlagConfig ofCPBuilder(String name, FlagSettings settings) {
+		return CPBuilders.getBuilder(Builder.class).get().setName(name).setSettings(settings).build();
 	}
 
 	/**

@@ -6,17 +6,20 @@ import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import com.google.gson.JsonObject;
 
 import net.kyori.adventure.builder.AbstractBuilder;
+import sawfowl.commandpack.api.CPBuilders;
 
-@ConfigSerializable
 public interface FlagValue extends DataSerializable {
 
 	static Builder builder() {
 		return Sponge.game().builderProvider().provide(Builder.class);
+	}
+
+	public static Builder cpBuilder() {
+		return CPBuilders.getBuilder(Builder.class).get();
 	}
 
 	static FlagValue simple(boolean value) {
@@ -25,6 +28,10 @@ public interface FlagValue extends DataSerializable {
 
 	static FlagValue of(boolean value, String source, String target) {
 		return builder().setValue(value).setSource(source).setTarget(target).build();
+	}
+
+	static FlagValue ofCPBuilder(boolean value, String source, String target) {
+		return cpBuilder().setValue(value).setSource(source).setTarget(target).build();
 	}
 
 	/**

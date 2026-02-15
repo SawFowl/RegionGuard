@@ -19,7 +19,7 @@ public enum Flags {
 	INTERACT_BLOCK_PRIMARY {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Interact-Block-Primary", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Interact-Block-Primary", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -38,7 +38,7 @@ public enum Flags {
 	INTERACT_BLOCK_SECONDARY {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Interact-Block-Secondary", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Interact-Block-Secondary", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -57,7 +57,7 @@ public enum Flags {
 	BLOCK_BREAK {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Block-Break", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Block-Break", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -76,7 +76,7 @@ public enum Flags {
 	BLOCK_PLACE {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Block-Place", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Block-Place", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -95,7 +95,7 @@ public enum Flags {
 	BLOCK_DECAY {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Block-Decay", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Block-Decay", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -114,7 +114,7 @@ public enum Flags {
 	BLOCK_GROWTH {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Block-Growth", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Block-Growth", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -133,7 +133,7 @@ public enum Flags {
 	PISTON {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Piston", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Piston", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -152,7 +152,7 @@ public enum Flags {
 	PISTON_GRIEF {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Piston-Grief", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Piston-Grief", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -171,7 +171,7 @@ public enum Flags {
 	LIQUID_FLOW {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Liquid-Flow", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Liquid-Flow", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -190,7 +190,7 @@ public enum Flags {
 	EXPLOSION {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Explosion", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Explosion", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -209,7 +209,7 @@ public enum Flags {
 	EXPLOSION_SURFACE {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Explosion-Surface", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Explosion-Surface", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -228,7 +228,7 @@ public enum Flags {
 	FIRE_SPREAD {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Fire-Spread", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Fire-Spread", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return false;
@@ -247,7 +247,7 @@ public enum Flags {
 	ENTER_CLAIM {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Enter-Claim", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Enter-Claim", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -266,7 +266,7 @@ public enum Flags {
 	EXIT_CLAIM {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Exit-Claim", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Exit-Claim", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -285,7 +285,7 @@ public enum Flags {
 	ALLOW_FLY {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Allow-Fly", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Allow-Fly", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -304,7 +304,7 @@ public enum Flags {
 	PVP {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("PvP", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("PvP", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return false;
@@ -323,7 +323,7 @@ public enum Flags {
 	KEEP_INVENTORY {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Keep-Inventory", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Keep-Inventory", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return false;
@@ -342,7 +342,7 @@ public enum Flags {
 	KEEP_EXP {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Keep-Exp", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Keep-Exp", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return false;
@@ -361,7 +361,7 @@ public enum Flags {
 	COMMAND_EXECUTE {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Command-Execute", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Command-Execute", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -380,7 +380,7 @@ public enum Flags {
 	COMMAND_EXECUTE_PVP {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Command-Execute-PvP", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Command-Execute-PvP", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -399,7 +399,7 @@ public enum Flags {
 	INTERACT_ENTITY_PRIMARY {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Interact-Entity-Primary", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Interact-Entity-Primary", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -422,7 +422,7 @@ public enum Flags {
 		}
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Interact-Entity-Secondary", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Interact-Entity-Secondary", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -441,7 +441,7 @@ public enum Flags {
 	COLLIDE_ENTITY {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Collide-Entity", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Collide-Entity", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -460,7 +460,7 @@ public enum Flags {
 	ENTITY_DAMAGE {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Entity-Damage", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Entity-Damage", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -479,7 +479,7 @@ public enum Flags {
 	ETITY_RIDING {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Entity-Riding", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Entity-Riding", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -498,7 +498,7 @@ public enum Flags {
 	ENTITY_SPAWN {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Entity-Spawn", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Entity-Spawn", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -517,7 +517,7 @@ public enum Flags {
 	ENTITY_TELEPORT_FROM {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Entity-Teleport-From", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Entity-Teleport-From", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -536,7 +536,7 @@ public enum Flags {
 	ENTITY_TELEPORT_TO {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Entity-Teleport-To", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Entity-Teleport-To", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -555,7 +555,7 @@ public enum Flags {
 	INTERACT_ITEM {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Interact-Item", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Interact-Item", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -574,7 +574,7 @@ public enum Flags {
 	ITEM_DROP {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Item-Drop", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Item-Drop", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -593,7 +593,7 @@ public enum Flags {
 	ITEM_PICKUP {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Item-Pickup", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Item-Pickup", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -612,7 +612,7 @@ public enum Flags {
 	ITEM_SPAWN {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Item-Spawn", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Item-Spawn", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -631,7 +631,7 @@ public enum Flags {
 	EXP_SPAWN {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Exp-Spawn", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Exp-Spawn", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -650,7 +650,7 @@ public enum Flags {
 	ITEM_USE {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Item-Use", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Item-Use", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -669,7 +669,7 @@ public enum Flags {
 	PROJECTILE_IMPACT_BLOCK {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Projectile-Impact-Block", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Projectile-Impact-Block", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -688,7 +688,7 @@ public enum Flags {
 	PROJECTILE_IMPACT_ENTITY {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Projectile-Impact-Entity", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Projectile-Impact-Entity", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;
@@ -707,7 +707,7 @@ public enum Flags {
 	PORTAL_USE {
 		@Override
 		public FlagConfig getFlagConfig() {
-			return FlagConfig.of("Portal-Use", new FlagSettings() {
+			return FlagConfig.ofCPBuilder("Portal-Use", new FlagSettings() {
 				@Override
 				public boolean isAllowArgs() {
 					return true;

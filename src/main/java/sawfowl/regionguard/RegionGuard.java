@@ -49,8 +49,12 @@ import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
+import sawfowl.commandpack.api.CPBuilders;
 import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.utils.StorageType;
 import sawfowl.localeapi.api.ConfigTypes;
@@ -61,6 +65,7 @@ import sawfowl.localeapi.api.config.ReferencedConfig;
 import sawfowl.localeapi.api.placeholders.Placeholders;
 import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.regionguard.api.RegionAPI;
+import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.ChunkNumber;
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.Cuboid;
@@ -243,9 +248,15 @@ public class RegionGuard {
 		configDirectory.toFile();
 		locales = LocaleService.getInstance().createLocales(pluginContainer, ImplementLocale.class);
 		if(!locales.contains(Locales.DEFAULT)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.DEFAULT, ImplementLocale.class);
-		if(!locales.contains(Locales.RU_RU)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.DEFAULT, ImplementRuLocale.class);
+		if(!locales.contains(Locales.RU_RU)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.RU_RU, ImplementRuLocale.class);
 		commandPack = CommandPack.getInstance();
-		mainConfig = ReferencedConfig.create(pluginContainer, configDirectory, "Config.conf", ConfigTypes.HOCON, ItemStackSerializerType.JSON, MainConfig.class);
+		mainConfig = ReferencedConfig.create(pluginContainer, configDirectory, "Config", ConfigTypes.HOCON, ItemStackSerializerType.JSON, null, MainConfig.class);
+		CPBuilders.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
+		CPBuilders.register(FlagValue.Builder.class, () -> new FlagValueImpl().builder());
+		this.flagsConfig = ReferencedConfig.create(pluginContainer, configDir, "DefaultFlags", ConfigTypes.HOCON, ItemStackSerializerType.JSON, RegionSerializerCollection.COLLETCTION, DefaultFlags.class);
+		this.cuiConfig = ReferencedConfig.create(pluginContainer, configDir, "CuiSettings", ConfigTypes.HOCON, ItemStackSerializerType.JSON, null, CuiConfig.class);
+		api = new Api(instance);
+		new InjectorAPI().createInjector();
 	}
 
 	/*@Listener
@@ -268,7 +279,6 @@ public class RegionGuard {
 	public void onStart(StartedEngineEvent<Server> event) {
 		commandPack.getCustomPayloadsService().registerChannel(ResourceKey.resolve("worldedit:cui"));
 		commandPack.getCustomPayloadsService().registerRawListener(pluginContainer, ResourceKey.resolve("worldedit:cui"), (player, packet) -> api.getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(packet.getDataAsString()));
-		api = new Api(instance);
 		regenUtil = new RegenUtil(instance);
 		if(getConfig().getMySQLConfig().isEnable()) {
 			mySQL = new MySQL(instance, getConfig().getMySQLConfig());
@@ -318,17 +328,18 @@ public class RegionGuard {
 			});
 		}).build());
 		registerPlaceholders();
+		mainCommand = new sawfowl.regionguard.commands.Region(instance);
+		commandPack.registerCommand(mainCommand);
+		commandPack.registerCommand(mainCommand.getChildExecutors().get("wand"));
 	}
 
-	@Listener
+/*	@Listener
 	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
 		mainCommand = new sawfowl.regionguard.commands.Region(instance);
 		mainCommand.register(event);
 		mainCommand.getChildExecutors().get("wand").register(event);
-		this.flagsConfig = ReferencedConfig.create(pluginContainer, configDir, "DefaultFlags.conf", ConfigTypes.HOCON, ItemStackSerializerType.JSON, DefaultFlags.class);
-		this.cuiConfig = ReferencedConfig.create(pluginContainer, configDir, "CuiSettings.conf", ConfigTypes.HOCON, ItemStackSerializerType.JSON, CuiConfig.class);
 	}
-
+*/
 	@Listener
 	public void registerBuilders(RegisterBuilderEvent event) {
 		event.register(ChunkNumber.Builder.class, () -> new ChunkNumberImpl().builder());
@@ -500,6 +511,20 @@ public class RegionGuard {
 				} else playersDataWork = new FileStorage(instance);
 			} else if(regionsDataWork == null) regionsDataWork = new FileStorage(instance);
 		}
+	}
+
+	final class InjectorAPI extends AbstractModule {
+
+		Injector createInjector() {
+			return Guice.createInjector(this);
+		}
+
+		@Override
+		protected void configure() {
+			bind(RegionAPI.class).toInstance(api);
+			this.requestStaticInjection(RegionAPI.class);
+		}
+
 	}
 
 }

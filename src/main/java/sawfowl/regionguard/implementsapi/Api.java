@@ -41,7 +41,7 @@ import sawfowl.regionguard.api.data.Region;
 import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 import sawfowl.regionguard.implementsapi.worldedit.WorldEditAPI;
 
-public class Api implements RegionAPI {
+public class Api extends RegionAPI {
 
 	private final RegionGuard plugin;
 	private final WorldEditCUIAPI cuiapi;
