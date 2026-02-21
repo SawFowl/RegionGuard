@@ -29,7 +29,6 @@ import java.util.UUID;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -39,7 +38,6 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
-import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
@@ -286,6 +284,9 @@ public class RegionGuard {
 		((WorldEditAPI) api.getWorldEditCUIAPI()).updateCuiDataMaps();
 		setStorages();
 		api.updateWandItem();
+		mainCommand = new sawfowl.regionguard.commands.Region(instance);
+		commandPack.registerCommand(mainCommand);
+		commandPack.registerCommand(mainCommand.getChildExecutors().get("wand"));
 		if(Sponge.server().serviceProvider().economyService().isPresent()) {
 			economyService  = Sponge.server().serviceProvider().economyService().get();
 			economy = new Economy(instance);
@@ -328,9 +329,6 @@ public class RegionGuard {
 			});
 		}).build());
 		registerPlaceholders();
-		mainCommand = new sawfowl.regionguard.commands.Region(instance);
-		commandPack.registerCommand(mainCommand);
-		commandPack.registerCommand(mainCommand.getChildExecutors().get("wand"));
 	}
 
 /*	@Listener
