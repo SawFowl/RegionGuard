@@ -35,7 +35,7 @@ public class ItemUseListener extends ManagementEvents {
 		DataContainer container = event.itemStackInUse().toContainer();
 		if(container.get(DataQuery.of("UnsafeData")).isPresent() && container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) return;
 		ServerWorld world = entity.serverLocation().world();
-		Region region = plugin.getAPI().findRegion(world, entity.blockPosition());
+		Region region = plugin.getAPI().getRegions(world).findRegion(entity.blockPosition());
 		boolean isAllow = isAllowUse(region, entity, event.itemStackInUse().asMutable());
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		RegionUseItemStackEvent rgEvent = new RegionUseItemStackEvent() {
@@ -123,7 +123,7 @@ public class ItemUseListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowUse(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, itemStack);
+		return region.isGlobal() ? true : isAllowUse(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), entity, itemStack);
 	}
 
 }

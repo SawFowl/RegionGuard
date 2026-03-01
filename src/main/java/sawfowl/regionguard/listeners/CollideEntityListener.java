@@ -31,7 +31,7 @@ public class CollideEntityListener {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onCollide(CollideEntityEvent event, @First Entity entitySource) {
 		ServerWorld world = entitySource.serverLocation().world();
-		Region region = plugin.getAPI().findRegion(world, entitySource.blockPosition());
+		Region region = plugin.getAPI().getRegions(world).findRegion(entitySource.blockPosition());
 		boolean isAllow = true;
 		Entity entityTarget = null;
 		for(Entity target : event.entities()) {
@@ -114,6 +114,6 @@ public class CollideEntityListener {
 				}
 			}
 		}
-		return region.isGlobal() ? (finalFlagResult == Tristate.UNDEFINED ? true : finalFlagResult.asBoolean()) : isAllowCollideEntity(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, target);
+		return region.isGlobal() ? (finalFlagResult == Tristate.UNDEFINED ? true : finalFlagResult.asBoolean()) : isAllowCollideEntity(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), source, target);
 	}
 }

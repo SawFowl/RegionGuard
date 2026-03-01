@@ -39,7 +39,7 @@ public class Delete extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
+		Region region = plugin.getAPI().getRegions(src.world()).findRegion(src.blockPosition());
 		if(region.isGlobal()) exception(getExceptions(locale).getRegionNotFound());
 		if(!region.getOwnerUUID().equals(src.uniqueId()) && !src.hasPermission(Permissions.STAFF_DELETE)) exception(getExceptions(locale).getNotOwner());
 		boolean regen = !region.getParrent().isPresent() && (src.hasPermission(Permissions.STAFF_DELETE) ? (args.getString(0).isPresent()) && plugin.getConfig().getRegenerateTerritory().isStaff() : plugin.getConfig().getRegenerateTerritory().isAllPlayers());

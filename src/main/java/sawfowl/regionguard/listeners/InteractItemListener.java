@@ -53,7 +53,7 @@ public class InteractItemListener extends ManagementEvents {
 					.execute();
 		}
 		boolean liquidInteract = isLiquidInteract(blockRay);
-		Region region = plugin.getAPI().findRegion(world, liquidInteract ? blockRay.get().hitPosition().toInt() : entity.blockPosition());
+		Region region = plugin.getAPI().getRegions(world).findRegion(liquidInteract ? blockRay.get().hitPosition().toInt() : entity.blockPosition());
 		boolean isAllow = !liquidInteract ? isAllowInteractItem(region, entity,  event.itemStack().asMutable()) : isAllowInteractItem(region, entity, event.itemStack().asMutable()) && isAllowInteractBlockSecondary(region, entity, blockRay.get().selectedObject().blockState(), true) && isAllowBreak(region, entity, blockRay.get().selectedObject().blockState(), true) ;
 		RegionInteractItemEvent rgEvent = new RegionInteractItemEvent() {
 
@@ -140,7 +140,7 @@ public class InteractItemListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowInteractItem(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, itemStack);
+		return region.isGlobal() ? true : isAllowInteractItem(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), entity, itemStack);
 	}
 
 	boolean isLiquidInteract(Optional<RayTraceResult<LocatableBlock>> blockRay) {
@@ -156,7 +156,7 @@ public class InteractItemListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowInteractBlockSecondary(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, block, false);
+		return region.isGlobal() ? true : isAllowInteractBlockSecondary(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), entity, block, false);
 	}
 
 	private boolean isAllowBreak(Region region, Entity entity, BlockState block, boolean first) {
@@ -168,7 +168,7 @@ public class InteractItemListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowBreak(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, block, false);
+		return region.isGlobal() ? true : isAllowBreak(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), entity, block, false);
 	}
 
 }

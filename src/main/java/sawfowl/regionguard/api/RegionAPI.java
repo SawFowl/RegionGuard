@@ -22,6 +22,7 @@ import sawfowl.regionguard.api.data.FlagConfig;
 import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.data.WorldRegions;
 import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 
 public abstract class RegionAPI {
@@ -59,6 +60,12 @@ public abstract class RegionAPI {
 	 */
 	public abstract void updateGlobalRegionData(ResourceKey serverWorld, Region region);
 
+	public WorldRegions getRegions(ServerWorld world) {
+		return getRegions(world.key());
+	}
+
+	public abstract WorldRegions getRegions(ResourceKey world);
+
 	/**
 	 * Adding a temporary region
 	 * 
@@ -76,7 +83,6 @@ public abstract class RegionAPI {
 
 	/**
 	 * Removing a temporary region
-	 * 
 	 */
 	public abstract void removeTempRegion(Region region);
 
@@ -124,6 +130,7 @@ public abstract class RegionAPI {
 	 * @param serverWorld - the world of the region.
 	 * @return Region
 	 */
+	@Deprecated
 	public abstract Region getGlobalRegion(ServerWorld serverWorld);
 
 	/**
@@ -132,6 +139,7 @@ public abstract class RegionAPI {
 	 * @param worldkey - the world key of the region.
 	 * @return Region
 	 */
+	@Deprecated
 	public abstract Region getGlobalRegion(ResourceKey worldkey);
 
 	/**
@@ -145,6 +153,7 @@ public abstract class RegionAPI {
 	 * Obtaining a map of regions by worlds. <br>
 	 * Without global regions.
 	 */
+	@Deprecated
 	public abstract Map<ResourceKey, Map<ChunkNumber, ArrayList<Region>>> getRegionsPerWorld();
 
 	/**
@@ -190,6 +199,7 @@ public abstract class RegionAPI {
 	 * @param position - Checkable position.
 	 * @return - Found region or global region.
 	 */
+	@Deprecated
 	public abstract Region findRegion(ServerWorld world, Vector3i position);
 
 	/**
@@ -200,6 +210,7 @@ public abstract class RegionAPI {
 	 * @param position - Checkable position.
 	 * @return - Found region or global region.
 	 */
+	@Deprecated
 	public abstract Optional<Region> findRegion(ServerWorld world, Vector3i position, Predicate<Region> filter);
 
 	/**
@@ -210,6 +221,7 @@ public abstract class RegionAPI {
 	 * @param position - Checkable position.
 	 * @return - Found region or global region.
 	 */
+	@Deprecated
 	public abstract Region findRegion(ResourceKey worldkey, Vector3i position);
 
 	/**
@@ -218,6 +230,7 @@ public abstract class RegionAPI {
 	 * @param region - Original region.
 	 * @return The first region found with which there is an intersection.<br>Or the original region if no intersection is found.
 	 */
+	@Deprecated
 	public abstract Region findIntersectsRegion(Region region);
 
 	/**

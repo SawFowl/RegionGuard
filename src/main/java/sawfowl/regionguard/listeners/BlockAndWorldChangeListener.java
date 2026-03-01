@@ -67,7 +67,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onPrimary(InteractBlockEvent.Primary.Start event, @Root Entity entity) {
 		ServerPlayer player = event.source() instanceof ServerPlayer ? (ServerPlayer) event.source() : null;
-		Region region = plugin.getAPI().findRegion(entity.serverLocation().world(), event.block().position());
+		Region region = plugin.getAPI().getRegions(entity.serverLocation().world()).findRegion(event.block().position());
 		if(player != null && resizeOrCreateRegion(player, event.block().position(), region)) {
 			event.setCancelled(true);
 			return;
@@ -153,7 +153,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onSecondary(InteractBlockEvent.Secondary.Pre event, @Root Entity entity) {
 		ServerPlayer player = event.source() instanceof ServerPlayer ? (ServerPlayer) event.source() : null;
-		Region region = plugin.getAPI().findRegion(entity.serverLocation().world(), event.block().position());
+		Region region = plugin.getAPI().getRegions(entity.serverLocation().world()).findRegion(event.block().position());
 		if(player != null && getRegionInfo(player, region)) {
 			event.setCancelled(true);
 			return;
@@ -262,22 +262,22 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 		}
 		if(ListenerUtils.isDecay(event.transactions())) {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.DECAY.get());
-			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
+			Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
 			if(!isAllowDecay(region, blockTransaction)) event.setCancelled(true);
 			return;
 		}
 		if(ListenerUtils.isGrowth(event.transactions())) {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.GROWTH.get());
-			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
+			Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
 			if(!isAllowGrowth(region, blockTransaction, event.source(), true)) event.setCancelled(true);
 			if(event.isCancelled() && isPlayer) player.sendMessage(getEvents(player).getBlock().getGrowth());
 			return;
 		}
 		if(ListenerUtils.isExplosion(event.source())) {
 			Explosion explosion = ((Explosion) event.source());
-			Region region = plugin.getAPI().findRegion(event.world(), explosion.blockPosition());
+			Region region = plugin.getAPI().getRegions(event.world()).findRegion(explosion.blockPosition());
 			event.transactions().forEach(transaction -> {
-				if(!isAllowExplosion(plugin.getAPI().findRegion(event.world(), transaction.original().position()), explosion, transaction)) transaction.setValid(false);
+				if(!isAllowExplosion(plugin.getAPI().getRegions(event.world()).findRegion(transaction.original().position()), explosion, transaction)) transaction.setValid(false);
 			});
 			boolean allow = isAllowExplosion(region, explosion, event.world().block(explosion.blockPosition()));
 			RegionExplosionEvent.Surface rgEvent = new RegionExplosionEvent.Surface() {
@@ -370,7 +370,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 		}
 		if(ListenerUtils.isLiquidFlow(event.transactions())) {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.LIQUID_SPREAD.get());
-			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
+			Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
 			boolean allow = isAllowLiquidFlow(region, blockTransaction);
 			RegionChangeBlockEvent.LiquidFlow rgEvent = new RegionChangeBlockEvent.LiquidFlow() {
 
@@ -449,13 +449,13 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 		}
 		if(ListenerUtils.isModify(event.transactions()) && ListenerUtils.blockID(ListenerUtils.getTransaction(event.transactions(), Operations.MODIFY.get()).defaultReplacement()).equals("minecraft:fire")) {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.MODIFY.get());
-			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
+			Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
 			if(!isAllowFireSpread(region, blockTransaction)) event.setCancelled(true);
 			return;
 		}
 		if(ListenerUtils.isPlaceBlock(event.transactions()) && event.source() instanceof Entity) {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.PLACE.get());
-			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
+			Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
 			Entity entity = (Entity) event.source();
 			boolean allow = isAllowPlace(region, blockTransaction, entity, true);
 			RegionChangeBlockEvent.Place rgEvent = new RegionChangeBlockEvent.Place() {
@@ -554,7 +554,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 		}
 		if(ListenerUtils.isDestructBlock(event.transactions()) && event.source() instanceof Entity) {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.BREAK.get());
-			Region region = plugin.getAPI().findRegion(event.world(), blockTransaction.defaultReplacement().position());
+			Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
 			Entity entity = event.source() instanceof Entity ? (Entity) event.source() : null;
 			boolean allow = isAllowBreak(region, blockTransaction, entity, true);
 			RegionChangeBlockEvent.Break rgEvent = new RegionChangeBlockEvent.Break() {
@@ -661,7 +661,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	private void onPistonMove(ChangeBlockEvent.Pre event, BlockSnapshot snapshot) {
 		Direction direction = getDirect(snapshot);
 		if(direction == null) return;
-		Region region = plugin.getAPI().findRegion(event.world(), snapshot.position());
+		Region region = plugin.getAPI().getRegions(event.world()).findRegion(snapshot.position());
 		Optional<Entity> optEntity = event.context().get(EventContextKeys.NOTIFIER).isPresent() ? event.world().entity(event.context().get(EventContextKeys.NOTIFIER).get()) : (event.context().get(EventContextKeys.CREATOR).isPresent() ? event.world().entity(event.context().get(EventContextKeys.CREATOR).get()) : Optional.empty());
 		List<String> sources = optEntity.isPresent() ? ListenerUtils.flagEntityArgs(optEntity.get()) : Arrays.asList("all");
 		List<String> targets = ListenerUtils.flagBlocksArgs(event.locations().stream().filter(l -> (!l.blockPosition().equals(snapshot.position()))).map(l -> (l.createSnapshot())).collect(Collectors.toList()));
@@ -900,7 +900,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 					return;
 				}
 			}
-			Region find = plugin.getAPI().findIntersectsRegion(getPositions(player).tempRegion);
+			Region find = plugin.getAPI().getRegions(getPositions(player).tempRegion.getWorldKey()).findIntersectsRegion(getPositions(player).tempRegion);
 			if(!find.equals(getPositions(player).tempRegion)) {
 				plugin.getAPI().getWorldEditCUIAPI().stopVisualDrag(player);
 				plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, getPositions(player).tempRegion.getUniqueId());
@@ -1104,7 +1104,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowInteractBlockPrimary(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()), block, false);
+		return region.isGlobal() ? true : isAllowInteractBlockPrimary(entity, plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), block, false);
 	}
 
 	private boolean isAllowInteractBlockSecondary(Entity entity, Region region, BlockSnapshot block, boolean first) {
@@ -1117,7 +1117,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowInteractBlockSecondary(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()), block, false);
+		return region.isGlobal() ? true : isAllowInteractBlockSecondary(entity, plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), block, false);
 	}
 
 	private boolean isAllowLiquidFlow(Region region, BlockTransaction transaction) {
@@ -1126,7 +1126,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResult(Flags.LIQUID_FLOW, null, block);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true: isAllowLiquidFlow(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction);
+		return region.isGlobal() ? true: isAllowLiquidFlow(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), transaction);
 	}
 
 	private boolean isAllowPlace(Region region, BlockTransaction transaction, Entity entity, boolean first) {
@@ -1139,7 +1139,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowPlace(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction, entity, false);
+		return region.isGlobal() ? true : isAllowPlace(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), transaction, entity, false);
 	}
 
 	private boolean isAllowBreak(Region region, BlockTransaction transaction, Entity entity, boolean first) {
@@ -1152,7 +1152,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowPlace(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction, entity, false);
+		return region.isGlobal() ? true : isAllowPlace(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), transaction, entity, false);
 	}
 
 	private boolean isAllowFireSpread(Region region, BlockTransaction transaction) {
@@ -1176,7 +1176,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowGrowth(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction, source, false);
+		return region.isGlobal() ? true : isAllowGrowth(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), transaction, source, false);
 	}
 
 	private boolean isAllowDecay(Region region, BlockTransaction transaction) {
@@ -1184,7 +1184,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResult(Flags.BLOCK_DECAY, null, blockId);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowDecay(plugin.getAPI().getGlobalRegion(region.getWorldKey()), transaction);
+		return region.isGlobal() ? true : isAllowDecay(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), transaction);
 	}
 
 	private boolean isAllowExplosion(Region region, Explosion explosion, BlockTransaction transaction) {
@@ -1201,7 +1201,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getWorldKey()), explosion, transaction);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), explosion, transaction);
 	}
 
 	private boolean isAllowExplosion(Region region, Explosion explosion, BlockState blockState) {
@@ -1216,7 +1216,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, null, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getWorldKey()), explosion, blockState);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), explosion, blockState);
 	}
 
 	private boolean isAllowPistonMove(Region region, List<String> sources, List<String> targets) {
@@ -1275,11 +1275,11 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	private HashSet<Region> getOtherRegions(ServerWorld world, List<Vector3i> locations, Direction direction, Region region, List<String> sources, List<String> targets) {
 		HashSet<Region> regions = new HashSet<Region>();
 		for(Vector3i location : locations) {
-			Region find1 = plugin.getAPI().findRegion(world, location);
+			Region find1 = plugin.getAPI().getRegions(world).findRegion(location);
 			if(!find1.equals(region)) regions.add(find1);
 			Vector3i vector2 = location.add(direction.asBlockOffset());
 			if(!locations.contains(vector2)) {
-				Region find2 = plugin.getAPI().findRegion(world, vector2);
+				Region find2 = plugin.getAPI().getRegions(world).findRegion(vector2);
 				if(!find2.equals(region)) regions.add(find2);
 			}
 		}
@@ -1293,7 +1293,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	private boolean isIntersects(Region region, ServerPlayer player, Vector3i blockPosition) {
 		final Region copy = getPositions(player).tempRegion.copy();
 		if(blockPosition != null) copy.setCuboid(copy.getCuboid().getOppositeCorner(blockPosition), blockPosition, copy.getCuboid().getSelectorType());
-		Region find = plugin.getAPI().findIntersectsRegion(copy).getPrimaryParent();
+		Region find = plugin.getAPI().getRegions(copy.getWorldKey()).findIntersectsRegion(copy).getPrimaryParent();
 		List<Region> allChilds = find.getAllChilds();
 		AABB copyAABB = copy.getCuboid().getAABB();
 		if(!find.isGlobal() && (!copy.isSubdivision() && !(find.equals(copy)))) {
@@ -1318,7 +1318,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	private boolean isIntersects(Region region, ServerPlayer player, Vector3i blockPosition, Vector3i oppositeCorner) {
 		Region copy = getPositions(player).tempRegion.copy();
 		copy.setCuboid(oppositeCorner, blockPosition, copy.getCuboid().getSelectorType());
-		Region find = plugin.getAPI().findIntersectsRegion(copy).getPrimaryParent();
+		Region find = plugin.getAPI().getRegions(copy.getWorldKey()).findIntersectsRegion(copy).getPrimaryParent();
 		List<Region> allChilds = find.getAllChilds();
 		AABB copyAABB = copy.getCuboid().getAABB();
 		if(!find.isGlobal() && (!copy.isSubdivision() && !(find.equals(copy)))) {

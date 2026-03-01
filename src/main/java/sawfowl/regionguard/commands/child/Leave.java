@@ -28,7 +28,7 @@ public class Leave extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
+		Region region = plugin.getAPI().getRegions(src.world()).findRegion(src.blockPosition());
 		if(region.isGlobal()) exception(getExceptions(locale).getRegionNotFound());
 		if(region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(getExceptions(locale).getNotOwner());
 		if(!region.isTrusted(src)) exception(getCommand(locale).getLeave().getNotTrusted());

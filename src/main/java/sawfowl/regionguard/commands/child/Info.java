@@ -42,7 +42,7 @@ public class Info extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
+		Region region = plugin.getAPI().getRegions(src.world()).findRegion(src.blockPosition());
 		Calendar calendar = Calendar.getInstance(locale);
 		calendar.setTimeInMillis(region.getCreationTime());
 		generateMessage(src, region, calendar);

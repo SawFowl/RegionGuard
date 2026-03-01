@@ -383,7 +383,7 @@ public class RegionGuard {
 	}
 
 	private Region getRegion(ServerPlayer player) {
-		return api.findRegion(player.world(), player.blockPosition());
+		return api.getRegions(player.world()).findRegion(player.blockPosition());
 	}
 
 	private String getDateCreated(ServerPlayer player, long time, SimpleDateFormat dateFormat) {

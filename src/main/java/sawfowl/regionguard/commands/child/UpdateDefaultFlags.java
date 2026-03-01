@@ -28,7 +28,7 @@ public class UpdateDefaultFlags extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
+		Region region = plugin.getAPI().getRegions(src.world()).findRegion(src.blockPosition());
 		plugin.getDefaultFlagsConfig().setDefaultFlags(region);
 		src.sendMessage(getCommand(locale).getUpdateDefaultFlags().getSuccess(region.getType()));
 	}

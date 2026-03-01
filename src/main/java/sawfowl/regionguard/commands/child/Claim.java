@@ -33,8 +33,8 @@ public class Claim extends AbstractPlayerCommand {
 		Region region = optRegion.get();
 		if(!region.getWorld().isPresent()) exception(getCommand(locale).getClaim().getWorldNotFound(region.getWorldKey().asString()));
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			Region find = plugin.getAPI().findIntersectsRegion(region);
-			if(!plugin.getAPI().findIntersectsRegion(region).equals(region)) {
+			Region find = plugin.getAPI().getRegions(region.getWorldKey()).findIntersectsRegion(region);
+			if(!plugin.getAPI().getRegions(region.getWorldKey()).findIntersectsRegion(region).equals(region)) {
 				src.sendMessage(getCommand(locale).getClaim().getIntersect(find.getCuboid().getMin(), find.getCuboid().getMax()));
 				return;
 			}

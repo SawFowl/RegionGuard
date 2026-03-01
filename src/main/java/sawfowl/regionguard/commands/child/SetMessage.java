@@ -44,7 +44,7 @@ public class SetMessage extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale srcLocale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
+		Region region = plugin.getAPI().getRegions(src.world()).findRegion(src.blockPosition());
 		if(region.isGlobal()) exception(getExceptions(srcLocale).getRegionNotFound());
 		if(!src.hasPermission(Permissions.STAFF_SET_MESSAGE)) {
 			if(!region.isTrusted(src)) exception(getSetMessage(srcLocale).getNotTrusted());

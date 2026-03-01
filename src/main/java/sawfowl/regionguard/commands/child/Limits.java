@@ -66,7 +66,7 @@ public class Limits extends AbstractCommand {
 	}
 
 	private List<Component> visualize(ServerPlayer player, ServerPlayer target, Locale locale, List<Component> messages) {
-		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
+		Region region = plugin.getAPI().getRegions(player.world()).findRegion(player.blockPosition());
 		if(region.isCurrentTrustType(target, TrustTypes.OWNER)) {
 			if(region.containsChilds()) {
 				List<Region> list = new ArrayList<>(region.getAllChilds());

@@ -38,7 +38,7 @@ public class Untrust extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
+		Region region = plugin.getAPI().getRegions(src.world()).findRegion(src.blockPosition());
 		if(region.isGlobal()) exception(getExceptions(locale).getRegionNotFound());
 		GameProfile profile = args.get(GameProfile.class, 0).get();
 		if(src.hasPermission(Permissions.STAFF_TRUST)) {
@@ -103,7 +103,7 @@ public class Untrust extends AbstractPlayerCommand {
 	}
 
 	private Optional<Region> findRegion(ServerPlayer player) {
-		return plugin.getAPI().findRegion(player.world(), player.blockPosition(), rg -> (player.hasPermission(Permissions.STAFF_TRUST) || rg.isCurrentTrustType(player, TrustTypes.OWNER) || rg.isCurrentTrustType(player, TrustTypes.MANAGER)));
+		return plugin.getAPI().getRegions(player.world()).findRegion(player.blockPosition(), rg -> (player.hasPermission(Permissions.STAFF_TRUST) || rg.isCurrentTrustType(player, TrustTypes.OWNER) || rg.isCurrentTrustType(player, TrustTypes.MANAGER)));
 	}
 
 }

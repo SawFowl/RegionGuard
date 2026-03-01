@@ -159,7 +159,7 @@ public class ListRegions extends AbstractCommand {
 
 			@Override
 			public Region getOriginalDestinationRegion() {
-				return plugin.getAPI().findRegion(world, location.toInt());
+				return plugin.getAPI().getRegions(world).findRegion(location.toInt());
 			}
 
 			@Override
@@ -184,7 +184,7 @@ public class ListRegions extends AbstractCommand {
 
 			@Override
 			public Region from() {
-				return plugin.getAPI().findRegion(world, player.blockPosition());
+				return plugin.getAPI().getRegions(world).findRegion(player.blockPosition());
 			}
 
 			@Override

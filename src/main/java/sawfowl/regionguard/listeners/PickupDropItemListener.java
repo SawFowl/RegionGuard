@@ -38,7 +38,7 @@ public class PickupDropItemListener extends ManagementEvents {
 	public void onPickup(ChangeInventoryEvent.Pickup.Pre event, @First Entity entity) {
 		if(entity.get(Keys.HEALTH).isPresent() && entity.get(Keys.HEALTH).get() <= 0) return;
 		ServerWorld world = entity.serverLocation().world();
-		Region region = plugin.getAPI().findRegion(world, entity.blockPosition());
+		Region region = plugin.getAPI().getRegions(world).findRegion(entity.blockPosition());
 		List<ItemStackSnapshot> items = event.finalStacks();
 		boolean allowPickup = isAllowItemPickup(region, entity, items);
 		Optional<ServerPlayer> optPlayer = entity instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) entity) : Optional.empty();
@@ -130,7 +130,7 @@ public class PickupDropItemListener extends ManagementEvents {
 	public void onDrop(ChangeInventoryEvent.Drop event, @First Entity entity) {
 		if(entity.get(Keys.HEALTH).isPresent() && entity.get(Keys.HEALTH).get() <= 0) return;
 		ServerWorld world = entity.serverLocation().world();
-		Region region = plugin.getAPI().findRegion(world, entity.blockPosition());
+		Region region = plugin.getAPI().getRegions(world).findRegion(entity.blockPosition());
 		List<ItemStackSnapshot> items = new ArrayList<ItemStackSnapshot>();
 		for(SlotTransaction slotTransaction : event.transactions()) {
 			items.add(slotTransaction.original());
@@ -232,7 +232,7 @@ public class PickupDropItemListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowItemPickup(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, snapshots);
+		return region.isGlobal() ? true : isAllowItemPickup(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), source, snapshots);
 	}
 
 	private boolean isAllowItemDrop(Region region, Entity source, List<ItemStackSnapshot> snapshots) {
@@ -246,7 +246,7 @@ public class PickupDropItemListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowItemDrop(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, snapshots);
+		return region.isGlobal() ? true : isAllowItemDrop(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), source, snapshots);
 	}
 
 }

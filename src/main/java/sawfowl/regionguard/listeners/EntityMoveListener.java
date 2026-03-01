@@ -53,8 +53,8 @@ public class EntityMoveListener extends ManagementEvents {
 		boolean portal = movementType.isPresent() && movementType.get() == MovementTypes.PORTAL.get();
 		boolean teleport = command || portal || enderPeal || movementType.isPresent() && (movementType.get() == MovementTypes.ENTITY_TELEPORT.get() || movementType.get() == MovementTypes.END_GATEWAY.get() || movementType.get() == MovementTypes.PORTAL.get());
 		ServerWorld world = event.entity().serverLocation().world();
-		Region from = plugin.getAPI().findRegion(world, event.originalPosition().toInt());
-		Region destination = plugin.getAPI().findRegion(world, event.destinationPosition().toInt());
+		Region from = plugin.getAPI().getRegions(world).findRegion(event.originalPosition().toInt());
+		Region destination = plugin.getAPI().getRegions(world).findRegion(event.destinationPosition().toInt());
 		boolean isAllowRiding = isRiding ? isAllowRidingEntity(from, event.entity(), ridingEntity) && (from.getUniqueId().equals(destination.getUniqueId()) ? true : isAllowRidingEntity(destination, event.entity(), ridingEntity)) : true;
 		boolean isAllowPortalUse = portal ? isAllowPortalUse(event.entity(), from) : true;
 		RegionMoveEntityEvent moveEvent = new RegionMoveEntityEvent() {
@@ -422,8 +422,8 @@ public class EntityMoveListener extends ManagementEvents {
 		Entity entity = event.entity();
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		Optional<ServerPlayer> optSourcePlayer = entity instanceof ServerPlayer ? Optional.ofNullable((ServerPlayer) entity) : Optional.empty();
-		Region from = plugin.getAPI().findRegion(event.originalWorld(), event.originalPosition().toInt());
-		Region to = plugin.getAPI().findRegion(event.destinationWorld(), event.destinationPosition().toInt());
+		Region from = plugin.getAPI().getRegions(event.originalWorld()).findRegion(event.originalPosition().toInt());
+		Region to = plugin.getAPI().getRegions(event.destinationWorld()).findRegion(event.destinationPosition().toInt());
 		boolean isAllowFrom = optPlayer.isPresent() && !optPlayer.get().uniqueId().equals(entity.uniqueId()) ? isAllowTeleportFrom(optPlayer.get(), from) : isAllowTeleportFrom(entity, from);
 		boolean isAllowTo = optPlayer.isPresent() && !optPlayer.get().uniqueId().equals(entity.uniqueId()) ? isAllowTeleportTo(optPlayer.get(), from) : isAllowTeleportTo(entity, to);
 		boolean isAllowFly = optPlayer.isPresent() && !optPlayer.get().uniqueId().equals(entity.uniqueId()) ? isAllowPlayerFly(optPlayer.get(), from) : (optSourcePlayer.isPresent() ? isAllowPlayerFly(optSourcePlayer.get(), to) : true);
@@ -578,7 +578,7 @@ public class EntityMoveListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResult(Flags.ENTITY_TELEPORT_FROM, source, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowTeleportFrom(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
+		return region.isGlobal() ? true : isAllowTeleportFrom(entity, plugin.getAPI().getRegions(region.getWorldKey()).getGlobal());
 	}
 
 	private boolean isAllowPortalUse(Entity entity, Region region) {
@@ -588,7 +588,7 @@ public class EntityMoveListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResult(Flags.PORTAL_USE, targetid, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowPortalUse(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
+		return region.isGlobal() ? true : isAllowPortalUse(entity, plugin.getAPI().getRegions(region.getWorldKey()).getGlobal());
 	}
 
 	private boolean isAllowTeleportTo(Entity entity, Region region) {
@@ -598,7 +598,7 @@ public class EntityMoveListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResult(Flags.ENTITY_TELEPORT_TO, source, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowTeleportTo(entity, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
+		return region.isGlobal() ? true : isAllowTeleportTo(entity, plugin.getAPI().getRegions(region.getWorldKey()).getGlobal());
 	}
 
 	private boolean isAllowPlayerJoin(ServerPlayer player, Region region) {
@@ -608,7 +608,7 @@ public class EntityMoveListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResultWhithoutParrents(Flags.ENTER_CLAIM, targetid, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowPlayerJoin(player, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
+		return region.isGlobal() ? true : isAllowPlayerJoin(player, plugin.getAPI().getRegions(region.getWorldKey()).getGlobal());
 	}
 
 	private boolean isAllowPlayerExit(ServerPlayer player, Region region) {
@@ -618,7 +618,7 @@ public class EntityMoveListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResultWhithoutParrents(Flags.EXIT_CLAIM, targetid, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowPlayerExit(player, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
+		return region.isGlobal() ? true : isAllowPlayerExit(player, plugin.getAPI().getRegions(region.getWorldKey()).getGlobal());
 	}
 
 	private boolean isAllowPlayerFly(ServerPlayer player, Region region) {
@@ -628,7 +628,7 @@ public class EntityMoveListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResult(Flags.ALLOW_FLY, targetid, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowPlayerFly(player, plugin.getAPI().getGlobalRegion(region.getWorldKey()));
+		return region.isGlobal() ? true : isAllowPlayerFly(player, plugin.getAPI().getRegions(region.getWorldKey()).getGlobal());
 	}
 
 	private boolean isAllowRidingEntity(Region region, Entity source, Entity vehicle) {
@@ -642,7 +642,7 @@ public class EntityMoveListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowRidingEntity(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, vehicle);
+		return region.isGlobal() ? true : isAllowRidingEntity(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), source, vehicle);
 	}
 
 }

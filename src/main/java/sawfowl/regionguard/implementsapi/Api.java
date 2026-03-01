@@ -3,7 +3,6 @@ package sawfowl.regionguard.implementsapi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,16 +10,16 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.economy.Currency;
-import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
@@ -38,7 +37,9 @@ import sawfowl.regionguard.api.data.FlagValue;
 import sawfowl.regionguard.api.data.PlayerData;
 import sawfowl.regionguard.api.data.PlayerLimits;
 import sawfowl.regionguard.api.data.Region;
+import sawfowl.regionguard.api.data.WorldRegions;
 import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
+import sawfowl.regionguard.implementsapi.data.WorldRegionsImpl;
 import sawfowl.regionguard.implementsapi.worldedit.WorldEditAPI;
 
 public class Api extends RegionAPI {
@@ -58,9 +59,7 @@ public class Api extends RegionAPI {
 	private Map<UUID, Region> regionsByUUID = new HashMap<UUID, Region>();
 	private Map<UUID, Region> tempRegions = new HashMap<UUID, Region>();
 	private Map<UUID, List<Region>> playersRegions = new HashMap<UUID, List<Region>>();
-	private Map<ResourceKey, Region> globalRegionsPerWorlds = new HashMap<ResourceKey, Region>();
-	private Map<ResourceKey, Map<ChunkNumber, ArrayList<Region>>> regionsPerWorld = new HashMap<ResourceKey, Map<ChunkNumber, ArrayList<Region>>>();
-	private Map<ResourceKey, HashSet<Region>> forFindIntersects = new HashMap<ResourceKey, HashSet<Region>>();
+	private Map<ResourceKey, WorldRegionsImpl> regionsPerWorld = new HashMap<>();
 	private Map<UUID, SelectorTypes> selectorsPerPlayer = new HashMap<UUID, SelectorTypes>();
 	private Map<UUID, RegionTypes> selectedRegionTypes = new HashMap<UUID, RegionTypes>();
 	private Map<UUID, PlayerData> dataPlayers = new HashMap<UUID, PlayerData>();
@@ -75,6 +74,7 @@ public class Api extends RegionAPI {
 	public boolean cleanWorldData(ResourceKey world) {
 		if(world.equals(DefaultWorldKeys.DEFAULT) || world.equals(DefaultWorldKeys.THE_END) || world.equals(DefaultWorldKeys.THE_NETHER)) return false;
 		plugin.getRegionsDataWork().removeAllWorldData(world);
+		if(regionsPerWorld.containsKey(world)) regionsPerWorld.get(world).clear();;
 		return true;
 	}
 
@@ -103,17 +103,19 @@ public class Api extends RegionAPI {
 	}
 
 	@Override
-	public void updateGlobalRegionData(ResourceKey serverWorld, Region region) {
-		if(serverWorld != null) {
-			if(globalRegionsPerWorlds.containsKey(serverWorld)) {
-				globalRegionsPerWorlds.remove(serverWorld);
-			}
-			globalRegionsPerWorlds.put(serverWorld, region);
+	public WorldRegions getRegions(ResourceKey world) {
+		if(!regionsPerWorld.containsKey(world)) regionsPerWorld.put(world, new WorldRegionsImpl(world, () -> defaultGlobal));
+		return regionsPerWorld.get(world);
+	}
+
+	@Override
+	public void updateGlobalRegionData(ResourceKey world, Region region) {
+		if(world != null) {
+			if(!regionsPerWorld.containsKey(world)) regionsPerWorld.put(world, new WorldRegionsImpl(world, () -> defaultGlobal));
+			regionsPerWorld.get(world).setGlobal(region);
 		} else {
-			if(globalRegionsPerWorlds.containsKey(region.getWorldKey())) {
-				globalRegionsPerWorlds.remove(region.getWorldKey());
-			}
-			globalRegionsPerWorlds.put(region.getWorldKey(), region);
+			if(!regionsPerWorld.containsKey(region.getWorldKey())) regionsPerWorld.put(region.getWorldKey(), new WorldRegionsImpl(world, () -> defaultGlobal));
+			regionsPerWorld.get(region.getWorldKey()).setGlobal(region);
 		}
 	}
 
@@ -184,13 +186,15 @@ public class Api extends RegionAPI {
 	}
 
 	@Override
+	@Deprecated
 	public Region getGlobalRegion(ServerWorld serverWorld) {
 		return getGlobalRegion(serverWorld.key());
 	}
 
 	@Override
+	@Deprecated
 	public Region getGlobalRegion(ResourceKey worldkey) {
-		return globalRegionsPerWorlds.getOrDefault(worldkey, defaultGlobal);
+		return regionsPerWorld.containsKey(worldkey) ? regionsPerWorld.get(worldkey).getGlobal() : defaultGlobal;
 	}
 
 	@Override
@@ -200,24 +204,14 @@ public class Api extends RegionAPI {
 
 	@Override
 	public Map<ResourceKey, Map<ChunkNumber, ArrayList<Region>>> getRegionsPerWorld() {
-		return regionsPerWorld;
+		return regionsPerWorld.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().getRegionsMap().entrySet().stream().collect(Collectors.toMap(e2 -> e2.getKey(), e2 -> new ArrayList<>(e2.getValue())))));
 	}
 
 	@Override
 	public void registerRegion(Region region) {
 		ResourceKey worldKey = region.getWorldKey();
-		if(!regionsPerWorld.containsKey(worldKey)) regionsPerWorld.put(worldKey, new HashMap<ChunkNumber, ArrayList<Region>>());
-		if(!forFindIntersects.containsKey(worldKey)) forFindIntersects.put(worldKey, new HashSet<Region>());
-		forFindIntersects.get(worldKey).add(region);
-		for(ChunkNumber chunkNumber : region.getChunkNumbers()) {
-			if(!regionsPerWorld.get(worldKey).containsKey(chunkNumber)) {
-				ArrayList<Region> regions = new ArrayList<Region>();
-				regions.add(region);
-				regionsPerWorld.get(worldKey).put(chunkNumber, regions);
-			} else {
-				regionsPerWorld.get(worldKey).get(chunkNumber).add(region);
-			}
-		}
+		if(!regionsPerWorld.containsKey(worldKey)) regionsPerWorld.put(worldKey, new WorldRegionsImpl(worldKey, () -> defaultGlobal));
+		regionsPerWorld.get(worldKey).add(region);
 		if(!regionsByUUID.containsKey(region.getUniqueId())) {
 			regionsByUUID.put(region.getUniqueId(), region);
 		}
@@ -237,21 +231,17 @@ public class Api extends RegionAPI {
 
 	@Override
 	public void registerRegionAsync(Region region) {
-		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			registerRegion(region);
-		});
+		CompletableFuture.runAsync(() -> registerRegion(region));
 	}
 
 	@Override
 	public void unregisterRegion(Region region) {
-		ResourceKey worldKey = region.getWorldKey();
-		for(ChunkNumber chunkNumber : region.getChunkNumbers()) if(regionsPerWorld.get(worldKey).containsKey(chunkNumber) && regionsPerWorld.get(worldKey).get(chunkNumber).contains(region)) regionsPerWorld.get(worldKey).get(chunkNumber).remove(region);
+		if(regionsPerWorld.containsKey(region.getWorldKey())) regionsPerWorld.get(region.getWorldKey()).remove(region);
 		if(playersRegions.containsKey(region.getOwnerUUID()) && playersRegions.get(region.getOwnerUUID()).contains(region)) {
 			playersRegions.get(region.getOwnerUUID()).remove(region);
 			updatePlayerData(region.getOwnerUUID());
 		}
 		if(regionsByUUID.containsKey(region.getUniqueId())) regionsByUUID.remove(region.getUniqueId());
-		if(forFindIntersects.containsKey(worldKey)) forFindIntersects.get(worldKey).remove(region);
 	}
 
 	@Override
@@ -266,35 +256,27 @@ public class Api extends RegionAPI {
 	}
 
 	@Override
+	@Deprecated
 	public Region findRegion(ServerWorld world, Vector3i position) {
 		return findRegion(world.key(), position);
 	}
 
 	@Override
+	@Deprecated
 	public Optional<Region> findRegion(ServerWorld world, Vector3i position, Predicate<Region> filter) {
-		return (regionsPerWorld.get(world.key()).size() > 10000 ? regionsPerWorld.get(world.key()).entrySet().parallelStream() : regionsPerWorld.get(world.key()).entrySet().stream()).filter(entry -> entry.getKey().equalsTo(position)).findFirst()
-				.map(entry -> (entry.getValue().size() > 10000 ? entry.getValue().parallelStream() : entry.getValue().stream()).filter(rg -> (rg.isIntersectsWith(position))).findFirst().filter(filter)
-					.map(rg -> rg.getChild(position)).orElse(null));
+		return regionsPerWorld.containsKey(world.key()) ? regionsPerWorld.get(world.key()).findRegion(position, filter) : Optional.empty();
 	}
 
 	@Override
+	@Deprecated
 	public Region findRegion(ResourceKey worldkey, Vector3i position) {
-		if(!regionsPerWorld.containsKey(worldkey)) return getGlobalRegion(worldkey);
-		return (regionsPerWorld.get(worldkey).size() > 10000 ? regionsPerWorld.get(worldkey).entrySet().parallelStream() : regionsPerWorld.get(worldkey).entrySet().stream()).filter(entry -> entry.getKey().equalsTo(position)).findFirst()
-		.map(entry -> (entry.getValue().size() > 10000 ? entry.getValue().parallelStream() : entry.getValue().stream()).filter(rg -> (rg.isIntersectsWith(position))).findFirst()
-			.map(rg -> rg.getChild(position)).orElse(getGlobalRegion(worldkey)))
-		.orElse(getGlobalRegion(worldkey));
+		return regionsPerWorld.containsKey(worldkey) ? regionsPerWorld.get(worldkey).findRegion(position) : defaultGlobal;
 	}
 
 	@Override
+	@Deprecated
 	public Region findIntersectsRegion(Region region) {
-		ResourceKey world = region.getWorldKey();
-		if(forFindIntersects.containsKey(world)) {
-			AABB aabb = region.getCuboid().getAABB();
-			Optional<Region> find = (forFindIntersects.get(world).size() > 10000 ? forFindIntersects.get(world).parallelStream() : forFindIntersects.get(world).stream()).filter(rg -> !rg.equals(region) && (rg.getCuboid().getAABB().intersects(aabb) || aabb.intersects(rg.getCuboid().getAABB()))).findFirst();
-			if(find.isPresent()) return find.get();
-		}
-		return region;
+		return regionsPerWorld.containsKey(region.getWorldKey()) ? regionsPerWorld.get(region.getWorldKey()).findIntersectsRegion(region) : region;
 	}
 
 	@Override
@@ -532,11 +514,11 @@ public class Api extends RegionAPI {
 	}
 
 	public boolean isRegisteredGlobal(ServerWorld world) {
-		return globalRegionsPerWorlds.containsKey(world.key());
+		return isRegisteredGlobal(world.key());
 	}
 
 	public boolean isRegisteredGlobal(ResourceKey world) {
-		return globalRegionsPerWorlds.containsKey(world);
+		return regionsPerWorld.containsKey(world) && regionsPerWorld.get(world).getGlobal() != null;
 	}
 
 }

@@ -37,7 +37,7 @@ public class SetOwner extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition()).getPrimaryParent();
+		Region region = plugin.getAPI().getRegions(src.world()).findRegion(src.blockPosition()).getPrimaryParent();
 		if(region.isGlobal()) exception(getExceptions(locale).getRegionNotFound());
 		if(region.isAdmin() && src.hasPermission(Permissions.STAFF_TRUST)) exception(getSetOwner(locale).getAdminClaim());
 		GameProfile newOwner = args.get(GameProfile.class, 0).get();

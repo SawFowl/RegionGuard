@@ -34,7 +34,7 @@ public class InteractEntityListener extends ManagementEvents {
 
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onPrimary(InteractEntityEvent.Primary event, @Root ServerPlayer player) {
-		Region region = plugin.getAPI().findRegion(player.world(), event.entity().blockPosition());
+		Region region = plugin.getAPI().getRegions(player.world()).findRegion(event.entity().blockPosition());
 		boolean isAllow = isAllowPrimary(region, player, event.entity());
 		RegionInteractEntityEvent.Primary rgEvent = new RegionInteractEntityEvent.Primary() {
 
@@ -111,7 +111,7 @@ public class InteractEntityListener extends ManagementEvents {
 		if(lastTime.containsKey(player.uniqueId()) && time - lastTime.get(player.uniqueId()) < 200) return;
 		if(lastTime.containsKey(player.uniqueId())) lastTime.remove(player.uniqueId());
 		lastTime.put(player.uniqueId(), time);
-		Region region = plugin.getAPI().findRegion(player.world(), event.entity().blockPosition());
+		Region region = plugin.getAPI().getRegions(player.world()).findRegion(event.entity().blockPosition());
 		boolean isAllow = isAllowSecondary(region, player, event.entity());
 		RegionInteractEntityEvent rgEvent = new RegionInteractEntityEvent.Secondary() {
 
@@ -190,7 +190,7 @@ public class InteractEntityListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowPrimary(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player, entity);
+		return region.isGlobal() ? true : isAllowPrimary(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), player, entity);
 	}
 
 	private boolean isAllowSecondary(Region region, ServerPlayer player, Entity entity) {
@@ -201,7 +201,7 @@ public class InteractEntityListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowSecondary(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player, entity);
+		return region.isGlobal() ? true : isAllowSecondary(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), player, entity);
 	}
 
 }

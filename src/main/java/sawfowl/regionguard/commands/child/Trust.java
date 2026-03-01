@@ -38,7 +38,7 @@ public class Trust extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
+		Region region = plugin.getAPI().getRegions(src.world()).findRegion(src.blockPosition());
 		if(region.isGlobal()) exception(getExceptions(locale).getRegionNotFound());
 		if(region.isAdmin()) exception(getTrust(locale).getAdminClaim());
 		if((!region.isCurrentTrustType(src, TrustTypes.OWNER) && !region.isCurrentTrustType(src, TrustTypes.MANAGER)) && !src.hasPermission(Permissions.STAFF_TRUST)) exception(getTrust(locale).getLowTrust());

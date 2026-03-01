@@ -45,7 +45,7 @@ public class ModExplosionListener {
 		if(event.getIndirectSourceEntity() != null) sources.addAll(ListenerUtils.flagEntityArgs(event.getIndirectSourceEntity()));
 		boolean allowExplosion = false;
 		for(Vector3i position : event.getBlockPositionsAffected()) {
-			Region region = plugin.getAPI().findRegion(event.getWorld(), position);
+			Region region = plugin.getAPI().getRegions(event.getWorld()).findRegion(position);
 			if(!regions.containsKey(region)) regions.put(region, new HashMap<>());
 			BlockState block = event.getWorld().block(position);
 			regions.get(region).put(position, block);
@@ -55,7 +55,7 @@ public class ModExplosionListener {
 			allowBlockDestruction.get(region).put(position, allow);
 		}
 		boolean finalAllow = allowExplosion;
-		Region region = plugin.getAPI().findRegion(event.getWorld(), event.getExplosion().blockPosition());
+		Region region = plugin.getAPI().getRegions(event.getWorld()).findRegion(event.getExplosion().blockPosition());
 		SurfaceMod regionEvent = new SurfaceMod() {
 			
 			@Override
@@ -164,7 +164,7 @@ public class ModExplosionListener {
 			Tristate flagResult = region.getFlagResult(Flags.EXPLOSION_SURFACE, null, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getWorldKey()), sources, blockState);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), sources, blockState);
 	}
 
 }

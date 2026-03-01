@@ -32,7 +32,7 @@ public class ExplosionListener {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onExplosion(ExplosionEvent.Pre event) {
 		Explosion explosion = event.explosion();
-		Region region = plugin.getAPI().findRegion(event.world(), explosion.blockPosition());
+		Region region = plugin.getAPI().getRegions(event.world()).findRegion(explosion.blockPosition());
 		boolean allow = isAllowExplosion(region, explosion);
 		RegionExplosionEvent.EntityDamage rgEvent = new RegionExplosionEvent.EntityDamage() {
 			
@@ -111,7 +111,7 @@ public class ExplosionListener {
 			Tristate flagResult = region.getFlagResult(Flags.EXPLOSION, null, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getGlobalRegion(region.getWorldKey()), explosion);
+		return region.isGlobal() ? true : isAllowExplosion(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), explosion);
 	}
 
 }

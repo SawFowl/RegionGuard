@@ -44,7 +44,7 @@ public class SpawnEntityListener extends ManagementEvents {
 		Optional<Entity> optSource = event.cause().first(Entity.class);
 		Optional<ServerPlayer> optPlayer = event.cause().first(ServerPlayer.class);
 		ServerWorld world = event.entities().get(0).serverLocation().world();
-		Region region = plugin.getAPI().findRegion(world, event.entities().get(0).blockPosition());
+		Region region = plugin.getAPI().getRegions(world).findRegion(event.entities().get(0).blockPosition());
 		SpawnType spawnType = event.context().get(EventContextKeys.SPAWN_TYPE).get();
 		String spawnKey = Sponge.game().registry(RegistryTypes.SPAWN_TYPE).valueKey(spawnType).asString();
 		boolean spawnExp = spawnType.equals(SpawnTypes.EXPERIENCE.get());
@@ -139,7 +139,7 @@ public class SpawnEntityListener extends ManagementEvents {
 			Tristate flagResult = region.getFlagResult(Flags.EXP_SPAWN, entityId, null);
 			if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 		}
-		return region.isGlobal() ? true : isAllowExpSpawn(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source);
+		return region.isGlobal() ? true : isAllowExpSpawn(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), source);
 	}
 
 	private boolean isAllowItemSpawn(Region region, Entity source, Set<String> items) {
@@ -153,7 +153,7 @@ public class SpawnEntityListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowItemSpawn(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, items);
+		return region.isGlobal() ? true : isAllowItemSpawn(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), source, items);
 	}
 
 	private boolean isAllowEntitySpawn(Region region, Entity source, List<Entity> entities, String spawnType) {
@@ -176,7 +176,7 @@ public class SpawnEntityListener extends ManagementEvents {
 				if(flagResult2 != Tristate.UNDEFINED) return flagResult2.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowEntitySpawn(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, entities, spawnType);
+		return region.isGlobal() ? true : isAllowEntitySpawn(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), source, entities, spawnType);
 	}
 
 }

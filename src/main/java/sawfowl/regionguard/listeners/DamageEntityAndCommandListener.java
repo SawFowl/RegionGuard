@@ -45,7 +45,7 @@ public class DamageEntityAndCommandListener extends ManagementEvents {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onCommand(ExecuteCommandEvent.Pre event, @First ServerPlayer player) {
 		if(event.command().contains("pagination") || event.command().contains("callback")) return;
-		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
+		Region region = plugin.getAPI().getRegions(player.world()).findRegion(player.blockPosition());
 		boolean isPvP = lastDamage.containsKey(player.uniqueId()) && System.currentTimeMillis() - lastDamage.get(player.uniqueId()) < 20000;
 		boolean isAllow = isPvP ? isAllowPvPCommand(region, player, event.command()) : isAllowCommand(region, player, event.command());
 		Component message = isPvP ? getEvents(player).getCommand().getExecutePvP() : getEvents(player).getCommand().getExecute();
@@ -127,7 +127,7 @@ public class DamageEntityAndCommandListener extends ManagementEvents {
 		Optional<Entity> optEntity = event.cause().first(Entity.class);
 		Optional<DamageSource> optDamageSource = event.cause().first(DamageSource.class);
 		ResourceKey worldKey = ResourceKey.resolve(event.entity().world().context().getValue());
-		Region region = plugin.getAPI().findRegion(worldKey, event.entity().blockPosition());
+		Region region = plugin.getAPI().getRegions(worldKey).findRegion(event.entity().blockPosition());
 		Component message = null;
 		boolean isAllow = true;
 		if(optPlayer.isPresent() && event.entity() instanceof ServerPlayer && !isAllowPvP(region, optPlayer.get()) && !optPlayer.get().uniqueId().equals(event.entity().uniqueId())) {
@@ -232,7 +232,7 @@ public class DamageEntityAndCommandListener extends ManagementEvents {
 	private boolean isAllowPvP(Region region, ServerPlayer player) {
 		if(player.hasPermission(Permissions.bypassFlag(Flags.PVP))) return true;
 		Tristate finalFlagResult = region.getFlagResult(Flags.PVP, null, null);
-		return region.isGlobal() ? (finalFlagResult == Tristate.UNDEFINED ? true : finalFlagResult.asBoolean()) : isAllowPvP(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player);
+		return region.isGlobal() ? (finalFlagResult == Tristate.UNDEFINED ? true : finalFlagResult.asBoolean()) : isAllowPvP(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), player);
 	}
 
 	private boolean isAllowDamage(Region region, Entity entity, Object damageSource) {
@@ -258,7 +258,7 @@ public class DamageEntityAndCommandListener extends ManagementEvents {
 				}
 			}
 		}
-		return region.isGlobal() ? true : isAllowDamage(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, damageSource);
+		return region.isGlobal() ? true : isAllowDamage(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), entity, damageSource);
 	}
 
 	private boolean isAllowPvPCommand(Region region, ServerPlayer player, String command) {
@@ -268,7 +268,7 @@ public class DamageEntityAndCommandListener extends ManagementEvents {
 		}
 		Tristate flagResult = region.getFlagResult(Flags.COMMAND_EXECUTE_PVP, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
-		return region.isGlobal() ? true : isAllowPvPCommand(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player, command);
+		return region.isGlobal() ? true : isAllowPvPCommand(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), player, command);
 	}
 
 	private boolean isAllowCommand(Region region, ServerPlayer player, String command) {
@@ -278,7 +278,7 @@ public class DamageEntityAndCommandListener extends ManagementEvents {
 		}
 		Tristate flagResult = region.getFlagResult(Flags.COMMAND_EXECUTE, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
-		return region.isGlobal() ? true : isAllowCommand(plugin.getAPI().getGlobalRegion(region.getWorldKey()), player, command);
+		return region.isGlobal() ? true : isAllowCommand(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), player, command);
 	}
 
 }

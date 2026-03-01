@@ -42,7 +42,7 @@ public class ImpactListener extends ManagementEvents {
 		Entity entity = (Entity) projectileSource;
 		ServerPlayer player = entity instanceof ServerPlayer ? (ServerPlayer) entity : null;
 		BlockState blockState = event.targetBlock();
-		Region region = plugin.getAPI().findRegion(event.impactPoint().world(), event.impactPoint().blockPosition());
+		Region region = plugin.getAPI().getRegions(event.impactPoint().world()).findRegion(event.impactPoint().blockPosition());
 		boolean isAllow = isAllowImpactBlock(region, entity, blockState);
 		RegionImpactEvent.Block rgEvent = new RegionImpactEvent.Block() {
 
@@ -127,7 +127,7 @@ public class ImpactListener extends ManagementEvents {
 		Entity targetEntity = optTargetEntity.get();
 		Entity entity = (Entity) projectileSource;
 		ServerPlayer player = entity instanceof ServerPlayer ? (ServerPlayer) entity : null;
-		Region region = plugin.getAPI().findRegion(event.impactPoint().world(), event.impactPoint().blockPosition());
+		Region region = plugin.getAPI().getRegions(event.impactPoint().world()).findRegion(event.impactPoint().blockPosition());
 		boolean isAllow = isAllowImpactEntity(region, entity, targetEntity);
 		RegionImpactEvent.Entity rgEvent = new RegionImpactEvent.Entity() {
 
@@ -213,7 +213,7 @@ public class ImpactListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowImpactBlock(plugin.getAPI().getGlobalRegion(region.getWorldKey()), entity, blockState);
+		return region.isGlobal() ? true : isAllowImpactBlock(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), entity, blockState);
 	}
 
 	private boolean isAllowImpactEntity(Region region, Entity source, Entity target) {
@@ -228,7 +228,7 @@ public class ImpactListener extends ManagementEvents {
 				if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
 			}
 		}
-		return region.isGlobal() ? true : isAllowImpactEntity(plugin.getAPI().getGlobalRegion(region.getWorldKey()), source, target);
+		return region.isGlobal() ? true : isAllowImpactEntity(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal(), source, target);
 	}
 
 }

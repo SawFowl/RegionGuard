@@ -43,7 +43,7 @@ public class Flag extends AbstractPlayerCommand {
 
 	@Override
 	public void process(CommandCause cause, ServerPlayer src, Locale locale, Mutable arguments, RawArgumentsMap args) throws CommandException {
-		Region region = plugin.getAPI().findRegion(src.world(), src.blockPosition());
+		Region region = plugin.getAPI().getRegions(src.world()).findRegion(src.blockPosition());
 		Optional<FlagConfig> optFlag = args.get(0);
 		if(optFlag.isPresent()) {
 			setFlag(region, optFlag.get().getName(), args.getBoolean(1).orElse(false), args.getString(2).orElse("all"), args.getString(3).orElse("all"));

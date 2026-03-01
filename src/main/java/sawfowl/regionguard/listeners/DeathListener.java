@@ -31,7 +31,7 @@ public class DeathListener extends ManagementEvents {
 	public void onDeath(DestructEntityEvent.Death event) {
 		if(event.keepInventory() || !(event.entity() instanceof ServerPlayer)) return;
 		ServerPlayer player = (ServerPlayer) event.entity();
-		Region region = plugin.getAPI().findRegion(player.world(), player.blockPosition());
+		Region region = plugin.getAPI().getRegions(player.world()).findRegion(player.blockPosition());
 		boolean keepInventory = isKeepInventory(region);
 		boolean keepExp = isKeepExp(region);
 		if(keepInventory && !event.keepInventory()) {
@@ -71,13 +71,13 @@ public class DeathListener extends ManagementEvents {
 	private boolean isKeepInventory(Region region) {
 		Tristate flagResult = region.getFlagResult(Flags.KEEP_INVENTORY, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
-		return region.isGlobal() ? true : isKeepInventory(plugin.getAPI().getGlobalRegion(region.getWorldKey()));
+		return region.isGlobal() ? true : isKeepInventory(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal());
 	}
 
 	private boolean isKeepExp(Region region) {
 		Tristate flagResult = region.getFlagResult(Flags.KEEP_EXP, null, null);
 		if(flagResult != Tristate.UNDEFINED) return flagResult.asBoolean();
-		return region.isGlobal() ? true : isKeepInventory(plugin.getAPI().getGlobalRegion(region.getWorldKey()));
+		return region.isGlobal() ? true : isKeepInventory(plugin.getAPI().getRegions(region.getWorldKey()).getGlobal());
 	}
 
 }

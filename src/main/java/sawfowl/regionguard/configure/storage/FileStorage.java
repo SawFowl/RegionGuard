@@ -50,7 +50,6 @@ public class FileStorage implements WorkData {
 			if(!worlds.contains(file.getName())) try {
 				FileUtils.deleteDirectory(file);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
