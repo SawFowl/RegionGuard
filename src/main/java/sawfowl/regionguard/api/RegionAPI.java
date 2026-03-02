@@ -27,6 +27,12 @@ import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 
 public abstract class RegionAPI {
 
+	private static RegionAPI INSTANCE;
+
+	public static RegionAPI getInstance() {
+		return INSTANCE;
+	}
+
 	public abstract void cleanNotExistWorldsData();
 
 	/**
