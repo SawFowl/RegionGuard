@@ -17,6 +17,8 @@ import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
+import com.google.inject.Inject;
+
 import sawfowl.regionguard.api.data.ChunkNumber;
 import sawfowl.regionguard.api.data.FlagConfig;
 import sawfowl.regionguard.api.data.FlagValue;
@@ -27,6 +29,7 @@ import sawfowl.regionguard.api.worldedit.WorldEditCUIAPI;
 
 public abstract class RegionAPI {
 
+	@Inject
 	private static RegionAPI INSTANCE;
 
 	public static RegionAPI getInstance() {
