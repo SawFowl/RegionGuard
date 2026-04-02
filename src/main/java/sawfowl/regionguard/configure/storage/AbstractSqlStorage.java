@@ -1,9 +1,5 @@
 package sawfowl.regionguard.configure.storage;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -16,17 +12,17 @@ import java.util.UUID;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
 import com.google.gson.JsonObject;
 
 import io.leangen.geantyref.TypeToken;
 
 import net.kyori.adventure.text.Component;
+
+import sawfowl.localeapi.api.ConfigTypes;
 import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
-import sawfowl.localeapi.api.serializetools.SerializeOptions;
+import sawfowl.localeapi.api.services.ConfigurationService;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.FlagValue;
@@ -83,9 +79,9 @@ public abstract class AbstractSqlStorage extends Thread implements WorkData {
 
 	protected <T> T createTempConfigReader(String string, TypeToken<T> token) {
 		if(string == null || string.isEmpty() || string.equalsIgnoreCase("null") || string.startsWith("{}")) return null;
-		HoconConfigurationLoader loader = SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).source(() -> new BufferedReader(new StringReader(string))).build();
+		ConfigurationService.getInstance().createVirtualConfig().setType(ConfigTypes.JSON).setItemStackSerializerType(ItemStackSerializerType.JSON).addSerializers(RegionSerializerCollection.COLLETCTION).setData(string).build();
 		try {
-			return loader.load().get(token);
+			return ConfigurationService.getInstance().createVirtualConfig().setType(ConfigTypes.JSON).setItemStackSerializerType(ItemStackSerializerType.JSON).addSerializers(RegionSerializerCollection.COLLETCTION).setData(string).build().getRootNode().get(token);
 		} catch (ConfigurateException e) {
 			plugin.getLogger().error(e.getLocalizedMessage() + " " + string);
 		}
@@ -94,16 +90,7 @@ public abstract class AbstractSqlStorage extends Thread implements WorkData {
 
 	protected <T> String getSerializedData(T object, TypeToken<T> token) {
 		if(object == null) return null;
-		StringWriter sink = new StringWriter();
-		try {
-			HoconConfigurationLoader loader = SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).sink(() -> new BufferedWriter(sink)).build();
-			BasicConfigurationNode basicNode = BasicConfigurationNode.root(SerializeOptions.selectOptions(ItemStackSerializerType.JSON).serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION)));
-			basicNode.set(token, object);
-			loader.save(basicNode);
-		} catch (ConfigurateException e) {
-			plugin.getLogger().error(e.getLocalizedMessage() + " " + object.getClass());
-		}
-		return sink.toString().length() == 0 ? null : sink.toString();
+		return ConfigurationService.getInstance().createVirtualReferencedConfig(object).setType(ConfigTypes.JSON).setItemStackSerializerType(ItemStackSerializerType.JSON).addSerializers(RegionSerializerCollection.COLLETCTION).build().getRawData();
 	}
 
 	protected Map<UUID, MemberData> convertMembersToMap(List<MemberData> list) {

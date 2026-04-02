@@ -1,17 +1,14 @@
 package sawfowl.regionguard.implementsapi.data;
 
-import java.io.BufferedWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.spongepowered.configurate.serialize.SerializationException;
-
 import com.google.gson.JsonObject;
 
+import sawfowl.localeapi.api.ConfigTypes;
 import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
-import sawfowl.localeapi.api.serializetools.SerializeOptions;
+import sawfowl.localeapi.api.services.ConfigurationService;
 import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.AdditionalData;
 
@@ -61,14 +58,11 @@ public class AdditionalDataListImpl {
 				return Optional.empty();
 			}
 		} else if(rawData.containsKey(key)) {
-			try {
-				T data = SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(rawData.get(key)).get(clazz);
-				if(data == null) return Optional.empty();
-				set(key, data);
-				return Optional.ofNullable(data);
-			} catch (SerializationException e) {
-				e.printStackTrace();
-			}
+			var config = ConfigurationService.getInstance().createVirtualReferencedConfig(clazz).setItemStackSerializerType(ItemStackSerializerType.JSON).addSerializers(RegionSerializerCollection.COLLETCTION).setType(ConfigTypes.HOCON).build();
+			T data = config.convertFromJson(rawData.get(key));
+			if(data == null) return Optional.empty();
+			set(key, data);
+			return Optional.ofNullable(data);
 		}
 		return Optional.empty();
 	}
@@ -76,11 +70,9 @@ public class AdditionalDataListImpl {
 	public JsonObject serialize() {
 		JsonObject json = new JsonObject();
 		additionalData.forEach((k, v) -> {
-			try {
-				json.add(k, SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(v).get(JsonObject.class));
-			} catch (SerializationException e) {
-				e.printStackTrace();
-			}
+			var jsonE = v.toJsonObject();
+			if(jsonE == null) jsonE = ConfigurationService.getInstance().createVirtualReferencedConfig(v).setItemStackSerializerType(ItemStackSerializerType.JSON).addSerializers(RegionSerializerCollection.COLLETCTION).setType(ConfigTypes.HOCON).build().toJson(JsonObject.class);
+			if(jsonE != null) json.add(k, jsonE);
 		});
 		rawData.forEach((k, v) -> {
 			if(!json.has(k)) json.add(k, v);
@@ -92,12 +84,9 @@ public class AdditionalDataListImpl {
 		Map<String, JsonObject> raw = new HashMap<>(rawData);
 		additionalData.forEach((k, v) -> {
 			 if(raw.containsKey(k)) raw.remove(k);
-			JsonObject json = v.toJsonObject();
-			try {
-				raw.put(k, json != null ? json : SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).defaultOptions(options -> options.serializers(serializers -> serializers.registerAll(RegionSerializerCollection.COLLETCTION))).sink(() -> new BufferedWriter(new StringWriter())).build().createNode().node("Json").set(v).get(JsonObject.class));
-			} catch (SerializationException e) {
-				e.printStackTrace();
-			}
+			var json = v.toJsonObject();
+			if(json == null) json = ConfigurationService.getInstance().createVirtualReferencedConfig(v).setItemStackSerializerType(ItemStackSerializerType.JSON).addSerializers(RegionSerializerCollection.COLLETCTION).setType(ConfigTypes.HOCON).build().toJson(JsonObject.class);
+			raw.put(k, json);
 		});
 		return raw;
 	}

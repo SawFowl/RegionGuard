@@ -56,7 +56,8 @@ import sawfowl.commandpack.api.CPBuilders;
 import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.utils.StorageType;
 import sawfowl.localeapi.api.ConfigTypes;
-import sawfowl.localeapi.api.LocaleService;
+import sawfowl.localeapi.api.services.ConfigurationService;
+import sawfowl.localeapi.api.services.LocaleService;
 import sawfowl.localeapi.api.LocalesList;
 import sawfowl.localeapi.api.Logger;
 import sawfowl.localeapi.api.config.ReferencedConfig;
@@ -248,11 +249,11 @@ public class RegionGuard {
 		if(!locales.contains(Locales.DEFAULT)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.DEFAULT, ImplementLocale.class);
 		if(!locales.contains(Locales.RU_RU)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.RU_RU, ImplementRuLocale.class);
 		commandPack = CommandPack.getInstance();
-		mainConfig = ReferencedConfig.create(pluginContainer, configDirectory, "Config", ConfigTypes.HOCON, ItemStackSerializerType.JSON, null, MainConfig.class);
+		mainConfig = ConfigurationService.getInstance().createReferencedConfig(MainConfig.class).setPath(configDirectory).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("Config").setType(ConfigTypes.HOCON).build();
 		CPBuilders.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
 		CPBuilders.register(FlagValue.Builder.class, () -> new FlagValueImpl().builder());
-		this.flagsConfig = ReferencedConfig.create(pluginContainer, configDir, "DefaultFlags", ConfigTypes.HOCON, ItemStackSerializerType.JSON, RegionSerializerCollection.COLLETCTION, DefaultFlags.class);
-		this.cuiConfig = ReferencedConfig.create(pluginContainer, configDir, "CuiSettings", ConfigTypes.HOCON, ItemStackSerializerType.JSON, null, CuiConfig.class);
+		flagsConfig = ConfigurationService.getInstance().createReferencedConfig(DefaultFlags.class).setPath(configDirectory).addSerializers(RegionSerializerCollection.COLLETCTION).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("DefaultFlags").setType(ConfigTypes.HOCON).build();
+		cuiConfig = ConfigurationService.getInstance().createReferencedConfig(CuiConfig.class).setPath(configDirectory).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("CuiSettings").setType(ConfigTypes.HOCON).build();
 		api = new Api(instance);
 		new InjectorAPI().createInjector();
 	}
