@@ -58,11 +58,10 @@ public class AdditionalDataListImpl {
 				return Optional.empty();
 			}
 		} else if(rawData.containsKey(key)) {
-			var config = ConfigurationService.getInstance().createVirtualReferencedConfig(clazz).setItemStackSerializerType(ItemStackSerializerType.JSON).addSerializers(RegionSerializerCollection.COLLETCTION).setType(ConfigTypes.HOCON).build();
-			T data = config.convertFromJson(rawData.get(key));
-			if(data == null) return Optional.empty();
-			set(key, data);
-			return Optional.ofNullable(data);
+			var config = ConfigurationService.getInstance().createVirtualReferencedConfig(clazz, rawData.get(key)).setItemStackSerializerType(ItemStackSerializerType.JSON).addSerializers(RegionSerializerCollection.COLLETCTION).setType(ConfigTypes.HOCON).build();
+			if(config.get() == null) return Optional.empty();
+			set(key, config.get());
+			return Optional.ofNullable(config.get());
 		}
 		return Optional.empty();
 	}
