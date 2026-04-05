@@ -11,7 +11,6 @@ import java.util.function.Predicate;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -524,15 +523,5 @@ public abstract class RegionAPI {
 	 * Go to the API for visually highlighting regions with a mod on the WECui client.
 	 */
 	public abstract WorldEditCUIAPI getWorldEditCUIAPI();
-
-	/**
-	 * This interface is designed to access the plugin's API.
-	 */
-	@Deprecated
-	public interface PostAPI extends Event {
-
-		public RegionAPI getAPI();
-
-	}
 
 }

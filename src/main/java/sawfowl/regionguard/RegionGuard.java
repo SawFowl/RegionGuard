@@ -31,9 +31,6 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
@@ -131,11 +128,6 @@ public class RegionGuard {
 	private LocalesList<AbstractLocale> locales;
 	private PluginContainer pluginContainer;
 	private Path configDir;
-	//private ConfigurationReference<CommentedConfigurationNode> configurationReference;
-	//private ConfigurationReference<CommentedConfigurationNode> flagsConfigurationReference;
-	//private ValueReference<DefaultFlags, CommentedConfigurationNode> flagsConfig;
-	//private ConfigurationReference<CommentedConfigurationNode> cuiConfigurationReference;
-	//private ValueReference<CuiConfig, CommentedConfigurationNode> cuiConfig;
 	private EconomyService economyService;
 	private Api api;
 	private sawfowl.regionguard.commands.Region mainCommand;
@@ -318,16 +310,6 @@ public class RegionGuard {
 			logger.info("Loaded claims: " + api.getRegions().size() + " in " + (System.currentTimeMillis() - time) + "ms");
 			playersDataWork.loadAll();
 			loaded = true;
-			Sponge.eventManager().post(new RegionAPI.PostAPI() {
-				@Override
-				public Cause cause() {
-					return Cause.of(EventContext.builder().add(EventContextKeys.PLUGIN, pluginContainer).build(), pluginContainer);
-				}
-				@Override
-				public RegionAPI getAPI() {
-					return api;
-				}
-			});
 		}).build());
 		registerPlaceholders();
 	}
