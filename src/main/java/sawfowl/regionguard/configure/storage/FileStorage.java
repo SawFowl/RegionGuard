@@ -19,7 +19,6 @@ import sawfowl.localeapi.api.config.ReferencedConfig;
 import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.localeapi.api.services.ConfigurationService;
 import sawfowl.regionguard.RegionGuard;
-import sawfowl.regionguard.TestData;
 import sawfowl.regionguard.api.RegionSerializerCollection;
 import sawfowl.regionguard.api.data.ClaimedByPlayer;
 import sawfowl.regionguard.api.data.PlayerData;
@@ -160,7 +159,7 @@ public class FileStorage implements WorkData {
 			if(ConfigTypes.isValidExtension(ConfigTypes.getExtension(file.getName()))) {
 				var reference = createPlayerDataConfig(file);
 				if(!reference.getRootNode().virtual() && !reference.getRootNode().empty()) {
-					UUID uuid = UUID.fromString(file.getName().replace(ConfigTypes.find(ConfigTypes.getExtension(file.getName())).toString(), ""));
+					UUID uuid = UUID.fromString(file.getName().replace(ConfigTypes.getTypeByExtension(ConfigTypes.getExtension(file.getName())).toString(), ""));
 					if(reference.get() != null) plugin.getAPI().setPlayerData(uuid, reference.get());
 				}
 			}
@@ -188,7 +187,7 @@ public class FileStorage implements WorkData {
 	}
 
 	private ReferencedConfig<PlayerData> createPlayerDataConfig(File file) {
-		return ConfigurationService.getInstance().createReferencedConfig(PlayerData.class).setItemStackSerializerType(ItemStackSerializerType.JSON).fromFile(file).setType(ConfigTypes.HOCON).addSerializers(RegionSerializerCollection.COLLETCTION).build();
+		return ConfigurationService.getInstance().createReferencedConfig(PlayerData.class).setItemStackSerializerType(ItemStackSerializerType.JSON).fromFile(file).addSerializers(RegionSerializerCollection.COLLETCTION).build();
 	}
 
 	private void removeFiles(File file) {
