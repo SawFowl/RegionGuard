@@ -47,7 +47,7 @@ public class MainConfig {
 
 	@Setting("WandItem")
 	@LocalisedComment(path = {"Comments", "MainConfig", "WandItem"}, plugin = "regionguard")
-	private SerializedItemStack wanditem = new SerializedItemStack("minecraft:stone_axe", 1, "{\"minecraft\":{\"damage\":131}}").toJsonComponents();
+	private SerializedItemStack wanditem = new SerializedItemStack("minecraft:stone_axe", 1, null).toJsonComponents();
 
 	@Setting("RegisterForgeListeners")
 	@LocalisedComment(path = {"Comments", "MainConfig", "RegisterForgeListeners"}, plugin = "regionguard")

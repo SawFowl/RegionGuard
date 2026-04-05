@@ -249,11 +249,11 @@ public class RegionGuard {
 		if(!locales.contains(Locales.DEFAULT)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.DEFAULT, ImplementLocale.class);
 		if(!locales.contains(Locales.RU_RU)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.RU_RU, ImplementRuLocale.class);
 		commandPack = CommandPack.getInstance();
-		mainConfig = ConfigurationService.getInstance().createReferencedConfig(MainConfig.class).setPath(configDirectory).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("Config").setType(ConfigTypes.HOCON).build();
+		mainConfig = ConfigurationService.getInstance().createReferencedConfig(pluginContainer, MainConfig.class).setPath(configDirectory).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("Config").setType(ConfigTypes.HOCON).build();
 		CPBuilders.register(FlagConfig.Builder.class, () -> new FlagConfigImpl().builder());
 		CPBuilders.register(FlagValue.Builder.class, () -> new FlagValueImpl().builder());
-		flagsConfig = ConfigurationService.getInstance().createReferencedConfig(DefaultFlags.class).setPath(configDirectory).addSerializers(RegionSerializerCollection.COLLETCTION).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("DefaultFlags").setType(ConfigTypes.HOCON).build();
-		cuiConfig = ConfigurationService.getInstance().createReferencedConfig(CuiConfig.class).setPath(configDirectory).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("CuiSettings").setType(ConfigTypes.HOCON).build();
+		flagsConfig = ConfigurationService.getInstance().createReferencedConfig(pluginContainer, DefaultFlags.class).setPath(configDirectory).addSerializers(RegionSerializerCollection.COLLETCTION).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("DefaultFlags").setType(ConfigTypes.HOCON).build();
+		cuiConfig = ConfigurationService.getInstance().createReferencedConfig(pluginContainer, CuiConfig.class).setPath(configDirectory).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("CuiSettings").setType(ConfigTypes.HOCON).build();
 		api = new Api(instance);
 		new InjectorAPI().createInjector();
 	}

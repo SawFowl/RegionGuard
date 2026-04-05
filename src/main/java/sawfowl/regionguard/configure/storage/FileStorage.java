@@ -175,19 +175,19 @@ public class FileStorage implements WorkData {
 	}
 
 	private ReferencedConfig<Region> createRegionConfig(Path path, String region) {
-		return ConfigurationService.getInstance().createReferencedConfig(Region.class).setItemStackSerializerType(ItemStackSerializerType.JSON).setPath(path).setName(region).setType(ConfigTypes.HOCON).addSerializers(RegionSerializerCollection.COLLETCTION).build();
+		return ConfigurationService.getInstance().createReferencedConfig(plugin.getPluginContainer(), Region.class).setItemStackSerializerType(ItemStackSerializerType.JSON).setPath(path).setName(region).setType(ConfigTypes.HOCON).addSerializers(RegionSerializerCollection.COLLETCTION).build();
 	}
 
 	private ReferencedConfig<Region> createRegionConfig(File file) {
-		return ConfigurationService.getInstance().createReferencedConfig(Region.class).setItemStackSerializerType(ItemStackSerializerType.JSON).fromFile(file).addSerializers(RegionSerializerCollection.COLLETCTION).build();
+		return ConfigurationService.getInstance().createReferencedConfig(plugin.getPluginContainer(), Region.class).setItemStackSerializerType(ItemStackSerializerType.JSON).fromFile(file).addSerializers(RegionSerializerCollection.COLLETCTION).build();
 	}
 
 	private ReferencedConfig<PlayerData> createPlayerDataConfig(Path path, String player) {
-		return ConfigurationService.getInstance().createReferencedConfig(PlayerData.class).setItemStackSerializerType(ItemStackSerializerType.JSON).setPath(path).setName(player).setType(ConfigTypes.HOCON).addSerializers(RegionSerializerCollection.COLLETCTION).build();
+		return ConfigurationService.getInstance().createReferencedConfig(plugin.getPluginContainer(), PlayerData.class).setItemStackSerializerType(ItemStackSerializerType.JSON).setPath(path).setName(player).setType(ConfigTypes.HOCON).addSerializers(RegionSerializerCollection.COLLETCTION).build();
 	}
 
 	private ReferencedConfig<PlayerData> createPlayerDataConfig(File file) {
-		return ConfigurationService.getInstance().createReferencedConfig(PlayerData.class).setItemStackSerializerType(ItemStackSerializerType.JSON).fromFile(file).addSerializers(RegionSerializerCollection.COLLETCTION).build();
+		return ConfigurationService.getInstance().createReferencedConfig(plugin.getPluginContainer(), PlayerData.class).setItemStackSerializerType(ItemStackSerializerType.JSON).fromFile(file).addSerializers(RegionSerializerCollection.COLLETCTION).build();
 	}
 
 	private void removeFiles(File file) {
