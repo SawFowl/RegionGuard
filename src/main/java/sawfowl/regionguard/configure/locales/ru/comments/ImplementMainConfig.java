@@ -27,7 +27,7 @@ public class ImplementMainConfig implements MainConfig {
 	@Setting("WandItem")
 	private String wandItem = "Предмет, используемый для выделения области и предоставления краткой информации о ней.";
 	@Setting("RegisterForgeListeners")
-	private String registerForgeListeners = "Иногда Sponge не перехватывает события Forge. Включение этой опции может устранить проблему.\nЕсли защита территории не работает при любом действии, сообщите об этом на сервер Discord разработчика плагина - https://discord.gg/4SMShjQ3Pe\nВ некоторых случаях может потребоваться внесение изменений в код мода.";
+	private String registerForgeListeners = "Иногда Sponge не перехватывает события Forge. Включение этой опции может устранить проблему.\nЕсли защита территории не работает при любом действии, сообщите об этом на Discord сервере разработчика плагина - https://discord.gg/4SMShjQ3Pe\nВ некоторых случаях может потребоваться внесение изменений в код мода.";
 	@Setting("SyncInterval")
 	private String syncInterval = "Время между загрузкой новых и обновленных данных из базы данных MySql.\nСинхронизация не будет выполняться, если значение меньше 0.";
 
