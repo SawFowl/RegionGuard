@@ -909,6 +909,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 				getPositions(player).clear();
 				return;
 			}
+			plugin.getAPI().getTempRegion(player.uniqueId()).ifPresent(temp -> plugin.getAPI().getWorldEditCUIAPI().revertVisuals(player, temp.getUniqueId()));
 			RegionCreateEvent createRegionEvent = createRegion(player, getPositions(player).tempRegion);
 			if(!createRegionEvent.isCancelled()) {
 				if(createRegionEvent.getRegion().getCuboid().getSize() < plugin.getAPI().getMinimalRegionSize(createRegionEvent.getRegion().getCuboid().getSelectorType())) {

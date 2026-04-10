@@ -246,30 +246,14 @@ public class RegionGuard {
 		CPBuilders.register(FlagValue.Builder.class, () -> new FlagValueImpl().builder());
 		flagsConfig = ConfigurationService.getInstance().createReferencedConfig(pluginContainer, DefaultFlags.class).setPath(configDirectory).addSerializers(RegionSerializerCollection.COLLETCTION).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("DefaultFlags").setType(ConfigTypes.HOCON).build();
 		cuiConfig = ConfigurationService.getInstance().createReferencedConfig(pluginContainer, CuiConfig.class).setPath(configDirectory).setItemStackSerializerType(ItemStackSerializerType.JSON).setName("CuiSettings").setType(ConfigTypes.HOCON).build();
+		commandPack.getCustomPayloadsService().registerChannel(ResourceKey.resolve("worldedit:cui"));
+		commandPack.getCustomPayloadsService().registerRawListener(pluginContainer, ResourceKey.resolve("worldedit:cui"), (player, packet) -> api.getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(packet.getDataAsString()));
 		api = new Api(instance);
 		new InjectorAPI().createInjector();
 	}
 
-	/*@Listener
-	public void onConstruct(LocaleServiseEvent.Construct event) {
-		try {
-			configurationReference = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("Config.conf")).build().loadToReference();
-			this.mainConfig = configurationReference.referenceTo(MainConfig.class);
-			configurationReference.save();
-		} catch (ConfigurateException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Listener
-	public void getCommandPackAPI(CommandPack.PostAPI event) {
-		commandPack = event.getAPI();
-	}*/
-
 	@Listener(order = Order.LAST)
 	public void onStart(StartedEngineEvent<Server> event) {
-		commandPack.getCustomPayloadsService().registerChannel(ResourceKey.resolve("worldedit:cui"));
-		commandPack.getCustomPayloadsService().registerRawListener(pluginContainer, ResourceKey.resolve("worldedit:cui"), (player, packet) -> api.getWorldEditCUIAPI().getOrCreateUser(player).handleCUIInitializationMessage(packet.getDataAsString()));
 		regenUtil = new RegenUtil(instance);
 		if(getConfig().getMySQLConfig().isEnable()) {
 			mySQL = new MySQL(instance, getConfig().getMySQLConfig());
@@ -314,13 +298,6 @@ public class RegionGuard {
 		registerPlaceholders();
 	}
 
-/*	@Listener
-	public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
-		mainCommand = new sawfowl.regionguard.commands.Region(instance);
-		mainCommand.register(event);
-		mainCommand.getChildExecutors().get("wand").register(event);
-	}
-*/
 	@Listener
 	public void registerBuilders(RegisterBuilderEvent event) {
 		event.register(ChunkNumber.Builder.class, () -> new ChunkNumberImpl().builder());
