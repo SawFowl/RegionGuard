@@ -23,7 +23,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 
 import net.kyori.adventure.text.Component;
 
-import sawfowl.commandpack.api.mixin.game.EntityItem;
+import sawfowl.commandpack.api.game.EntityItem;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
