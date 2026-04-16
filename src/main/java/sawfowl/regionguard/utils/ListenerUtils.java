@@ -28,7 +28,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.chunk.WorldChunk;
-import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -172,10 +171,6 @@ public class ListenerUtils {
 
 	public static boolean isDecay(List<BlockTransaction> transactions) {
 		return transactions.stream().filter(transaction -> (transaction.operation() == Operations.DECAY.get())).findFirst().isPresent();
-	}
-
-	public static boolean isExplosion(Object object) {
-		return object instanceof Explosion;
 	}
 
 	public static int getLiquidFlowLevel(BlockTransaction transaction) {

@@ -251,8 +251,8 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 	@Listener(order = Order.FIRST, beforeModifications = true)
 	public void onBlockChange(ChangeBlockEvent.All event) {
 		if(event.isCancelled()) return;
-		boolean isPlayer = event.source() instanceof ServerPlayer;
-		ServerPlayer player = isPlayer ? (ServerPlayer) event.source() : null;
+		ServerPlayer player = event.cause().first(ServerPlayer.class).orElse(null);
+		boolean isPlayer = player != null;
 		if(isPlayer) {
 			DataContainer container = player.itemInHand(HandTypes.MAIN_HAND.get()).toContainer();
 			if(container.get(DataQuery.of("UnsafeData")).isPresent() && container.get(DataQuery.of("UnsafeData")).get().toString().contains("WandItem")) {
@@ -273,8 +273,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 			if(event.isCancelled() && isPlayer) player.sendMessage(getEvents(player).getBlock().getGrowth());
 			return;
 		}
-		if(ListenerUtils.isExplosion(event.source())) {
-			Explosion explosion = ((Explosion) event.source());
+		event.cause().first(Explosion.class).ifPresent(explosion -> {
 			Region region = plugin.getAPI().getRegions(event.world()).findRegion(explosion.blockPosition());
 			event.transactions().forEach(transaction -> {
 				if(!isAllowExplosion(plugin.getAPI().getRegions(event.world()).findRegion(transaction.original().position()), explosion, transaction)) transaction.setValid(false);
@@ -367,7 +366,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 			ListenerUtils.postEvent(rgEvent);
 			event.setCancelled(rgEvent.isCancelled());
 			return;
-		}
+		});
 		if(ListenerUtils.isLiquidFlow(event.transactions())) {
 			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.LIQUID_SPREAD.get());
 			Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
@@ -453,204 +452,204 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 			if(!isAllowFireSpread(region, blockTransaction)) event.setCancelled(true);
 			return;
 		}
-		if(ListenerUtils.isPlaceBlock(event.transactions()) && event.source() instanceof Entity) {
-			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.PLACE.get());
-			Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
-			Entity entity = (Entity) event.source();
-			boolean allow = isAllowPlace(region, blockTransaction, entity, true);
-			RegionChangeBlockEvent.Place rgEvent = new RegionChangeBlockEvent.Place() {
+		event.cause().first(Entity.class).ifPresent(entity -> {
+			if(ListenerUtils.isPlaceBlock(event.transactions())) {
+				BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.PLACE.get());
+				Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
+				boolean allow = isAllowPlace(region, blockTransaction, entity, true);
+				RegionChangeBlockEvent.Place rgEvent = new RegionChangeBlockEvent.Place() {
 
-				Component component;
-				boolean cancelled;
-				@Override
-				public Cause cause() {
-					return cause;
-				}
+					Component component;
+					boolean cancelled;
+					@Override
+					public Cause cause() {
+						return cause;
+					}
 
-				@Override
-				public Object source() {
-					return event.source();
-				}
+					@Override
+					public Object source() {
+						return event.cause().root();
+					}
 
-				@Override
-				public ServerWorld getWorld() {
-					return event.world();
-				}
+					@Override
+					public ServerWorld getWorld() {
+						return event.world();
+					}
 
-				@Override
-				public List<BlockTransaction> getTransactions() {
-					return event.transactions();
-				}
+					@Override
+					public List<BlockTransaction> getTransactions() {
+						return event.transactions();
+					}
 
-				@Override
-				public BlockTransaction getDefaultTransaction() {
-					return blockTransaction;
-				}
+					@Override
+					public BlockTransaction getDefaultTransaction() {
+						return blockTransaction;
+					}
 
-				@Override
-				public BlockSnapshot afterTransaction() {
-					return getDefaultTransaction().defaultReplacement();
-				}
+					@Override
+					public BlockSnapshot afterTransaction() {
+						return getDefaultTransaction().defaultReplacement();
+					}
 
-				@Override
-				public BlockSnapshot beforeTransaction() {
-					return getDefaultTransaction().original();
-				}
+					@Override
+					public BlockSnapshot beforeTransaction() {
+						return getDefaultTransaction().original();
+					}
 
-				@Override
-				public Region getRegion() {
-					return region;
-				}
+					@Override
+					public Region getRegion() {
+						return region;
+					}
 
-				@Override
-				public boolean isCancelled() {
-					return cancelled;
-				}
+					@Override
+					public boolean isCancelled() {
+						return cancelled;
+					}
 
-				@Override
-				public void setCancelled(boolean cancel) {
-					cancelled = cancel;
-				}
+					@Override
+					public void setCancelled(boolean cancel) {
+						cancelled = cancel;
+					}
 
-				@Override
-				public boolean isAllowPlace() {
-					return allow;
-				}
+					@Override
+					public boolean isAllowPlace() {
+						return allow;
+					}
 
-				@Override
-				public Entity getEntity() {
-					return entity;
-				}
+					@Override
+					public Entity getEntity() {
+						return entity;
+					}
 
-				@SuppressWarnings("unchecked")
-				@Override
-				public Optional<ServerPlayer> getPlayer() {
-					return Optional.ofNullable(player);
-				}
+					@SuppressWarnings("unchecked")
+					@Override
+					public Optional<ServerPlayer> getPlayer() {
+						return Optional.ofNullable(player);
+					}
 
-				@Override
-				public void setMessage(Component message) {
-					component = message;
-				}
+					@Override
+					public void setMessage(Component message) {
+						component = message;
+					}
 
-				@Override
-				public Optional<Component> getMessage() {
-					return Optional.ofNullable(component);
-				}
+					@Override
+					public Optional<Component> getMessage() {
+						return Optional.ofNullable(component);
+					}
 
-				@SuppressWarnings("unchecked")
-				@Override
-				public All getSpongeEvent() {
-					return event;
-				}
-				
-			};
-			rgEvent.setCancelled(!allow);
-			if(isPlayer) rgEvent.setMessage(getEvents(player).getBlock().getPlace());
-			ListenerUtils.postEvent(rgEvent);
-			event.setCancelled(rgEvent.isCancelled());
-			if(rgEvent.isCancelled() && rgEvent.getMessage().isPresent() && isPlayer) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
-			return;
-		}
-		if(ListenerUtils.isDestructBlock(event.transactions()) && event.source() instanceof Entity) {
-			BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.BREAK.get());
-			Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
-			Entity entity = event.source() instanceof Entity ? (Entity) event.source() : null;
-			boolean allow = isAllowBreak(region, blockTransaction, entity, true);
-			RegionChangeBlockEvent.Break rgEvent = new RegionChangeBlockEvent.Break() {
+					@SuppressWarnings("unchecked")
+					@Override
+					public All getSpongeEvent() {
+						return event;
+					}
+					
+				};
+				rgEvent.setCancelled(!allow);
+				if(isPlayer) rgEvent.setMessage(getEvents(player).getBlock().getPlace());
+				ListenerUtils.postEvent(rgEvent);
+				event.setCancelled(rgEvent.isCancelled());
+				if(rgEvent.isCancelled() && rgEvent.getMessage().isPresent() && isPlayer) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
+				return;
+			}
+			if(ListenerUtils.isDestructBlock(event.transactions())) {
+				BlockTransaction blockTransaction = ListenerUtils.getTransaction(event.transactions(), Operations.BREAK.get());
+				Region region = plugin.getAPI().getRegions(event.world()).findRegion(blockTransaction.defaultReplacement().position());
+				boolean allow = isAllowBreak(region, blockTransaction, entity, true);
+				RegionChangeBlockEvent.Break rgEvent = new RegionChangeBlockEvent.Break() {
 
-				Component component;
-				boolean cancelled;
-				@Override
-				public Cause cause() {
-					return cause;
-				}
+					Component component;
+					boolean cancelled;
+					@Override
+					public Cause cause() {
+						return cause;
+					}
 
-				@Override
-				public Object source() {
-					return event.source();
-				}
+					@Override
+					public Object source() {
+						return event.source();
+					}
 
-				@Override
-				public ServerWorld getWorld() {
-					return event.world();
-				}
+					@Override
+					public ServerWorld getWorld() {
+						return event.world();
+					}
 
-				@Override
-				public List<BlockTransaction> getTransactions() {
-					return event.transactions();
-				}
+					@Override
+					public List<BlockTransaction> getTransactions() {
+						return event.transactions();
+					}
 
-				@Override
-				public BlockTransaction getDefaultTransaction() {
-					return blockTransaction;
-				}
+					@Override
+					public BlockTransaction getDefaultTransaction() {
+						return blockTransaction;
+					}
 
-				@Override
-				public BlockSnapshot afterTransaction() {
-					return getDefaultTransaction().defaultReplacement();
-				}
+					@Override
+					public BlockSnapshot afterTransaction() {
+						return getDefaultTransaction().defaultReplacement();
+					}
 
-				@Override
-				public BlockSnapshot beforeTransaction() {
-					return getDefaultTransaction().original();
-				}
+					@Override
+					public BlockSnapshot beforeTransaction() {
+						return getDefaultTransaction().original();
+					}
 
-				@Override
-				public Region getRegion() {
-					return region;
-				}
+					@Override
+					public Region getRegion() {
+						return region;
+					}
 
-				@Override
-				public boolean isCancelled() {
-					return cancelled;
-				}
+					@Override
+					public boolean isCancelled() {
+						return cancelled;
+					}
 
-				@Override
-				public void setCancelled(boolean cancel) {
-					cancelled = cancel;
-				}
+					@Override
+					public void setCancelled(boolean cancel) {
+						cancelled = cancel;
+					}
 
-				@Override
-				public Entity getEntity() {
-					return entity;
-				}
+					@Override
+					public Entity getEntity() {
+						return entity;
+					}
 
-				@SuppressWarnings("unchecked")
-				@Override
-				public Optional<ServerPlayer> getPlayer() {
-					return Optional.ofNullable(player);
-				}
+					@SuppressWarnings("unchecked")
+					@Override
+					public Optional<ServerPlayer> getPlayer() {
+						return Optional.ofNullable(player);
+					}
 
-				@Override
-				public void setMessage(Component message) {
-					component = message;
-				}
+					@Override
+					public void setMessage(Component message) {
+						component = message;
+					}
 
-				@Override
-				public Optional<Component> getMessage() {
-					return Optional.ofNullable(component);
-				}
+					@Override
+					public Optional<Component> getMessage() {
+						return Optional.ofNullable(component);
+					}
 
-				@Override
-				public boolean isAllowBreak() {
-					return allow;
-				}
+					@Override
+					public boolean isAllowBreak() {
+						return allow;
+					}
 
-				@SuppressWarnings("unchecked")
-				@Override
-				public All getSpongeEvent() {
-					return event;
-				}
-				
-			};
-			rgEvent.setCancelled(!allow);
-			if(isPlayer) rgEvent.setMessage(getEvents(player).getBlock().getBreak());
-			ListenerUtils.postEvent(rgEvent);
-			event.setCancelled(rgEvent.isCancelled());
-			if(rgEvent.isCancelled() && rgEvent.getMessage().isPresent() && isPlayer) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
-			return;
-		}
+					@SuppressWarnings("unchecked")
+					@Override
+					public All getSpongeEvent() {
+						return event;
+					}
+					
+				};
+				rgEvent.setCancelled(!allow);
+				if(isPlayer) rgEvent.setMessage(getEvents(player).getBlock().getBreak());
+				ListenerUtils.postEvent(rgEvent);
+				event.setCancelled(rgEvent.isCancelled());
+				if(rgEvent.isCancelled() && rgEvent.getMessage().isPresent() && isPlayer) rgEvent.getPlayer().get().sendMessage(rgEvent.getMessage().get());
+				return;
+			}
+		});
 	}
 
 	@Listener

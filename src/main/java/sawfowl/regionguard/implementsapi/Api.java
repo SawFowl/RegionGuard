@@ -498,7 +498,7 @@ public class Api extends RegionAPI {
 	}
 
 	private long getOptionLongValue(ServerPlayer player, String option) {
-		return optionIsPresent(player, option) && NumberUtils.isCreatable(player.option(option).get()) ? NumberUtils.createLong(player.option(option).get()) : 0;
+		return player.option(option).map(value -> NumberUtils.isCreatable(value) ? NumberUtils.createLong(value) : 0).orElse(0l);
 	}
 
 	private double getOptionDoubleValue(ServerPlayer player, String option) {
