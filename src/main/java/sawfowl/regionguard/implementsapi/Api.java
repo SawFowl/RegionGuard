@@ -439,7 +439,7 @@ public class Api extends RegionAPI {
 
 	@Override
 	public Currency getCurrency(ServerPlayer player) {
-		return plugin.getEconomy() != null && optionIsPresent(player, Permissions.TRANSACRION_CURRENCY) ? plugin.getEconomy().checkCurrency(player.option(Permissions.TRANSACRION_CURRENCY).get()) : null;
+		return player.option(Permissions.TRANSACRION_CURRENCY).map(value -> plugin.getEconomy().checkCurrency(value)).orElse(null);
 	}
 
 	@Override
@@ -502,11 +502,7 @@ public class Api extends RegionAPI {
 	}
 
 	private double getOptionDoubleValue(ServerPlayer player, String option) {
-		return optionIsPresent(player, option) && NumberUtils.isCreatable(player.option(option).get()) ? NumberUtils.createDouble(player.option(option).get()) : 0;
-	}
-
-	private boolean optionIsPresent(ServerPlayer player, String option) {
-		return player.option(option).isPresent();
+		return player.option(option).map(value -> NumberUtils.isCreatable(value) ? NumberUtils.createDouble(value) : 0).orElse(0d);
 	}
 
 	private boolean containsLimits(UUID player) {
