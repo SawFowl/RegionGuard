@@ -120,8 +120,8 @@ public class SetMessage extends AbstractPlayerCommand {
 			RawArguments.createStringArgument(clear, new RawBasicArgumentData<String>(null, "Clear | Message", 2, null, null), RawOptional.optional(), null),
 			RawArgument.of(
 				Component.class,
-				(cause, args) -> Stream.empty(),
-				(cause, args) -> Optional.ofNullable(args.length > 1 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, (locales.containsKey(args[1]) ? args[1] : "")))) : null),
+				(_, _) -> Stream.empty(),
+				(_, args) -> Optional.ofNullable(args.length > 1 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, (locales.containsKey(args[1]) ? args[1] : "")))) : null),
 				new RawArgumentData<>("Message", CommandTreeNodeTypes.STRING.get().createNode().greedy(), 3, null, null),
 				RawOptional.notOptional(),
 				locale -> getExceptions(locale).getMessageNotPresent()

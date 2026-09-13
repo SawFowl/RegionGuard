@@ -359,7 +359,7 @@ public abstract class RegionAPI {
 	 * Each basic region has its own limit. <br>
 	 * 
 	 * @param player - Checked player
-	 * @returnThe number of regions available to the player for creating.
+	 * @return The number of regions available to the player for creating.
 	 */
 	public abstract long getLimitSubdivisions(ServerPlayer player);
 

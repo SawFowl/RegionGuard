@@ -65,11 +65,11 @@ public class ListRegions extends AbstractCommand {
 		if(regions.size() == 0) exception(getCommand(locale).getList().getEmpty(optProfile.isPresent()));
 		List<Component> list = new ArrayList<>();
 		for(Region region : regions) {
-			Component tp = region.getWorld().isPresent() && ((isPlayer && cause.hasPermission(Permissions.TELEPORT) && region.isTrusted((ServerPlayer) audience)) || (isPlayer && cause.hasPermission(Permissions.STAFF_LIST))) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(callback -> {
+			Component tp = region.getWorld().isPresent() && ((isPlayer && cause.hasPermission(Permissions.TELEPORT) && region.isTrusted((ServerPlayer) audience)) || (isPlayer && cause.hasPermission(Permissions.STAFF_LIST))) ? Component.text("§7[§bTP§7]").clickEvent(SpongeComponents.executeCallback(_ -> {
 				if(isPlayer) teleport((ServerPlayer) audience, region, true);
 			})) : Component.empty();
 			Component positions = Component.text((isPlayer ? "§6" : "") + region.getCuboid().getMin() + " ➢ " + region.getCuboid().getMax());
-			Component uuidOrName = (region.getPlainName(locale).isPresent() ? region.getName(locale) : Component.text((isPlayer ? "§2" : "") + "<" + region.getUniqueId() + ">").clickEvent(SpongeComponents.executeCallback(callback -> {
+			Component uuidOrName = (region.getPlainName(locale).isPresent() ? region.getName(locale) : Component.text((isPlayer ? "§2" : "") + "<" + region.getUniqueId() + ">").clickEvent(SpongeComponents.executeCallback(_ -> {
 				if(!isPlayer) return;
 				Calendar calendar = Calendar.getInstance(locale);
 				calendar.setTimeInMillis(region.getCreationTime());
@@ -125,7 +125,7 @@ public class ListRegions extends AbstractCommand {
 				teleport(player, region, false);
 			}).build());
 		} else {
-			player.sendMessage(getCommand(player).getList().getTeleportNotSafe().clickEvent(SpongeComponents.executeCallback(callback2 -> {
+			player.sendMessage(getCommand(player).getList().getTeleportNotSafe().clickEvent(SpongeComponents.executeCallback(_ -> {
 				teleport(player, region, world, Vector3d.from(vector3i.x(), vector3i.y(), vector3i.z()));
 				if(repeat) Sponge.server().scheduler().submit(Task.builder().plugin(plugin.getPluginContainer()).delay(Ticks.single()).execute(() -> {
 					teleport(player, region, false);
@@ -228,7 +228,7 @@ public class ListRegions extends AbstractCommand {
 			Component flags = null;
 			boolean regen = plugin.getConfig().getRegenerateTerritory().isAllPlayers() && !region.getParrent().isPresent();
 			if(regen) player.sendMessage(getDelete(player).getRegen());
-			Component delete = getCommand(player).getInfo().getButtons().getDelete().clickEvent(SpongeComponents.executeCallback(cause -> {
+			Component delete = getCommand(player).getInfo().getButtons().getDelete().clickEvent(SpongeComponents.executeCallback(_ -> {
 				player.sendMessage(getDelete(player).getConfirmRequest().clickEvent(SpongeComponents.executeCallback(cause2 -> {
 					if(region.getParrent().isPresent()) {
 						Region parrent = region.getParrent().get();
@@ -329,17 +329,17 @@ public class ListRegions extends AbstractCommand {
 					})));
 			})).append(Component.text("  "));
 			if(player.hasPermission(Permissions.STAFF_SET_REGION_TYPE) && !region.isSubdivision()) {
-				claim = region.isBasicClaim() ? Component.text("§7[§6Claim§7]  ") : Component.text("§7[§eClaim§7]  ").clickEvent(SpongeComponents.executeCallback(cause -> {
+				claim = region.isBasicClaim() ? Component.text("§7[§6Claim§7]  ") : Component.text("§7[§eClaim§7]  ").clickEvent(SpongeComponents.executeCallback(_ -> {
 					region.setRegionType(RegionTypes.CLAIM);
 					plugin.getAPI().saveRegion(region);
 					generateInfoMessage(player, region, calendar);
 				}));
-				arena = region.isArena() ? Component.text("§7[§2Arena§7]  ") : Component.text("§7[§aArena§7]  ").clickEvent(SpongeComponents.executeCallback(cause -> {
+				arena = region.isArena() ? Component.text("§7[§2Arena§7]  ") : Component.text("§7[§aArena§7]  ").clickEvent(SpongeComponents.executeCallback(_ -> {
 					region.setRegionType(RegionTypes.ARENA);
 					plugin.getAPI().saveRegion(region);
 					generateInfoMessage(player, region, calendar);
 				}));
-				admin = region.isAdmin() ? Component.text("§7[§4Admin§7]") : Component.text("§7[§cAdmin§7]").clickEvent(SpongeComponents.executeCallback(cause -> {
+				admin = region.isAdmin() ? Component.text("§7[§4Admin§7]") : Component.text("§7[§cAdmin§7]").clickEvent(SpongeComponents.executeCallback(_ -> {
 					region.setRegionType(RegionTypes.ADMIN);
 					plugin.getAPI().saveRegion(region);
 					generateInfoMessage(player, region, calendar);

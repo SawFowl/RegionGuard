@@ -98,8 +98,8 @@ public class SetName extends AbstractPlayerCommand {
 			RawArguments.createStringArgument(clear, new RawBasicArgumentData<String>(null, "Clear | Message", 1, null, null), RawOptional.optional(), null),
 			RawArgument.of(
 				Component.class,
-				(cause, args) -> Stream.empty(),
-				(cause, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, locales.containsKey(args[0]) ? args[0] : ""))) : null),
+				(_, _) -> Stream.empty(),
+				(_, args) -> Optional.ofNullable(args.length > 0 ? TextUtils.deserialize(String.join(" ", ArrayUtils.removeElements(args, locales.containsKey(args[0]) ? args[0] : ""))) : null),
 				new RawArgumentData<>("Name", CommandTreeNodeTypes.MESSAGE.get().createNode(), 2, null, null),
 				RawOptional.notOptional(),
 				locale -> getExceptions(locale).getNameNotPresent()

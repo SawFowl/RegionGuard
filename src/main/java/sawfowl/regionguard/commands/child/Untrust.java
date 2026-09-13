@@ -84,7 +84,7 @@ public class Untrust extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				GameProfile.class,
-				(cause, args) -> cause.first(ServerPlayer.class).isPresent() ? findRegion(cause.first(ServerPlayer.class).get()).map(region -> region.getMembers().stream().filter(member -> member.getTrustType() != TrustTypes.OWNER).map(MemberData::getName)).orElse(Stream.empty()) : Stream.empty(),
+				(cause, _) -> cause.first(ServerPlayer.class).isPresent() ? findRegion(cause.first(ServerPlayer.class).get()).map(region -> region.getMembers().stream().filter(member -> member.getTrustType() != TrustTypes.OWNER).map(MemberData::getName)).orElse(Stream.empty()) : Stream.empty(),
 				(cause, args) -> args.length > 0 && cause.first(ServerPlayer.class).isPresent() ? findRegion(cause.first(ServerPlayer.class).get()).map(region -> region.getMembers().stream().filter(member -> member.getTrustType() != TrustTypes.OWNER).filter(member -> member.getName().equals(args[0])).findFirst().orElse(null)).map(member -> Sponge.server().userManager().streamAll().filter(profile -> member.getUniqueId().equals(profile.uniqueId())).findFirst().orElse(null)) : Optional.empty(),
 				new RawArgumentData<>("Player", CommandTreeNodeTypes.GAME_PROFILE.get().createNode(), 0, null, null),
 				RawOptional.notOptional(),

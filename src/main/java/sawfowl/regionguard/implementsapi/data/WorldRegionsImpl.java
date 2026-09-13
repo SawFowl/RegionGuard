@@ -123,7 +123,7 @@ public class WorldRegionsImpl implements WorldRegions {
 	public void add(Region region) {
 		if(!region.isGlobal()) {
 			regions.add(region);
-			region.getChunkNumbers().forEach(cn -> regionsMap.computeIfAbsent(cn, c -> new HashSet<>()).add(region));
+			region.getChunkNumbers().forEach(cn -> regionsMap.computeIfAbsent(cn, _ -> new HashSet<>()).add(region));
 		} else setGlobal(region);
 	}
 

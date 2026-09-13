@@ -484,6 +484,7 @@ public class Api extends RegionAPI {
 	}
 
 	public void updateWandItem() {
+		if(wandItem != null) return;
 		wandItem = setNBT(getWandItemFromConfig());
 	}
 

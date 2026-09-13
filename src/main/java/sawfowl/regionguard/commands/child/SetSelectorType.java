@@ -68,8 +68,8 @@ public class SetSelectorType extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				SelectorTypes.class,
-				(cause, args) -> SelectorTypes.getValues().stream(),
-				(cause, args) -> args.length >= 1 ? Optional.ofNullable(SelectorTypes.checkType(args[0])) : Optional.empty(),
+				(_, _) -> SelectorTypes.getValues().stream(),
+				(_, args) -> args.length >= 1 ? Optional.ofNullable(SelectorTypes.checkType(args[0])) : Optional.empty(),
 				new RawBasicArgumentData<String>(null, "Type", 0, null, null).toRawArgumentData(CommandTreeNodeTypes.STRING.get().createNode()),
 				RawOptional.notOptional(),
 				locale -> getExceptions(locale).getSelectorTypeNotPresent()

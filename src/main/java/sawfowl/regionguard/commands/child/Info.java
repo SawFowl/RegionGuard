@@ -93,7 +93,7 @@ public class Info extends AbstractPlayerCommand {
 			Component flags = null;
 			boolean regen = plugin.getConfig().getRegenerateTerritory().isAllPlayers() && !region.getParrent().isPresent();
 			if(regen) player.sendMessage(getDelete(player).getRegen());
-			Component delete = getInfo(player).getButtons().getDelete().clickEvent(SpongeComponents.executeCallback(cause -> {
+			Component delete = getInfo(player).getButtons().getDelete().clickEvent(SpongeComponents.executeCallback(_ -> {
 				player.sendMessage(getDelete(player).getConfirmRequest().clickEvent(SpongeComponents.executeCallback(cause2 -> {
 					if(region.getParrent().isPresent()) {
 						Region parrent = region.getParrent().get();
@@ -206,17 +206,17 @@ public class Info extends AbstractPlayerCommand {
 					})));
 			})).append(Component.text("  "));
 			if(player.hasPermission(Permissions.STAFF_SET_REGION_TYPE) && !region.isSubdivision()) {
-				claim = region.isBasicClaim() ? Component.text("§7[§6Claim§7]  ") : Component.text("§7[§eClaim§7]  ").clickEvent(SpongeComponents.executeCallback(cause -> {
+				claim = region.isBasicClaim() ? Component.text("§7[§6Claim§7]  ") : Component.text("§7[§eClaim§7]  ").clickEvent(SpongeComponents.executeCallback(_ -> {
 					region.setRegionType(RegionTypes.CLAIM);
 					plugin.getAPI().saveRegion(region);
 					generateMessage(player, region, calendar);
 				}));
-				arena = region.isArena() ? Component.text("§7[§2Arena§7]  ") : Component.text("§7[§aArena§7]  ").clickEvent(SpongeComponents.executeCallback(cause -> {
+				arena = region.isArena() ? Component.text("§7[§2Arena§7]  ") : Component.text("§7[§aArena§7]  ").clickEvent(SpongeComponents.executeCallback(_ -> {
 					region.setRegionType(RegionTypes.ARENA);
 					plugin.getAPI().saveRegion(region);
 					generateMessage(player, region, calendar);
 				}));
-				admin = region.isAdmin() ? Component.text("§7[§4Admin§7]") : Component.text("§7[§cAdmin§7]").clickEvent(SpongeComponents.executeCallback(cause -> {
+				admin = region.isAdmin() ? Component.text("§7[§4Admin§7]") : Component.text("§7[§cAdmin§7]").clickEvent(SpongeComponents.executeCallback(_ -> {
 					region.setRegionType(RegionTypes.ADMIN);
 					plugin.getAPI().saveRegion(region);
 					generateMessage(player, region, calendar);

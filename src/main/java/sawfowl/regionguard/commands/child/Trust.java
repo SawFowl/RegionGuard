@@ -85,8 +85,8 @@ public class Trust extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArguments.createGameProfile(RawBasicArgumentData.createGameProfile(0, null, null), RawOptional.notOptional(), locale -> getExceptions(locale).getPlayerNotPresent()),
 			RawArgument.of(TrustTypes.class,
-				(cause, args) -> TrustTypes.getValues().stream(),
-				(cause, args) -> args.length > 1 ? Stream.of(TrustTypes.values()).filter(t -> t.toString().equals(args[1])).findFirst() : null,
+				(_, _) -> TrustTypes.getValues().stream(),
+				(_, args) -> args.length > 1 ? Stream.of(TrustTypes.values()).filter(t -> t.toString().equals(args[1])).findFirst() : null,
 				new RawArgumentData<>("TrustType", CommandTreeNodeTypes.STRING.get().createNode(), 1, null, null),
 				RawOptional.notOptional(),
 				locale -> getExceptions(locale).getTrustTypeNotPresent())

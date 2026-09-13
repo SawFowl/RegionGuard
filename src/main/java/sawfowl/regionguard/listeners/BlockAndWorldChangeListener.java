@@ -41,7 +41,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 import net.kyori.adventure.text.Component;
-
+import sawfowl.localeapi.api.serializetools.itemstack.ComponentUtil;
 import sawfowl.regionguard.Permissions;
 import sawfowl.regionguard.RegionGuard;
 import sawfowl.regionguard.api.Flags;
@@ -842,7 +842,7 @@ public class BlockAndWorldChangeListener extends ManagementEvents {
 
 	private boolean resizeOrCreateRegion(ServerPlayer player, Vector3i blockPosition, Region region) {
 		if(!plugin.playerPositionsExist(player)) plugin.addPlayerPositions(player, new PlayerPositions());
-		if(!player.itemInHand(HandTypes.MAIN_HAND.get()).toContainer().get(DataQuery.of("components")).filter(data -> data.toString().contains("WandItem")).isPresent()) return false;
+		if(!player.itemInHand(HandTypes.MAIN_HAND.get()).toContainer().get(ComponentUtil.COMPONENTS_PATH).filter(data -> data.toString().contains("WandItem")).isPresent()) return false;
 		//if(!ItemTypes.registry().valueKey(player.itemInHand(HandTypes.MAIN_HAND.get()).type()).toString().equals(plugin.getConfig().getWanditem().getItemTypeAsString())) return false;
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			if(region.isAdmin() && !player.hasPermission(Permissions.STAFF_ADMINCLAIM)) player.sendMessage(getEvents(player).getRegion().getCreate().getNoAdminPerm());

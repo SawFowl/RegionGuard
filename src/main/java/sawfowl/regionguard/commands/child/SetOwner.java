@@ -44,13 +44,13 @@ public class SetOwner extends AbstractPlayerCommand {
 		if(src.uniqueId().equals(newOwner.uniqueId()) && region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(getExceptions(locale).getTargetSelf());
 		if(src.hasPermission(Permissions.STAFF_TRUST)) {
 			if(region.getOwnerUUID().equals(newOwner.uniqueId())) exception(getSetOwner(locale).getAlreadyOwnerStaff(newOwner));
-			src.sendMessage(getSetOwner(locale).getConfirmRequest(newOwner).clickEvent(SpongeComponents.executeCallback(messageCause -> {
+			src.sendMessage(getSetOwner(locale).getConfirmRequest(newOwner).clickEvent(SpongeComponents.executeCallback(_ -> {
 				setOwner(src, newOwner, region, true);
 			})));
 			return;
 		}
 		if(!region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(getSetOwner(locale).getOnlyOwner());
-		src.sendMessage(getSetOwner(locale).getConfirmRequest(newOwner).clickEvent(SpongeComponents.executeCallback(messageCause -> {
+		src.sendMessage(getSetOwner(locale).getConfirmRequest(newOwner).clickEvent(SpongeComponents.executeCallback(_ -> {
 			setOwner(src, newOwner, region, false);
 		})));
 	

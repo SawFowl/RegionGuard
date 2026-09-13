@@ -32,7 +32,7 @@ public class Leave extends AbstractPlayerCommand {
 		if(region.isGlobal()) exception(getExceptions(locale).getRegionNotFound());
 		if(region.isCurrentTrustType(src, TrustTypes.OWNER)) exception(getExceptions(locale).getNotOwner());
 		if(!region.isTrusted(src)) exception(getCommand(locale).getLeave().getNotTrusted());
-		src.sendMessage(TextUtils.createCallBack(getCommand(locale).getLeave().getConfirmRequest(), messageCause -> {
+		src.sendMessage(TextUtils.createCallBack(getCommand(locale).getLeave().getConfirmRequest(), _ -> {
 			if(region.isTrusted(src)) {
 				region.untrust(src);
 				plugin.getAPI().saveRegion(region);

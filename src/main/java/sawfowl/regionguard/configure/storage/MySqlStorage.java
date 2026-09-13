@@ -178,7 +178,7 @@ public class MySqlStorage extends AbstractSqlStorage {
 						childs.get(UUID.fromString(parrent)).add(region);
 					}
 				} else {
-					if(childs.containsKey(uuid)) childs.get(uuid).forEach(child -> region.addChild(region));
+					if(childs.containsKey(uuid)) childs.get(uuid).forEach(_ -> region.addChild(region));
 					plugin.getAPI().registerRegion(region);
 				}
 			}

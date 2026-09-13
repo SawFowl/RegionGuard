@@ -82,7 +82,7 @@ public class Flag extends AbstractPlayerCommand {
 		return Arrays.asList(
 			RawArgument.of(
 				FlagConfig.class,
-				(cause, args) -> plugin.getAPI().getRegisteredFlags().keySet().stream().filter(flag -> cause.hasPermission(Permissions.setFlag(flag))),
+				(cause, _) -> plugin.getAPI().getRegisteredFlags().keySet().stream().filter(flag -> cause.hasPermission(Permissions.setFlag(flag))),
 				(cause, args) -> args.length == 0 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().values().stream().filter(flag -> flag.getName().equalsIgnoreCase(args[0]) && cause.hasPermission(Permissions.setFlag(flag.getName()))).findFirst(),
 				new RawArgumentData<>("Flag", CommandTreeNodeTypes.STRING.get().createNode(), 0, null, null),
 				RawOptional.optional(),
@@ -90,24 +90,24 @@ public class Flag extends AbstractPlayerCommand {
 			),
 			RawArgument.of(
 				Boolean.class,
-				(cause, args) -> values.stream(),
-				(cause, args) -> args.length < 2 || !plugin.getAPI().getRegisteredFlags().containsKey(args[0]) ? Optional.empty() : Optional.ofNullable(BooleanUtils.toBooleanObject(args[1])),
+				(_, _) -> values.stream(),
+				(_, args) -> args.length < 2 || !plugin.getAPI().getRegisteredFlags().containsKey(args[0]) ? Optional.empty() : Optional.ofNullable(BooleanUtils.toBooleanObject(args[1])),
 				new RawArgumentData<>("Value", CommandTreeNodeTypes.BOOL.get().createNode(), 1, null, new RawRequiredArgs(new Integer[] {0}, null)),
 				RawOptional.optional(),
 				locale -> getCommand(locale).getFlag().getValueNotPresent()
 			),
 			RawArgument.of(
 				String.class,
-				(cause, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getSources()).orElse(Stream.of("all")),
-				(cause, args) -> args.length < 3 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
+				(_, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getSources()).orElse(Stream.of("all")),
+				(_, args) -> args.length < 3 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getSources().filter(source -> args[2] != null && source.equals(args[2])).findFirst().orElse("all")),
 				new RawArgumentData<>("Source", CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(), 2, null, new RawRequiredArgs(new Integer[] {0, 1}, null)),
 				RawOptional.optional(),
 				locale -> getCommand(locale).getFlag().getInvalidSource()
 			),
 			RawArgument.of(
 				String.class,
-				(cause, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getTargets()).orElse(Stream.of("all")),
-				(cause, args) -> args.length < 4 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
+				(_, args) -> plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().map(entry -> entry.getValue().getSettings().getTargets()).orElse(Stream.of("all")),
+				(_, args) -> args.length < 4 ? Optional.empty() : plugin.getAPI().getRegisteredFlags().entrySet().stream().filter(entry -> entry.getKey().equals(args[0])).findFirst().filter(entry -> entry.getValue().getSettings().isAllowArgs()).map(entry -> entry.getValue().getSettings().getTargets().filter(target -> args[3] != null && target.equals(args[3])).findFirst().orElse("all")),
 				new RawArgumentData<>("Target", CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode(), 3, null, new RawRequiredArgs(new Integer[] {0, 1, 2}, null)),
 				RawOptional.optional(),
 				locale -> getCommand(locale).getFlag().getInvalidTarget()
@@ -133,7 +133,7 @@ public class Flag extends AbstractPlayerCommand {
 			}
 			if(region.containsFlag(flagName)) {
 				Component remove = Component.text("§7[§cRemove§7]§r")
-						.clickEvent(SpongeComponents.executeCallback(cause -> {
+						.clickEvent(SpongeComponents.executeCallback(_ -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
 								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
@@ -144,7 +144,7 @@ public class Flag extends AbstractPlayerCommand {
 						}))
 						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getRemove()));
 				Component setTrue = Component.text("§7[§eTrue§7]§r")
-						.clickEvent(SpongeComponents.executeCallback(cause -> {
+						.clickEvent(SpongeComponents.executeCallback(_ -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
 								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
@@ -155,7 +155,7 @@ public class Flag extends AbstractPlayerCommand {
 						}))
 						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getTrue()));
 				Component setFalse = Component.text("§7[§eFalse§7]§r")
-						.clickEvent(SpongeComponents.executeCallback(cause -> {
+						.clickEvent(SpongeComponents.executeCallback(_ -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
 								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
@@ -178,7 +178,7 @@ public class Flag extends AbstractPlayerCommand {
 				);
 			} else {
 				Component setTrue = Component.text(region.getFlagResult(flagName, null, null) == Tristate.TRUE ? "§7[§2True§7]§r" : "§7[§6True§7]§r")
-						.clickEvent(SpongeComponents.executeCallback(cause -> {
+						.clickEvent(SpongeComponents.executeCallback(_ -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
 								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
@@ -189,7 +189,7 @@ public class Flag extends AbstractPlayerCommand {
 						}))
 						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getTrue()));
 				Component setFalse = Component.text(region.getFlagResult(flagName, null, null) == Tristate.FALSE ? "§7[§2False§7]§r" : "§7[§6False§7]§r")
-						.clickEvent(SpongeComponents.executeCallback(cause -> {
+						.clickEvent(SpongeComponents.executeCallback(_ -> {
 							if(!player.hasPermission(Permissions.setFlag(flagName))) {
 								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flagName));
 								return;
@@ -225,7 +225,7 @@ public class Flag extends AbstractPlayerCommand {
 		for(FlagValue flagValue : customFlags) {
 			if(region.containsFlag(flag.toString())) {
 				Component remove = Component.text("§7[§cRemove§7]§r")
-						.clickEvent(SpongeComponents.executeCallback(cause -> {
+						.clickEvent(SpongeComponents.executeCallback(_ -> {
 							if(!player.hasPermission(Permissions.setFlag(flag))) {
 								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flag));
 								return;
@@ -236,7 +236,7 @@ public class Flag extends AbstractPlayerCommand {
 						}))
 						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getRemove()));
 				Component setTrue = Component.text("§7[§eTrue§7]§r")
-						.clickEvent(SpongeComponents.executeCallback(cause -> {
+						.clickEvent(SpongeComponents.executeCallback(_ -> {
 							if(!player.hasPermission(Permissions.setFlag(flag.toString()))) {
 								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flag));
 								return;
@@ -247,7 +247,7 @@ public class Flag extends AbstractPlayerCommand {
 						}))
 						.hoverEvent(HoverEvent.showText(getCommand(player).getFlag().getHover().getTrue()));
 				Component setFalse = Component.text("§7[§eFalse§7]§r")
-						.clickEvent(SpongeComponents.executeCallback(cause -> {
+						.clickEvent(SpongeComponents.executeCallback(_ -> {
 							if(!player.hasPermission(Permissions.setFlag(flag))) {
 								player.sendMessage(getCommand(player).getFlag().getNotPermittedFlag(flag));
 								return;
