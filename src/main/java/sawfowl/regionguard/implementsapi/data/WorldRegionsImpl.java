@@ -82,6 +82,7 @@ public class WorldRegionsImpl implements WorldRegions {
 				)
 			)
 			.findFirst()
+			.map(region -> region.getChild(position))
 			.orElse(getGlobal())
 		;
 	}
